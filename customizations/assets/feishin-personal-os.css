@@ -1,6 +1,7 @@
 /* ==========================================================================
-   FEISHIN x PERSONAL OS — AUTO-HIPNOSE PRO MASTER GLASSMORPHISM & SHADERS
-   True 2-Pane Floating Glass Island Architecture + 33 WebGL Shaders
+   FEISHIN x PERSONAL OS — MASTER LIQUID GLASS ARCHITECTURE & SHADERS
+   Pure VisionOS / macOS Sequoia Frosted Glass + 33 Real-Time WebGL Shaders
+   Sovereign Design System for Music OS
    ========================================================================== */
 
 @import url("https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Outfit:wght@400;600;700;800&display=swap");
@@ -18,17 +19,18 @@ body, html, #root {
     overflow: hidden !important;
     background: transparent !important;
     background-color: transparent !important;
-    font-family: "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+    font-family: "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, sans-serif !important;
     color: #F8FAFC !important;
     -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
 }
 
-/* Eliminate rogue text outlines */
+/* Eliminate rogue text borders and default backgrounds */
 div, span, p, a, h1, h2, h3, h4, h5, h6 {
     border: none;
 }
 
-/* --- 2. WEBGL BACKDROP & VIGNETTE LAYERS --- */
+/* --- 2. WEBGL BACKDROP & CINEMATIC VIGNETTE --- */
 #bg-webgl-container {
     position: fixed !important;
     top: 0 !important;
@@ -38,6 +40,9 @@ div, span, p, a, h1, h2, h3, h4, h5, h6 {
     z-index: -2 !important;
     pointer-events: none !important;
     overflow: hidden !important;
+    contain: strict !important;
+    transform: translate3d(0, 0, 0) !important;
+    will-change: transform !important;
 }
 
 #bg-webgl-container canvas {
@@ -54,10 +59,10 @@ div, span, p, a, h1, h2, h3, h4, h5, h6 {
     height: 100vh !important;
     z-index: -1 !important;
     pointer-events: none !important;
-    background: radial-gradient(circle at 50% 50%, rgba(10, 8, 18, 0.20) 0%, rgba(5, 4, 10, 0.72) 100%) !important;
+    background: radial-gradient(circle at 50% 50%, rgba(0, 0, 0, 0.15) 0%, rgba(4, 4, 8, 0.65) 100%) !important;
 }
 
-/* --- 3. 2-PANE FLOATING ISLAND ARCHITECTURE --- */
+/* --- 3. PERSONAL OS FLOATING ISLAND LAYOUT --- */
 #default-layout {
     display: flex !important;
     flex-direction: column !important;
@@ -74,19 +79,26 @@ div, span, p, a, h1, h2, h3, h4, h5, h6 {
 .fs-window-bar-module-window-bar,
 .fs-window-bar-module-macos-container {
     flex-shrink: 0 !important;
-    height: 48px !important;
-    border-radius: 20px !important;
-    padding: 0 18px !important;
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.10) 0%, rgba(255, 255, 255, 0.02) 100%), rgba(14, 11, 24, 0.52) !important;
-    border: 1px solid rgba(255, 255, 255, 0.16) !important;
-    border-top: 1px solid rgba(255, 255, 255, 0.40) !important;
-    backdrop-filter: blur(18px) saturate(190%) !important;
-    -webkit-backdrop-filter: blur(18px) saturate(190%) !important;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.25) !important;
+    height: 44px !important;
+    border-radius: 18px !important;
+    padding: 0 16px !important;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.09) 0%, rgba(255, 255, 255, 0.02) 100%), rgba(10, 10, 16, 0.38) !important;
+    border: 1px solid rgba(255, 255, 255, 0.18) !important;
+    border-top: 1px solid rgba(255, 255, 255, 0.38) !important;
+    backdrop-filter: blur(20px) saturate(200%) !important;
+    -webkit-backdrop-filter: blur(20px) saturate(200%) !important;
+    box-shadow: 0 12px 35px rgba(0, 0, 0, 0.35), inset 0 1px 1px rgba(255, 255, 255, 0.30) !important;
     display: flex !important;
     align-items: center !important;
     justify-content: space-between !important;
     z-index: 100 !important;
+}
+
+.fs-window-bar-module-title {
+    font-size: 13px !important;
+    font-weight: 600 !important;
+    color: rgba(255, 255, 255, 0.90) !important;
+    letter-spacing: 0.2px !important;
 }
 
 /* 3.2 MAIN WORKSPACE CONTAINER */
@@ -108,19 +120,20 @@ div, span, p, a, h1, h2, h3, h4, h5, h6 {
     gap: 10px !important;
 }
 
-/* 3.3 LEFT NAVIGATION SIDEBAR (LIQUID GLASS ISLAND) */
-#sidebar {
+/* 3.3 LEFT NAVIGATION SIDEBAR (PERSONAL OS LIQUID GLASS) */
+#sidebar,
+.fs-left-sidebar-module-container {
     width: 250px !important;
     min-width: 230px !important;
     height: 100% !important;
     border-radius: 24px !important;
     overflow: hidden !important;
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.02) 100%), rgba(12, 10, 22, 0.42) !important;
-    border: 1px solid rgba(255, 255, 255, 0.16) !important;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.02) 100%), rgba(10, 10, 16, 0.35) !important;
+    border: 1px solid rgba(255, 255, 255, 0.18) !important;
     border-top: 1px solid rgba(255, 255, 255, 0.38) !important;
-    backdrop-filter: blur(16px) saturate(190%) !important;
-    -webkit-backdrop-filter: blur(16px) saturate(190%) !important;
-    box-shadow: 0 16px 45px rgba(0, 0, 0, 0.45), 0 0 25px rgba(139, 92, 246, 0.10), inset 0 1px 0 rgba(255, 255, 255, 0.25) !important;
+    backdrop-filter: blur(20px) saturate(200%) !important;
+    -webkit-backdrop-filter: blur(20px) saturate(200%) !important;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.45), inset 0 1px 1px rgba(255, 255, 255, 0.30) !important;
     padding: 14px 10px !important;
 }
 
@@ -129,41 +142,76 @@ div, span, p, a, h1, h2, h3, h4, h5, h6 {
     border: none !important;
 }
 
-/* Sidebar Navigation Items */
-.fs-sidebar-item-module-link {
-    border-radius: 14px !important;
-    margin: 3px 4px !important;
-    padding: 8px 14px !important;
+/* Search input in sidebar */
+.fs-sidebar-module-container input[type="search"],
+.fs-sidebar-module-container .mantine-TextInput-input,
+.fs-search-input-module-input {
+    background: rgba(255, 255, 255, 0.06) !important;
+    border: 1px solid rgba(255, 255, 255, 0.14) !important;
+    border-top: 1px solid rgba(255, 255, 255, 0.25) !important;
+    border-radius: 12px !important;
+    color: #FFFFFF !important;
+    padding: 7px 12px !important;
+    font-size: 13px !important;
+    backdrop-filter: blur(12px) !important;
+    transition: all 0.2s ease !important;
+}
+
+.fs-sidebar-module-container input[type="search"]:focus,
+.fs-sidebar-module-container .mantine-TextInput-input:focus,
+.fs-search-input-module-input:focus {
+    background: rgba(255, 255, 255, 0.10) !important;
+    border-color: rgba(255, 255, 255, 0.40) !important;
+    box-shadow: 0 0 14px rgba(255, 255, 255, 0.15) !important;
+}
+
+/* Sidebar Navigation Items - Clean Ghost & Glass State (NO BINAURAL PURPLE PILLS) */
+.fs-sidebar-item-module-link,
+.fs-sidebar-item-module-root {
+    border-radius: 12px !important;
+    margin: 2px 4px !important;
+    padding: 7px 12px !important;
     background: transparent !important;
     border: 1px solid transparent !important;
-    color: rgba(255, 255, 255, 0.75) !important;
+    box-shadow: none !important;
+    color: rgba(255, 255, 255, 0.72) !important;
     font-size: 13px !important;
     font-weight: 500 !important;
-    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1) !important;
 }
 
-.fs-sidebar-item-module-link:hover {
+.fs-sidebar-item-module-link:hover,
+.fs-sidebar-item-module-root:hover {
     background: rgba(255, 255, 255, 0.08) !important;
-    border: 1px solid rgba(255, 255, 255, 0.14) !important;
+    border: 1px solid rgba(255, 255, 255, 0.12) !important;
     color: #FFFFFF !important;
-    transform: translateX(3px) !important;
+    transform: translateX(2px) !important;
 }
 
+/* Targeted Active Selector (excludes generic .mantine-active) */
 .fs-sidebar-item-module-link[data-active="true"],
 .fs-sidebar-item-module-link.active,
-.fs-sidebar-item-module-link.mantine-active {
-    background: rgba(139, 92, 246, 0.22) !important;
-    border: 1px solid rgba(139, 92, 246, 0.50) !important;
-    box-shadow: 0 4px 18px rgba(139, 92, 246, 0.25) !important;
-    color: #EDE9FE !important;
-    font-weight: 700 !important;
+.fs-sidebar-item-module-link[aria-current="page"] {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.15) 0%, rgba(255, 255, 255, 0.04) 100%) !important;
+    border: 1px solid rgba(255, 255, 255, 0.25) !important;
+    border-top: 1px solid rgba(255, 255, 255, 0.45) !important;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.35) !important;
+    color: #FFFFFF !important;
+    font-weight: 600 !important;
 }
 
 /* Sidebar Section Headers & Accordions */
 .fs-accordion-module-panel,
-.fs-sidebar-module-accordion-content {
+.fs-sidebar-module-accordion-content,
+.fs-sidebar-module-accordion-control {
     background: transparent !important;
     border: none !important;
+    box-shadow: none !important;
+    color: rgba(255, 255, 255, 0.50) !important;
+    font-size: 11px !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.6px !important;
+    text-transform: uppercase !important;
 }
 
 /* 3.4 MAIN CONTENT BODY (RIGHT STAGE ISLAND) */
@@ -173,12 +221,12 @@ div, span, p, a, h1, h2, h3, h4, h5, h6 {
     min-width: 0 !important;
     border-radius: 24px !important;
     overflow: hidden !important;
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.07) 0%, rgba(255, 255, 255, 0.01) 100%), rgba(10, 8, 18, 0.32) !important;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.06) 0%, rgba(255, 255, 255, 0.01) 100%), rgba(8, 8, 12, 0.28) !important;
     border: 1px solid rgba(255, 255, 255, 0.16) !important;
-    border-top: 1px solid rgba(255, 255, 255, 0.38) !important;
-    backdrop-filter: blur(14px) saturate(190%) !important;
-    -webkit-backdrop-filter: blur(14px) saturate(190%) !important;
-    box-shadow: 0 16px 45px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.25) !important;
+    border-top: 1px solid rgba(255, 255, 255, 0.35) !important;
+    backdrop-filter: blur(20px) saturate(200%) !important;
+    -webkit-backdrop-filter: blur(20px) saturate(200%) !important;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.45), inset 0 1px 1px rgba(255, 255, 255, 0.28) !important;
 }
 
 .fs-main-content-module-main-content-body-scroll,
@@ -186,14 +234,41 @@ div, span, p, a, h1, h2, h3, h4, h5, h6 {
     background: transparent !important;
 }
 
-/* Filter Sub-sidebar on Album & Artist Pages */
-.fs-list-with-sidebar-container-module-sidebar-container {
-    background: rgba(255, 255, 255, 0.03) !important;
-    border: 1px solid rgba(255, 255, 255, 0.08) !important;
-    border-radius: 20px !important;
-    margin: 10px !important;
-    padding: 14px !important;
-    backdrop-filter: blur(12px) !important;
+/* 3.5 RIGHT SIDEBAR (QUEUE / LYRICS / INFO DOCKED ISLAND) */
+#sidebar-queue,
+.fs-right-sidebar-module-right-sidebar-container {
+    order: 10 !important;
+    width: 280px !important;
+    min-width: 240px !important;
+    height: 100% !important;
+    border-radius: 24px !important;
+    overflow: hidden !important;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.02) 100%), rgba(10, 10, 16, 0.35) !important;
+    border: 1px solid rgba(255, 255, 255, 0.18) !important;
+    border-top: 1px solid rgba(255, 255, 255, 0.38) !important;
+    backdrop-filter: blur(20px) saturate(200%) !important;
+    -webkit-backdrop-filter: blur(20px) saturate(200%) !important;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.45), inset 0 1px 1px rgba(255, 255, 255, 0.30) !important;
+    transition: all 0.25s ease !important;
+}
+
+#sidebar-play-queue-container,
+.fs-sidebar-play-queue-module-lyrics-section,
+.fs-sidebar-play-queue-module-visualizer-section,
+.fs-sidebar-play-queue-module-header,
+.fs-sidebar-play-queue-module-empty-container {
+    background: transparent !important;
+    background-color: transparent !important;
+    border: none !important;
+}
+
+.fs-resize-handle-module-handle {
+    background: rgba(255, 255, 255, 0.08) !important;
+    transition: background 0.2s ease !important;
+}
+
+.fs-resize-handle-module-handle:hover {
+    background: rgba(255, 255, 255, 0.25) !important;
 }
 
 /* --- 4. ALBUM & MEDIA CARDS --- */
@@ -202,27 +277,27 @@ div, span, p, a, h1, h2, h3, h4, h5, h6 {
     background: transparent !important;
     box-shadow: none !important;
     padding: 0 !important;
-    transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+    transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1) !important;
 }
 
 .fs-item-card-module-container:hover {
-    transform: translateY(-6px) scale(1.02) !important;
+    transform: translateY(-4px) scale(1.01) !important;
 }
 
 .fs-item-card-module-image-container,
 .fs-image-module-image-container {
-    border-radius: 18px !important;
+    border-radius: 16px !important;
     overflow: hidden !important;
     border: 1px solid rgba(255, 255, 255, 0.16) !important;
     border-top: 1px solid rgba(255, 255, 255, 0.35) !important;
-    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.5) !important;
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.45) !important;
     background: rgba(255, 255, 255, 0.04) !important;
     transition: all 0.25s ease !important;
 }
 
 .fs-item-card-module-container:hover .fs-item-card-module-image-container {
-    border-color: rgba(139, 92, 246, 0.6) !important;
-    box-shadow: 0 18px 45px rgba(0, 0, 0, 0.6), 0 0 25px rgba(139, 92, 246, 0.35) !important;
+    border-color: rgba(255, 255, 255, 0.35) !important;
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.55), 0 0 20px rgba(255, 255, 255, 0.15) !important;
 }
 
 .fs-item-card-module-detail-container,
@@ -240,70 +315,102 @@ div, span, p, a, h1, h2, h3, h4, h5, h6 {
 
 .fs-item-card-module-muted,
 .fs-item-card-module-artists-row {
-    color: rgba(255, 255, 255, 0.60) !important;
+    color: rgba(255, 255, 255, 0.55) !important;
     font-size: 12px !important;
     border: none !important;
     box-shadow: none !important;
 }
 
-/* --- 5. FLOATING MEDIA PLAYER DOCK --- */
+/* Sidebar Album Art Thumbnail */
+#sidebar .fs-image-module-image-container {
+    border-radius: 14px !important;
+    border: 1px solid rgba(255, 255, 255, 0.16) !important;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.35) !important;
+}
+
+/* --- 5. FLOATING MEDIA PLAYER DOCK (PERSONAL OS MASTER DOCK) --- */
 #player-bar {
     position: fixed !important;
     bottom: 12px !important;
     left: 14px !important;
     right: 14px !important;
-    height: 74px !important;
-    border-radius: 24px !important;
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.02) 100%), rgba(14, 10, 26, 0.68) !important;
+    height: 72px !important;
+    border-radius: 22px !important;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.10) 0%, rgba(255, 255, 255, 0.02) 100%), rgba(10, 10, 16, 0.50) !important;
     border: 1px solid rgba(255, 255, 255, 0.20) !important;
-    border-top: 1px solid rgba(255, 255, 255, 0.45) !important;
-    backdrop-filter: blur(22px) saturate(210%) !important;
-    -webkit-backdrop-filter: blur(22px) saturate(210%) !important;
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6), 0 0 30px rgba(139, 92, 246, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.35) !important;
+    border-top: 1px solid rgba(255, 255, 255, 0.42) !important;
+    backdrop-filter: blur(24px) saturate(210%) !important;
+    -webkit-backdrop-filter: blur(24px) saturate(210%) !important;
+    box-shadow: 0 25px 70px rgba(0, 0, 0, 0.55), inset 0 1px 1px rgba(255, 255, 255, 0.35) !important;
     z-index: 9999 !important;
-    padding: 0 24px !important;
+    padding: 0 20px !important;
     display: flex !important;
     align-items: center !important;
     justify-content: space-between !important;
 }
 
-/* Hero Play Button */
+.fs-playerbar-module-container {
+    background: transparent !important;
+    width: 100% !important;
+}
+
+/* Hero Play/Pause Button - Apple Minimalist White Pure Glass */
 .fs-center-controls-module-buttons-container button:nth-child(3),
 button[title*="Play"], button[title*="Reproduzir"], button[title*="Pausar"] {
     border-radius: 50% !important;
-    background: linear-gradient(135deg, #7C3AED, #4F46E5) !important;
-    border: 1px solid rgba(255, 255, 255, 0.28) !important;
-    border-top: 1px solid rgba(255, 255, 255, 0.50) !important;
-    box-shadow: 0 6px 20px rgba(124, 58, 237, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.35) !important;
-    color: #FFFFFF !important;
-    transition: all 0.22s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+    background: #FFFFFF !important;
+    color: #0A0A0E !important;
+    border: 1px solid rgba(255, 255, 255, 0.85) !important;
+    box-shadow: 0 4px 18px rgba(255, 255, 255, 0.30) !important;
+    transition: all 0.20s cubic-bezier(0.16, 1, 0.3, 1) !important;
 }
 
 .fs-center-controls-module-buttons-container button:nth-child(3):hover,
 button[title*="Play"]:hover, button[title*="Reproduzir"]:hover, button[title*="Pausar"]:hover {
-    transform: scale(1.12) !important;
-    box-shadow: 0 10px 28px rgba(124, 58, 237, 0.8), inset 0 1px 0 rgba(255, 255, 255, 0.5) !important;
+    transform: scale(1.08) !important;
+    box-shadow: 0 6px 24px rgba(255, 255, 255, 0.45) !important;
 }
 
-/* Scrub Bar */
+/* Secondary Controls (Shuffle, Prev, Next, Repeat, Queue) */
+.fs-center-controls-module-buttons-container button:not(:nth-child(3)),
+.fs-playerbar-module-right-grid-item button {
+    background: transparent !important;
+    border: 1px solid transparent !important;
+    border-radius: 10px !important;
+    color: rgba(255, 255, 255, 0.70) !important;
+    transition: all 0.15s ease !important;
+}
+
+.fs-center-controls-module-buttons-container button:not(:nth-child(3)):hover,
+.fs-playerbar-module-right-grid-item button:hover {
+    background: rgba(255, 255, 255, 0.08) !important;
+    color: #FFFFFF !important;
+}
+
+/* Scrubber / Progress Bar */
 .mantine-Slider-track {
-    background: rgba(255, 255, 255, 0.12) !important;
+    background: rgba(255, 255, 255, 0.14) !important;
+    height: 4px !important;
+    border-radius: 2px !important;
+    transition: height 0.15s ease !important;
+}
+
+.mantine-Slider-root:hover .mantine-Slider-track {
     height: 6px !important;
-    border-radius: 4px !important;
 }
 
 .mantine-Slider-bar {
-    background: linear-gradient(90deg, #6366F1, #06B6D4) !important;
-    box-shadow: 0 0 10px rgba(6, 182, 212, 0.5) !important;
-    border-radius: 4px !important;
+    background: #FFFFFF !important;
+    border-radius: 2px !important;
+    box-shadow: 0 0 8px rgba(255, 255, 255, 0.5) !important;
 }
 
 .mantine-Slider-thumb {
     background: #FFFFFF !important;
-    border: 2px solid #06B6D4 !important;
-    box-shadow: 0 0 12px rgba(6, 182, 212, 0.9) !important;
-    width: 14px !important;
-    height: 14px !important;
+    border: none !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4) !important;
+    width: 12px !important;
+    height: 12px !important;
 }
 
 /* --- 6. SONGS TABLE & LIST VIEW --- */
@@ -312,153 +419,121 @@ button[title*="Play"]:hover, button[title*="Reproduzir"]:hover, button[title*="P
     background: transparent !important;
     border: none !important;
     border-bottom: 1px solid rgba(255, 255, 255, 0.04) !important;
-    border-radius: 12px !important;
-    margin: 2px 0 !important;
-    transition: all 0.18s ease !important;
+    border-radius: 10px !important;
+    margin: 1px 0 !important;
+    transition: all 0.15s ease !important;
 }
 
 .fs-virtual-table-module-row:hover,
 [role="row"]:hover {
     background: rgba(255, 255, 255, 0.06) !important;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.10) !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
 }
 
 .fs-virtual-table-module-row[data-selected="true"],
 .fs-song-row-module-playing {
-    background: rgba(139, 92, 246, 0.20) !important;
-    border: 1px solid rgba(6, 182, 212, 0.55) !important;
-    box-shadow: 0 4px 20px rgba(139, 92, 246, 0.20) !important;
+    background: rgba(255, 255, 255, 0.12) !important;
+    border: 1px solid rgba(255, 255, 255, 0.22) !important;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.20) !important;
 }
 
 .fs-virtual-table-module-header, thead, thead tr {
     background: transparent !important;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.10) !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
     font-size: 11px !important;
     font-weight: 700 !important;
-    color: rgba(255, 255, 255, 0.55) !important;
-    letter-spacing: 0.6px !important;
+    color: rgba(255, 255, 255, 0.50) !important;
+    letter-spacing: 0.8px !important;
+    text-transform: uppercase !important;
 }
 
-/* --- 7. AUTO-HIPNOSE QUICK SHADER PILL & MODAL --- */
+/* Action Bar Toolbar at top of lists */
+.fs-action-bar-module-container,
+.fs-song-list-module-controls-container {
+    background: transparent !important;
+    padding: 8px 12px !important;
+}
+
+.fs-action-bar-module-container button {
+    background: rgba(255, 255, 255, 0.05) !important;
+    border: 1px solid rgba(255, 255, 255, 0.10) !important;
+    border-radius: 10px !important;
+    color: rgba(255, 255, 255, 0.80) !important;
+    transition: all 0.15s ease !important;
+}
+
+.fs-action-bar-module-container button:hover {
+    background: rgba(255, 255, 255, 0.12) !important;
+    color: #FFFFFF !important;
+}
+
+/* --- 7. PERSONAL OS QUICK SHADER PILL & MODAL --- */
 #personal-os-shader-pill {
     display: inline-flex !important;
     align-items: center !important;
     gap: 8px !important;
-    padding: 6px 16px !important;
-    border-radius: 20px !important;
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.14) 0%, rgba(255, 255, 255, 0.03) 100%), rgba(16, 11, 28, 0.72) !important;
+    padding: 5px 14px !important;
+    border-radius: 18px !important;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.10) 0%, rgba(255, 255, 255, 0.02) 100%), rgba(12, 12, 18, 0.45) !important;
     border: 1px solid rgba(255, 255, 255, 0.20) !important;
-    border-top: 1px solid rgba(255, 255, 255, 0.45) !important;
+    border-top: 1px solid rgba(255, 255, 255, 0.40) !important;
     color: #FFFFFF !important;
     font-size: 12px !important;
     font-weight: 600 !important;
     cursor: pointer !important;
     transition: all 0.2s ease !important;
-    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.30) !important;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.30), inset 0 1px 0 rgba(255, 255, 255, 0.25) !important;
     backdrop-filter: blur(20px) !important;
     -webkit-backdrop-filter: blur(20px) !important;
 }
 
 #personal-os-shader-pill:hover {
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.20) 0%, rgba(255, 255, 255, 0.06) 100%), rgba(24, 16, 42, 0.85) !important;
-    border-color: rgba(255, 255, 255, 0.35) !important;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.16) 0%, rgba(255, 255, 255, 0.04) 100%), rgba(12, 12, 18, 0.55) !important;
+    border-color: rgba(255, 255, 255, 0.30) !important;
     transform: translateY(-1px) !important;
 }
 
-.shader-glow-dot {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    background: #06B6D4;
-    box-shadow: 0 0 10px #06B6D4;
-    animation: shaderGlowPulse 2s infinite ease-in-out;
-}
-
-@keyframes shaderGlowPulse {
-    0%, 100% { transform: scale(1); opacity: 0.8; }
-    50% { transform: scale(1.3); opacity: 1; box-shadow: 0 0 15px #06B6D4, 0 0 25px #7C3AED; }
-}
-
-.badge-bg-num {
-    font-size: 10px !important;
-    background: rgba(139, 92, 246, 0.45) !important;
-    color: #FFFFFF !important;
-    padding: 2px 7px !important;
-    border-radius: 10px !important;
-    margin-left: 2px !important;
-    font-weight: 700 !important;
-}
-
-/* SHADER SELECTOR MODAL */
 #personal-os-shader-modal {
     position: fixed !important;
     top: 50% !important;
     left: 50% !important;
     transform: translate(-50%, -50%) !important;
-    width: 620px !important;
+    width: 660px !important;
     max-width: 90vw !important;
-    max-height: 80vh !important;
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.10) 0%, rgba(255, 255, 255, 0.02) 100%), rgba(14, 11, 24, 0.94) !important;
-    border: 1px solid rgba(255, 255, 255, 0.18) !important;
-    border-top: 1px solid rgba(255, 255, 255, 0.42) !important;
-    border-radius: 28px !important;
-    box-shadow: 0 30px 80px rgba(0, 0, 0, 0.75), 0 0 50px rgba(139, 92, 246, 0.20) !important;
-    backdrop-filter: blur(28px) saturate(200%) !important;
-    -webkit-backdrop-filter: blur(28px) saturate(200%) !important;
+    max-height: 82vh !important;
+    border-radius: 24px !important;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.12) 0%, rgba(18, 18, 26, 0.45) 100%) !important;
+    border: 1px solid rgba(255, 255, 255, 0.25) !important;
+    border-top: 1px solid rgba(255, 255, 255, 0.45) !important;
+    backdrop-filter: blur(24px) saturate(200%) !important;
+    -webkit-backdrop-filter: blur(24px) saturate(200%) !important;
+    box-shadow: 0 30px 80px rgba(0, 0, 0, 0.70), inset 0 1px 2px rgba(255, 255, 255, 0.35) !important;
     z-index: 100000 !important;
     padding: 24px !important;
-    display: flex !important;
+    display: none;
     flex-direction: column !important;
     gap: 16px !important;
-    color: #FFFFFF !important;
+    color: #F8FAFC !important;
 }
 
-.shader-modal-header {
-    display: flex !important;
-    align-items: center !important;
-    justify-content: space-between !important;
-}
-
-.shader-modal-header h3 {
-    margin: 0 !important;
-    font-size: 18px !important;
-    font-weight: 700 !important;
-    display: flex !important;
-    align-items: center !important;
-    gap: 8px !important;
-}
-
-.shader-modal-close {
-    background: rgba(255, 255, 255, 0.1) !important;
-    border: none !important;
-    border-radius: 50% !important;
-    width: 32px !important;
-    height: 32px !important;
-    color: #FFFFFF !important;
-    font-size: 14px !important;
-    cursor: pointer !important;
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    transition: all 0.2s ease !important;
-}
-
-.shader-modal-close:hover {
-    background: rgba(239, 68, 68, 0.6) !important;
-    transform: scale(1.1) !important;
-}
-
-.shader-modal-controls {
-    display: flex !important;
-    gap: 10px !important;
+#personal-os-shader-backdrop {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    background: rgba(0, 0, 0, 0.30) !important;
+    backdrop-filter: blur(10px) saturate(180%) !important;
+    -webkit-backdrop-filter: blur(10px) saturate(180%) !important;
+    z-index: 99999 !important;
+    display: none;
 }
 
 .shader-ctrl-btn {
-    flex: 1 !important;
-    padding: 10px 14px !important;
-    border-radius: 14px !important;
+    padding: 7px 14px !important;
+    border-radius: 12px !important;
     background: rgba(255, 255, 255, 0.06) !important;
-    border: 1px solid rgba(255, 255, 255, 0.12) !important;
+    border: 1px solid rgba(255, 255, 255, 0.14) !important;
     color: rgba(255, 255, 255, 0.85) !important;
     font-size: 12px !important;
     font-weight: 600 !important;
@@ -476,10 +551,10 @@ button[title*="Play"]:hover, button[title*="Reproduzir"]:hover, button[title*="P
 }
 
 .shader-ctrl-btn.active {
-    background: rgba(139, 92, 246, 0.35) !important;
-    border-color: rgba(139, 92, 246, 0.65) !important;
+    background: rgba(255, 255, 255, 0.22) !important;
+    border-color: rgba(255, 255, 255, 0.45) !important;
     color: #FFFFFF !important;
-    box-shadow: 0 0 16px rgba(139, 92, 246, 0.35) !important;
+    box-shadow: 0 0 16px rgba(255, 255, 255, 0.20) !important;
 }
 
 .shader-grid-list {
@@ -508,8 +583,8 @@ button[title*="Play"]:hover, button[title*="Reproduzir"]:hover, button[title*="P
 .shader-item-card {
     padding: 10px 12px !important;
     border-radius: 14px !important;
-    background: rgba(255, 255, 255, 0.04) !important;
-    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    background: rgba(255, 255, 255, 0.05) !important;
+    border: 1px solid rgba(255, 255, 255, 0.10) !important;
     color: rgba(255, 255, 255, 0.85) !important;
     font-size: 12px !important;
     font-weight: 500 !important;
@@ -521,30 +596,30 @@ button[title*="Play"]:hover, button[title*="Reproduzir"]:hover, button[title*="P
 }
 
 .shader-item-card:hover {
-    background: rgba(255, 255, 255, 0.10) !important;
-    border-color: rgba(255, 255, 255, 0.20) !important;
+    background: rgba(255, 255, 255, 0.12) !important;
+    border-color: rgba(255, 255, 255, 0.25) !important;
     transform: translateY(-2px) !important;
     color: #FFFFFF !important;
 }
 
 .shader-item-card.active {
-    background: rgba(139, 92, 246, 0.30) !important;
-    border-color: rgba(139, 92, 246, 0.60) !important;
-    box-shadow: 0 4px 16px rgba(139, 92, 246, 0.30) !important;
-    color: #EDE9FE !important;
+    background: rgba(255, 255, 255, 0.20) !important;
+    border-color: rgba(255, 255, 255, 0.45) !important;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.30) !important;
+    color: #FFFFFF !important;
     font-weight: 700 !important;
 }
 
 /* --- 8. MANTINE MODALS & DROPDOWNS --- */
 .mantine-Modal-content,
 .mantine-Dialog-root {
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.10) 0%, rgba(255, 255, 255, 0.02) 100%), rgba(14, 11, 24, 0.94) !important;
-    border: 1px solid rgba(255, 255, 255, 0.18) !important;
-    border-top: 1px solid rgba(255, 255, 255, 0.40) !important;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.12) 0%, rgba(18, 18, 26, 0.45) 100%) !important;
+    border: 1px solid rgba(255, 255, 255, 0.25) !important;
+    border-top: 1px solid rgba(255, 255, 255, 0.45) !important;
     border-radius: 24px !important;
-    backdrop-filter: blur(24px) saturate(190%) !important;
-    -webkit-backdrop-filter: blur(24px) saturate(190%) !important;
-    box-shadow: 0 30px 80px rgba(0, 0, 0, 0.75) !important;
+    backdrop-filter: blur(24px) saturate(200%) !important;
+    -webkit-backdrop-filter: blur(24px) saturate(200%) !important;
+    box-shadow: 0 30px 80px rgba(0, 0, 0, 0.70) !important;
     color: #FFFFFF !important;
 }
 
@@ -554,13 +629,13 @@ button[title*="Play"]:hover, button[title*="Reproduzir"]:hover, button[title*="P
 
 .mantine-Menu-dropdown,
 .mantine-Popover-dropdown {
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.10) 0%, rgba(255, 255, 255, 0.02) 100%), rgba(14, 11, 24, 0.94) !important;
-    border: 1px solid rgba(255, 255, 255, 0.18) !important;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.12) 0%, rgba(18, 18, 26, 0.50) 100%) !important;
+    border: 1px solid rgba(255, 255, 255, 0.22) !important;
     border-top: 1px solid rgba(255, 255, 255, 0.40) !important;
-    border-radius: 18px !important;
-    backdrop-filter: blur(24px) saturate(190%) !important;
-    -webkit-backdrop-filter: blur(24px) saturate(190%) !important;
-    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.65) !important;
+    border-radius: 16px !important;
+    backdrop-filter: blur(24px) saturate(200%) !important;
+    -webkit-backdrop-filter: blur(24px) saturate(200%) !important;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.60) !important;
     padding: 6px !important;
 }
 
@@ -571,25 +646,11 @@ button[title*="Play"]:hover, button[title*="Reproduzir"]:hover, button[title*="P
 }
 
 .mantine-Menu-item:hover, .mantine-Menu-item[data-hovered="true"] {
-    background: rgba(139, 92, 246, 0.25) !important;
+    background: rgba(255, 255, 255, 0.12) !important;
     color: #FFFFFF !important;
 }
 
-/* --- 9. INPUTS & SEARCH BAR --- */
-.fs-search-input-module-input, input[type="search"], .mantine-Input-input {
-    background: rgba(255, 255, 255, 0.05) !important;
-    border: 1px solid rgba(255, 255, 255, 0.12) !important;
-    border-radius: 14px !important;
-    color: #FFFFFF !important;
-    backdrop-filter: blur(10px) !important;
-}
-
-.fs-search-input-module-input:focus, input[type="search"]:focus, .mantine-Input-input:focus {
-    border-color: rgba(139, 92, 246, 0.6) !important;
-    box-shadow: 0 0 15px rgba(139, 92, 246, 0.3) !important;
-}
-
-/* --- 10. ULTRA-SLEEK SCROLLBARS --- */
+/* --- 9. ULTRA-SLEEK SCROLLBARS --- */
 ::-webkit-scrollbar {
     width: 6px !important;
     height: 6px !important;
@@ -600,10 +661,10 @@ button[title*="Play"]:hover, button[title*="Reproduzir"]:hover, button[title*="P
 }
 
 ::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.15) !important;
+    background: rgba(255, 255, 255, 0.20) !important;
     border-radius: 10px !important;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-    background: rgba(139, 92, 246, 0.5) !important;
+    background: rgba(255, 255, 255, 0.40) !important;
 }
