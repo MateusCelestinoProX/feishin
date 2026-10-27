@@ -6,9 +6,9 @@
     "semantic_hash": ""
   },
   "customizations/assets/feishin-personal-os.js": {
-    "mtime": 1793132998.70772,
-    "seen": 1793133039.493474,
-    "ast_hash": "85095b8bc8bb080bfdef45825ffb225c",
+    "mtime": 1793133787.7916238,
+    "seen": 1793133897.606472,
+    "ast_hash": "6bf928417dbbbfb4f108a49580db0d08",
     "semantic_hash": ""
   },
   "customizations/assets/ogl.js": {
@@ -42,9 +42,9 @@
     "semantic_hash": ""
   },
   "scripts/apply_customizations.py": {
-    "mtime": 1793117519.378759,
-    "seen": 1793117582.984993,
-    "ast_hash": "78e85d3a9dd30b62c531e91957805838",
+    "mtime": 1793133828.0138843,
+    "seen": 1793133897.606484,
+    "ast_hash": "94446241a989f313e3a92d8300f7e69a",
     "semantic_hash": ""
   },
   "scripts/build_full_pt_br.py": {
@@ -54,9 +54,9 @@
     "semantic_hash": ""
   },
   "scripts/install.sh": {
-    "mtime": 1793068560.7138474,
-    "seen": 1793069500.9181042,
-    "ast_hash": "80b6460194686ba65196c2cfa8fa19f2",
+    "mtime": 1793133842.0839527,
+    "seen": 1793133897.606487,
+    "ast_hash": "5c204b89fdaf084ef837441414eb3cdb",
     "semantic_hash": ""
   },
   "scripts/restore.sh": {
@@ -78,9 +78,9 @@
     "semantic_hash": ""
   },
   "customizations/patches/patch_main.py": {
-    "mtime": 1793116191.239669,
-    "seen": 1793117019.8863628,
-    "ast_hash": "4714e07aff418b9dbf4d499b37c88a08",
+    "mtime": 1793133776.3834777,
+    "seen": 1793133897.606483,
+    "ast_hash": "9280f9ca1720a4ca7aa563d7403fa844",
     "semantic_hash": ""
   },
   "customizations/assets/tray-panel.html": {
@@ -123,12 +123,6 @@
     "mtime": 1793118832.0172172,
     "seen": 1793120032.2436328,
     "ast_hash": "3e0cc7798e431304a1823db10fe0dc1a",
-    "semantic_hash": ""
-  },
-  "sidebar-BLJHaOap.js": {
-    "mtime": 1793129915.4246151,
-    "seen": 1793133039.493491,
-    "ast_hash": "09b29c13852172d52ced8933d54531e8",
     "semantic_hash": ""
   }
 }
