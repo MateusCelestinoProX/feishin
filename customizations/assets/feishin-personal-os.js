@@ -9,36 +9,38 @@ import './music-analytics.js';
 (function() {
   console.log('[Personal OS Engine] Inicializando Shaders & Liquid Glass no Feishin...');
 
-  // 0. Auto-sync Home route & garantir Faixas (/library/songs) como página inicial padrão do sistema
+  // 0. Purgar Início e Álbuns do store_settings e garantir Faixas (/library/songs) como rota definitiva
   try {
     const rawSettings = localStorage.getItem('store_settings');
     if (rawSettings) {
       const s = JSON.parse(rawSettings);
       let changed = false;
       if (s?.state?.general?.sidebarItems) {
-        for (const item of s.state.general.sidebarItems) {
-          if (item.id === 'Home' && item.route === '/') {
-            item.route = '/home';
-            changed = true;
-          }
-        }
+        const prevLen = s.state.general.sidebarItems.length;
+        s.state.general.sidebarItems = s.state.general.sidebarItems.filter(item => item.id !== 'Albums' && item.id !== 'Home');
+        if (s.state.general.sidebarItems.length !== prevLen) changed = true;
+      }
+      if (s?.general?.sidebarItems) {
+        const prevLen = s.general.sidebarItems.length;
+        s.general.sidebarItems = s.general.sidebarItems.filter(item => item.id !== 'Albums' && item.id !== 'Home');
+        if (s.general.sidebarItems.length !== prevLen) changed = true;
       }
       if (changed) {
         localStorage.setItem('store_settings', JSON.stringify(s));
       }
     }
   } catch (e) {
-    console.error('[Personal OS] Erro ao sincronizar rota de Início:', e);
+    console.error('[Personal OS] Erro ao sincronizar sidebarItems:', e);
   }
 
-  if (!window.location.hash || window.location.hash === '#' || window.location.hash === '#/') {
-    window.location.hash = '#/library/songs';
-  }
-  window.addEventListener('hashchange', () => {
-    if (window.location.hash === '' || window.location.hash === '#' || window.location.hash === '#/') {
+  const enforceDefaultSongsRoute = () => {
+    const hash = window.location.hash || '';
+    if (!hash || hash === '#' || hash === '#/' || hash === '#/home' || hash.includes('/library/albums')) {
       window.location.hash = '#/library/songs';
     }
-  });
+  };
+  enforceDefaultSongsRoute();
+  window.addEventListener('hashchange', enforceDefaultSongsRoute);
 
   // Auto-reconexão resiliente ao servidor Navidrome caso caia na tela action-required
   setInterval(() => {
@@ -517,10 +519,15 @@ import './music-analytics.js';
 
     // Ensure item in Left Sidebar as a native-feeling nav item
     function ensureSidebarItem() {
-      // Purge any Albums nav button from DOM immediately
-      document.querySelectorAll('a[href*="/library/albums"]').forEach(el => {
+      // Purge any Albums and Home nav buttons from DOM immediately
+      document.querySelectorAll('a[href*="/library/albums"], a[href="#/home"], a[href="/home"], a[href="#/"]').forEach(el => {
         const href = el.getAttribute('href') || '';
-        if (href === '/library/albums' || href === '#/library/albums' || href.startsWith('/library/albums?') || href.startsWith('#/library/albums?')) {
+        const txt = (el.textContent || '').trim();
+        if (
+          href === '/library/albums' || href === '#/library/albums' || href.startsWith('/library/albums?') || href.startsWith('#/library/albums?') ||
+          href === '/home' || href === '#/home' || href === '#/' ||
+          txt === 'INÍCIO' || txt === 'Início' || txt === 'ÁLBUNS' || txt === 'Álbuns'
+        ) {
           el.remove();
         }
       });
@@ -696,26 +703,33 @@ import './music-analytics.js';
         }
       }
 
-      // Purge Albums from store_settings sidebarItems in localStorage
+      // Purge Albums & Home from store_settings sidebarItems in localStorage
       const rawSettings = localStorage.getItem('store_settings');
       if (rawSettings) {
         const parsedSettings = JSON.parse(rawSettings);
         if (parsedSettings?.general?.sidebarItems) {
           const prevLen = parsedSettings.general.sidebarItems.length;
-          parsedSettings.general.sidebarItems = parsedSettings.general.sidebarItems.filter(item => item.id !== 'Albums');
+          parsedSettings.general.sidebarItems = parsedSettings.general.sidebarItems.filter(item => item.id !== 'Albums' && item.id !== 'Home');
           if (parsedSettings.general.sidebarItems.length !== prevLen) {
             localStorage.setItem('store_settings', JSON.stringify(parsedSettings));
           }
         }
       }
 
-      // Redirect away from /library/albums if currently open
-      if (window.location.hash.includes('/library/albums') || window.location.pathname.includes('/library/albums')) {
+      // Redirect away from /library/albums and /home if currently open
+      if (
+        window.location.hash.includes('/library/albums') ||
+        window.location.hash === '#/home' ||
+        window.location.hash === '#/' ||
+        window.location.pathname.includes('/library/albums') ||
+        window.location.pathname === '/home'
+      ) {
         window.location.replace('#/library/songs');
       }
     } catch (e) {}
 
     initPlayerSplitQueue();
+    initPlayerKillSwitch();
 
     const enforcePlayerCoverArt = () => {
       const sidebarImg = document.querySelector('.fs-sidebar-module-image-container');
@@ -1019,6 +1033,233 @@ import './music-analytics.js';
         setTimeout(enforceQueueActive, 100);
       }
     }, true);
+  }
+
+  // ==========================================================================
+  // 12. PLAYER KILL SWITCH & GLASS CONFIRMATION DIALOG (BOTÃO X)
+  // Adiciona botão "X" na barra de controle do player que fecha a música atual,
+  // interrompe a reprodução e limpa a playlist/fila de reprodução, com diálogo glass.
+  // ==========================================================================
+  function initPlayerKillSwitch() {
+    console.log('[Personal OS] Ativando Kill Switch do Player (Botão X + Glass Dialog)...');
+
+    function executeKillSwitch() {
+      console.log('[Personal OS] Executando Kill Switch: Encerrando música e limpando fila...');
+      const store = (window.__FEISHIN_PLAYER_STORE__ && window.__FEISHIN_PLAYER_STORE__.getState)
+        ? window.__FEISHIN_PLAYER_STORE__.getState()
+        : null;
+
+      // 1. Stop native playback via stop button if present in DOM
+      const stopBtn = document.querySelectorAll('.fs-playerbar-module-center-grid-item button')[0];
+      if (stopBtn) {
+        try { stopBtn.click(); } catch(e) {}
+      }
+
+      // 2. Stop in store
+      try {
+        store?.mediaStop?.({ reset: true });
+      } catch(e) {}
+
+      // 3. Clear queue & selected in store
+      try {
+        store?.clearQueue?.();
+        store?.clearSelected?.();
+      } catch(e) {}
+
+      // 4. Pause any HTML audio elements
+      document.querySelectorAll('audio').forEach(a => {
+        try { a.pause(); a.currentTime = 0; } catch(e) {}
+      });
+
+      // 5. Retract FullScreenPlayer if open
+      const fsContainer = document.querySelector('.fs-full-screen-player-module-container');
+      if (fsContainer) {
+        const minBtn = fsContainer.querySelector('.full-screen-player-controls-container:not(.fs-full-screen-player-queue-module-controls-container) button');
+        if (minBtn) {
+          minBtn.click();
+        } else {
+          window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', code: 'Escape', keyCode: 27, bubbles: true }));
+        }
+      }
+
+      // 6. Broadcast empty state to Tray
+      try {
+        if (window.api && window.api.ipc && typeof window.api.ipc.send === 'function') {
+          window.api.ipc.send('tray-panel-send-state', {
+            title: 'Nenhuma faixa selecionada',
+            artist: '',
+            album: '',
+            coverUrl: null,
+            isPlaying: false,
+            timestamp: 0,
+            duration: 0,
+            queue: []
+          });
+        }
+      } catch(e) {}
+
+      // 7. Update button state immediately
+      updateKillButtonState();
+    }
+
+    function openKillSwitchGlassDialog() {
+      if (document.getElementById('feishin-kill-switch-dialog-backdrop')) return;
+
+      const store = (window.__FEISHIN_PLAYER_STORE__ && window.__FEISHIN_PLAYER_STORE__.getState)
+        ? window.__FEISHIN_PLAYER_STORE__.getState()
+        : null;
+      const currentSong = store?.getCurrentSong?.();
+      const songTitle = currentSong?.name || currentSong?.title || 'Música atual';
+      const artistName = currentSong?.artistName || (currentSong?.artists?.map(a => a.name).join(', ')) || '';
+
+      const imgEl = document.querySelector('footer img, .fs-player-bar-module-cover-art img, .player-cover-art img, img[alt]');
+      const coverSrc = imgEl ? imgEl.src : null;
+
+      const backdrop = document.createElement('div');
+      backdrop.id = 'feishin-kill-switch-dialog-backdrop';
+      backdrop.className = 'feishin-glass-modal-backdrop';
+      backdrop.innerHTML = `
+        <div class="feishin-glass-dialog-box" role="dialog" aria-modal="true" tabindex="-1">
+          <div class="feishin-glass-dialog-badge">
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+          </div>
+          <h3 class="feishin-glass-dialog-title">Encerrar Reprodução?</h3>
+          <p class="feishin-glass-dialog-desc">
+            Deseja fechar a música atual e matar toda a fila de reprodução ativa?
+          </p>
+          <div class="feishin-glass-dialog-song-card">
+            ${coverSrc ? `<img src="${coverSrc}" class="feishin-glass-song-cover" alt="Capa" />` : `<div class="song-icon">🎵</div>`}
+            <div class="song-details">
+              <span class="song-name">${songTitle}</span>
+              ${artistName ? `<span class="song-sub">${artistName}</span>` : ''}
+            </div>
+          </div>
+          <div class="feishin-glass-dialog-actions">
+            <button type="button" class="feishin-glass-btn feishin-glass-btn-cancel" id="feishin-kill-cancel-btn">
+              Cancelar
+            </button>
+            <button type="button" class="feishin-glass-btn feishin-glass-btn-danger" id="feishin-kill-confirm-btn">
+              Encerrar e Limpar
+            </button>
+          </div>
+        </div>
+      `;
+
+      document.body.appendChild(backdrop);
+
+      const closeDialog = () => {
+        window.removeEventListener('keydown', handleKey);
+        backdrop.style.opacity = '0';
+        const box = backdrop.querySelector('.feishin-glass-dialog-box');
+        if (box) box.style.transform = 'scale(0.92)';
+        setTimeout(() => backdrop.remove(), 160);
+      };
+
+      const handleKey = (e) => {
+        if (e.key === 'Escape') {
+          e.preventDefault();
+          closeDialog();
+        } else if (e.key === 'Enter') {
+          e.preventDefault();
+          executeKillSwitch();
+          closeDialog();
+        }
+      };
+
+      window.addEventListener('keydown', handleKey);
+
+      backdrop.onclick = (e) => {
+        if (e.target === backdrop) closeDialog();
+      };
+
+      const cancelBtn = backdrop.querySelector('#feishin-kill-cancel-btn');
+      if (cancelBtn) cancelBtn.onclick = closeDialog;
+
+      const confirmBtn = backdrop.querySelector('#feishin-kill-confirm-btn');
+      if (confirmBtn) {
+        confirmBtn.onclick = () => {
+          executeKillSwitch();
+          closeDialog();
+        };
+      }
+    }
+
+    function updateKillButtonState() {
+      const btn = document.getElementById('feishin-kill-switch-btn');
+      if (!btn) return;
+      const store = (window.__FEISHIN_PLAYER_STORE__ && window.__FEISHIN_PLAYER_STORE__.getState)
+        ? window.__FEISHIN_PLAYER_STORE__.getState()
+        : null;
+      const q = store?.getQueue?.();
+      const hasQueue = q && ((q.items && q.items.length > 0) || (Array.isArray(q) && q.length > 0));
+      const current = store?.getCurrentSong?.();
+      const isPlaying = store?.player?.status === 'playing' || store?.player?.status === 'paused';
+      const active = !!(hasQueue || current || isPlaying);
+
+      if (active) {
+        btn.removeAttribute('data-disabled');
+        btn.style.setProperty('opacity', '0.85', 'important');
+        btn.style.setProperty('cursor', 'pointer', 'important');
+        btn.style.setProperty('pointer-events', 'auto', 'important');
+      } else {
+        btn.setAttribute('data-disabled', 'true');
+        btn.style.setProperty('opacity', '0.35', 'important');
+        btn.style.setProperty('cursor', 'not-allowed', 'important');
+        btn.style.setProperty('pointer-events', 'none', 'important');
+      }
+    }
+
+    function mountKillButton() {
+      const center = document.querySelector('.fs-center-controls-module-buttons-container');
+      if (!center) return;
+
+      let btn = document.getElementById('feishin-kill-switch-btn');
+      if (!btn) {
+        btn = document.createElement('button');
+        btn.id = 'feishin-kill-switch-btn';
+        btn.className = 'mantine-focus-never mantine-active fs-action-icon-module-root m_8d3f4000 mantine-ActionIcon-root m_87cf2631 mantine-UnstyledButton-root feishin-kill-btn';
+        btn.setAttribute('type', 'button');
+        btn.setAttribute('title', 'Encerrar reprodução e limpar fila (X)');
+        btn.innerHTML = `
+          <span class="m_8d3afb97 mantine-ActionIcon-icon">
+            <svg stroke="currentColor" fill="none" stroke-width="2.2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" height="15" width="15" xmlns="http://www.w3.org/2000/svg">
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+          </span>
+        `;
+
+        btn.onclick = (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          openKillSwitchGlassDialog();
+        };
+
+        const stopBtn = center.children[0];
+        if (stopBtn && stopBtn !== btn) {
+          stopBtn.after(btn);
+        } else {
+          center.prepend(btn);
+        }
+      }
+      updateKillButtonState();
+    }
+
+    mountKillButton();
+    setInterval(mountKillButton, 1000);
+
+    const observer = new MutationObserver(() => {
+      mountKillButton();
+    });
+    const playerBar = document.querySelector('#player-bar, footer');
+    if (playerBar) {
+      observer.observe(playerBar, { childList: true, subtree: true });
+    } else {
+      observer.observe(document.body, { childList: true, subtree: true });
+    }
   }
 
   if (document.readyState === 'loading') {

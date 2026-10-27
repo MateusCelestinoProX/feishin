@@ -58,6 +58,12 @@ Motor gráfico em tempo real renderizado sobre OGL (`ogl.js` + `webgl-background
 - **Roteamento Cirúrgico com Redirecionamento**: Substituição da rota `/library/albums` por `<Navigate to="/library/songs" replace />`, garantindo que qualquer link residual redirecione instantaneamente para Faixas.
 - **Sanitização de Configurações e Paleta de Comandos**: Purga de `Albums` das preferências de reordenação de itens de barra lateral (`Hle`), da paleta de atalhos e do armazenamento persistente (`store_settings`).
 
+### 10. 🛑 Kill Switch da Reprodução (Botão X + Dialog Box Glass)
+- **Botão de Fechamento Integrado**: Botão `✕` estilizado e perfeitamente alinhado aos controles centrais da barra do player (ao lado de Parar/Stop).
+- **Dialog Box Glass de Alta Fidelidade**: Caixa de diálogo com blur translúcido, bordas reflexivas, iluminação de destaque e exibição em tempo real da faixa em reprodução.
+- **Encerramento Cirúrgico de Fila e Playlist**: Ao confirmar, interrompe imediatamente o áudio (MPV / Web Audio), limpa integralmente a fila e a playlist criadas (`clearQueue()`), redefine o estado da barra e sincroniza com o Mini Painel do macOS.
+- **Atalhos e Acessibilidade**: Fechamento suave com tecla `Esc` ou clique no backdrop blur, e confirmação instantânea via tecla `Enter`.
+
 ---
 
 ## 📂 Estrutura do Repositório

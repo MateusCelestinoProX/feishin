@@ -134,32 +134,48 @@ def patch_bundle(file_path):
         else:
             print(f"[!] Aviso: Padrão não encontrado: {old[:35]}...")
 
-    # 7. Patch de Remoção da Página de Álbuns (Interface e Código)
-    replacements_albums_removal = [
+    # 7. Patch de Remoção das Páginas de Álbuns e de Início (Interface e Código)
+    replacements_page_removals = [
         # 7.1 Rota /library/albums redireciona para /library/songs (Faixas)
         ('f=p.jsx(Rn,{element:p.jsx(G7,{}),path:$t.LIBRARY_ALBUMS})',
          'f=p.jsx(Rn,{element:p.jsx(bKe,{to:$t.LIBRARY_SONGS,replace:!0}),path:$t.LIBRARY_ALBUMS})'),
-        # 7.2 Remover Álbuns das configurações de itens da barra lateral (Hle)
+        # 7.2 Rota /home redireciona para /library/songs (Faixas)
+        ('o=p.jsx(Rn,{element:p.jsx(Yue,{}),path:$t.HOME})',
+         'o=p.jsx(Rn,{element:p.jsx(bKe,{to:$t.LIBRARY_SONGS,replace:!0}),path:$t.HOME})'),
+        # 7.3 Remover Álbuns e Início das configurações de itens da barra lateral (Hle)
         ('[sc.ALBUMS,"page.sidebar.albums"],',
          ''),
-        # 7.3 Desativar Álbuns na lista padrão de sidebar items (Obe)
+        ('[sc.HOME,"page.sidebar.home"],',
+         ''),
+        # 7.4 Desativar Álbuns e Início na lista padrão de sidebar items (Obe)
         ('{disabled:!1,id:"Albums",label:Ce.t("page.sidebar.albums"),route:$t.LIBRARY_ALBUMS},',
          '{disabled:!0,id:"Albums",label:"",route:""},'),
-        # 7.4 Remover Álbuns da busca global/paleta de comando (uo.Group heading Library)
+        ('{disabled:!1,id:"Home",label:Ce.t("page.sidebar.home"),route:$t.HOME},',
+         '{disabled:!0,id:"Home",label:"",route:""},'),
+        # 7.5 Remover Álbuns e Início da busca global/paleta de comando
         ('H=p.jsxs(uo.Group,{heading:"Library",children:[A,E,z,O,I,U]})',
          'H=p.jsxs(uo.Group,{heading:"Library",children:[E,z,O,I,U]})'),
-        # 7.5 Filtrar Álbuns na navegação mobile/recolhida (hJt)
+        ('v=p.jsxs(uo.Group,{children:[d,h,b]})',
+         'v=p.jsxs(uo.Group,{children:[h,b]})'),
+        # 7.6 Hotkeys e atalhos de navegação para Home redirecionam para Faixas
+        ('A=()=>e($t.HOME)',
+         'A=()=>e($t.LIBRARY_SONGS)'),
+        ('u=A=>{e($t.HOME),i(A),o(void 0)}',
+         'u=A=>{e($t.LIBRARY_SONGS),i(A),o(void 0)}'),
+        ('d=A=>{s($t.HOME),l(A),a(),r(""),n([hm.HOME])}',
+         'd=A=>{s($t.LIBRARY_SONGS),l(A),a(),r(""),n([hm.HOME])}'),
+        # 7.7 Filtrar Álbuns e Início na navegação mobile/recolhida (hJt)
         ('function hJt(t){return!t.disabled}',
-         'function hJt(t){return!t.disabled&&t.id!=="Albums"}')
+         'function hJt(t){return!t.disabled&&t.id!=="Albums"&&t.id!=="Home"}')
     ]
 
-    for old, new in replacements_albums_removal:
+    for old, new in replacements_page_removals:
         if old in js:
             js = js.replace(old, new, 1)
             modified = True
-            print(f"[✓] Patch Remoção de Álbuns aplicado: {old[:35]}...")
+            print(f"[✓] Patch Remoção de Página aplicado: {old[:35]}...")
         elif new in js:
-            print(f"[-] Patch Remoção de Álbuns já presente: {new[:35]}...")
+            print(f"[-] Patch Remoção de Página já presente: {new[:35]}...")
         else:
             print(f"[!] Aviso: Padrão não encontrado: {old[:35]}...")
 
@@ -217,9 +233,9 @@ def patch_bundle(file_path):
                 sb_mod = True
                 print(f"[✓] Patch Sidebar Cover Art desativado em {sidebar_bundle.name}")
             if 'function Je(e){return e.id!=="Collections"&&e.route}' in sb_js:
-                sb_js = sb_js.replace('function Je(e){return e.id!=="Collections"&&e.route}', 'function Je(e){return e.id!=="Collections"&&e.id!=="Albums"&&e.route}', 1)
+                sb_js = sb_js.replace('function Je(e){return e.id!=="Collections"&&e.route}', 'function Je(e){return e.id!=="Collections"&&e.id!=="Albums"&&e.id!=="Home"&&e.route}', 1)
                 sb_mod = True
-                print(f"[✓] Patch Sidebar Remoção de Álbuns aplicado em {sidebar_bundle.name}")
+                print(f"[✓] Patch Sidebar Remoção de Álbuns e Início aplicado em {sidebar_bundle.name}")
             if sb_mod:
                 with open(sidebar_bundle, "w", encoding="utf-8") as f:
                     f.write(sb_js)
@@ -231,10 +247,10 @@ def patch_bundle(file_path):
             with open(col_bundle, "r", encoding="utf-8") as f:
                 cb_js = f.read()
             if 'function Pe(e){return!e.disabled}' in cb_js:
-                cb_js = cb_js.replace('function Pe(e){return!e.disabled}', 'function Pe(e){return!e.disabled&&e.id!=="Albums"}', 1)
+                cb_js = cb_js.replace('function Pe(e){return!e.disabled}', 'function Pe(e){return!e.disabled&&e.id!=="Albums"&&e.id!=="Home"}', 1)
                 with open(col_bundle, "w", encoding="utf-8") as f:
                     f.write(cb_js)
-                print(f"[✓] Patch Collapsed Sidebar Remoção de Álbuns aplicado em {col_bundle.name}")
+                print(f"[✓] Patch Collapsed Sidebar Remoção de Álbuns e Início aplicado em {col_bundle.name}")
         except Exception as e:
             print(f"[!] Erro ao patchear {col_bundle.name}: {e}")
 

@@ -2364,3 +2364,222 @@ button.fs-player-button-module-main svg {
     border-color: rgba(239, 68, 68, 0.5) !important;
     box-shadow: 0 16px 36px rgba(0, 0, 0, 0.5), 0 0 20px rgba(239, 68, 68, 0.25) !important;
 }
+
+/* ==========================================================================
+   12. PLAYER KILL SWITCH & GLASS CONFIRMATION DIALOG (BOTÃO X)
+   ========================================================================== */
+#feishin-kill-switch-btn {
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
+    position: relative !important;
+}
+
+#feishin-kill-switch-btn:hover {
+    color: #F87171 !important;
+    background: rgba(239, 68, 68, 0.16) !important;
+    border-color: rgba(239, 68, 68, 0.35) !important;
+    box-shadow: 0 0 14px rgba(239, 68, 68, 0.28) !important;
+    transform: scale(1.05) !important;
+}
+
+#feishin-kill-switch-btn:active {
+    transform: scale(0.95) !important;
+}
+
+#feishin-kill-switch-btn[data-disabled="true"] {
+    opacity: 0.32 !important;
+    cursor: not-allowed !important;
+    pointer-events: none !important;
+    box-shadow: none !important;
+    transform: none !important;
+}
+
+/* Glass Modal Backdrop Overlay */
+.feishin-glass-modal-backdrop {
+    position: fixed !important;
+    inset: 0 !important;
+    z-index: 999999 !important;
+    background: rgba(0, 0, 0, 0.6) !important;
+    backdrop-filter: blur(14px) saturate(180%) !important;
+    -webkit-backdrop-filter: blur(14px) saturate(180%) !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    animation: feishinModalFadeIn 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
+    transition: opacity 0.16s ease !important;
+}
+
+@keyframes feishinModalFadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+/* Glass Dialog Box Card */
+.feishin-glass-dialog-box {
+    width: 90% !important;
+    max-width: 420px !important;
+    background: rgba(20, 20, 28, 0.82) !important;
+    backdrop-filter: blur(40px) saturate(210%) !important;
+    -webkit-backdrop-filter: blur(40px) saturate(210%) !important;
+    border: 1px solid rgba(255, 255, 255, 0.14) !important;
+    border-top: 1px solid rgba(255, 255, 255, 0.28) !important;
+    border-radius: 22px !important;
+    padding: 28px 28px 24px 28px !important;
+    box-shadow: 0 28px 65px rgba(0, 0, 0, 0.75), 0 0 0 1px rgba(255, 255, 255, 0.05), 0 0 40px rgba(239, 68, 68, 0.14) !important;
+    text-align: center !important;
+    color: #FFFFFF !important;
+    font-family: "Outfit", "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, sans-serif !important;
+    transform-origin: center center !important;
+    animation: feishinModalScaleIn 0.22s cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
+    transition: transform 0.16s ease !important;
+}
+
+@keyframes feishinModalScaleIn {
+    from { transform: scale(0.92); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+}
+
+/* Badge Icon */
+.feishin-glass-dialog-badge {
+    width: 52px !important;
+    height: 52px !important;
+    border-radius: 50% !important;
+    margin: 0 auto 16px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    background: linear-gradient(135deg, rgba(239, 68, 68, 0.22), rgba(220, 38, 38, 0.08)) !important;
+    border: 1px solid rgba(239, 68, 68, 0.4) !important;
+    color: #F87171 !important;
+    box-shadow: 0 0 24px rgba(239, 68, 68, 0.28), inset 0 1px 1px rgba(255, 255, 255, 0.3) !important;
+}
+
+/* Title & Description */
+.feishin-glass-dialog-title {
+    font-size: 19px !important;
+    font-weight: 700 !important;
+    letter-spacing: -0.02em !important;
+    margin: 0 0 8px 0 !important;
+    color: #FFFFFF !important;
+}
+
+.feishin-glass-dialog-desc {
+    font-size: 13.5px !important;
+    line-height: 1.5 !important;
+    color: rgba(255, 255, 255, 0.7) !important;
+    margin: 0 0 18px 0 !important;
+    padding: 0 8px !important;
+}
+
+/* Song card preview in modal */
+.feishin-glass-dialog-song-card {
+    display: flex !important;
+    align-items: center !important;
+    gap: 12px !important;
+    background: rgba(255, 255, 255, 0.05) !important;
+    border: 1px solid rgba(255, 255, 255, 0.09) !important;
+    border-radius: 14px !important;
+    padding: 10px 14px !important;
+    margin-bottom: 22px !important;
+    text-align: left !important;
+}
+
+.feishin-glass-song-cover {
+    width: 38px !important;
+    height: 38px !important;
+    border-radius: 8px !important;
+    object-fit: cover !important;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4) !important;
+    flex-shrink: 0 !important;
+}
+
+.feishin-glass-dialog-song-card .song-icon {
+    font-size: 18px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 38px !important;
+    height: 38px !important;
+    background: rgba(255, 255, 255, 0.08) !important;
+    border-radius: 8px !important;
+    flex-shrink: 0 !important;
+}
+
+.feishin-glass-dialog-song-card .song-details {
+    display: flex !important;
+    flex-direction: column !important;
+    overflow: hidden !important;
+}
+
+.feishin-glass-dialog-song-card .song-name {
+    font-size: 13px !important;
+    font-weight: 600 !important;
+    color: #F1F5F9 !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+}
+
+.feishin-glass-dialog-song-card .song-sub {
+    font-size: 11.5px !important;
+    color: rgba(255, 255, 255, 0.5) !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+}
+
+/* Actions Row */
+.feishin-glass-dialog-actions {
+    display: flex !important;
+    gap: 10px !important;
+    justify-content: stretch !important;
+}
+
+.feishin-glass-btn {
+    flex: 1 !important;
+    border: none !important;
+    outline: none !important;
+    padding: 12px 18px !important;
+    border-radius: 12px !important;
+    font-size: 13.5px !important;
+    font-family: inherit !important;
+    font-weight: 600 !important;
+    cursor: pointer !important;
+    transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1) !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+
+.feishin-glass-btn-cancel {
+    background: rgba(255, 255, 255, 0.08) !important;
+    border: 1px solid rgba(255, 255, 255, 0.14) !important;
+    color: #E2E8F0 !important;
+}
+
+.feishin-glass-btn-cancel:hover {
+    background: rgba(255, 255, 255, 0.15) !important;
+    border-color: rgba(255, 255, 255, 0.22) !important;
+    transform: translateY(-1px) !important;
+}
+
+.feishin-glass-btn-cancel:active {
+    transform: translateY(0) !important;
+}
+
+.feishin-glass-btn-danger {
+    flex: 1.25 !important;
+    background: linear-gradient(135deg, #EF4444, #DC2626) !important;
+    border: 1px solid rgba(255, 255, 255, 0.2) !important;
+    color: #FFFFFF !important;
+    box-shadow: 0 4px 18px rgba(239, 68, 68, 0.38) !important;
+}
+
+.feishin-glass-btn-danger:hover {
+    background: linear-gradient(135deg, #F87171, #EF4444) !important;
+    box-shadow: 0 6px 24px rgba(239, 68, 68, 0.55) !important;
+    transform: translateY(-1px) !important;
+}
+
+.feishin-glass-btn-danger:active {
+    transform: translateY(0) !important;
+}
