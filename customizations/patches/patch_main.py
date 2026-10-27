@@ -142,6 +142,14 @@ if (!require$$0.ipcMain.eventNames().includes("tray-panel-action")) {
     }
   });
 }
+
+if (!require$$0.ipcMain.eventNames().includes("request-open-settings")) {
+  require$$0.ipcMain.on("request-open-settings", () => {
+    if (mainWindow && !mainWindow.isDestroyed()) {
+      mainWindow.webContents.send("renderer-open-settings");
+    }
+  });
+}
 """
 
     replacement = helper_code + """

@@ -944,16 +944,16 @@
       "explore": "Explore a sua biblioteca",
       "recentlyPlayed": "Tocadas Recentemente",
       "recentlyReleased": "Lançamentos Recentes",
-      "genres": "$t(entity.genre, {\"count\": 2})",
+      "genres": "Tags",
       "playlists": "Playlists"
     },
     "albumArtistList": {
       "title": "$t(entity.albumArtist, {\"count\": 2})"
     },
     "genreList": {
-      "title": "$t(entity.genre, {\"count\": 2})",
-      "showTracks": "Mostrar $t(entity.genre, {\"count\": 1}) $t(entity.track, {\"count\": 2})",
-      "showAlbums": "Mostrar $t(entity.genre, {\"count\": 1}) $t(entity.album, {\"count\": 2})"
+      "title": "Tags",
+      "showTracks": "Mostrar faixas da tag",
+      "showAlbums": "Mostrar álbuns da tag"
     },
     "trackList": {
       "title": "$t(entity.track, {\"count\": 2})",
@@ -973,7 +973,7 @@
       "tracks": "Faixas",
       "shared": "Playlists compartilhadas",
       "albums": "Álbuns",
-      "genres": "Gêneros",
+      "genres": "Tags",
       "folders": "Pastas",
       "albumArtists": "Artistas do álbum",
       "artists": "Artistas",
@@ -1262,7 +1262,7 @@
     "playSimilarSongs": "Tocar músicas similares",
     "skip": "Pular",
     "stop": "Parar",
-    "addNext": "Adicionar a seguir",
+    "addNext": "Tocar a seguir",
     "muted": "Mudo",
     "queue_clear": "Limpar fila",
     "toggleFullscreenPlayer": "Alternar player de tela cheia",
@@ -1338,9 +1338,9 @@
     "folder_one": "Pasta",
     "folder_many": "Pastas",
     "folder_other": "Pastas",
-    "genre_one": "Gênero",
-    "genre_many": "Gêneros",
-    "genre_other": "Gêneros",
+    "genre_one": "Tag",
+    "genre_many": "Tags",
+    "genre_other": "Tags",
     "playlistWithCount_one": "{{count}} playlist",
     "playlistWithCount_many": "{{count}} playlists",
     "playlistWithCount_other": "{{count}} playlists",
@@ -1350,9 +1350,9 @@
     "folderWithCount_one": "{{count}} pasta",
     "folderWithCount_many": "{{count}} pastas",
     "folderWithCount_other": "{{count}} pastas",
-    "genreWithCount_one": "{{count}} gênero",
-    "genreWithCount_many": "{{count}} gêneros",
-    "genreWithCount_other": "{{count}} gêneros",
+    "genreWithCount_one": "{{count}} tag",
+    "genreWithCount_many": "{{count}} tags",
+    "genreWithCount_other": "{{count}} tags",
     "trackWithCount_one": "{{count}} faixa",
     "trackWithCount_many": "{{count}} faixas",
     "trackWithCount_other": "{{count}} faixas",
@@ -1371,7 +1371,8 @@
     "radioStation_other": "Estações de rádio",
     "radioStationWithCount_one": "{{count}} estação de rádio",
     "radioStationWithCount_many": "{{count}} estações de rádio",
-    "radioStationWithCount_other": "{{count}} estações de rádio"
+    "radioStationWithCount_other": "{{count}} estações de rádio",
+    "genre": "Tag"
   },
   "error": {
     "remotePortWarning": "Reinicie o servidor para aplicar a nova porta",

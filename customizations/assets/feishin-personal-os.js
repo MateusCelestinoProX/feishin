@@ -4,14 +4,47 @@
 // ==========================================================================
 
 import './webgl-backgrounds.js';
+import './music-analytics.js';
 
 (function() {
   console.log('[Personal OS Engine] Inicializando Shaders & Liquid Glass no Feishin...');
+
+  // 0. Auto-sync Home route & garantir Faixas (/library/songs) como página inicial padrão do sistema
+  try {
+    const rawSettings = localStorage.getItem('store_settings');
+    if (rawSettings) {
+      const s = JSON.parse(rawSettings);
+      let changed = false;
+      if (s?.state?.general?.sidebarItems) {
+        for (const item of s.state.general.sidebarItems) {
+          if (item.id === 'Home' && item.route === '/') {
+            item.route = '/home';
+            changed = true;
+          }
+        }
+      }
+      if (changed) {
+        localStorage.setItem('store_settings', JSON.stringify(s));
+      }
+    }
+  } catch (e) {
+    console.error('[Personal OS] Erro ao sincronizar rota de Início:', e);
+  }
+
+  if (!window.location.hash || window.location.hash === '#' || window.location.hash === '#/') {
+    window.location.hash = '#/library/songs';
+  }
+  window.addEventListener('hashchange', () => {
+    if (window.location.hash === '' || window.location.hash === '#' || window.location.hash === '#/') {
+      window.location.hash = '#/library/songs';
+    }
+  });
 
   // 1. Shaders catalog from Personal OS
   const SHADER_CATALOG = [
     {
       category: '🌌 Cósmico & Etéreo',
+      key: 'cosmico',
       items: [
         { id: 'softaurora', name: 'Soft Aurora', icon: '✨' },
         { id: 'aurora', name: 'Aurora Borealis', icon: '🌌' },
@@ -24,6 +57,7 @@ import './webgl-backgrounds.js';
     },
     {
       category: '⚡ Energia & Ondas',
+      key: 'energia',
       items: [
         { id: 'plasmawave', name: 'Plasma Wave', icon: '🌊' },
         { id: 'plasma', name: 'Core Plasma', icon: '⚡' },
@@ -37,6 +71,7 @@ import './webgl-backgrounds.js';
     },
     {
       category: '🧪 Fluidos & Orgânico',
+      key: 'fluidos',
       items: [
         { id: 'ferrofluid', name: 'Ferrofluid', icon: '⚫' },
         { id: 'liquidchrome', name: 'Liquid Chrome', icon: '🪞' },
@@ -50,6 +85,7 @@ import './webgl-backgrounds.js';
     },
     {
       category: '🎮 Cyber & Arcade',
+      key: 'cyber',
       items: [
         { id: 'balatro', name: 'Balatro CRT', icon: '🃏' },
         { id: 'dither', name: 'Dither Noise', icon: '📺' },
@@ -76,8 +112,14 @@ import './webgl-backgrounds.js';
   let isRotative = localStorage.getItem('feishin_shader_rotative') === 'true';
   let rotativeSeconds = parseInt(localStorage.getItem('feishin_shader_rotative_sec') || '30', 10);
   let isEcoMode = localStorage.getItem('feishin_shader_eco') === 'true';
+  let glassBlur = parseInt(localStorage.getItem('personal_os_glass_blur') || '28', 10);
+  let shaderDim = parseInt(localStorage.getItem('personal_os_shader_dim') || '25', 10);
   let rotativeTimer = null;
   let currentRotativeIdx = 0;
+
+  // Apply initial glass blur and shader darkening immediately to document
+  document.documentElement.style.setProperty('--personal-os-glass-blur', glassBlur + 'px');
+  document.documentElement.style.setProperty('--personal-os-shader-dim', (shaderDim / 100).toFixed(2));
 
   // 3. Ensure DOM Canvas Container
   function ensureShaderContainer() {
@@ -87,11 +129,17 @@ import './webgl-backgrounds.js';
       container.id = 'bg-webgl-container';
       document.body.prepend(container);
     }
+    let dimEl = document.getElementById('bg-webgl-dim');
+    if (!dimEl) {
+      dimEl = document.createElement('div');
+      dimEl.id = 'bg-webgl-dim';
+      document.body.insertBefore(dimEl, container.nextSibling);
+    }
     let vignette = document.getElementById('bg-webgl-vignette');
     if (!vignette) {
       vignette = document.createElement('div');
       vignette.id = 'bg-webgl-vignette';
-      document.body.insertBefore(vignette, container.nextSibling);
+      document.body.insertBefore(vignette, dimEl.nextSibling);
     }
     return container;
   }
@@ -176,7 +224,7 @@ import './webgl-backgrounds.js';
       document.body.appendChild(backdrop);
     }
 
-    // Modal / Popover
+    // Modal / Popover (Box Quadrado Personal OS)
     let modal = document.getElementById('personal-os-shader-modal');
     if (!modal) {
       modal = document.createElement('div');
@@ -186,52 +234,153 @@ import './webgl-backgrounds.js';
 
       modal.innerHTML = `
         <div class="shader-modal-header">
-          <h3><span>🎨</span> Temas & Shaders</h3>
-          <button class="shader-modal-close" id="shader-modal-close-btn" type="button">✕</button>
+          <div class="shader-modal-title-group">
+            <span class="shader-modal-icon">🎨</span>
+            <div>
+              <h3 class="shader-modal-title">Temas & Shaders</h3>
+              <span class="shader-modal-subtitle">Personal OS • 33 Shaders WebGL</span>
+            </div>
+          </div>
+          <div class="shader-header-actions">
+            <button class="shader-ctrl-btn ${isRotative ? 'active' : ''}" id="shader-rotative-toggle" type="button" title="Alternar rotação automática de backgrounds">
+              <span>🔄</span> Rotativo: ${isRotative ? 'Ativo' : 'Fixo'}
+            </button>
+            <button class="shader-ctrl-btn ${isEcoMode ? 'active' : ''}" id="shader-eco-toggle" type="button" title="Pausar shaders para economia de bateria">
+              <span>${isEcoMode ? '▶️' : '🍃'}</span> ${isEcoMode ? 'Retomar' : 'Eco Mode'}
+            </button>
+            <button class="shader-modal-close" id="shader-modal-close-btn" type="button" title="Fechar (ESC)">✕</button>
+          </div>
         </div>
-        <div class="shader-modal-controls">
-          <button class="shader-ctrl-btn ${isRotative ? 'active' : ''}" id="shader-rotative-toggle" type="button">
-            <span>🔄</span> Rotativo: ${isRotative ? 'Ativo' : 'Fixo'}
-          </button>
-          <button class="shader-ctrl-btn ${isEcoMode ? 'active' : ''}" id="shader-eco-toggle" type="button">
-            <span>${isEcoMode ? '▶️' : '🍃'}</span> ${isEcoMode ? 'Retomar' : 'Eco Mode'}
-          </button>
+
+        <div class="shader-controls-panel">
+          <!-- Controle Deslizante 1: Blur do Vidro -->
+          <div class="shader-slider-box">
+            <div class="shader-slider-header">
+              <div class="shader-slider-label">
+                <span class="slider-icon">🪟</span>
+                <span>Blur do Vidro</span>
+              </div>
+              <span class="shader-slider-badge" id="val-glass-blur">${glassBlur}px</span>
+            </div>
+            <div class="shader-slider-wrapper">
+              <input type="range" class="shader-range-slider" id="slider-glass-blur" min="0" max="60" value="${glassBlur}" step="1" title="Ajuste o desfoque do vidro translúcido">
+            </div>
+            <div class="shader-slider-scale">
+              <span>0px (Límpido)</span>
+              <span>28px (Padrão)</span>
+              <span>60px (Fosco)</span>
+            </div>
+          </div>
+
+          <!-- Controle Deslizante 2: Escurecimento do Shader -->
+          <div class="shader-slider-box">
+            <div class="shader-slider-header">
+              <div class="shader-slider-label">
+                <span class="slider-icon">🌘</span>
+                <span>Escurecimento do Fundo</span>
+              </div>
+              <span class="shader-slider-badge" id="val-shader-dim">${shaderDim}%</span>
+            </div>
+            <div class="shader-slider-wrapper">
+              <input type="range" class="shader-range-slider" id="slider-shader-dim" min="0" max="90" value="${shaderDim}" step="1" title="Ajuste o escurecimento do shader">
+            </div>
+            <div class="shader-slider-scale">
+              <span>0% (Brilhante)</span>
+              <span>25% (Equilibrado)</span>
+              <span>90% (Ultra Dark)</span>
+            </div>
+          </div>
         </div>
-        <div class="shader-grid-list" id="shader-grid-list-container">
-          <!-- populated dynamically -->
+
+        <div class="shader-category-pills" id="shader-category-pills">
+          <button type="button" class="shader-pill-btn active" data-cat="all">Todos (33)</button>
+          <button type="button" class="shader-pill-btn" data-cat="cosmico">🌌 Cósmico</button>
+          <button type="button" class="shader-pill-btn" data-cat="energia">⚡ Energia</button>
+          <button type="button" class="shader-pill-btn" data-cat="fluidos">🧪 Fluidos</button>
+          <button type="button" class="shader-pill-btn" data-cat="cyber">🎮 Cyber</button>
+        </div>
+
+        <div class="shader-grid-wrapper">
+          <div class="shader-grid-4col" id="shader-grid-list-container">
+            <!-- populated dynamically with 4 columns -->
+          </div>
         </div>
       `;
 
       document.body.appendChild(modal);
 
-      // Populate Shaders in Grid
+      // Populate Shaders into 4-Column Grid
       const listContainer = modal.querySelector('#shader-grid-list-container');
       SHADER_CATALOG.forEach(cat => {
-        const catHeader = document.createElement('div');
-        catHeader.className = 'shader-category-title';
-        catHeader.textContent = cat.category;
-        listContainer.appendChild(catHeader);
-
         cat.items.forEach(sh => {
           const card = document.createElement('div');
-          card.className = `shader-item-card ${sh.id === activeShader ? 'active' : ''}`;
+          card.className = `shader-item-card ${sh.id === activeShader && !isEcoMode ? 'active' : ''}`;
           card.setAttribute('data-shader-id', sh.id);
+          card.setAttribute('data-cat', cat.key || 'cosmico');
           card.innerHTML = `
-            <span>${sh.icon} ${sh.name}</span>
-            <span class="shader-item-badge">${sh.id}</span>
+            <div class="shader-card-icon">${sh.icon}</div>
+            <div class="shader-card-title">${sh.name}</div>
+            <div class="shader-card-badge">${sh.id}</div>
           `;
           card.onclick = (e) => {
             e.preventDefault();
             e.stopPropagation();
             isEcoMode = false;
             localStorage.setItem('feishin_shader_eco', 'false');
+            const ecoBtn = modal.querySelector('#shader-eco-toggle');
+            if (ecoBtn) {
+              ecoBtn.classList.remove('active');
+              ecoBtn.innerHTML = '<span>🍃</span> Eco Mode';
+            }
             applyShader(sh.id);
-            setTimeout(() => {
-              closeModal();
-            }, 250);
           };
           listContainer.appendChild(card);
         });
+      });
+
+      // Dual Sliders Logic
+      const sliderBlur = modal.querySelector('#slider-glass-blur');
+      const badgeBlur = modal.querySelector('#val-glass-blur');
+      if (sliderBlur) {
+        sliderBlur.addEventListener('input', (e) => {
+          glassBlur = parseInt(e.target.value, 10);
+          document.documentElement.style.setProperty('--personal-os-glass-blur', glassBlur + 'px');
+          localStorage.setItem('personal_os_glass_blur', glassBlur.toString());
+          if (badgeBlur) badgeBlur.textContent = `${glassBlur}px`;
+        });
+      }
+
+      const sliderDim = modal.querySelector('#slider-shader-dim');
+      const badgeDim = modal.querySelector('#val-shader-dim');
+      if (sliderDim) {
+        sliderDim.addEventListener('input', (e) => {
+          shaderDim = parseInt(e.target.value, 10);
+          const alpha = (shaderDim / 100).toFixed(2);
+          document.documentElement.style.setProperty('--personal-os-shader-dim', alpha);
+          localStorage.setItem('personal_os_shader_dim', shaderDim.toString());
+          if (badgeDim) badgeDim.textContent = `${shaderDim}%`;
+        });
+      }
+
+      // Filter pills logic
+      const pillButtons = modal.querySelectorAll('.shader-pill-btn');
+      pillButtons.forEach(btn => {
+        btn.onclick = (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          pillButtons.forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          const targetCat = btn.getAttribute('data-cat');
+          const cards = modal.querySelectorAll('.shader-item-card');
+          cards.forEach(card => {
+            const cardCat = card.getAttribute('data-cat');
+            if (targetCat === 'all' || cardCat === targetCat) {
+              card.style.display = 'flex';
+            } else {
+              card.style.display = 'none';
+            }
+          });
+        };
       });
 
       // Close Modal Button
@@ -274,16 +423,28 @@ import './webgl-backgrounds.js';
     }
 
     function openModal() {
-      backdrop.style.display = 'block';
-      modal.style.display = 'flex';
+      backdrop.style.setProperty('display', 'block', 'important');
+      modal.style.setProperty('display', 'flex', 'important');
       const item = document.getElementById('personal-os-sidebar-backgrounds-item');
       if (item) item.classList.add('active');
+
+      // Sync sliders and badges
+      const sliderBlur = modal.querySelector('#slider-glass-blur');
+      const badgeBlur = modal.querySelector('#val-glass-blur');
+      if (sliderBlur) sliderBlur.value = glassBlur;
+      if (badgeBlur) badgeBlur.textContent = `${glassBlur}px`;
+
+      const sliderDim = modal.querySelector('#slider-shader-dim');
+      const badgeDim = modal.querySelector('#val-shader-dim');
+      if (sliderDim) sliderDim.value = shaderDim;
+      if (badgeDim) badgeDim.textContent = `${shaderDim}%`;
+
       updateModalUI();
     }
 
     function closeModal() {
-      backdrop.style.display = 'none';
-      modal.style.display = 'none';
+      backdrop.style.setProperty('display', 'none', 'important');
+      modal.style.setProperty('display', 'none', 'important');
       const item = document.getElementById('personal-os-sidebar-backgrounds-item');
       if (item) item.classList.remove('active');
     }
@@ -296,8 +457,59 @@ import './webgl-backgrounds.js';
       }
     }
 
+    function findMantineModalsContext() {
+      if (window.__MANTINE_MODALS__) return window.__MANTINE_MODALS__;
+      try {
+        const rootEl = document.querySelector("#root");
+        if (!rootEl) return null;
+        const key = Object.keys(rootEl).find(k => k.startsWith("__reactContainer"));
+        if (!key) return null;
+        let fiber = rootEl[key];
+        let queue = [fiber];
+        let count = 0;
+        while (queue.length > 0 && count < 1000) {
+          count++;
+          const f = queue.shift();
+          if (!f) continue;
+          if (f.memoizedProps?.value?.openContextModal) {
+            window.__MANTINE_MODALS__ = f.memoizedProps.value;
+            return window.__MANTINE_MODALS__;
+          }
+          if (f.child) queue.push(f.child);
+          if (f.sibling) queue.push(f.sibling);
+        }
+      } catch (e) {}
+      return null;
+    }
+
+    function openFeishinSettings() {
+      if (typeof window.__FEISHIN_OPEN_SETTINGS__ === 'function') {
+        window.__FEISHIN_OPEN_SETTINGS__();
+        return;
+      }
+      if (window.api?.ipc?.send) {
+        window.api.ipc.send('request-open-settings');
+      }
+      const modals = findMantineModalsContext();
+      if (modals?.openContextModal) {
+        modals.openContextModal('settings', {
+          innerProps: {},
+          size: '60rem',
+          styles: { content: { height: '100%', maxWidth: '90%', width: '100%' } }
+        });
+      }
+    }
+
     // Ensure item in Left Sidebar as a native-feeling nav item
     function ensureSidebarItem() {
+      // Purge any Albums nav button from DOM immediately
+      document.querySelectorAll('a[href*="/library/albums"]').forEach(el => {
+        const href = el.getAttribute('href') || '';
+        if (href === '/library/albums' || href === '#/library/albums' || href.startsWith('/library/albums?') || href.startsWith('#/library/albums?')) {
+          el.remove();
+        }
+      });
+
       const parent = document.querySelector('.fs-sidebar-module-accordion-content');
       if (!parent) return;
 
@@ -338,6 +550,52 @@ import './webgl-backgrounds.js';
         parent.appendChild(item);
       } else if (item.parentElement !== parent) {
         parent.appendChild(item);
+      }
+
+      // Ensure Settings Item right below Backgrounds Item
+      let settingsItem = document.getElementById('personal-os-sidebar-settings-item');
+      if (!settingsItem) {
+        settingsItem = document.createElement('a');
+        settingsItem.id = 'personal-os-sidebar-settings-item';
+        settingsItem.className = 'mantine-focus-never mantine-active fs-button-module-root fs-sidebar-item-module-link fs-sidebar-item-module-root m_77c9d27d mantine-Button-root m_87cf2631 mantine-UnstyledButton-root';
+        settingsItem.setAttribute('data-variant', 'subtle');
+        settingsItem.setAttribute('data-size', 'sm');
+        settingsItem.setAttribute('draggable', 'false');
+        settingsItem.setAttribute('title', 'Configurações (⌘,)');
+        settingsItem.style.cssText = '--button-height: var(--button-height-sm); --button-padding-x: var(--button-padding-x-sm); --button-fz: var(--mantine-font-size-sm); --button-bg: transparent; --button-hover: var(--mantine-color-primary-light-hover); --button-color: var(--mantine-color-primary-light-color); --button-bd: calc(0.0625rem * var(--mantine-scale)) solid transparent; cursor: pointer; user-select: none; -webkit-app-region: no-drag;';
+
+        settingsItem.innerHTML = `
+          <span class="fs-sidebar-item-module-inner m_80f1301b mantine-Button-inner">
+            <span class="fs-sidebar-item-module-label m_811560b9 mantine-Button-label">
+              <div class="m_4081bf90 mantine-Group-root" style="--group-gap: var(--mantine-spacing-md); --group-align: center; --group-justify: flex-start; --group-wrap: wrap;">
+                <span class="fs-sidebar-icon-module-wrapper">
+                  <svg stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"></path>
+                    <circle cx="12" cy="12" r="3"></circle>
+                  </svg>
+                </span>
+                <span>CONFIGURAÇÕES</span>
+              </div>
+            </span>
+          </span>
+        `;
+
+        settingsItem.addEventListener('pointerdown', (e) => e.stopPropagation());
+        settingsItem.addEventListener('mousedown', (e) => e.stopPropagation());
+        settingsItem.addEventListener('click', (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          openFeishinSettings();
+        });
+
+        item.insertAdjacentElement('afterend', settingsItem);
+      } else if (settingsItem.previousElementSibling !== item) {
+        item.insertAdjacentElement('afterend', settingsItem);
+      }
+
+      const isSettingsOpen = !!document.querySelector('.mantine-Modal-content');
+      if (settingsItem) {
+        settingsItem.classList.toggle('active', isSettingsOpen);
       }
     }
 
@@ -421,6 +679,24 @@ import './webgl-backgrounds.js';
           parsedFs.state.activeTab = 'queue';
           localStorage.setItem('store_full_screen_player', JSON.stringify(parsedFs));
         }
+      }
+
+      // Purge Albums from store_settings sidebarItems in localStorage
+      const rawSettings = localStorage.getItem('store_settings');
+      if (rawSettings) {
+        const parsedSettings = JSON.parse(rawSettings);
+        if (parsedSettings?.general?.sidebarItems) {
+          const prevLen = parsedSettings.general.sidebarItems.length;
+          parsedSettings.general.sidebarItems = parsedSettings.general.sidebarItems.filter(item => item.id !== 'Albums');
+          if (parsedSettings.general.sidebarItems.length !== prevLen) {
+            localStorage.setItem('store_settings', JSON.stringify(parsedSettings));
+          }
+        }
+      }
+
+      // Redirect away from /library/albums if currently open
+      if (window.location.hash.includes('/library/albums') || window.location.pathname.includes('/library/albums')) {
+        window.location.replace('#/library/songs');
       }
     } catch (e) {}
 

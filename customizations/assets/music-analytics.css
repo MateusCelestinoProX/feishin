@@ -1,0 +1,1032 @@
+/* ==========================================================================
+   FEISHIN ULTRA-PREMIUM APPLE GLASS — MUSIC ANALYTICS DASHBOARD
+   Design System: Frosted Acrylic Glassmorphism, Neon Aura & Tabular Stats
+   ========================================================================== */
+
+/* 1. Início Top Segmented Tab Switcher */
+.feishin-home-tabs-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+  padding: 8px 12px;
+  background: rgba(22, 27, 42, 0.55);
+  backdrop-filter: blur(30px) saturate(180%);
+  -webkit-backdrop-filter: blur(30px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 9999px;
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+  position: relative;
+  z-index: 20;
+}
+
+.feishin-home-tabs-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.feishin-tab-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 22px;
+  border-radius: 9999px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.65);
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, sans-serif;
+  font-size: 13.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  user-select: none;
+}
+
+.feishin-tab-btn:hover {
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.feishin-tab-btn.active {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.18), rgba(255, 255, 255, 0.08));
+  color: #ffffff;
+  border-color: rgba(255, 255, 255, 0.25);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+}
+
+.feishin-tab-btn .tab-badge-live {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 2px 7px;
+  background: rgba(16, 185, 129, 0.2);
+  border: 1px solid rgba(16, 185, 129, 0.45);
+  color: #34d399;
+  font-size: 10px;
+  font-weight: 700;
+  border-radius: 9999px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.feishin-tab-btn .tab-badge-live .pulse-dot {
+  width: 6px;
+  height: 6px;
+  background: #10b981;
+  border-radius: 50%;
+  box-shadow: 0 0 8px #10b981;
+  animation: tabPulse 2s infinite ease-in-out;
+}
+
+@keyframes tabPulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.4; transform: scale(0.75); }
+}
+
+.feishin-home-tabs-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding-right: 6px;
+}
+
+.feishin-live-sync-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11.5px;
+  color: rgba(255, 255, 255, 0.55);
+}
+
+.feishin-refresh-btn {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #fff;
+  border-radius: 8px;
+  padding: 6px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.2s;
+}
+
+.feishin-refresh-btn:hover {
+  background: rgba(255, 255, 255, 0.15);
+  transform: translateY(-1px);
+}
+
+.feishin-refresh-btn.rotating svg {
+  animation: spinIcon 0.8s linear infinite;
+}
+
+@keyframes spinIcon {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* 2. Left Sidebar Navigation Item */
+#personal-os-sidebar-analytics-item.active {
+  background: linear-gradient(135deg, rgba(0, 242, 254, 0.2), rgba(79, 172, 254, 0.15)) !important;
+  border-color: rgba(0, 242, 254, 0.4) !important;
+  color: #ffffff !important;
+  box-shadow: 0 0 16px rgba(0, 242, 254, 0.25) !important;
+}
+
+.fs-analytics-sidebar-pill {
+  margin-left: auto;
+  padding: 2px 6px;
+  font-size: 9.5px;
+  font-weight: 800;
+  background: linear-gradient(135deg, #00f2fe, #4facfe);
+  color: #0b101e;
+  border-radius: 4px;
+  letter-spacing: 0.5px;
+}
+
+/* 3. Main Dashboard Wrapper */
+#feishin-analytics-dashboard {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+  width: 100%;
+  animation: fadeInDashboard 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes fadeInDashboard {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* 4. Glass Cards Base */
+.glass-panel {
+  background: rgba(18, 23, 37, 0.65);
+  backdrop-filter: blur(40px) saturate(190%);
+  -webkit-backdrop-filter: blur(40px) saturate(190%);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 20px;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.12);
+  padding: 24px;
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.25s, box-shadow 0.25s, border-color 0.25s;
+}
+
+.glass-panel:hover {
+  border-color: rgba(255, 255, 255, 0.16);
+  box-shadow: 0 20px 48px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.18);
+}
+
+/* 5. Header Banner Glass */
+.analytics-hero-banner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 28px 32px;
+  background: linear-gradient(135deg, rgba(30, 38, 64, 0.7), rgba(15, 19, 32, 0.75));
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 24px;
+  position: relative;
+}
+
+.analytics-hero-banner::after {
+  content: "";
+  position: absolute;
+  top: -50px;
+  right: -50px;
+  width: 280px;
+  height: 280px;
+  background: radial-gradient(circle, rgba(0, 242, 254, 0.15) 0%, rgba(121, 40, 202, 0.1) 50%, transparent 70%);
+  filter: blur(40px);
+  pointer-events: none;
+}
+
+.analytics-title-group h1 {
+  font-size: 32px;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+  margin: 0 0 6px 0;
+  background: linear-gradient(135deg, #ffffff 40%, rgba(255, 255, 255, 0.7));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.analytics-title-group p {
+  margin: 0;
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.65);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.analytics-timeframe-selector {
+  display: flex;
+  align-items: center;
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 4px;
+  border-radius: 12px;
+  gap: 4px;
+}
+
+.analytics-time-btn {
+  background: transparent;
+  border: none;
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 12px;
+  font-weight: 600;
+  padding: 6px 14px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.analytics-time-btn:hover {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.analytics-time-btn.active {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.1));
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+}
+
+/* 6. KPI Grid */
+.analytics-kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  gap: 18px;
+}
+
+.kpi-card {
+  padding: 22px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 140px;
+}
+
+.kpi-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.kpi-icon-bubble {
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.25);
+}
+
+.kpi-bubble-playtime {
+  background: linear-gradient(135deg, rgba(0, 242, 254, 0.3), rgba(79, 172, 254, 0.15));
+  border: 1px solid rgba(0, 242, 254, 0.4);
+  color: #00f2fe;
+}
+
+.kpi-bubble-plays {
+  background: linear-gradient(135deg, rgba(168, 85, 247, 0.3), rgba(121, 40, 202, 0.15));
+  border: 1px solid rgba(168, 85, 247, 0.4);
+  color: #c084fc;
+}
+
+.kpi-bubble-diversity {
+  background: linear-gradient(135deg, rgba(236, 72, 153, 0.3), rgba(219, 39, 119, 0.15));
+  border: 1px solid rgba(236, 72, 153, 0.4);
+  color: #f472b6;
+}
+
+.kpi-bubble-streak {
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.3), rgba(217, 119, 6, 0.15));
+  border: 1px solid rgba(245, 158, 11, 0.4);
+  color: #fbbf24;
+}
+
+.kpi-label {
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.kpi-value {
+  font-size: 28px;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+  font-variant-numeric: tabular-nums;
+  color: #ffffff;
+  margin: 4px 0;
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+}
+
+.kpi-value-sub {
+  font-size: 14px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.55);
+}
+
+.kpi-footer-note {
+  font-size: 11.5px;
+  color: rgba(255, 255, 255, 0.5);
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+/* 7. Section Titles */
+.analytics-section-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.analytics-section-title-wrap h2 {
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: -0.3px;
+  margin: 0 0 4px 0;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.analytics-section-title-wrap p {
+  margin: 0;
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.55);
+}
+
+.metric-badge-highlight {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  background: rgba(0, 242, 254, 0.12);
+  border: 1px solid rgba(0, 242, 254, 0.3);
+  color: #38bdf8;
+  font-size: 11px;
+  font-weight: 700;
+  border-radius: 9999px;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+}
+
+/* 8. Top 3 Podium (Músicas Mais Ouvidas por Tempo de Reprodução) */
+.podium-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+  margin-bottom: 24px;
+}
+
+@media (max-width: 900px) {
+  .podium-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.podium-card {
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  border-radius: 20px;
+  padding: 22px;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.podium-card:hover {
+  transform: translateY(-4px);
+}
+
+.podium-rank-badge {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 900;
+  font-size: 14px;
+  z-index: 10;
+  box-shadow: 0 6px 16px rgba(0,0,0,0.4);
+}
+
+/* Gold #1 */
+.podium-gold {
+  background: linear-gradient(135deg, rgba(45, 36, 20, 0.75), rgba(20, 18, 14, 0.8));
+  border: 1px solid rgba(255, 215, 0, 0.4);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.5), 0 0 30px rgba(255, 215, 0, 0.15), inset 0 1px 0 rgba(255, 215, 0, 0.3);
+}
+.podium-gold .podium-rank-badge {
+  background: linear-gradient(135deg, #ffd700, #ffae00);
+  color: #1a1200;
+  box-shadow: 0 0 15px rgba(255, 215, 0, 0.6);
+}
+.podium-gold .podium-playtime-highlight {
+  color: #ffd700;
+}
+
+/* Silver #2 */
+.podium-silver {
+  background: linear-gradient(135deg, rgba(32, 38, 48, 0.75), rgba(18, 22, 28, 0.8));
+  border: 1px solid rgba(226, 232, 240, 0.3);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.5), 0 0 24px rgba(226, 232, 240, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.25);
+}
+.podium-silver .podium-rank-badge {
+  background: linear-gradient(135deg, #e2e8f0, #94a3b8);
+  color: #0f172a;
+}
+.podium-silver .podium-playtime-highlight {
+  color: #e2e8f0;
+}
+
+/* Bronze #3 */
+.podium-bronze {
+  background: linear-gradient(135deg, rgba(42, 30, 24, 0.75), rgba(22, 16, 14, 0.8));
+  border: 1px solid rgba(217, 119, 6, 0.35);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.5), 0 0 24px rgba(217, 119, 6, 0.1), inset 0 1px 0 rgba(245, 158, 11, 0.25);
+}
+.podium-bronze .podium-rank-badge {
+  background: linear-gradient(135deg, #d97706, #b45309);
+  color: #fff;
+}
+.podium-bronze .podium-playtime-highlight {
+  color: #f59e0b;
+}
+
+.podium-cover-wrap {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  border-radius: 14px;
+  overflow: hidden;
+  position: relative;
+  margin-bottom: 16px;
+  background: #111;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+}
+
+.podium-cover-wrap img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.4s ease;
+}
+
+.podium-card:hover .podium-cover-wrap img {
+  transform: scale(1.05);
+}
+
+.podium-play-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.2s;
+  cursor: pointer;
+}
+
+.podium-card:hover .podium-play-overlay {
+  opacity: 1;
+}
+
+.podium-play-circle {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: #ffffff;
+  color: #000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+  transition: transform 0.2s;
+}
+
+.podium-play-circle:hover {
+  transform: scale(1.1);
+}
+
+.podium-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.podium-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: #ffffff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.podium-artist {
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.65);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.podium-stats-box {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+}
+
+.podium-playtime-highlight {
+  font-size: 20px;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.3px;
+}
+
+.podium-plays-count {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+/* 9. Ranking List Table (#4 ao #50+) */
+.ranking-table-panel {
+  padding: 0;
+  overflow: hidden;
+}
+
+.ranking-table-header {
+  display: grid;
+  grid-template-columns: 48px 3fr 2fr 1fr 1fr 2fr;
+  align-items: center;
+  gap: 16px;
+  padding: 14px 24px;
+  background: rgba(0, 0, 0, 0.2);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  font-size: 11.5px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  color: rgba(255, 255, 255, 0.45);
+}
+
+.ranking-table-row {
+  display: grid;
+  grid-template-columns: 48px 3fr 2fr 1fr 1fr 2fr;
+  align-items: center;
+  gap: 16px;
+  padding: 12px 24px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  cursor: pointer;
+}
+
+.ranking-table-row:last-child {
+  border-bottom: none;
+}
+
+.ranking-table-row:hover {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.ranking-table-row.is-current {
+  background: rgba(0, 242, 254, 0.08);
+  border-left: 3px solid #00f2fe;
+}
+
+.ranking-rank-num {
+  font-size: 14px;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.45);
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+}
+
+.ranking-track-col {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.ranking-thumb {
+  width: 44px;
+  height: 44px;
+  border-radius: 8px;
+  overflow: hidden;
+  position: relative;
+  flex-shrink: 0;
+  background: #111;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+}
+
+.ranking-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.ranking-thumb-play {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.2s;
+  color: #fff;
+}
+
+.ranking-table-row:hover .ranking-thumb-play {
+  opacity: 1;
+}
+
+.ranking-track-details {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.ranking-track-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #ffffff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ranking-track-artist {
+  font-size: 12.5px;
+  color: rgba(255, 255, 255, 0.6);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ranking-album-col {
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.6);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ranking-duration-col {
+  font-size: 12.5px;
+  font-variant-numeric: tabular-nums;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.ranking-plays-col {
+  font-size: 13px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.ranking-playtime-col {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.ranking-playtime-val {
+  font-size: 13.5px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: #00f2fe;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.ranking-progress-track {
+  width: 100%;
+  height: 5px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 9999px;
+  overflow: hidden;
+}
+
+.ranking-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #00f2fe, #7928ca);
+  border-radius: 9999px;
+  transition: width 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* 10. Split Columns: Top Artistas & Top Álbuns */
+.split-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 24px;
+}
+
+@media (max-width: 900px) {
+  .split-stats-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.mini-stat-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  border-radius: 12px;
+  margin-bottom: 8px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  transition: all 0.2s;
+}
+
+.mini-stat-item:hover {
+  background: rgba(255, 255, 255, 0.07);
+  transform: translateX(4px);
+}
+
+.mini-stat-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.artist-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+  background: #222;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.album-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  object-fit: cover;
+  background: #222;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.mini-stat-names {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.mini-stat-main {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: #ffffff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.mini-stat-sub {
+  font-size: 11.5px;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.mini-stat-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+  flex-shrink: 0;
+}
+
+.mini-stat-time {
+  font-size: 13px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: #38bdf8;
+}
+
+.mini-stat-pct {
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.45);
+}
+
+/* 11. Listening Clock (24-Hour Activity Chart) */
+.listening-clock-card {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.clock-periods-summary {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+}
+
+@media (max-width: 768px) {
+  .clock-periods-summary {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.clock-period-box {
+  background: rgba(0, 0, 0, 0.25);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  padding: 12px 16px;
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.clock-period-box.peak {
+  border-color: rgba(0, 242, 254, 0.4);
+  background: linear-gradient(135deg, rgba(0, 242, 254, 0.12), rgba(0, 0, 0, 0.3));
+}
+
+.period-name {
+  font-size: 12px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.65);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.period-val {
+  font-size: 16px;
+  font-weight: 800;
+  color: #fff;
+  font-variant-numeric: tabular-nums;
+}
+
+.clock-bars-visualizer {
+  display: flex;
+  align-items: flex-end;
+  height: 120px;
+  gap: 6px;
+  padding: 12px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.clock-hour-col {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  height: 100%;
+  justify-content: flex-end;
+  gap: 6px;
+}
+
+.clock-hour-bar {
+  width: 100%;
+  min-height: 4px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 4px 4px 0 0;
+  transition: height 0.6s cubic-bezier(0.16, 1, 0.3, 1), background 0.2s;
+  position: relative;
+}
+
+.clock-hour-col:hover .clock-hour-bar {
+  background: #00f2fe;
+  box-shadow: 0 0 12px #00f2fe;
+}
+
+.clock-hour-bar.is-peak {
+  background: linear-gradient(to top, #7928ca, #00f2fe);
+  box-shadow: 0 0 10px rgba(0, 242, 254, 0.5);
+}
+
+.clock-hour-label {
+  font-size: 10px;
+  color: rgba(255, 255, 255, 0.4);
+  font-variant-numeric: tabular-nums;
+}
+
+/* 12. Vibe DNA & Audio Profile */
+.vibe-dna-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 14px;
+}
+
+.vibe-pill-card {
+  padding: 16px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.vibe-tag-title {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.vibe-tag-val {
+  font-size: 16px;
+  font-weight: 700;
+  color: #fff;
+}
+
+.vibe-tag-desc {
+  font-size: 11.5px;
+  color: rgba(255, 255, 255, 0.45);
+}
+
+/* 13. Recent Streams Timeline */
+.stream-history-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.stream-history-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 16px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  transition: background 0.2s;
+}
+
+.stream-history-item:hover {
+  background: rgba(255, 255, 255, 0.07);
+}
+
+.stream-history-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.stream-history-thumb {
+  width: 36px;
+  height: 36px;
+  border-radius: 6px;
+  object-fit: cover;
+}
+
+.stream-history-names {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.stream-history-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: #fff;
+}
+
+.stream-history-meta {
+  font-size: 11.5px;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.stream-history-time {
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  color: rgba(255, 255, 255, 0.55);
+}

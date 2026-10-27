@@ -7,6 +7,9 @@
         
         <script>
             (function () {
+                if (!window.location.hash || window.location.hash === '#') {
+                    window.location.hash = '#/';
+                }
                 if (localStorage.getItem('umami.disabled') !== '1' && window.ANALYTICS_DISABLED !== true && window.ANALYTICS_DISABLED !== 'true') {
                     var s = document.createElement('script');
                     s.defer = true;
@@ -24,11 +27,13 @@
       <script type="module" crossorigin src="./assets/index-C3w9ueFE.js"></script>
       <link rel="stylesheet" crossorigin href="./assets/index-Cp7aWvHd.css">
       <link rel="stylesheet" crossorigin href="./assets/feishin-personal-os.css">
+      <link rel="stylesheet" crossorigin href="./assets/music-analytics.css">
       <script type="module" crossorigin src="./assets/feishin-personal-os.js"></script>
     </head>
 
     <body style="background-color: transparent">
         <div id="bg-webgl-container"></div>
+        <div id="bg-webgl-dim"></div>
         <div id="bg-webgl-vignette"></div>
         <div id="root">
         </div>

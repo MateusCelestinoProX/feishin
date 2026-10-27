@@ -71,9 +71,10 @@ def patch_bundle(file_path):
         else:
             print(f"[!] Aviso: Padrão não encontrado: {old[:35]}...")
 
-    # 3. Patch de Exposição do Player Store para o Mini Painel do Tray
+    # 3. Patch de Exposição do Player Store & Auth Store para Analytics e Mini Painel do Tray
     replacements_tray_stores = [
-        (',Pa=hYe(Ma)', ',Pa=(typeof window!=="undefined"&&(window.__FEISHIN_PLAYER_STORE__=Ma),hYe(Ma))')
+        (',Pa=hYe(Ma)', ',Pa=(typeof window!=="undefined"&&(window.__FEISHIN_PLAYER_STORE__=Ma),hYe(Ma))'),
+        ('to=()=>fr(NHe,la)', 'to=()=>(typeof window!=="undefined"&&(window.__FEISHIN_AUTH_STORE__=fr),fr(NHe,la))')
     ]
 
     for old, new in replacements_tray_stores:
@@ -115,6 +116,56 @@ def patch_bundle(file_path):
         else:
             print(f"[!] Aviso: Padrão não encontrado: {old[:35]}...")
 
+    # 5. Patch de Rota Inicial Padrão (Faixas / Tracks como página inicial)
+    replacements_default_route = [
+        ('t.FAVORITES="/favorites",t.HOME="/",t.LIBRARY_ALBUM_ARTISTS="/lib',
+         't.FAVORITES="/favorites",t.HOME="/home",t.LIBRARY_ALBUM_ARTISTS="/lib'),
+        ('i=p.jsx(Rn,{element:p.jsx(Yue,{}),index:!0}),t[4]=i',
+         'i=p.jsx(Rn,{element:p.jsx(bKe,{to:$t.LIBRARY_SONGS,replace:!0}),index:!0}),t[4]=i'),
+        # Expor Função de Abertura do Modal de Configurações para o Renderer
+        ('kY=()=>{Pd({innerProps:{},modal:"settings",overlayProps:{opacity:1}',
+         'kY=window.__FEISHIN_OPEN_SETTINGS__=()=>{Pd({innerProps:{},modal:"settings",overlayProps:{opacity:1}')
+    ]
+
+    for old, new in replacements_default_route:
+        if old in js:
+            js = js.replace(old, new, 1)
+            modified = True
+            print(f"[✓] Patch Rota Inicial aplicado: {old[:35]}...")
+        elif new in js:
+            print(f"[-] Patch Rota Inicial já presente: {new[:35]}...")
+        else:
+            print(f"[!] Aviso: Padrão não encontrado: {old[:35]}...")
+
+    # 7. Patch de Remoção da Página de Álbuns (Interface e Código)
+    replacements_albums_removal = [
+        # 7.1 Rota /library/albums redireciona para /library/songs (Faixas)
+        ('f=p.jsx(Rn,{element:p.jsx(G7,{}),path:$t.LIBRARY_ALBUMS})',
+         'f=p.jsx(Rn,{element:p.jsx(bKe,{to:$t.LIBRARY_SONGS,replace:!0}),path:$t.LIBRARY_ALBUMS})'),
+        # 7.2 Remover Álbuns das configurações de itens da barra lateral (Hle)
+        ('[sc.ALBUMS,"page.sidebar.albums"],',
+         ''),
+        # 7.3 Desativar Álbuns na lista padrão de sidebar items (Obe)
+        ('{disabled:!1,id:"Albums",label:Ce.t("page.sidebar.albums"),route:$t.LIBRARY_ALBUMS},',
+         '{disabled:!0,id:"Albums",label:"",route:""},'),
+        # 7.4 Remover Álbuns da busca global/paleta de comando (uo.Group heading Library)
+        ('H=p.jsxs(uo.Group,{heading:"Library",children:[A,E,z,O,I,U]})',
+         'H=p.jsxs(uo.Group,{heading:"Library",children:[E,z,O,I,U]})'),
+        # 7.5 Filtrar Álbuns na navegação mobile/recolhida (hJt)
+        ('function hJt(t){return!t.disabled}',
+         'function hJt(t){return!t.disabled&&t.id!=="Albums"}')
+    ]
+
+    for old, new in replacements_albums_removal:
+        if old in js:
+            js = js.replace(old, new, 1)
+            modified = True
+            print(f"[✓] Patch Remoção de Álbuns aplicado: {old[:35]}...")
+        elif new in js:
+            print(f"[-] Patch Remoção de Álbuns já presente: {new[:35]}...")
+        else:
+            print(f"[!] Aviso: Padrão não encontrado: {old[:35]}...")
+
     if modified:
         with open(bundle_path, "w", encoding="utf-8") as f:
             f.write(js)
@@ -147,13 +198,32 @@ def patch_bundle(file_path):
         try:
             with open(sidebar_bundle, "r", encoding="utf-8") as f:
                 sb_js = f.read()
+            sb_mod = False
             if "function Ve(e){return e.sidebar.image}" in sb_js:
                 sb_js = sb_js.replace("function Ve(e){return e.sidebar.image}", "function Ve(e){return!1}", 1)
+                sb_mod = True
+                print(f"[✓] Patch Sidebar Cover Art desativado em {sidebar_bundle.name}")
+            if 'function Je(e){return e.id!=="Collections"&&e.route}' in sb_js:
+                sb_js = sb_js.replace('function Je(e){return e.id!=="Collections"&&e.route}', 'function Je(e){return e.id!=="Collections"&&e.id!=="Albums"&&e.route}', 1)
+                sb_mod = True
+                print(f"[✓] Patch Sidebar Remoção de Álbuns aplicado em {sidebar_bundle.name}")
+            if sb_mod:
                 with open(sidebar_bundle, "w", encoding="utf-8") as f:
                     f.write(sb_js)
-                print(f"[✓] Patch Sidebar Cover Art desativado em {sidebar_bundle.name}")
         except Exception as e:
             print(f"[!] Erro ao patchear {sidebar_bundle.name}: {e}")
+
+    for col_bundle in assets_dir.glob("collapsed-sidebar-*.js"):
+        try:
+            with open(col_bundle, "r", encoding="utf-8") as f:
+                cb_js = f.read()
+            if 'function Pe(e){return!e.disabled}' in cb_js:
+                cb_js = cb_js.replace('function Pe(e){return!e.disabled}', 'function Pe(e){return!e.disabled&&e.id!=="Albums"}', 1)
+                with open(col_bundle, "w", encoding="utf-8") as f:
+                    f.write(cb_js)
+                print(f"[✓] Patch Collapsed Sidebar Remoção de Álbuns aplicado em {col_bundle.name}")
+        except Exception as e:
+            print(f"[!] Erro ao patchear {col_bundle.name}: {e}")
 
     for table_bundle in assets_dir.glob("song-list-infinite-table-*.js"):
         try:

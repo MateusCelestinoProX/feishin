@@ -6,6 +6,11 @@
 
 @import url("https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Outfit:wght@400;600;700;800&display=swap");
 
+:root {
+    --personal-os-glass-blur: 28px;
+    --personal-os-shader-dim: 0.25;
+}
+
 /* --- 1. GLOBAL RESETS & FOUNDATION --- */
 *, *::before, *::after {
     box-sizing: border-box !important;
@@ -49,6 +54,18 @@ div, span, p, a, h1, h2, h3, h4, h5, h6 {
     width: 100% !important;
     height: 100% !important;
     display: block !important;
+}
+
+#bg-webgl-dim {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    z-index: -1 !important;
+    pointer-events: none !important;
+    background-color: rgba(0, 0, 0, var(--personal-os-shader-dim, 0.25)) !important;
+    transition: background-color 0.08s ease !important;
 }
 
 #bg-webgl-vignette {
@@ -132,8 +149,8 @@ div, span, p, a, h1, h2, h3, h4, h5, h6 {
     overflow: hidden !important;
     background: rgba(18, 18, 24, 0.62) !important;
     border: 1px solid rgba(255, 255, 255, 0.08) !important;
-    backdrop-filter: blur(28px) saturate(180%) !important;
-    -webkit-backdrop-filter: blur(28px) saturate(180%) !important;
+    backdrop-filter: blur(var(--personal-os-glass-blur, 28px)) saturate(180%) !important;
+    -webkit-backdrop-filter: blur(var(--personal-os-glass-blur, 28px)) saturate(180%) !important;
     box-shadow: 0 16px 36px rgba(0, 0, 0, 0.35) !important;
     padding: 14px 10px !important;
 }
@@ -222,8 +239,8 @@ div, span, p, a, h1, h2, h3, h4, h5, h6 {
     overflow: hidden !important;
     background: rgba(16, 16, 22, 0.55) !important;
     border: 1px solid rgba(255, 255, 255, 0.08) !important;
-    backdrop-filter: blur(28px) saturate(180%) !important;
-    -webkit-backdrop-filter: blur(28px) saturate(180%) !important;
+    backdrop-filter: blur(var(--personal-os-glass-blur, 28px)) saturate(180%) !important;
+    -webkit-backdrop-filter: blur(var(--personal-os-glass-blur, 28px)) saturate(180%) !important;
     box-shadow: 0 16px 36px rgba(0, 0, 0, 0.35) !important;
 }
 
@@ -364,8 +381,8 @@ div, span, p, a, h1, h2, h3, h4, h5, h6 {
     border-radius: 18px !important;
     background: rgba(22, 22, 28, 0.72) !important;
     border: 1px solid rgba(255, 255, 255, 0.09) !important;
-    backdrop-filter: blur(28px) saturate(180%) !important;
-    -webkit-backdrop-filter: blur(28px) saturate(180%) !important;
+    backdrop-filter: blur(var(--personal-os-glass-blur, 28px)) saturate(180%) !important;
+    -webkit-backdrop-filter: blur(var(--personal-os-glass-blur, 28px)) saturate(180%) !important;
     box-shadow: 0 18px 45px rgba(0, 0, 0, 0.45) !important;
     z-index: 9999 !important;
     padding: 0 20px !important;
@@ -738,9 +755,11 @@ button.fs-player-button-module-main svg {
     color: #FFFFFF !important;
 }
 
-/* --- 7. PERSONAL OS SIDEBAR BACKGROUNDS ITEM & MODAL --- */
+/* --- 7. PERSONAL OS SIDEBAR BACKGROUNDS ITEM, SETTINGS ITEM & SQUARE MODAL --- */
 #personal-os-sidebar-backgrounds-item,
 #personal-os-sidebar-backgrounds-item *,
+#personal-os-sidebar-settings-item,
+#personal-os-sidebar-settings-item *,
 #personal-os-shader-modal,
 #personal-os-shader-modal *,
 #personal-os-shader-backdrop {
@@ -748,20 +767,23 @@ button.fs-player-button-module-main svg {
     pointer-events: auto !important;
 }
 
-#personal-os-sidebar-backgrounds-item {
+#personal-os-sidebar-backgrounds-item,
+#personal-os-sidebar-settings-item {
     cursor: pointer !important;
     user-select: none !important;
     transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1) !important;
 }
 
-#personal-os-sidebar-backgrounds-item:hover {
+#personal-os-sidebar-backgrounds-item:hover,
+#personal-os-sidebar-settings-item:hover {
     background: rgba(255, 255, 255, 0.08) !important;
     border: 1px solid rgba(255, 255, 255, 0.12) !important;
     color: #FFFFFF !important;
     transform: translateX(2px) !important;
 }
 
-#personal-os-sidebar-backgrounds-item.active {
+#personal-os-sidebar-backgrounds-item.active,
+#personal-os-sidebar-settings-item.active {
     background: linear-gradient(135deg, rgba(255, 255, 255, 0.15) 0%, rgba(255, 255, 255, 0.04) 100%) !important;
     border: 1px solid rgba(255, 255, 255, 0.25) !important;
     border-top: 1px solid rgba(255, 255, 255, 0.45) !important;
@@ -779,42 +801,110 @@ button.fs-player-button-module-main svg {
     left: 0 !important;
     width: 100vw !important;
     height: 100vh !important;
-    background: rgba(0, 0, 0, 0.45) !important;
+    background: rgba(0, 0, 0, 0.55) !important;
     backdrop-filter: blur(16px) saturate(160%) !important;
     -webkit-backdrop-filter: blur(16px) saturate(160%) !important;
     z-index: 100000 !important;
     display: none;
 }
 
+/* BOX QUADRADO PERSONAL OS (SQUARE LUXURY MODAL) */
 #personal-os-shader-modal {
     position: fixed !important;
     top: 50% !important;
     left: 50% !important;
     transform: translate(-50%, -50%) !important;
-    width: 660px !important;
-    max-width: 90vw !important;
-    max-height: 82vh !important;
-    border-radius: 18px !important;
-    background: rgba(24, 24, 30, 0.88) !important;
-    border: 1px solid rgba(255, 255, 255, 0.10) !important;
-    backdrop-filter: blur(30px) saturate(180%) !important;
-    -webkit-backdrop-filter: blur(30px) saturate(180%) !important;
-    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.60) !important;
+    width: min(780px, 88vw, 88vh) !important;
+    height: min(780px, 88vw, 88vh) !important;
+    aspect-ratio: 1 / 1 !important;
+    border-radius: 24px !important;
+    background: rgba(14, 15, 21, 0.92) !important;
+    border: 1px solid rgba(255, 255, 255, 0.12) !important;
+    border-top: 1px solid rgba(255, 255, 255, 0.28) !important;
+    backdrop-filter: blur(40px) saturate(200%) !important;
+    -webkit-backdrop-filter: blur(40px) saturate(200%) !important;
+    box-shadow: 0 32px 80px rgba(0, 0, 0, 0.75), inset 0 1px 1px rgba(255, 255, 255, 0.15) !important;
     z-index: 100001 !important;
-    padding: 24px !important;
+    padding: 20px 22px !important;
     display: none;
     flex-direction: column !important;
-    gap: 16px !important;
+    gap: 12px !important;
     color: #F8FAFC !important;
+    box-sizing: border-box !important;
+    overflow: hidden !important;
+}
+
+/* MODAL HEADER */
+.shader-modal-header {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 12px !important;
+    flex-shrink: 0 !important;
+}
+
+.shader-modal-title-group {
+    display: flex !important;
+    align-items: center !important;
+    gap: 10px !important;
+}
+
+.shader-modal-icon {
+    font-size: 22px !important;
+    line-height: 1 !important;
+    filter: drop-shadow(0 2px 6px rgba(255, 255, 255, 0.2)) !important;
+}
+
+.shader-modal-title {
+    font-size: 15px !important;
+    font-weight: 700 !important;
+    letter-spacing: -0.3px !important;
+    color: #FFFFFF !important;
+    margin: 0 !important;
+    line-height: 1.2 !important;
+}
+
+.shader-modal-subtitle {
+    font-size: 10.5px !important;
+    color: rgba(255, 255, 255, 0.45) !important;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, monospace !important;
+    letter-spacing: 0.2px !important;
+}
+
+.shader-header-actions {
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+}
+
+.shader-modal-close {
+    width: 28px !important;
+    height: 28px !important;
+    border-radius: 8px !important;
+    background: rgba(255, 255, 255, 0.08) !important;
+    border: 1px solid rgba(255, 255, 255, 0.10) !important;
+    color: rgba(255, 255, 255, 0.70) !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    font-size: 13px !important;
+    cursor: pointer !important;
+    transition: all 0.15s ease !important;
+}
+
+.shader-modal-close:hover {
+    background: rgba(255, 255, 255, 0.18) !important;
+    color: #FFFFFF !important;
+    transform: scale(1.05) !important;
 }
 
 .shader-ctrl-btn {
-    padding: 7px 14px !important;
-    border-radius: 10px !important;
+    padding: 6px 12px !important;
+    border-radius: 9px !important;
     background: rgba(255, 255, 255, 0.06) !important;
-    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    border: 1px solid rgba(255, 255, 255, 0.09) !important;
     color: rgba(255, 255, 255, 0.85) !important;
-    font-size: 12px !important;
+    font-size: 11.5px !important;
     font-weight: 500 !important;
     cursor: pointer !important;
     display: flex !important;
@@ -826,84 +916,394 @@ button.fs-player-button-module-main svg {
 }
 
 .shader-ctrl-btn:hover {
-    background: rgba(255, 255, 255, 0.10) !important;
+    background: rgba(255, 255, 255, 0.12) !important;
     color: #FFFFFF !important;
 }
 
 .shader-ctrl-btn.active {
     background: rgba(255, 255, 255, 0.18) !important;
-    border-color: rgba(255, 255, 255, 0.20) !important;
+    border-color: rgba(255, 255, 255, 0.25) !important;
     color: #FFFFFF !important;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25) !important;
 }
 
-.shader-grid-list {
+/* NOVO PAINEL DE CONTROLES: BLUR DO VIDRO & ESCURECIMENTO DO SHADER */
+.shader-controls-panel {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 12px !important;
+    background: rgba(255, 255, 255, 0.035) !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    border-radius: 14px !important;
+    padding: 10px 14px !important;
+    flex-shrink: 0 !important;
+}
+
+.shader-slider-box {
     display: flex !important;
     flex-direction: column !important;
-    gap: 16px !important;
-    overflow-y: auto !important;
-    padding-right: 6px !important;
+    gap: 5px !important;
 }
 
-.shader-category-title {
+.shader-slider-header {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
     font-size: 11px !important;
-    font-weight: 600 !important;
-    text-transform: uppercase !important;
-    letter-spacing: 0.6px !important;
-    color: rgba(255, 255, 255, 0.45) !important;
-    margin-bottom: 8px !important;
+    font-weight: 500 !important;
+    color: rgba(255, 255, 255, 0.75) !important;
 }
 
-.shader-category-grid {
+.shader-slider-label {
+    display: flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+}
+
+.slider-icon {
+    font-size: 13px !important;
+    line-height: 1 !important;
+    font-family: "Apple Color Emoji", -apple-system, sans-serif !important;
+}
+
+.shader-slider-badge {
+    font-size: 11px !important;
+    font-weight: 700 !important;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, monospace !important;
+    color: #60A5FA !important;
+    background: rgba(96, 165, 250, 0.12) !important;
+    border: 1px solid rgba(96, 165, 250, 0.25) !important;
+    padding: 1px 7px !important;
+    border-radius: 6px !important;
+}
+
+.shader-slider-wrapper {
+    display: flex !important;
+    align-items: center !important;
+    height: 18px !important;
+}
+
+.shader-range-slider {
+    -webkit-appearance: none !important;
+    appearance: none !important;
+    width: 100% !important;
+    height: 5px !important;
+    border-radius: 9999px !important;
+    background: rgba(255, 255, 255, 0.15) !important;
+    outline: none !important;
+    cursor: pointer !important;
+    transition: background 0.15s ease !important;
+}
+
+.shader-range-slider:hover {
+    background: rgba(255, 255, 255, 0.22) !important;
+}
+
+.shader-range-slider::-webkit-slider-thumb {
+    -webkit-appearance: none !important;
+    appearance: none !important;
+    width: 15px !important;
+    height: 15px !important;
+    border-radius: 50% !important;
+    background: #FFFFFF !important;
+    cursor: pointer !important;
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.6), 0 2px 4px rgba(0, 0, 0, 0.4) !important;
+    border: 1.5px solid rgba(255, 255, 255, 0.9) !important;
+    transition: transform 0.15s ease, background-color 0.15s ease !important;
+}
+
+.shader-range-slider::-webkit-slider-thumb:hover {
+    transform: scale(1.18) !important;
+    background: #93C5FD !important;
+}
+
+.shader-slider-scale {
+    display: flex !important;
+    justify-content: space-between !important;
+    font-size: 8.5px !important;
+    color: rgba(255, 255, 255, 0.35) !important;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, monospace !important;
+}
+
+/* CATEGORY FILTER PILLS */
+.shader-category-pills {
+    display: flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+    overflow-x: auto !important;
+    padding-bottom: 2px !important;
+    flex-shrink: 0 !important;
+}
+
+.shader-category-pills::-webkit-scrollbar {
+    display: none !important;
+}
+
+.shader-pill-btn {
+    padding: 5px 11px !important;
+    border-radius: 20px !important;
+    background: rgba(255, 255, 255, 0.05) !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    color: rgba(255, 255, 255, 0.65) !important;
+    font-size: 11px !important;
+    font-weight: 500 !important;
+    cursor: pointer !important;
+    white-space: nowrap !important;
+    transition: all 0.15s ease !important;
+}
+
+.shader-pill-btn:hover {
+    background: rgba(255, 255, 255, 0.10) !important;
+    color: #FFFFFF !important;
+}
+
+.shader-pill-btn.active {
+    background: rgba(255, 255, 255, 0.18) !important;
+    border-color: rgba(255, 255, 255, 0.28) !important;
+    color: #FFFFFF !important;
+    font-weight: 600 !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2) !important;
+}
+
+/* 4-COLUMN SHADERS GRID (1 SHADER PER AVAILABLE SLOT) */
+.shader-grid-wrapper {
+    flex: 1 !important;
+    overflow-y: auto !important;
+    padding-right: 4px !important;
+    min-height: 0 !important;
+}
+
+.shader-grid-wrapper::-webkit-scrollbar {
+    width: 6px !important;
+}
+
+.shader-grid-wrapper::-webkit-scrollbar-track {
+    background: transparent !important;
+}
+
+.shader-grid-wrapper::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.18) !important;
+    border-radius: 9999px !important;
+}
+
+.shader-grid-wrapper::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.32) !important;
+}
+
+.shader-grid-4col {
     display: grid !important;
-    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)) !important;
-    gap: 8px !important;
+    grid-template-columns: repeat(4, 1fr) !important;
+    gap: 9px !important;
 }
 
 .shader-item-card {
-    padding: 10px 12px !important;
-    border-radius: 10px !important;
-    background: rgba(255, 255, 255, 0.05) !important;
-    border: 1px solid rgba(255, 255, 255, 0.06) !important;
+    padding: 10px 8px !important;
+    border-radius: 12px !important;
+    background: rgba(255, 255, 255, 0.04) !important;
+    border: 1px solid rgba(255, 255, 255, 0.07) !important;
     color: rgba(255, 255, 255, 0.85) !important;
-    font-size: 12px !important;
+    font-size: 11px !important;
     font-weight: 500 !important;
     cursor: pointer !important;
     display: flex !important;
+    flex-direction: column !important;
     align-items: center !important;
-    gap: 8px !important;
-    transition: all 0.15s ease !important;
+    justify-content: center !important;
+    text-align: center !important;
+    gap: 4px !important;
+    min-height: 78px !important;
+    transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1) !important;
+    position: relative !important;
+    user-select: none !important;
     box-shadow: none !important;
 }
 
 .shader-item-card:hover {
     background: rgba(255, 255, 255, 0.10) !important;
-    border-color: rgba(255, 255, 255, 0.12) !important;
+    border-color: rgba(255, 255, 255, 0.18) !important;
     color: #FFFFFF !important;
+    transform: translateY(-2px) scale(1.02) !important;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.40) !important;
 }
 
 .shader-item-card.active {
-    background: rgba(255, 255, 255, 0.16) !important;
-    border-color: rgba(255, 255, 255, 0.18) !important;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25) !important;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.20) 0%, rgba(255, 255, 255, 0.08) 100%) !important;
+    border-color: rgba(255, 255, 255, 0.38) !important;
+    border-top-color: rgba(255, 255, 255, 0.60) !important;
+    box-shadow: 0 0 16px rgba(96, 165, 250, 0.25), 0 8px 24px rgba(0, 0, 0, 0.45), inset 0 1px 1px rgba(255, 255, 255, 0.45) !important;
     color: #FFFFFF !important;
     font-weight: 600 !important;
 }
 
-/* --- 8. MANTINE MODALS & DROPDOWNS (APPLE macOS HIG STYLE) --- */
+.shader-card-icon {
+    font-size: 20px !important;
+    line-height: 1 !important;
+}
+
+.shader-card-title {
+    font-size: 11.5px !important;
+    font-weight: 600 !important;
+    color: #FFFFFF !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    max-width: 100% !important;
+    line-height: 1.2 !important;
+}
+
+.shader-card-badge {
+    font-size: 8.5px !important;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, monospace !important;
+    color: rgba(255, 255, 255, 0.40) !important;
+    letter-spacing: 0.2px !important;
+}
+
+.shader-item-card.active .shader-card-badge {
+    color: #93C5FD !important;
+}
+
+/* --- 8. MANTINE MODALS & SETTINGS PANELS (APPLE macOS LIQUID GLASS) --- */
+.mantine-Modal-overlay {
+    background: rgba(0, 0, 0, 0.35) !important;
+    backdrop-filter: blur(16px) saturate(160%) !important;
+    -webkit-backdrop-filter: blur(16px) saturate(160%) !important;
+}
+
 .mantine-Modal-content,
+.fs-modal-module-content,
 .mantine-Dialog-root {
-    background: rgba(26, 26, 32, 0.88) !important;
-    border: 1px solid rgba(255, 255, 255, 0.10) !important;
-    border-radius: 18px !important;
-    backdrop-filter: blur(30px) saturate(180%) !important;
-    -webkit-backdrop-filter: blur(30px) saturate(180%) !important;
-    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.60) !important;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.02) 100%), rgba(16, 16, 22, 0.60) !important;
+    border: 1px solid rgba(255, 255, 255, 0.12) !important;
+    border-top: 1px solid rgba(255, 255, 255, 0.25) !important;
+    border-radius: 20px !important;
+    backdrop-filter: blur(36px) saturate(190%) !important;
+    -webkit-backdrop-filter: blur(36px) saturate(190%) !important;
+    box-shadow: 0 30px 80px rgba(0, 0, 0, 0.65), inset 0 1px 1px rgba(255, 255, 255, 0.18) !important;
+    color: #F8FAFC !important;
+    overflow: hidden !important;
+}
+
+.mantine-Modal-header,
+.fs-modal-module-header {
+    background: transparent !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+    padding: 16px 24px !important;
+}
+
+.mantine-Modal-title {
+    font-size: 20px !important;
+    font-weight: 700 !important;
+    color: #FFFFFF !important;
+    letter-spacing: -0.3px !important;
+}
+
+.mantine-Modal-body,
+.fs-modal-module-body {
+    background: transparent !important;
+    padding: 20px 24px !important;
+}
+
+.mantine-Modal-close,
+.fs-modal-module-close {
+    background: rgba(255, 255, 255, 0.08) !important;
+    border: 1px solid rgba(255, 255, 255, 0.12) !important;
+    color: rgba(255, 255, 255, 0.75) !important;
+    border-radius: 50% !important;
+    transition: all 0.15s ease !important;
+}
+
+.mantine-Modal-close:hover,
+.fs-modal-module-close:hover {
+    background: rgba(255, 255, 255, 0.18) !important;
+    color: #FFFFFF !important;
+    transform: scale(1.05) !important;
+}
+
+/* Modal Tabs Navigation */
+.mantine-Tabs-list,
+.fs-tabs-module-list {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+    background: transparent !important;
+    gap: 4px !important;
+}
+
+.mantine-Tabs-tab,
+.fs-tabs-module-tab {
+    background: transparent !important;
+    border: none !important;
+    border-bottom: 2px solid transparent !important;
+    color: rgba(255, 255, 255, 0.65) !important;
+    font-size: 13px !important;
+    font-weight: 500 !important;
+    padding: 8px 14px !important;
+    border-radius: 8px 8px 0 0 !important;
+    transition: all 0.18s ease !important;
+}
+
+.mantine-Tabs-tab:hover,
+.fs-tabs-module-tab:hover {
+    background: rgba(255, 255, 255, 0.06) !important;
     color: #FFFFFF !important;
 }
 
-.mantine-Modal-header {
-    background: transparent !important;
+.mantine-Tabs-tab[data-active="true"],
+.fs-tabs-module-tab[data-active="true"] {
+    background: rgba(255, 255, 255, 0.10) !important;
+    color: #FFFFFF !important;
+    font-weight: 600 !important;
+    border-bottom: 2px solid #A78BFA !important;
+}
+
+/* Settings Options & Rows */
+.fs-settings-option-module-row,
+.fs-settings-option-module-row-indented {
+    padding: 10px 14px !important;
+    border-radius: 12px !important;
+    background: rgba(255, 255, 255, 0.02) !important;
+    border: 1px solid rgba(255, 255, 255, 0.04) !important;
+    margin-bottom: 6px !important;
+    transition: background 0.15s ease !important;
+}
+
+.fs-settings-option-module-row:hover,
+.fs-settings-option-module-row-indented:hover {
+    background: rgba(255, 255, 255, 0.05) !important;
+    border-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+/* Modal Inputs, TextFields, Selects */
+.mantine-Modal-content input[type="text"],
+.mantine-Modal-content input[type="search"],
+.mantine-Modal-content .mantine-TextInput-input,
+.mantine-Modal-content .mantine-Select-input,
+.mantine-Modal-content .mantine-Input-input {
+    background: rgba(255, 255, 255, 0.06) !important;
+    border: 1px solid rgba(255, 255, 255, 0.10) !important;
+    border-radius: 10px !important;
+    color: #FFFFFF !important;
+    backdrop-filter: blur(12px) !important;
+    -webkit-backdrop-filter: blur(12px) !important;
+    transition: all 0.2s ease !important;
+}
+
+.mantine-Modal-content input:focus,
+.mantine-Modal-content .mantine-Input-input:focus {
+    border-color: rgba(167, 139, 250, 0.60) !important;
+    box-shadow: 0 0 0 2px rgba(167, 139, 250, 0.25) !important;
+}
+
+/* Switches inside settings */
+.mantine-Modal-content .mantine-Switch-track,
+.mantine-Modal-content .fs-switch-module-track {
+    background: rgba(255, 255, 255, 0.14) !important;
+    border: 1px solid rgba(255, 255, 255, 0.10) !important;
+}
+
+.mantine-Modal-content input:checked + .mantine-Switch-track,
+.mantine-Modal-content input:checked + * .mantine-Switch-track,
+.mantine-Modal-content .mantine-Switch-track[data-checked="true"] {
+    background: #6366F1 !important;
+    border-color: #818CF8 !important;
 }
 
 .mantine-Menu-dropdown,
@@ -1016,8 +1416,8 @@ button.fs-player-button-module-main svg {
     background: linear-gradient(135deg, rgba(255, 255, 255, 0.10) 0%, rgba(255, 255, 255, 0.02) 100%), rgba(10, 10, 16, 0.35) !important;
     border: 1px solid rgba(255, 255, 255, 0.20) !important;
     border-top: 1px solid rgba(255, 255, 255, 0.42) !important;
-    backdrop-filter: blur(28px) saturate(200%) !important;
-    -webkit-backdrop-filter: blur(28px) saturate(200%) !important;
+    backdrop-filter: blur(var(--personal-os-glass-blur, 28px)) saturate(200%) !important;
+    -webkit-backdrop-filter: blur(var(--personal-os-glass-blur, 28px)) saturate(200%) !important;
     box-shadow: 0 30px 80px rgba(0, 0, 0, 0.60), inset 0 1px 2px rgba(255, 255, 255, 0.40) !important;
     max-height: 65vh !important;
     max-width: 65vh !important;
@@ -1050,8 +1450,8 @@ button.fs-player-button-module-main svg {
     background: linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.02) 100%), rgba(10, 10, 16, 0.38) !important;
     border: 1px solid rgba(255, 255, 255, 0.18) !important;
     border-top: 1px solid rgba(255, 255, 255, 0.38) !important;
-    backdrop-filter: blur(28px) saturate(200%) !important;
-    -webkit-backdrop-filter: blur(28px) saturate(200%) !important;
+    backdrop-filter: blur(var(--personal-os-glass-blur, 28px)) saturate(200%) !important;
+    -webkit-backdrop-filter: blur(var(--personal-os-glass-blur, 28px)) saturate(200%) !important;
     box-shadow: 0 20px 50px rgba(0, 0, 0, 0.45), inset 0 1px 1px rgba(255, 255, 255, 0.30) !important;
     margin-top: 16px !important;
     margin-right: 16px !important;

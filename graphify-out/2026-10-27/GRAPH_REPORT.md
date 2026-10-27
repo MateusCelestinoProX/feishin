@@ -1,16 +1,16 @@
 # Graph Report - feishin  (2026-10-27)
 
 ## Corpus Check
-- 14 files · ~91,179 words
+- 14 files · ~92,151 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 2278 nodes · 5232 edges · 125 communities (51 shown, 63 thin omitted)
+- 2280 nodes · 5235 edges · 122 communities (57 shown, 57 thin omitted)
 - Extraction: 94% EXTRACTED · 6% INFERRED · 0% AMBIGUOUS · INFERRED: 337 edges (avg confidence: 0.85)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `9a305adf`
+- Built from commit: `67b6e3f5`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -27,108 +27,108 @@
 - .z
 - V
 - it
-- .copy
+- sr
 - At
 - W
-- ec
+- copy
 - ws
 - 🚀 Customizações Incluídas
 - .constructor
-- ct
+- es
 - feishin-personal-os.js
 - en
 - .update
 - Lt
 - vt
 - Lc
-- e
+- eh
 - St
 - sn
-- ke
-- eh
+- .constructor
+- e
 - en
 - apply_customizations.py
 - nl
 - patch_bundle.py
 - install.sh
 - restore.sh
-- mi
+- .constructor
+- pt
 - se
 - yt
 - Kn
 - jc
-- Ne
+- .normalize
 - xc
 - patch_main.py
 - no
-- .multiplyScalar
 - yc
-- .fromJSON
+- pl
 - Ce
-- Wn
+- _sceneToCubeUV
 - pt
 - constructor
-- us
-- .dispatchEvent
-- .applyMatrix4
+- kl
+- je
+- zt
 - gt
 - .toJSON
 - bl
 - tn
-- .intersectMeshes
+- ke
+- .copy
 - jt
+- Hi
 - .subVectors
 - update
 - re
 - mr
-- ei
-- parseObject
+- .removeEventListener
+- ya
 - fl
 - ia
 - yo
-- .rotateOnAxis
-- la
+- ct
+- .fromArray
 - K
 - bt
 - qc
 - Na
-- ys
+- yr
 - wo
 - .getRenderList
 - q
 - .x
-- Wl
-- zl
+- clone
+- .fromJSON
 - fo
 - nc
 - gr
-- Tt
-- copy
+- .invert
 - ge
 - el
 - ml
-- ic
-- uc
-- Xe
+- mi
+- .applyMatrix4
 - .addAttribute
-- bind
-- dn
-- Ll
+- .apply
+- dc
+- .equals
 - qo
 - .setHSL
+- ds
 - Rl
 - rc
 - Zc
-- Al
 - Vs
-- Tt
-- sc
 - ms
 - ss
-- ts
-- .generateShapes
-- cn
-- sh
+- qh
+- xs
+- _a
+- Do
+- .copyLinearToSRGB
+- bo
 
 ## God Nodes (most connected - your core abstractions)
 1. `_` - 208 edges
@@ -147,17 +147,17 @@
   customizations/assets/ogl.js → customizations/assets/three.min.js
 - `ws()` --indirect_call--> `R()`  [INFERRED]
   customizations/assets/three.min.js → customizations/assets/ogl.js
-- `et()` --indirect_call--> `S()`  [INFERRED]
+- `ws()` --indirect_call--> `L()`  [INFERRED]
+  customizations/assets/three.min.js → customizations/assets/ogl.js
+- `tt()` --indirect_call--> `Y()`  [INFERRED]
   customizations/assets/ogl.js → customizations/assets/three.min.js
-- `et()` --indirect_call--> `Y()`  [INFERRED]
-  customizations/assets/ogl.js → customizations/assets/three.min.js
-- `xs()` --indirect_call--> `Y()`  [INFERRED]
-  customizations/assets/ogl.js → customizations/assets/three.min.js
+- `gt()` --indirect_call--> `tt()`  [INFERRED]
+  customizations/assets/three.min.js → customizations/assets/ogl.js
 
 ## Import Cycles
 - None detected.
 
-## Communities (125 total, 63 thin omitted)
+## Communities (122 total, 57 thin omitted)
 
 ### Community 0 - "webgl-backgrounds.js"
 Cohesion: 0.06
@@ -165,170 +165,182 @@ Nodes (61): gt, buildStrandsPalette(), easePower2InOut(), getOptimizedDPR(), hex
 
 ### Community 1 - "_"
 Cohesion: 0.03
-Nodes (52): _, ae(), at, bs(), bt(), ce(), ct(), dt (+44 more)
-
-### Community 2 - "ar"
-Cohesion: 0.16
-Nodes (3): ar, dr(), pr()
+Nodes (47): _, ae(), at, bs(), bt(), ce(), ct(), dt (+39 more)
 
 ### Community 3 - "U"
 Cohesion: 0.05
-Nodes (16): ai(), ci(), di(), fi(), gi(), hi(), ii(), li() (+8 more)
+Nodes (17): ai(), ci(), di(), _e(), fi(), gi(), hi(), ii() (+9 more)
 
 ### Community 4 - "three.min.js"
-Cohesion: 0.03
-Nodes (34): Vr(), bi(), bs, $c(), er(), Ga, Hi(), hr() (+26 more)
+Cohesion: 0.04
+Nodes (18): bi(), br(), bs, $c(), fi(), intersectObject(), intersectObjects(), ir() (+10 more)
 
 ### Community 7 - "tn"
-Cohesion: 0.13
-Nodes (7): cs, fr(), A(), E(), m(), ns(), tn
+Cohesion: 0.15
+Nodes (6): fr(), A(), E(), m(), ns(), tn
 
 ### Community 9 - ".z"
-Cohesion: 0.08
-Nodes (4): Gs(), Hs(), qs(), Xs()
+Cohesion: 0.07
+Nodes (7): Gs(), Hs(), Os(), Ps(), qs(), Rt(), Xs()
 
 ### Community 10 - "V"
-Cohesion: 0.09
-Nodes (3): De(), qi(), V
+Cohesion: 0.08
+Nodes (4): De(), ji(), qi(), V
 
 ### Community 11 - "it"
-Cohesion: 0.13
-Nodes (4): Ds(), it, St, ui()
+Cohesion: 0.17
+Nodes (3): Ds(), it, St
 
-### Community 12 - ".copy"
-Cohesion: 0.07
-Nodes (15): er, he(), Ie(), Lt, Ne(), or, Ot, sr() (+7 more)
+### Community 12 - "sr"
+Cohesion: 0.18
+Nodes (7): sr(), C(), et(), L(), N(), tt(), xs()
+
+### Community 13 - "At"
+Cohesion: 0.06
+Nodes (4): pe, xe(), At, fe
 
 ### Community 14 - "W"
-Cohesion: 0.06
-Nodes (17): be(), bi(), _i(), nn(), on, pn, pt, rn (+9 more)
+Cohesion: 0.08
+Nodes (13): be(), Fs(), nn(), on, pn, rn, l(), un (+5 more)
+
+### Community 15 - "copy"
+Cohesion: 0.10
+Nodes (4): ai, copy(), cs, ec
 
 ### Community 16 - "ws"
-Cohesion: 0.17
-Nodes (12): L(), C(), f(), ws(), At(), Ct(), Dt(), It() (+4 more)
+Cohesion: 0.16
+Nodes (13): A(), C(), f(), m(), mt(), _t, ws(), At() (+5 more)
 
 ### Community 17 - "🚀 Customizações Incluídas"
-Cohesion: 0.13
-Nodes (14): 1. 🌌 Arquitetura Personal OS (2-Pane Floating Glass Island), 2. 🔮 33 Shaders WebGL Interativos em Tempo Real, 3. 🇧🇷 Localização Integral em Português do Brasil (100% PT-BR), 4. ⚡ Deep UX: Expansão da Tela da Música ao Clicar na Barra, 5. ⚙️ macOS Window Bar & Preferences, 6. 🍎 Mini Painel da Barra de Menus em Vidro Apple (Apple Glassmorphism Popover), 👤 Autor & Identidade Git, 🔄 Como Desinstalar (Restaurar Original) (+6 more)
-
-### Community 19 - "ct"
-Cohesion: 0.13
-Nodes (4): ct(), es(), ns(), Yl
+Cohesion: 0.12
+Nodes (15): 1. 🌌 Arquitetura Personal OS (2-Pane Floating Glass Island), 2. 🔮 33 Shaders WebGL Interativos em Tempo Real, 3. 🇧🇷 Localização Integral em Português do Brasil (100% PT-BR), 4. ⚡ Deep UX: Expansão da Tela da Música ao Clicar na Barra, 5. ⚙️ macOS Window Bar & Preferences, 6. 🍎 Mini Painel da Barra de Menus em Vidro Apple (Apple Glassmorphism Popover), 7. 🎵 Faixas (Tracks) como Página Inicial Padrão do Sistema, 👤 Autor & Identidade Git (+7 more)
 
 ### Community 20 - "feishin-personal-os.js"
-Cohesion: 0.22
-Nodes (18): applyShader(), ensureShaderContainer(), initEngine(), initFullScreenFreeSpaceDismiss(), initTrayBridge(), broadcastState(), getCoverUrl(), getPlayerStore() (+10 more)
+Cohesion: 0.20
+Nodes (19): applyShader(), ensureShaderContainer(), initEngine(), initFullScreenFreeSpaceDismiss(), initPlayerSplitQueue(), initTrayBridge(), broadcastState(), getCoverUrl() (+11 more)
 
 ### Community 22 - ".update"
-Cohesion: 0.19
-Nodes (3): is, rr, Ys()
+Cohesion: 0.15
+Nodes (4): cs, is, rr, Ys()
 
 ### Community 25 - "Lc"
-Cohesion: 0.08
-Nodes (4): bc, getInput(), getOutput(), Lc
-
-### Community 26 - "e"
-Cohesion: 0.11
-Nodes (17): cl, hl, ii, il(), load(), ol, or(), parse() (+9 more)
+Cohesion: 0.07
+Nodes (6): bc, getInput(), getOutput(), ic, Lc, parseMaterials()
 
 ### Community 28 - "sn"
 Cohesion: 0.05
-Nodes (9): an, fn, hn, ln, on, pn, sn, un (+1 more)
+Nodes (11): an, cn, dn, fn, hn, ln, on, pn (+3 more)
 
-### Community 29 - "ke"
-Cohesion: 0.12
-Nodes (7): v(), ji(), ke, tr, R(), we(), ye()
+### Community 29 - ".constructor"
+Cohesion: 0.40
+Nodes (3): v(), tr, R()
+
+### Community 30 - "e"
+Cohesion: 0.09
+Nodes (20): cl, i(), hl, ii, il(), load(), oc, ol (+12 more)
 
 ### Community 31 - "en"
 Cohesion: 0.08
-Nodes (6): ca, co(), en, t(), mn, p()
+Nodes (13): ca, ci, v(), en, Ga, hs, mn, i() (+5 more)
 
 ### Community 32 - "apply_customizations.py"
 Cohesion: 0.67
 Nodes (3): main(), Feishin for macOS — Customization Engine & Installer Aplica automaticamente…, run_cmd()
 
-### Community 39 - "mi"
-Cohesion: 0.17
-Nodes (7): v(), mi(), g(), m(), y(), x(), y()
+### Community 39 - ".constructor"
+Cohesion: 0.09
+Nodes (16): Re(), S(), gs, oi(), r(), pi(), p(), us() (+8 more)
+
+### Community 40 - "pt"
+Cohesion: 0.12
+Nodes (6): bi(), _i(), pt, Si(), Ti(), vi()
+
+### Community 41 - "se"
+Cohesion: 0.07
+Nodes (4): as(), is(), os(), se
+
+### Community 42 - "yt"
+Cohesion: 0.09
+Nodes (3): vi(), h(), yt
 
 ### Community 43 - "Kn"
 Cohesion: 0.11
 Nodes (4): fs, Jl, Kn, vl()
 
-### Community 45 - "Ne"
-Cohesion: 0.08
-Nodes (3): ht(), Ne, rh
-
 ### Community 48 - "no"
-Cohesion: 0.15
-Nodes (7): ao(), eo(), go, no(), oo(), ro(), so()
+Cohesion: 0.14
+Nodes (12): ao(), eo(), ho(), io(), ja(), no(), oo(), ro() (+4 more)
 
-### Community 51 - ".fromJSON"
-Cohesion: 0.10
-Nodes (5): dl, oc, parseGeometries(), parseShapes(), pl
+### Community 52 - "Ce"
+Cohesion: 0.07
+Nodes (5): Ee(), Se(), Te(), Ce, sh
 
-### Community 53 - "Wn"
-Cohesion: 0.13
-Nodes (20): _allocateTargets(), _applyPMREM(), _blur(), _cleanup(), compileCubemapShader(), compileEquirectangularShader(), _compileMaterial(), fromCubemap() (+12 more)
+### Community 53 - "_sceneToCubeUV"
+Cohesion: 0.16
+Nodes (15): _allocateTargets(), _applyPMREM(), _blur(), _cleanup(), fromCubemap(), fromEquirectangular(), fromScene(), _fromTexture() (+7 more)
 
 ### Community 55 - "constructor"
-Cohesion: 0.14
-Nodes (30): ze, br(), constructor(), d(), u(), Da, i(), y() (+22 more)
+Cohesion: 0.15
+Nodes (26): constructor(), d(), u(), y(), t(), gi(), l(), o() (+18 more)
 
-### Community 56 - "us"
-Cohesion: 0.17
-Nodes (5): clone(), kl, Ql, us(), b()
-
-### Community 58 - ".applyMatrix4"
-Cohesion: 0.11
-Nodes (3): ri(), ai, h()
+### Community 58 - "zt"
+Cohesion: 0.24
+Nodes (4): Ie(), Ne(), or, zt
 
 ### Community 59 - "gt"
-Cohesion: 0.12
-Nodes (29): j(), tt(), ds(), F(), G(), k(), V(), z() (+21 more)
+Cohesion: 0.20
+Nodes (12): j(), ps(), I(), J(), K(), N(), Q(), V() (+4 more)
 
 ### Community 60 - ".toJSON"
-Cohesion: 0.15
-Nodes (3): ac, r(), tc
+Cohesion: 0.11
+Nodes (4): ac, r(), go, tc
 
-### Community 62 - "tn"
-Cohesion: 0.08
-Nodes (5): bo, $e(), is(), Ke(), tn
+### Community 63 - "ke"
+Cohesion: 0.09
+Nodes (7): cr, dr(), er, ke, ki(), pr(), Mt()
 
-### Community 63 - ".intersectMeshes"
-Cohesion: 0.14
-Nodes (3): cr, Fs(), ki()
+### Community 64 - ".copy"
+Cohesion: 0.13
+Nodes (5): Lt, Ot, ui(), ur(), ye()
+
+### Community 66 - "Hi"
+Cohesion: 0.12
+Nodes (14): Vr(), er(), Hi(), ji(), Jr(), ki(), kr(), nr() (+6 more)
+
+### Community 67 - ".subVectors"
+Cohesion: 0.11
+Nodes (3): he(), jn(), rh
 
 ### Community 68 - "update"
-Cohesion: 0.10
-Nodes (16): ci, dispose(), fi(), ni, i(), pi(), p(), V() (+8 more)
+Cohesion: 0.12
+Nodes (11): ei, s(), i(), a(), o(), ka(), s(), update() (+3 more)
 
 ### Community 70 - "mr"
+Cohesion: 0.22
+Nodes (3): kt(), mr, Ut()
+
+### Community 71 - ".removeEventListener"
 Cohesion: 0.15
-Nodes (4): kt(), mr, Ut(), yr
+Nodes (9): dispose(), Et, ni, G(), U(), Tt(), wt(), yi() (+1 more)
 
-### Community 71 - "ei"
-Cohesion: 0.18
-Nodes (9): ei, s(), gn(), i(), a(), o(), G(), U() (+1 more)
+### Community 72 - "ya"
+Cohesion: 0.11
+Nodes (9): Ah, co(), fa, fh, hh, lo(), Mh, uo() (+1 more)
 
-### Community 72 - "parseObject"
-Cohesion: 0.07
-Nodes (17): Ah, fa, fh, hh, ho(), io(), ja(), $l (+9 more)
-
-### Community 76 - ".rotateOnAxis"
-Cohesion: 0.18
-Nodes (3): Ee(), Te(), xe()
+### Community 74 - "ia"
+Cohesion: 0.19
+Nodes (3): Da, ia, ta
 
 ### Community 78 - "K"
 Cohesion: 0.22
 Nodes (3): br, K, kr
 
 ### Community 79 - "bt"
-Cohesion: 0.17
-Nodes (4): bt, li(), Ra, Mt()
+Cohesion: 0.12
+Nodes (5): bt, li(), Ra, rt, Tt
 
 ### Community 81 - "Na"
-Cohesion: 0.18
+Cohesion: 0.20
 Nodes (5): Ba, Ko, Na, _o, to()
 
 ### Community 83 - "wo"
@@ -339,49 +351,61 @@ Nodes (3): jo, wo, xo
 Cohesion: 0.23
 Nodes (3): p(), q, zi()
 
+### Community 87 - "clone"
+Cohesion: 0.10
+Nodes (5): clone(), dl, ts(), Wl, Xn()
+
+### Community 88 - ".fromJSON"
+Cohesion: 0.15
+Nodes (3): n(), parseShapes(), zl
+
 ### Community 89 - "fo"
 Cohesion: 0.24
 Nodes (4): fo(), mo(), l(), po
 
-### Community 92 - "Tt"
-Cohesion: 0.40
-Nodes (3): Et, Tt(), Zh()
+### Community 93 - ".invert"
+Cohesion: 0.13
+Nodes (5): we(), qn, _s(), n(), updateMatrixWorld()
 
-### Community 93 - "copy"
-Cohesion: 0.08
-Nodes (12): _e(), copy(), S(), hs, qn, _s(), n(), _sceneToCubeUV() (+4 more)
+### Community 97 - "mi"
+Cohesion: 0.29
+Nodes (3): mi(), y(), x()
 
-### Community 101 - "Xe"
-Cohesion: 0.15
-Nodes (5): _a, cs, Do, Xe(), zo
-
-### Community 103 - "bind"
-Cohesion: 0.25
-Nodes (5): bind(), bindSkeletons(), getValue(), parseSkeletons(), setValue()
+### Community 103 - ".apply"
+Cohesion: 0.14
+Nodes (7): bind(), bindSkeletons(), getValue(), parseSkeletons(), pc, setValue(), uh()
 
 ### Community 107 - ".setHSL"
 Cohesion: 0.33
 Nodes (3): dt(), Qe(), ut()
 
+### Community 108 - "ds"
+Cohesion: 0.22
+Nodes (16): ds(), G(), k(), V(), z(), s(), F(), G() (+8 more)
+
+### Community 123 - "qh"
+Cohesion: 0.33
+Nodes (7): compileCubemapShader(), compileEquirectangularShader(), _compileMaterial(), $h(), Kh(), qh(), tu()
+
 ## Knowledge Gaps
-- **43 isolated node(s):** `fe`, `Ei`, `J`, `H`, `ir` (+38 more)
-  These have ≤1 connection - possible missing edges or undocumented components. (Counts symbols only; 665 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
-- **63 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **44 isolated node(s):** `fe`, `Ei`, `J`, `H`, `ir` (+39 more)
+  These have ≤1 connection - possible missing edges or undocumented components. (Counts symbols only; 666 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
+- **57 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `_` connect `_` to `webgl-backgrounds.js`, `ar`, `U`, `three.min.js`, `ks`, `tn`, `le`, `.z`, `V`, `it`, `.copy`, `W`, `en`, `.update`, `ke`, `constructor`, `.dispatchEvent`, `.applyMatrix4`, `.intersectMeshes`, `mr`, `.rotateOnAxis`, `K`, `.getRenderList`, `q`, `.x`, `gr`, `copy`, `.addAttribute`?**
-  _High betweenness centrality (0.363) - this node is a cross-community bridge._
-- **Why does `ws()` connect `ws` to `three.min.js`, `Lt`, `vt`, `St`, `ke`, `en`, `se`, `.multiplyScalar`, `constructor`, `.dispatchEvent`, `.applyMatrix4`, `gt`, `tn`, `jt`, `update`, `ei`, `ia`, `yo`, `bt`, `nc`, `Tt`, `copy`, `Xe`, `bind`?**
-  _High betweenness centrality (0.145) - this node is a cross-community bridge._
-- **Why does `R()` connect `ke` to `ws`, `_`?**
-  _High betweenness centrality (0.106) - this node is a cross-community bridge._
+- **Why does `_` connect `_` to `webgl-backgrounds.js`, `ar`, `U`, `ks`, `tn`, `le`, `.z`, `V`, `it`, `sr`, `At`, `W`, `en`, `.update`, `.constructor`, `.constructor`, `pt`, `Ce`, `je`, `zt`, `ke`, `.copy`, `Hi`, `.subVectors`, `mr`, `K`, `yr`, `.getRenderList`, `q`, `.x`, `gr`, `.invert`, `.applyMatrix4`, `.addAttribute`?**
+  _High betweenness centrality (0.343) - this node is a cross-community bridge._
+- **Why does `ws()` connect `ws` to `_a`, `three.min.js`, `sr`, `copy`, `Lt`, `vt`, `St`, `.constructor`, `en`, `.constructor`, `se`, `.multiplyScalar`, `Ce`, `constructor`, `gt`, `tn`, `ke`, `update`, `.removeEventListener`, `ia`, `yo`, `bt`, `.invert`, `.applyMatrix4`, `.apply`, `ds`, `xs`?**
+  _High betweenness centrality (0.154) - this node is a cross-community bridge._
+- **Why does `R()` connect `.constructor` to `ws`, `_`, `ke`?**
+  _High betweenness centrality (0.108) - this node is a cross-community bridge._
 - **Are the 21 inferred relationships involving `ws()` (e.g. with `L()` and `R()`) actually correct?**
   _`ws()` has 21 INFERRED edges - model-reasoned connections that need verification._
 - **What connects `fe`, `Ei`, `J` to the rest of the system?**
-  _43 weakly-connected nodes found - possible documentation gaps or missing edges._
+  _44 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `webgl-backgrounds.js` be split into smaller, more focused modules?**
   _Cohesion score 0.06050420168067227 - nodes in this community are weakly interconnected._
 - **Should `_` be split into smaller, more focused modules?**
-  _Cohesion score 0.03089887640449438 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.0347289840960727 - nodes in this community are weakly interconnected._

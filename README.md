@@ -42,6 +42,20 @@ Motor gráfico em tempo real renderizado sobre OGL (`ogl.js` + `webgl-background
 - **Arquitetura IPC Bidirecional**: Sincronização em tempo real entre o processo Electron Main (`patch_main.py`), a janela do Mini Player (`tray-panel.html`) e o store Zustand do Feishin via ponte injetada (`feishin-personal-os.js`).
 - **Integração de Bandeja Nativa**: Clique com o botão esquerdo no ícone da barra de menus abre o popover; clique com o botão direito preserva o menu de contexto nativo do macOS.
 
+### 7. 🎵 Faixas (Tracks) como Página Inicial Padrão do Sistema
+- **Inicialização Direta em Faixas**: Redirecionamento instantâneo para `/library/songs` no carregamento raiz sem flicker, garantindo acesso imediato à biblioteca completa de faixas.
+- **Roteamento e Integridade Total**: Roteamento inicial index via `<Navigate to="/library/songs" replace />`, garantindo que a barra lateral mantenha o item "Faixas" ativado por padrão e preserve o acesso a "Início" em `/home`.
+
+### 8. ⚡ Ação Rápida: Botão "Tocar a seguir" no Menu Principal do Clique Direito sobre a Faixa
+- **Acesso Direto Sem Submenus**: Adiciona a ação "Tocar a seguir" (ícone `mediaPlayNext`) diretamente na lista principal do menu de contexto ao clicar com o botão direito sobre qualquer faixa (`he.SONG`, `he.PLAYLIST_SONG`, `he.QUEUE_SONG`).
+- **Ergonomia e Alta Densidade de Ação**: Elimina a necessidade de abrir o submenu "Tocar >" para enfileirar uma faixa para reprodução imediata a seguir.
+- **Suporte Multi-Seleção**: Suporta seleção individual ou múltipla de faixas com adição instantânea à fila via `addToQueueByData` / `addToQueueByFetch`.
+
+### 9. 🚫 Remoção Completa da Página de Álbuns (Interface e Código)
+- **Eliminação Visual da Barra Lateral**: Remoção definitiva do item "Álbuns" do menu de navegação da biblioteca (sidebar padrão e sidebar recolhida/mobile).
+- **Roteamento Cirúrgico com Redirecionamento**: Substituição da rota `/library/albums` por `<Navigate to="/library/songs" replace />`, garantindo que qualquer link residual redirecione instantaneamente para Faixas.
+- **Sanitização de Configurações e Paleta de Comandos**: Purga de `Albums` das preferências de reordenação de itens de barra lateral (`Hle`), da paleta de atalhos e do armazenamento persistente (`store_settings`).
+
 ---
 
 ## 📂 Estrutura do Repositório
