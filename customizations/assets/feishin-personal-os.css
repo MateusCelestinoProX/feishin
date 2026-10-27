@@ -321,11 +321,25 @@ div, span, p, a, h1, h2, h3, h4, h5, h6 {
     box-shadow: none !important;
 }
 
-/* Sidebar Album Art Thumbnail */
-#sidebar .fs-image-module-image-container {
-    border-radius: 14px !important;
-    border: 1px solid rgba(255, 255, 255, 0.16) !important;
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.35) !important;
+/* Disallow misplaced sidebar album thumbnail - album art belongs in the player dock */
+#sidebar .fs-sidebar-module-image-container,
+.fs-sidebar-module-image-container,
+.fs-sidebar-module-sidebar-image {
+    display: none !important;
+    height: 0 !important;
+    max-height: 0 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    overflow: hidden !important;
+    pointer-events: none !important;
+}
+
+/* Hide toggle arrow that moves album art to the sidebar */
+.fs-left-controls-module-toggle-button {
+    display: none !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+    visibility: hidden !important;
 }
 
 /* --- 5. FLOATING MEDIA PLAYER DOCK (PERSONAL OS MASTER DOCK) --- */
@@ -347,6 +361,57 @@ div, span, p, a, h1, h2, h3, h4, h5, h6 {
     display: flex !important;
     align-items: center !important;
     justify-content: space-between !important;
+}
+
+/* 5.1 CORNER ALBUM ART IN PLAYER DOCK */
+.fs-left-controls-module-left-controls-container {
+    display: flex !important;
+    align-items: center !important;
+    gap: 14px !important;
+    height: 100% !important;
+}
+
+.fs-left-controls-module-image-wrapper {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    flex-shrink: 0 !important;
+    margin: 0 !important;
+}
+
+.fs-left-controls-module-image,
+.fs-left-controls-module-image-wrapper img,
+.fs-left-controls-module-playerbar-image {
+    width: 52px !important;
+    height: 52px !important;
+    min-width: 52px !important;
+    min-height: 52px !important;
+    border-radius: 12px !important;
+    overflow: hidden !important;
+    position: relative !important;
+    border: 1px solid rgba(255, 255, 255, 0.22) !important;
+    border-top: 1px solid rgba(255, 255, 255, 0.38) !important;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.45), inset 0 1px 1px rgba(255, 255, 255, 0.25) !important;
+    object-fit: cover !important;
+    cursor: pointer !important;
+    transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s ease !important;
+}
+
+.fs-left-controls-module-image:hover,
+.fs-left-controls-module-image-wrapper img:hover,
+.fs-left-controls-module-playerbar-image:hover {
+    transform: scale(1.05) !important;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.55), 0 0 14px rgba(255, 255, 255, 0.25) !important;
+    border-color: rgba(255, 255, 255, 0.35) !important;
+}
+
+.fs-left-controls-module-metadata-stack {
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: center !important;
+    gap: 2px !important;
+    max-width: 280px !important;
+    overflow: hidden !important;
 }
 
 .fs-playerbar-module-container {
@@ -691,3 +756,123 @@ button[title*="Play"]:hover, button[title*="Reproduzir"]:hover, button[title*="P
 ::-webkit-scrollbar-thumb:hover {
     background: rgba(255, 255, 255, 0.40) !important;
 }
+
+/* --- 10. FULLSCREEN & EXPANDED PLAYER PERSONAL OS LIQUID GLASS --- */
+#main-content:has(.fs-full-screen-player-module-container) > #sidebar,
+#main-content:has(.fs-full-screen-player-module-container) > #sidebar-queue,
+#main-content:has(.fs-full-screen-player-module-container) > .fs-main-content-module-main-content-body {
+    display: none !important;
+}
+
+.fs-full-screen-player-module-container,
+.fs-mobile-fullscreen-player-module-container,
+.fs-mobile-layout-module-full-screen-player-overlay {
+    background: transparent !important;
+    background-color: transparent !important;
+}
+
+.fs-full-screen-player-module-background-image,
+.fs-full-screen-player-module-background-image-overlay,
+.fs-full-screen-player-module-background-overlay,
+.fs-mobile-fullscreen-player-module-background-image,
+.fs-mobile-fullscreen-player-module-background-image-overlay,
+.fs-mobile-fullscreen-player-module-background-overlay,
+.fs-mobile-fullscreen-player-module-background-color {
+    display: none !important;
+    opacity: 0 !important;
+    background: transparent !important;
+    background-color: transparent !important;
+}
+
+.fs-full-screen-player-module-container .full-screen-player-controls-container:not(.fs-full-screen-player-queue-module-controls-container) {
+    top: 14px !important;
+    left: 14px !important;
+    padding: 6px 12px !important;
+    border-radius: 16px !important;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.03) 100%), rgba(14, 14, 22, 0.45) !important;
+    border: 1px solid rgba(255, 255, 255, 0.20) !important;
+    border-top: 1px solid rgba(255, 255, 255, 0.40) !important;
+    backdrop-filter: blur(24px) saturate(200%) !important;
+    -webkit-backdrop-filter: blur(24px) saturate(200%) !important;
+    box-shadow: 0 12px 35px rgba(0, 0, 0, 0.40), inset 0 1px 1px rgba(255, 255, 255, 0.35) !important;
+    z-index: 100 !important;
+    opacity: 0.8 !important;
+    transition: opacity 0.25s ease !important;
+}
+
+.fs-full-screen-player-module-container:hover .full-screen-player-controls-container:not(.fs-full-screen-player-queue-module-controls-container) {
+    opacity: 1 !important;
+}
+
+.fs-full-screen-player-module-container .full-screen-player-controls-container button {
+    border-radius: 10px !important;
+    color: rgba(255, 255, 255, 0.90) !important;
+    transition: all 0.2s ease !important;
+}
+
+.fs-full-screen-player-module-container .full-screen-player-controls-container button:hover {
+    background: rgba(255, 255, 255, 0.18) !important;
+    color: #FFFFFF !important;
+}
+
+.fs-full-screen-player-queue-module-controls-container {
+    bottom: 14px !important;
+    right: 20px !important;
+    padding: 6px 12px !important;
+    border-radius: 16px !important;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.10) 0%, rgba(255, 255, 255, 0.02) 100%), rgba(10, 10, 16, 0.40) !important;
+    border: 1px solid rgba(255, 255, 255, 0.18) !important;
+    border-top: 1px solid rgba(255, 255, 255, 0.38) !important;
+    backdrop-filter: blur(20px) saturate(200%) !important;
+    -webkit-backdrop-filter: blur(20px) saturate(200%) !important;
+    box-shadow: 0 12px 35px rgba(0, 0, 0, 0.35), inset 0 1px 1px rgba(255, 255, 255, 0.30) !important;
+    z-index: 100 !important;
+}
+
+.fs-full-screen-player-queue-module-controls-container button {
+    border-radius: 10px !important;
+    color: rgba(255, 255, 255, 0.85) !important;
+    transition: all 0.2s ease !important;
+}
+
+.fs-full-screen-player-queue-module-controls-container button:hover {
+    background: rgba(255, 255, 255, 0.15) !important;
+    color: #FFFFFF !important;
+}
+
+.fs-full-screen-player-image-module-image-container {
+    border-radius: 28px !important;
+    padding: 14px !important;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.10) 0%, rgba(255, 255, 255, 0.02) 100%), rgba(10, 10, 16, 0.35) !important;
+    border: 1px solid rgba(255, 255, 255, 0.20) !important;
+    border-top: 1px solid rgba(255, 255, 255, 0.42) !important;
+    backdrop-filter: blur(28px) saturate(200%) !important;
+    -webkit-backdrop-filter: blur(28px) saturate(200%) !important;
+    box-shadow: 0 30px 80px rgba(0, 0, 0, 0.60), inset 0 1px 2px rgba(255, 255, 255, 0.40) !important;
+    max-height: 65vh !important;
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+.fs-full-screen-player-image-module-image {
+    border-radius: 18px !important;
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.45) !important;
+}
+
+.fs-full-screen-player-queue-module-grid-container {
+    border-radius: 24px !important;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.02) 100%), rgba(10, 10, 16, 0.35) !important;
+    border: 1px solid rgba(255, 255, 255, 0.18) !important;
+    border-top: 1px solid rgba(255, 255, 255, 0.38) !important;
+    backdrop-filter: blur(24px) saturate(200%) !important;
+    -webkit-backdrop-filter: blur(24px) saturate(200%) !important;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.45), inset 0 1px 1px rgba(255, 255, 255, 0.30) !important;
+    margin-right: 14px !important;
+    margin-bottom: 14px !important;
+    height: calc(100% - 28px) !important;
+    overflow: hidden !important;
+}
+
+.fs-full-screen-player-queue-module-grid-container:before {
+    display: none !important;
+}
+
