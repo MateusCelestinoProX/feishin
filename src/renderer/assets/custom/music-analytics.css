@@ -168,6 +168,10 @@
   animation: fadeInDashboard 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
 }
 
+#feishin-analytics-dashboard > * {
+  flex-shrink: 0 !important;
+}
+
 #feishin-analytics-dashboard[style*="display: none"] {
   display: none !important;
 }
@@ -209,6 +213,7 @@
   padding: 24px;
   position: relative;
   overflow: hidden;
+  min-height: fit-content;
   transition: transform 0.25s, box-shadow 0.25s, border-color 0.25s;
 }
 
@@ -229,6 +234,8 @@
   border: 1px solid rgba(255, 255, 255, 0.14);
   border-radius: 22px;
   position: relative;
+  flex-shrink: 0 !important;
+  min-height: fit-content;
 }
 
 .analytics-hero-banner::after {
@@ -274,6 +281,7 @@
   font-size: 26px;
   font-weight: 800;
   letter-spacing: -0.4px;
+  line-height: 1.25 !important;
   color: #ffffff;
   margin: 0;
   text-shadow: 0 2px 12px rgba(0, 0, 0, 0.5);
@@ -282,6 +290,7 @@
 .analytics-title-sub {
   margin: 0;
   font-size: 13.5px;
+  line-height: 1.4 !important;
   color: rgba(255, 255, 255, 0.65);
   font-weight: 500;
 }
@@ -455,12 +464,14 @@
   display: flex;
   align-items: center;
   gap: 10px;
+  line-height: 1.3;
 }
 
 .analytics-section-title-wrap p {
   margin: 0;
   font-size: 13px;
   color: rgba(255, 255, 255, 0.55);
+  line-height: 1.4;
 }
 
 .metric-badge-highlight {
