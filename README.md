@@ -35,6 +35,13 @@ Motor gráfico em tempo real renderizado sobre OGL (`ogl.js` + `webgl-background
 ### 5. ⚙️ macOS Window Bar & Preferences
 - Configuração pré-otimizada em `config/macos-config.json` para barra de títulos estilo nativo macOS, hotkeys globais e integração de bandeja.
 
+### 6. 🍎 Mini Painel da Barra de Menus em Vidro Apple (Apple Glassmorphism Popover)
+- **Design Autêntico Apple Popover**: Janela flutuante no menu bar com `vibrancy: "popover"`, transparência real, cantos curvos de 12px, hairline border translúcida e design monocromático ultra-minimal sem opacidades sólidas ou gradientes.
+- **Controles de Reprodução Ordenados**: Ordem cirúrgica de controles: `[ ⏮ Retroceder ]` `[ -3s ]` `[ ▶ / ⏸ Play/Pause ]` `[ +3s ]` `[ ⏭ Avançar ]`.
+- **Fila de Reprodução em Tempo Real**: Listagem interativa da playlist ou fila de reprodução tocando no momento com indicação animada de equalizador na faixa atual e clique direto para pular faixas.
+- **Arquitetura IPC Bidirecional**: Sincronização em tempo real entre o processo Electron Main (`patch_main.py`), a janela do Mini Player (`tray-panel.html`) e o store Zustand do Feishin via ponte injetada (`feishin-personal-os.js`).
+- **Integração de Bandeja Nativa**: Clique com o botão esquerdo no ícone da barra de menus abre o popover; clique com o botão direito preserva o menu de contexto nativo do macOS.
+
 ---
 
 ## 📂 Estrutura do Repositório
@@ -44,14 +51,16 @@ feishin/
 ├── customizations/
 │   ├── assets/
 │   │   ├── feishin-personal-os.css   # Estilo Master Glassmorphism & 2-Pane Island
-│   │   ├── feishin-personal-os.js    # UI Switcher de Shaders, atalhos e ciclo de vida
+│   │   ├── feishin-personal-os.js    # UI Switcher, ponte IPC do Tray e ciclo de vida
+│   │   ├── tray-panel.html           # Mini painel popover da bandeja em Apple Glassmorphism
 │   │   ├── webgl-backgrounds.js      # Motor com os 33 shaders WebGL em tempo real
 │   │   ├── ogl.js                    # Micro-biblioteca WebGL ultra-eficiente
 │   │   └── pt-br-full.js             # Dicionário e runtime injector de PT-BR
 │   ├── i18n/
 │   │   └── feishin_pt_full.json      # Dataset completo de traduções em formato JSON
 │   ├── patches/
-│   │   └── patch_bundle.py           # Patch cirúrgico do bundle React (i18n + click bar)
+│   │   ├── patch_bundle.py           # Patch cirúrgico do bundle React (i18n, player store e click bar)
+│   │   └── patch_main.py             # Patch do Electron Main e Preload para janela e IPC do Tray
 │   └── index.html                    # Template HTML modificado com containers WebGL
 ├── scripts/
 │   ├── apply_customizations.py       # Engine autônoma de patch e injeção no app.asar
