@@ -600,7 +600,7 @@
 
   function ensureTagsPageMounted(mainBody) {
     if (!mainBody) {
-      mainBody = document.querySelector('.fs-main-content-module-main-content-body, .fs-main-content-module-main-content-container, main');
+      mainBody = document.querySelector('.fs-main-content-module-main-content-body') || document.querySelector('main');
       if (!mainBody) return;
     }
 
@@ -626,6 +626,9 @@
       Array.from(mainBody.children).forEach(ch => {
         if (ch.id !== 'fs-tags-page-mount') ch.style.display = 'none';
       });
+      if (!mountEl.hasChildNodes() || mountEl.innerHTML.trim() === '') {
+        renderTagsPage(mountEl);
+      }
     }
   }
 

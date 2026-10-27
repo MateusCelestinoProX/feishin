@@ -192,6 +192,20 @@
   // 4. Load Complete Analytics Data (Server + Local Merged)
   async function fetchAnalyticsData() {
     if (cachedLibraryStats && !isFetching) return cachedLibraryStats;
+    if (!cachedLibraryStats) {
+      try {
+        const stored = localStorage.getItem('feishin_analytics_cache_v1');
+        if (stored) {
+          const parsed = JSON.parse(stored);
+          if (parsed && parsed.stats) {
+            cachedLibraryStats = parsed.stats;
+            if (Date.now() - (parsed.time || 0) < 5 * 60 * 1000 && !isFetching) {
+              return cachedLibraryStats;
+            }
+          }
+        }
+      } catch(e) {}
+    }
     isFetching = true;
 
     const { url, cred, serverId } = getSubsonicCredentials();
@@ -230,23 +244,23 @@
       }
 
       // 2. Fetch Frequent Albums from Subsonic
-      const resFrequent = await fetch(`${url}/rest/getAlbumList2.view?type=frequent&size=30&f=json&v=1.13.0&c=Feishin&${cred}`);
+      const resFrequent = await fetch(`${url}/rest/getAlbumList2.view?type=frequent&size=25&f=json&v=1.13.0&c=Feishin&${cred}`, { signal: AbortSignal.timeout(4000) });
       const dataFrequent = await resFrequent.json();
       const frequentAlbums = dataFrequent?.['subsonic-response']?.albumList2?.album || [];
 
       // 3. Fetch Recent Albums
-      const resRecent = await fetch(`${url}/rest/getAlbumList2.view?type=recent&size=20&f=json&v=1.13.0&c=Feishin&${cred}`);
+      const resRecent = await fetch(`${url}/rest/getAlbumList2.view?type=recent&size=15&f=json&v=1.13.0&c=Feishin&${cred}`, { signal: AbortSignal.timeout(4000) });
       const dataRecent = await resRecent.json();
       const recentAlbums = dataRecent?.['subsonic-response']?.albumList2?.album || [];
 
       const uniqueAlbums = new Map();
       [...frequentAlbums, ...recentAlbums].forEach(a => { if (a && a.id) uniqueAlbums.set(a.id, a); });
 
-      // Fetch tracks in parallel chunks
-      const albumsToFetch = Array.from(uniqueAlbums.values()).slice(0, 30);
+      // Fetch tracks in parallel chunks (max 15 albums)
+      const albumsToFetch = Array.from(uniqueAlbums.values()).slice(0, 15);
       await Promise.all(albumsToFetch.map(async (albumObj) => {
         try {
-          const aRes = await fetch(`${url}/rest/getAlbum.view?id=${albumObj.id}&f=json&v=1.13.0&c=Feishin&${cred}`);
+          const aRes = await fetch(`${url}/rest/getAlbum.view?id=${albumObj.id}&f=json&v=1.13.0&c=Feishin&${cred}`, { signal: AbortSignal.timeout(3500) });
           const aData = await aRes.json();
           const songs = aData?.['subsonic-response']?.album?.song || [];
 
@@ -380,6 +394,13 @@
       history: localData.history || [],
       streaks: localData.streaks || { current: 1 }
     };
+
+    try {
+      localStorage.setItem('feishin_analytics_cache_v1', JSON.stringify({
+        time: Date.now(),
+        stats: cachedLibraryStats
+      }));
+    } catch(e) {}
 
     isFetching = false;
     return cachedLibraryStats;

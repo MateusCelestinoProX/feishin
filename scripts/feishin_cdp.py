@@ -12,7 +12,13 @@ class FeishinCDP:
         self.session_id = None
         self.req_id = 1
         self.pending = {}
+        self.event_handlers = {}
         self.recv_task = None
+
+    def on(self, method, callback):
+        if method not in self.event_handlers:
+            self.event_handlers[method] = []
+        self.event_handlers[method].append(callback)
 
     async def connect(self):
         v = json.loads(urllib.request.urlopen(f'http://127.0.0.1:{self.port}/json/version').read())
@@ -41,12 +47,19 @@ class FeishinCDP:
         try:
             async for raw in self.ws:
                 msg = json.loads(raw)
-                print("[RAW RECV]", msg)
                 msg_id = msg.get('id')
                 if msg_id and msg_id in self.pending:
                     fut = self.pending.pop(msg_id)
                     if not fut.done():
                         fut.set_result(msg)
+                
+                method = msg.get('method')
+                if method and method in self.event_handlers:
+                    for cb in self.event_handlers[method]:
+                        try:
+                            cb(msg.get('params', {}))
+                        except Exception as e:
+                            print(f"[CDP] Handler error for {method}:", e)
         except asyncio.CancelledError:
             pass
         except Exception as e:
@@ -64,7 +77,6 @@ class FeishinCDP:
         if self.session_id and not method.startswith('Target.'):
             payload['sessionId'] = self.session_id
 
-        print("[RAW SEND]", payload)
         await self.ws.send(json.dumps(payload))
         res = await asyncio.wait_for(fut, timeout=timeout)
         if 'error' in res:
