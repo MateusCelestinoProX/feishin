@@ -47,14 +47,15 @@ def patch_bundle(file_path):
     else:
         print("[!] Aviso: Padrão target_i18n não encontrado no bundle.")
 
-    # 2. Patch de Clique na Barra do Player (FullScreenPlayer Toggle)
+    # 2. Patch de Clique na Barra do Player e Fixação da Imagem no Dock
     replacements_playerbar = [
         ('{className:es.lineItem,onClick:L,children:p.jsxs(It,{align:\\"center\\"', '{className:es.lineItem,onClick:void 0,children:p.jsxs(It,{align:\\"center\\"'),
         ('secondary,js.songArtist),onClick:L,children:p.jsx(ug,{artistName:(l==n', 'secondary,js.songArtist),onClick:void 0,children:p.jsx(ug,{artistName:(l==n'),
         ('.secondary,js.songAlbum),onClick:L,children:p.jsx(Ve,{component:Or,fw:', '.secondary,js.songAlbum),onClick:void 0,children:p.jsx(Ve,{component:Or,fw:'),
         ('const l=e?o:void 0;let c;', 'const l=o;let c;'),
         ('a=it({[Pue.container]:!0,[Pue.openDrawer]:e})', 'a=it({[Pue.container]:!0,[Pue.openDrawer]:!0})'),
-        ('playButtonBehavior:Gt.NOW,playerbarOpenDrawer:!1,playerbarSlider:', 'playButtonBehavior:Gt.NOW,playerbarOpenDrawer:!0,playerbarSlider:')
+        ('playButtonBehavior:Gt.NOW,playerbarOpenDrawer:!1,playerbarSlider:', 'playButtonBehavior:Gt.NOW,playerbarOpenDrawer:!0,playerbarSlider:'),
+        ('function XHt(t){return{collapsed:t.sidebar.collapsed,image:t.sidebar.image}}', 'function XHt(t){return{collapsed:t.sidebar.collapsed,image:!1}}')
     ]
 
     for old, new in replacements_playerbar:
@@ -138,6 +139,18 @@ def patch_bundle(file_path):
                 print(f"[✓] Patch Grid aplicado com sucesso em {grid_bundle.name}")
         except Exception as e:
             print(f"[!] Erro ao patchear {grid_bundle.name}: {e}")
+
+    for sidebar_bundle in assets_dir.glob("sidebar-*.js"):
+        try:
+            with open(sidebar_bundle, "r", encoding="utf-8") as f:
+                sb_js = f.read()
+            if "function Ve(e){return e.sidebar.image}" in sb_js:
+                sb_js = sb_js.replace("function Ve(e){return e.sidebar.image}", "function Ve(e){return!1}", 1)
+                with open(sidebar_bundle, "w", encoding="utf-8") as f:
+                    f.write(sb_js)
+                print(f"[✓] Patch Sidebar Cover Art desativado em {sidebar_bundle.name}")
+        except Exception as e:
+            print(f"[!] Erro ao patchear {sidebar_bundle.name}: {e}")
 
     for table_bundle in assets_dir.glob("song-list-infinite-table-*.js"):
         try:

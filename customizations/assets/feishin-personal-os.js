@@ -344,6 +344,29 @@ import './webgl-backgrounds.js';
     mountShaderSwitcherUI();
     initTrayBridge();
 
+    // Enforce album art staying in playerbar dock corner (never in sidebar)
+    try {
+      const rawApp = localStorage.getItem('store_app');
+      if (rawApp) {
+        const parsed = JSON.parse(rawApp);
+        if (parsed?.state?.sidebar?.image) {
+          parsed.state.sidebar.image = false;
+          localStorage.setItem('store_app', JSON.stringify(parsed));
+        }
+      }
+    } catch (e) {}
+
+    const enforcePlayerCoverArt = () => {
+      const sidebarImg = document.querySelector('.fs-sidebar-module-image-container');
+      if (sidebarImg) {
+        const btn = sidebarImg.querySelector('button');
+        if (btn) btn.click();
+      }
+    };
+    const coverObserver = new MutationObserver(enforcePlayerCoverArt);
+    coverObserver.observe(document.body, { childList: true, subtree: true });
+    enforcePlayerCoverArt();
+
     // Loop checking until setWebGLBackground is available
     const checkInit = () => {
       if (typeof window.setWebGLBackground === 'function' || typeof window.renderWebGLBackground === 'function') {
