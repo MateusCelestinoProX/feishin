@@ -713,8 +713,32 @@ if (typeof window !== 'undefined') {
     }
   });
 
+  // 7.4. Ative atalhos nativos de navegação do macOS (Command+[ e Command+])
+  function initNavigationShortcuts() {
+    if (window.__feishinNavShortcutsInitialized) return;
+    window.__feishinNavShortcutsInitialized = true;
+
+    window.addEventListener(
+      'keydown',
+      (e) => {
+        const isCmd = e.metaKey || (e.ctrlKey && !navigator.userAgent.includes('Mac'));
+        if (isCmd && !e.altKey && !e.shiftKey) {
+          if (e.key === '[' || e.code === 'BracketLeft') {
+            e.preventDefault();
+            window.history.back();
+          } else if (e.key === ']' || e.code === 'BracketRight') {
+            e.preventDefault();
+            window.history.forward();
+          }
+        }
+      },
+      true,
+    );
+  }
+
   // 8. Bootstrap Engine
   function initEngine() {
+    initNavigationShortcuts();
     ensureShaderContainer();
     mountShaderSwitcherUI();
     initTrayBridge();

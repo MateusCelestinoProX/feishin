@@ -152,6 +152,25 @@ export default class MenuBuilder {
             label: 'View',
             submenu: [
                 {
+                    accelerator: 'Command+[',
+                    click: () => {
+                        if (this.mainWindow?.webContents.navigationHistory.canGoBack()) {
+                            this.mainWindow.webContents.navigationHistory.goBack();
+                        }
+                    },
+                    label: 'Back',
+                },
+                {
+                    accelerator: 'Command+]',
+                    click: () => {
+                        if (this.mainWindow?.webContents.navigationHistory.canGoForward()) {
+                            this.mainWindow.webContents.navigationHistory.goForward();
+                        }
+                    },
+                    label: 'Forward',
+                },
+                { type: 'separator' },
+                {
                     accelerator: accelerators?.globalSearch,
                     click: () => {
                         this.mainWindow.webContents.send('renderer-open-command-palette');
