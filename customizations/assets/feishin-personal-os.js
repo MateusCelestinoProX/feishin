@@ -397,7 +397,10 @@ import './webgl-backgrounds.js';
       try {
         const q = store.getQueue();
         const items = Array.isArray(q) ? q : (q && q.items ? q.items : []);
-        const current = items.find(i => i.isCurrent) || store.getCurrentSong?.() || (items.length > 0 ? items[0] : null);
+        
+        // Find current song by index or method
+        const currentIndex = (store.player && typeof store.player.index === "number") ? store.player.index : -1;
+        const current = (currentIndex >= 0 && currentIndex < items.length) ? items[currentIndex] : (store.getCurrentSong?.() || (items.length > 0 ? items[0] : null));
         
         // Elapsed & Duration
         const timeStore = window.__FEISHIN_TIME_STORE__;
@@ -430,7 +433,7 @@ import './webgl-backgrounds.js';
             artist: t.artistName || (t.artists?.map(a => a.name).join(", ")) || "",
             album: t.album || t.albumName || "",
             duration: t.duration ? (t.duration > 10000 ? Math.round(t.duration / 1000) : t.duration) : 0,
-            isCurrent: current ? ((t._uniqueId && t._uniqueId === current._uniqueId) || (t.id && t.id === current.id)) : false
+            isCurrent: current ? ((t._uniqueId && t._uniqueId === current._uniqueId) || (t.id && t.id === current.id) || idx === currentIndex) : false
           }))
         };
 

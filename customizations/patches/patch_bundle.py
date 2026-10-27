@@ -67,11 +67,9 @@ def patch_bundle(file_path):
         else:
             print(f"[!] Aviso: Padrão não encontrado: {old[:35]}...")
 
-    # 3. Patch de Exposição do Player Store & Time Store para o Mini Painel do Tray
+    # 3. Patch de Exposição do Player Store para o Mini Painel do Tray
     replacements_tray_stores = [
-        (',Pa=hYe(Ma)', ',Pa=hYe(Ma);if(typeof window!=="undefined"){window.__FEISHIN_PLAYER_STORE__=Ma;}'),
-        (',Ui=qm()(Zy(KV(t=>({setTimestamp:e=>{t({timestamp:e})},timestamp:0})),{name:"player-timestamp",storage:dnt,version:1})),BH=t=>Ui.subscribe',
-         ',Ui=qm()(Zy(KV(t=>({setTimestamp:e=>{t({timestamp:e})},timestamp:0})),{name:"player-timestamp",storage:dnt,version:1}));if(typeof window!=="undefined"){window.__FEISHIN_TIME_STORE__=Ui;}const BH=t=>Ui.subscribe')
+        (',Pa=hYe(Ma)', ',Pa=(typeof window!=="undefined"&&(window.__FEISHIN_PLAYER_STORE__=Ma),hYe(Ma))')
     ]
 
     for old, new in replacements_tray_stores:

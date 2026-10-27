@@ -3,21 +3,15 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Feishin — Mini Player Widget</title>
+  <title>Feishin — Mini Player Glass</title>
   <style>
     :root {
-      --bg-glass: rgba(16, 18, 27, 0.82);
-      --bg-glass-card: rgba(255, 255, 255, 0.06);
-      --bg-glass-card-hover: rgba(255, 255, 255, 0.12);
-      --bg-glass-card-active: rgba(124, 58, 237, 0.22);
-      --border-glass: rgba(255, 255, 255, 0.14);
-      --border-glass-top: rgba(255, 255, 255, 0.28);
-      --text-main: #F8FAFC;
-      --text-muted: #94A3B8;
+      --text-main: #FFFFFF;
+      --text-muted: rgba(255, 255, 255, 0.65);
       --accent-violet: #8B5CF6;
       --accent-cyan: #06B6D4;
       --accent-gradient: linear-gradient(135deg, #8B5CF6 0%, #06B6D4 100%);
-      --glow-violet: rgba(139, 92, 246, 0.45);
+      --glow-violet: rgba(139, 92, 246, 0.55);
       --font-family: -apple-system, BlinkMacSystemFont, "Plus Jakarta Sans", "SF Pro Display", sans-serif;
     }
 
@@ -29,38 +23,47 @@
       -webkit-user-select: none;
     }
 
-    body {
-      background: transparent;
+    html, body {
+      background: transparent !important;
       color: var(--text-main);
       font-family: var(--font-family);
       overflow: hidden;
       width: 100vw;
       height: 100vh;
-      display: flex;
-      flex-direction: column;
-      padding: 10px;
+      margin: 0 !important;
+      padding: 0 !important;
     }
 
-    /* Main Container Glass Window */
+    /* Main Container — PURE 100% TRANSLUCENT LIQUID GLASS */
     .widget-container {
       width: 100%;
       height: 100%;
-      background: var(--bg-glass);
-      backdrop-filter: blur(35px) saturate(210%);
-      -webkit-backdrop-filter: blur(35px) saturate(210%);
-      border: 1px solid var(--border-glass);
-      border-top: 1px solid var(--border-glass-top);
-      border-radius: 22px;
-      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.65), inset 0 1px 1px rgba(255, 255, 255, 0.2);
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.18) 0%, rgba(15, 18, 30, 0.38) 100%) !important;
+      backdrop-filter: blur(48px) saturate(220%) brightness(1.15) !important;
+      -webkit-backdrop-filter: blur(48px) saturate(220%) brightness(1.15) !important;
+      border: 1px solid rgba(255, 255, 255, 0.28) !important;
+      border-top: 1px solid rgba(255, 255, 255, 0.58) !important;
+      border-radius: 20px;
+      box-shadow: 0 25px 60px rgba(0, 0, 0, 0.40), inset 0 1px 2px rgba(255, 255, 255, 0.50) !important;
       display: flex;
       flex-direction: column;
       overflow: hidden;
-      animation: popIn 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+      position: relative;
     }
 
-    @keyframes popIn {
-      0% { opacity: 0; transform: translateY(-8px) scale(0.98); }
-      100% { opacity: 1; transform: translateY(0) scale(1); }
+    /* Specular glass reflection bar */
+    .widget-container::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 40%;
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.18) 0%, rgba(255, 255, 255, 0) 100%);
+      pointer-events: none;
+      border-top-left-radius: 20px;
+      border-top-right-radius: 20px;
+      z-index: 1;
     }
 
     /* Header */
@@ -69,7 +72,9 @@
       align-items: center;
       justify-content: space-between;
       padding: 12px 16px 8px 16px;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+      position: relative;
+      z-index: 2;
     }
 
     .widget-brand {
@@ -83,22 +88,21 @@
       height: 8px;
       border-radius: 50%;
       background: #10B981;
-      box-shadow: 0 0 10px #10B981;
+      box-shadow: 0 0 12px #10B981;
       transition: all 0.3s ease;
     }
 
     .brand-glow-dot.paused {
       background: #F59E0B;
-      box-shadow: 0 0 10px #F59E0B;
+      box-shadow: 0 0 12px #F59E0B;
     }
 
     .brand-title {
       font-size: 13px;
       font-weight: 700;
       letter-spacing: 0.3px;
-      background: linear-gradient(135deg, #FFFFFF 20%, #CBD5E1 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
+      color: #FFFFFF;
+      text-shadow: 0 1px 4px rgba(0, 0, 0, 0.5);
     }
 
     .header-actions {
@@ -108,11 +112,11 @@
     }
 
     .btn-header {
-      background: rgba(255, 255, 255, 0.08);
-      border: 1px solid rgba(255, 255, 255, 0.12);
-      color: var(--text-muted);
+      background: rgba(255, 255, 255, 0.12);
+      border: 1px solid rgba(255, 255, 255, 0.24);
+      color: rgba(255, 255, 255, 0.85);
       border-radius: 8px;
-      padding: 4px 8px;
+      padding: 4px 9px;
       font-size: 11px;
       font-weight: 600;
       cursor: pointer;
@@ -120,20 +124,32 @@
       display: flex;
       align-items: center;
       gap: 4px;
+      backdrop-filter: blur(12px);
+      box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.25);
     }
 
     .btn-header:hover {
-      background: rgba(255, 255, 255, 0.18);
-      color: var(--text-main);
+      background: rgba(255, 255, 255, 0.24);
+      color: #FFFFFF;
+      border-color: rgba(255, 255, 255, 0.40);
       transform: translateY(-1px);
     }
 
-    /* Now Playing Hero */
+    /* Now Playing Hero Box — Frosted Glass Island */
     .now-playing-box {
-      padding: 14px 16px;
+      margin: 10px 12px 6px 12px;
+      padding: 12px 14px;
+      background: rgba(255, 255, 255, 0.07);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      border-radius: 16px;
+      box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.25), 0 8px 24px rgba(0, 0, 0, 0.2);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
       display: flex;
       flex-direction: column;
       gap: 12px;
+      position: relative;
+      z-index: 2;
     }
 
     .track-info-row {
@@ -147,9 +163,9 @@
       height: 58px;
       border-radius: 14px;
       overflow: hidden;
-      background: rgba(255, 255, 255, 0.05);
-      border: 1px solid rgba(255, 255, 255, 0.15);
-      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+      background: rgba(255, 255, 255, 0.10);
+      border: 1px solid rgba(255, 255, 255, 0.28);
+      box-shadow: 0 8px 22px rgba(0, 0, 0, 0.4);
       flex-shrink: 0;
       position: relative;
     }
@@ -168,7 +184,7 @@
       align-items: center;
       justify-content: center;
       font-size: 24px;
-      background: linear-gradient(135deg, rgba(139, 92, 246, 0.3) 0%, rgba(6, 182, 212, 0.2) 100%);
+      background: linear-gradient(135deg, rgba(139, 92, 246, 0.45) 0%, rgba(6, 182, 212, 0.35) 100%);
     }
 
     .track-meta {
@@ -182,20 +198,21 @@
     .track-title {
       font-size: 14px;
       font-weight: 700;
-      color: var(--text-main);
+      color: #FFFFFF;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
-      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+      text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6);
     }
 
     .track-artist {
       font-size: 12px;
-      font-weight: 500;
-      color: var(--accent-cyan);
+      font-weight: 600;
+      color: #38BDF8;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
+      text-shadow: 0 0 10px rgba(56, 189, 248, 0.4);
     }
 
     .track-album {
@@ -211,13 +228,13 @@
     .progress-section {
       display: flex;
       flex-direction: column;
-      gap: 4px;
+      gap: 5px;
     }
 
     .progress-bar-bg {
       width: 100%;
       height: 5px;
-      background: rgba(255, 255, 255, 0.12);
+      background: rgba(255, 255, 255, 0.18);
       border-radius: 6px;
       overflow: hidden;
       position: relative;
@@ -229,7 +246,7 @@
       border-radius: 6px;
       width: 0%;
       transition: width 0.3s linear;
-      box-shadow: 0 0 10px var(--glow-violet);
+      box-shadow: 0 0 12px var(--glow-violet);
     }
 
     .progress-times {
@@ -247,13 +264,13 @@
       align-items: center;
       justify-content: center;
       gap: 10px;
-      padding-top: 4px;
+      padding-top: 2px;
     }
 
     .ctrl-btn {
-      background: rgba(255, 255, 255, 0.08);
-      border: 1px solid rgba(255, 255, 255, 0.14);
-      color: var(--text-main);
+      background: rgba(255, 255, 255, 0.11);
+      border: 1px solid rgba(255, 255, 255, 0.24);
+      color: #FFFFFF;
       border-radius: 12px;
       cursor: pointer;
       display: flex;
@@ -261,12 +278,15 @@
       justify-content: center;
       transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
       position: relative;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.18), inset 0 1px 1px rgba(255, 255, 255, 0.3);
+      backdrop-filter: blur(14px);
     }
 
     .ctrl-btn:hover {
-      background: rgba(255, 255, 255, 0.18);
-      border-color: rgba(255, 255, 255, 0.3);
+      background: rgba(255, 255, 255, 0.24);
+      border-color: rgba(255, 255, 255, 0.42);
       transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.25), inset 0 1px 2px rgba(255, 255, 255, 0.4);
     }
 
     .ctrl-btn:active {
@@ -292,25 +312,27 @@
       height: 52px;
       border-radius: 50%;
       background: var(--accent-gradient);
-      border: 1px solid rgba(255, 255, 255, 0.35);
+      border: 1px solid rgba(255, 255, 255, 0.50);
       color: #FFFFFF;
       font-size: 20px;
-      box-shadow: 0 8px 24px var(--glow-violet);
+      box-shadow: 0 8px 24px var(--glow-violet), inset 0 1px 2px rgba(255, 255, 255, 0.45);
     }
 
     .ctrl-btn-play:hover {
-      box-shadow: 0 10px 30px rgba(139, 92, 246, 0.65);
-      transform: translateY(-2px) scale(1.05);
+      box-shadow: 0 12px 32px rgba(139, 92, 246, 0.75), inset 0 1px 3px rgba(255, 255, 255, 0.55);
+      transform: translateY(-2px) scale(1.06);
     }
 
-    /* Queue / Playlist Section */
+    /* Queue / Playlist Section — Frosted Glass Substrate */
     .queue-section {
       flex: 1;
       display: flex;
       flex-direction: column;
       overflow: hidden;
-      border-top: 1px solid rgba(255, 255, 255, 0.08);
-      background: rgba(0, 0, 0, 0.18);
+      border-top: 1px solid rgba(255, 255, 255, 0.14);
+      background: rgba(10, 12, 20, 0.18);
+      position: relative;
+      z-index: 2;
     }
 
     .queue-header {
@@ -321,21 +343,23 @@
     }
 
     .queue-title {
-      font-size: 12px;
+      font-size: 11px;
       font-weight: 700;
       text-transform: uppercase;
-      letter-spacing: 0.8px;
-      color: var(--text-muted);
+      letter-spacing: 0.9px;
+      color: rgba(255, 255, 255, 0.8);
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
     }
 
     .queue-badge {
       font-size: 10px;
       font-weight: 600;
-      padding: 2px 7px;
+      padding: 2px 8px;
       border-radius: 10px;
-      background: rgba(139, 92, 246, 0.2);
-      border: 1px solid rgba(139, 92, 246, 0.35);
-      color: #DDD6FE;
+      background: rgba(139, 92, 246, 0.30);
+      border: 1px solid rgba(139, 92, 246, 0.50);
+      color: #FFFFFF;
+      box-shadow: 0 0 10px rgba(139, 92, 246, 0.3);
     }
 
     .queue-list {
@@ -344,7 +368,7 @@
       padding: 4px 10px 10px 10px;
       display: flex;
       flex-direction: column;
-      gap: 4px;
+      gap: 5px;
     }
 
     /* Sleek Scrollbar */
@@ -355,35 +379,36 @@
       background: transparent;
     }
     .queue-list::-webkit-scrollbar-thumb {
-      background: rgba(255, 255, 255, 0.16);
+      background: rgba(255, 255, 255, 0.25);
       border-radius: 10px;
     }
     .queue-list::-webkit-scrollbar-thumb:hover {
-      background: rgba(255, 255, 255, 0.3);
+      background: rgba(255, 255, 255, 0.42);
     }
 
     .queue-item {
       display: flex;
       align-items: center;
       gap: 10px;
-      padding: 7px 10px;
-      border-radius: 10px;
-      background: var(--bg-glass-card);
-      border: 1px solid transparent;
+      padding: 8px 10px;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.07);
+      border: 1px solid rgba(255, 255, 255, 0.12);
       cursor: pointer;
       transition: all 0.15s ease;
+      backdrop-filter: blur(14px);
     }
 
     .queue-item:hover {
-      background: var(--bg-glass-card-hover);
-      border-color: rgba(255, 255, 255, 0.14);
+      background: rgba(255, 255, 255, 0.18);
+      border-color: rgba(255, 255, 255, 0.28);
       transform: translateX(2px);
     }
 
     .queue-item.active {
-      background: var(--bg-glass-card-active);
-      border-color: rgba(139, 92, 246, 0.45);
-      box-shadow: inset 0 0 14px rgba(139, 92, 246, 0.2);
+      background: linear-gradient(135deg, rgba(139, 92, 246, 0.40) 0%, rgba(6, 182, 212, 0.25) 100%);
+      border: 1px solid rgba(167, 139, 250, 0.65);
+      box-shadow: 0 4px 20px rgba(139, 92, 246, 0.40), inset 0 1px 2px rgba(255, 255, 255, 0.45);
     }
 
     .queue-item-idx {
@@ -396,7 +421,7 @@
     }
 
     .queue-item.active .queue-item-idx {
-      color: var(--accent-cyan);
+      color: #38BDF8;
     }
 
     .queue-item-details {
@@ -410,20 +435,21 @@
     .queue-item-title {
       font-size: 12px;
       font-weight: 600;
-      color: var(--text-main);
+      color: #FFFFFF;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
     }
 
     .queue-item.active .queue-item-title {
-      color: #A78BFA;
+      color: #FFFFFF;
       font-weight: 700;
     }
 
     .queue-item-artist {
       font-size: 10px;
-      font-weight: 400;
+      font-weight: 500;
       color: var(--text-muted);
       white-space: nowrap;
       overflow: hidden;
@@ -450,7 +476,7 @@
     .sound-wave span {
       display: block;
       width: 3px;
-      background: var(--accent-cyan);
+      background: #38BDF8;
       border-radius: 2px;
       animation: wave 1s infinite ease-in-out alternate;
     }

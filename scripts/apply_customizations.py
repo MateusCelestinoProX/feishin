@@ -52,8 +52,8 @@ def main():
     # 2. Extração
     with tempfile.TemporaryDirectory() as tmp_dir:
         extract_dir = Path(tmp_dir) / "feishin_asar"
-        print(f"[*] Extraindo {asar_path.name} para área temporária...")
-        run_cmd(f"npx --yes @electron/asar extract \"{asar_path}\" \"{extract_dir}\"")
+        print(f"[*] Extraindo cópia limpa de {backup_path.name} para área temporária...")
+        run_cmd(f"npx --yes @electron/asar extract \"{backup_path}\" \"{extract_dir}\"")
 
         renderer_dir = extract_dir / "out" / "renderer"
         assets_dest = renderer_dir / "assets"

@@ -43,9 +43,10 @@ function createTrayMiniWindow() {
     fullscreenable: false,
     resizable: false,
     transparent: true,
+    backgroundColor: "#00000000",
     alwaysOnTop: true,
     skipTaskbar: true,
-    hasShadow: true,
+    hasShadow: false,
     vibrancy: "under-window",
     visualEffectState: "active",
     webPreferences: {
@@ -90,6 +91,9 @@ function toggleTrayMiniPanel(bounds) {
   win.show();
   win.focus();
 
+  if (lastTrayState) {
+    win.webContents.send("tray-panel-update-state", lastTrayState);
+  }
   if (mainWindow && !mainWindow.isDestroyed()) {
     mainWindow.webContents.send("tray-panel-request-state");
   }
@@ -110,7 +114,7 @@ function initPersonalOsTray(tray, contextMenu) {
 if (!require$$0.ipcMain.eventNames().includes("tray-panel-send-state")) {
   require$$0.ipcMain.on("tray-panel-send-state", (_event, state) => {
     lastTrayState = state;
-    if (trayMiniWindow && !trayMiniWindow.isDestroyed() && trayMiniWindow.isVisible()) {
+    if (trayMiniWindow && !trayMiniWindow.isDestroyed()) {
       trayMiniWindow.webContents.send("tray-panel-update-state", state);
     }
   });
