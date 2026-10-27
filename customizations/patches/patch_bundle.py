@@ -52,11 +52,8 @@ def patch_bundle(file_path):
         ('{className:es.lineItem,onClick:L,children:p.jsxs(It,{align:\\"center\\"', '{className:es.lineItem,onClick:void 0,children:p.jsxs(It,{align:\\"center\\"'),
         ('secondary,js.songArtist),onClick:L,children:p.jsx(ug,{artistName:(l==n', 'secondary,js.songArtist),onClick:void 0,children:p.jsx(ug,{artistName:(l==n'),
         ('.secondary,js.songAlbum),onClick:L,children:p.jsx(Ve,{component:Or,fw:', '.secondary,js.songAlbum),onClick:void 0,children:p.jsx(Ve,{component:Or,fw:'),
-        ('const l=e?o:void 0;let c;', 'const l=o;let c;'),
-        ('a=it({[Pue.container]:!0,[Pue.openDrawer]:e})', 'a=it({[Pue.container]:!0,[Pue.openDrawer]:!0})'),
-        ('playButtonBehavior:Gt.NOW,playerbarOpenDrawer:!1,playerbarSlider:', 'playButtonBehavior:Gt.NOW,playerbarOpenDrawer:!0,playerbarSlider:'),
-        ('function XHt(t){return{collapsed:t.sidebar.collapsed,image:t.sidebar.image}}', 'function XHt(t){return{collapsed:t.sidebar.collapsed,image:!1}}'),
         # 2.1 Reprodutor Tela Dividida em 2 (Capa + Fila Integrada) e remoção da fila lateral
+        ('function XHt(t){return{collapsed:t.sidebar.collapsed,image:t.sidebar.image}}', 'function XHt(t){return{collapsed:t.sidebar.collapsed,image:!1}}'),
         ('activeTab:"",coverArtSize:75', 'activeTab:"queue",coverArtSize:75'),
         ('r==="sideQueue"?n({rightExpanded:!a}):s(JWt)', 'n({rightExpanded:!1}),(document.querySelector(".fs-left-controls-module-image")||document.querySelector("#player-bar img"))?.click()')
     ]

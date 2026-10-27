@@ -40,6 +40,21 @@ import './music-analytics.js';
     }
   });
 
+  // Auto-reconexão resiliente ao servidor Navidrome caso caia na tela action-required
+  setInterval(() => {
+    if (window.location.hash && window.location.hash.includes('action-required')) {
+      const candidates = Array.from(document.querySelectorAll('button, div, [role="button"]'));
+      const srvBtn = candidates.find(el => {
+        const t = (el.textContent || '').trim();
+        return (t.includes('Navidrome VPS') || t === 'Navidrome') && (el.tagName === 'BUTTON' || el.classList.contains('mantine-UnstyledButton-root') || el.getAttribute('role') === 'button');
+      });
+      if (srvBtn) {
+        console.log('[Personal OS Auto-Connect] Reconectando automaticamente ao Navidrome VPS...');
+        srvBtn.click();
+      }
+    }
+  }, 1200);
+
   // 1. Shaders catalog from Personal OS
   const SHADER_CATALOG = [
     {
