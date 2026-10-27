@@ -394,6 +394,7 @@ import './webgl-backgrounds.js';
     ensureShaderContainer();
     mountShaderSwitcherUI();
     initTrayBridge();
+    initFullScreenFreeSpaceDismiss();
 
     // Enforce album art staying in playerbar dock corner (never in sidebar)
     try {
@@ -557,6 +558,80 @@ import './webgl-backgrounds.js';
         if (data && data.action) handleAction(data.action, data.payload);
       });
     }
+  }
+
+  // ==========================================================================
+  // 10. FULLSCREEN FREE-SPACE CLICK-TO-DISMISS (ESC ACTION)
+  // Clicar em qualquer espaço livre da tela de reprodução expandida
+  // executa a ação da tecla Esc, retraindo a tela de volta para a barra.
+  // ==========================================================================
+  function initFullScreenFreeSpaceDismiss() {
+    let pointerDownPos = null;
+
+    window.addEventListener('pointerdown', (e) => {
+      if (e.button === 0) {
+        pointerDownPos = { x: e.clientX, y: e.clientY, time: Date.now() };
+      }
+    }, true);
+
+    window.addEventListener('click', (e) => {
+      // 1. Apenas botão principal (esquerdo)
+      if (e.button !== 0) return;
+
+      // 2. Ignora arrastos e seleções (> 8px)
+      if (pointerDownPos) {
+        const dx = Math.abs(e.clientX - pointerDownPos.x);
+        const dy = Math.abs(e.clientY - pointerDownPos.y);
+        pointerDownPos = null;
+        if (dx > 8 || dy > 8) return;
+      }
+
+      // 3. Verifica se a tela cheia / expandida está ativa
+      const fsContainer = document.querySelector('.fs-full-screen-player-module-container');
+      if (!fsContainer) return;
+
+      // 4. Ignora se houver texto selecionado
+      if (window.getSelection && window.getSelection().toString().trim().length > 0) return;
+
+      // 5. Ignora se algum modal, popover, menu ou o widget de temas estiver aberto
+      if (document.querySelector('.mantine-Modal-content, .mantine-Popover-dropdown, .mantine-Menu-dropdown, .mantine-Select-dropdown')) return;
+      const themeModal = document.getElementById('personal-os-shader-modal');
+      if (themeModal && themeModal.style.display === 'flex') return;
+
+      // 6. Lista de controles interativos que devem preservar sua ação própria
+      const interactive = e.target.closest(
+        'button, [role="button"], a, input, select, textarea, [role="slider"], ' +
+        '.mantine-Slider-root, .mantine-Menu-dropdown, .mantine-Modal-content, ' +
+        '.mantine-Popover-dropdown, #personal-os-shader-pill, #personal-os-shader-modal, ' +
+        '#personal-os-shader-backdrop, .fs-full-screen-player-queue-module-grid-container, ' +
+        '.fs-lyrics-module-container, #player-bar, footer, .full-screen-player-controls-container, ' +
+        '.fs-full-screen-player-queue-module-controls-container, .fs-window-bar-module-window-bar, ' +
+        '.fs-window-bar-module-macos-container'
+      );
+      if (interactive) return;
+
+      // 7. Confirma que o clique ocorreu dentro da área de tela cheia ou fundo
+      const isWithinFS = e.target.closest(
+        '.fs-full-screen-player-module-container, #main-content, #bg-webgl-container, #bg-webgl-vignette, #root'
+      );
+      if (!isWithinFS) return;
+
+      // 8. Executa a ação do botão Esc / Minimizar retraindo a tela
+      console.log('[Personal OS] Espaço livre clicado — executando ação do Esc para retrair a barra...');
+      const minBtn = document.querySelector('.fs-full-screen-player-module-container .full-screen-player-controls-container:not(.fs-full-screen-player-queue-module-controls-container) button');
+      if (minBtn) {
+        minBtn.click();
+      } else {
+        window.dispatchEvent(new KeyboardEvent('keydown', {
+          key: 'Escape',
+          code: 'Escape',
+          keyCode: 27,
+          which: 27,
+          bubbles: true,
+          cancelable: true
+        }));
+      }
+    }, true);
   }
 
   if (document.readyState === 'loading') {
