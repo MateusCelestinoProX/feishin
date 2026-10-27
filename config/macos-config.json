@@ -1,0 +1,35 @@
+{
+	"disable_auto_updates": false,
+	"enableNeteaseTranslation": false,
+	"global_media_hotkeys": true,
+	"lyrics": [
+		"NetEase",
+		"lrclib.net"
+	],
+	"mediaSession": false,
+	"playbackType": "web",
+	"should_prompt_accessibility": false,
+	"shown_accessibility_warning": true,
+	"visualizer_system_audio_consent_granted": false,
+	"window_enable_tray": true,
+	"window_exit_to_tray": false,
+	"window_minimize_to_tray": false,
+	"window_start_minimized": false,
+	"window_window_bar_style": "macos",
+	"__internal__": {
+		"migrations": {
+			"version": "1.17.0"
+		}
+	},
+	"window_has_frame": false,
+	"release_channel": "latest",
+	"bounds": {
+		"height": 952,
+		"width": 1680,
+		"x": 0,
+		"y": 25
+	},
+	"maximized": false,
+	"fullscreen": true,
+	"theme": "dark"
+}

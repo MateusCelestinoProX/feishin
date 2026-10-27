@@ -1,0 +1,35 @@
+<!doctype html>
+<html>
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+        <title>Feishin</title>
+        
+        <script>
+            (function () {
+                if (localStorage.getItem('umami.disabled') !== '1' && window.ANALYTICS_DISABLED !== true && window.ANALYTICS_DISABLED !== 'true') {
+                    var s = document.createElement('script');
+                    s.defer = true;
+                    s.src = 'https://umami.jeffvli.org/script.js';
+                    s.setAttribute('data-website-id', '5120fc56-cffa-4d42-8b6c-9afb6f459251');
+                    s.setAttribute('data-exclude-search', 'true');
+                    s.setAttribute('data-exclude-hash', 'true');
+                    s.setAttribute('data-auto-track', 'false');
+                    document.head.appendChild(s);
+                }
+            })();
+        </script>
+      <script src="./assets/pt-br-full.js"></script>
+      <script type="module" crossorigin src="./assets/index-C3w9ueFE.js"></script>
+      <link rel="stylesheet" crossorigin href="./assets/index-Cp7aWvHd.css">
+      <link rel="stylesheet" crossorigin href="./assets/feishin-personal-os.css">
+      <script type="module" crossorigin src="./assets/feishin-personal-os.js"></script>
+    </head>
+
+    <body style="background-color: transparent">
+        <div id="bg-webgl-container"></div>
+        <div id="bg-webgl-vignette"></div>
+        <div id="root">
+        </div>
+    </body>
+</html>

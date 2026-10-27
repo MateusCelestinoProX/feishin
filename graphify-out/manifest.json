@@ -1,0 +1,80 @@
+{
+  "config/macos-config.json": {
+    "mtime": 1793061905.0348675,
+    "seen": 1793062008.2642748,
+    "ast_hash": "f1248da6b8cc6f76b29ef586eae02140",
+    "semantic_hash": ""
+  },
+  "customizations/assets/feishin-personal-os.js": {
+    "mtime": 1793061904.951242,
+    "seen": 1793062008.2642822,
+    "ast_hash": "01e9bffc48ce9f494d536f9eb6f0c278",
+    "semantic_hash": ""
+  },
+  "customizations/assets/ogl.js": {
+    "mtime": 1793061904.9666896,
+    "seen": 1793062008.264286,
+    "ast_hash": "2053a58c70590e81b8c60af3390458db",
+    "semantic_hash": ""
+  },
+  "customizations/assets/pt-br-full.js": {
+    "mtime": 1793061904.9749744,
+    "seen": 1793062008.264287,
+    "ast_hash": "f1ad509f19139eb2be45a98ebd8d865a",
+    "semantic_hash": ""
+  },
+  "customizations/assets/webgl-backgrounds.js": {
+    "mtime": 1793061904.958662,
+    "seen": 1793062008.2642891,
+    "ast_hash": "a25216792f53a95bbb2b425d8b24fe7b",
+    "semantic_hash": ""
+  },
+  "customizations/i18n/feishin_pt_full.json": {
+    "mtime": 1793061905.0039477,
+    "seen": 1793062008.264291,
+    "ast_hash": "ad04cc6dadc461e84b3290ac16eedb67",
+    "semantic_hash": ""
+  },
+  "customizations/patches/patch_bundle.py": {
+    "mtime": 1793061938.0727491,
+    "seen": 1793062008.2642932,
+    "ast_hash": "f8c0e26b77a7c22591a2d6cc64b70a40",
+    "semantic_hash": ""
+  },
+  "scripts/apply_customizations.py": {
+    "mtime": 1793061953.3312068,
+    "seen": 1793062008.264294,
+    "ast_hash": "9a17892fa7b56cdb0321131e8d4fe598",
+    "semantic_hash": ""
+  },
+  "scripts/build_full_pt_br.py": {
+    "mtime": 1793061905.0192142,
+    "seen": 1793062008.264296,
+    "ast_hash": "f688f6d386eb923725366b48003a6d9b",
+    "semantic_hash": ""
+  },
+  "scripts/install.sh": {
+    "mtime": 1793061961.6225574,
+    "seen": 1793062008.264298,
+    "ast_hash": "3f065510811ce994c6b1cdb1c50a98ba",
+    "semantic_hash": ""
+  },
+  "scripts/restore.sh": {
+    "mtime": 1793061969.5752673,
+    "seen": 1793062008.264299,
+    "ast_hash": "b70f10de1509d22ad263aac347b67413",
+    "semantic_hash": ""
+  },
+  "README.md": {
+    "mtime": 1793061994.6060054,
+    "seen": 1793062008.264301,
+    "ast_hash": "097aa5acf1b4e93f0fd0b36edfe88821",
+    "semantic_hash": ""
+  },
+  "customizations/index.html": {
+    "mtime": 1793061904.993095,
+    "seen": 1793062008.2643032,
+    "ast_hash": "a66ee31a791162e248d527301cbe60f8",
+    "semantic_hash": ""
+  }
+}
