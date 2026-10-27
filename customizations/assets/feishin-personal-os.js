@@ -936,12 +936,26 @@ import './music-analytics.js';
   function initPlayerSplitQueue() {
     console.log('[Personal OS] Ativando Reprodutor com Tela Dividida (Capa + Fila)...');
 
-    const enforceQueueActive = () => {
-      const fsContainer = document.querySelector('.fs-full-screen-player-module-container');
-      if (!fsContainer) return;
+    let isEnforcing = false;
+    let lastEnforceTime = 0;
+    let lastFsState = false;
 
-      // 1. Assegura persistência de activeTab: "queue"
+    const enforceQueueActive = () => {
+      const now = Date.now();
+      if (isEnforcing || (now - lastEnforceTime < 800)) return;
+      
+      const fsContainer = document.querySelector('.fs-full-screen-player-module-container');
+      if (!fsContainer) {
+        lastFsState = false;
+        return;
+      }
+
+      isEnforcing = true;
+      lastEnforceTime = now;
+      lastFsState = true;
+
       try {
+        // 1. Assegura persistência de activeTab: "queue"
         const rawFs = localStorage.getItem('store_full_screen_player');
         if (rawFs) {
           const parsedFs = JSON.parse(rawFs);
@@ -950,22 +964,30 @@ import './music-analytics.js';
             localStorage.setItem('store_full_screen_player', JSON.stringify(parsedFs));
           }
         }
-      } catch (e) {}
 
-      // 2. Se a fila estiver colapsada no DOM, dispara o clique no botão de fila
-      const qg = fsContainer.querySelector('.fs-full-screen-player-queue-module-grid-container');
-      if (qg && (qg.classList.contains('fs-full-screen-player-queue-module-grid-container-collapsed') || qg.children.length === 0)) {
-        const queueControls = fsContainer.querySelector('.fs-full-screen-player-queue-module-controls-container');
-        const btns = queueControls ? queueControls.querySelectorAll('button') : [];
-        if (btns[0]) btns[0].click();
+        // 2. Se a fila estiver colapsada no DOM, dispara o clique no botão de fila
+        const qg = fsContainer.querySelector('.fs-full-screen-player-queue-module-grid-container');
+        if (qg && (qg.classList.contains('fs-full-screen-player-queue-module-grid-container-collapsed') || qg.children.length === 0)) {
+          const queueControls = fsContainer.querySelector('.fs-full-screen-player-queue-module-controls-container');
+          const btns = queueControls ? queueControls.querySelectorAll('button') : [];
+          if (btns[0]) btns[0].click();
+        }
+      } catch (e) {
+      } finally {
+        setTimeout(() => { isEnforcing = false; }, 300);
       }
     };
 
-    // Observa entrada na tela da música
+    // Observa entrada na tela da música somente quando o estado de presença do container mudar
+    let checkTimeout = null;
     const playerObserver = new MutationObserver(() => {
-      enforceQueueActive();
+      const isFSNow = !!document.querySelector('.fs-full-screen-player-module-container');
+      if (isFSNow !== lastFsState) {
+        if (checkTimeout) clearTimeout(checkTimeout);
+        checkTimeout = setTimeout(enforceQueueActive, 100);
+      }
     });
-    playerObserver.observe(document.body, { childList: true, subtree: true });
+    playerObserver.observe(document.body, { childList: true, subtree: false });
     enforceQueueActive();
 
     // Redireciona clique no botão de fila da dock inferior para abrir a tela da música

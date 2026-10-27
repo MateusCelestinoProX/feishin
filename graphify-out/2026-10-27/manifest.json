@@ -36,15 +36,15 @@
     "semantic_hash": ""
   },
   "customizations/patches/patch_bundle.py": {
-    "mtime": 1793116793.834451,
-    "seen": 1793117019.8863611,
-    "ast_hash": "e5aeb173137e38a031525c9338ab6d85",
+    "mtime": 1793117507.1965907,
+    "seen": 1793117582.9849868,
+    "ast_hash": "34facac8ec6b3134bb0704cb8ed628d3",
     "semantic_hash": ""
   },
   "scripts/apply_customizations.py": {
-    "mtime": 1793116458.8569062,
-    "seen": 1793117019.886365,
-    "ast_hash": "deb5e08c2fa9262869ffdea0eaad8a31",
+    "mtime": 1793117519.378759,
+    "seen": 1793117582.984993,
+    "ast_hash": "78e85d3a9dd30b62c531e91957805838",
     "semantic_hash": ""
   },
   "scripts/build_full_pt_br.py": {
@@ -66,15 +66,15 @@
     "semantic_hash": ""
   },
   "README.md": {
-    "mtime": 1793116805.3202662,
-    "seen": 1793117019.886375,
-    "ast_hash": "9078840cae4cd5589529f7d8658c0638",
+    "mtime": 1793117110.7232442,
+    "seen": 1793117582.9850082,
+    "ast_hash": "5b9b0ec06d135f0aab00c6878e54ac46",
     "semantic_hash": ""
   },
   "customizations/index.html": {
-    "mtime": 1793116427.585923,
-    "seen": 1793117019.88638,
-    "ast_hash": "b7f262b874d9d39c09cdf52dd023a2e7",
+    "mtime": 1793117231.657741,
+    "seen": 1793117582.985014,
+    "ast_hash": "e9c6d1775b43d21084366e1c1cfef0ed",
     "semantic_hash": ""
   },
   "customizations/patches/patch_main.py": {
@@ -96,9 +96,21 @@
     "semantic_hash": ""
   },
   "customizations/assets/music-analytics.js": {
-    "mtime": 1793117013.0646195,
-    "seen": 1793117019.8863418,
-    "ast_hash": "8b00de414ed455e53c6d018e568aca50",
+    "mtime": 1793117375.6030982,
+    "seen": 1793117582.984965,
+    "ast_hash": "8a0b54f4e09786cd4819068bf89d60d3",
+    "semantic_hash": ""
+  },
+  "customizations/assets/feishin-tags-engine.js": {
+    "mtime": 1793117478.8603556,
+    "seen": 1793117582.98496,
+    "ast_hash": "5adc240ce6b03b878e3608efc0b632f0",
+    "semantic_hash": ""
+  },
+  "scripts/capture_feishin.mjs": {
+    "mtime": 1793117086.5894527,
+    "seen": 1793117582.984999,
+    "ast_hash": "14a851a8304f333e83184cb547e3522d",
     "semantic_hash": ""
   }
 }
