@@ -1,7 +1,7 @@
 /* ==========================================================================
-   FEISHIN x PERSONAL OS — MASTER LIQUID GLASS ARCHITECTURE & SHADERS
-   Pure VisionOS / macOS Sequoia Frosted Glass + 33 Real-Time WebGL Shaders
-   Sovereign Design System for Music OS
+   FEISHIN x PERSONAL OS — APPLE macOS LIQUID GLASS SYSTEM
+   Standard Apple macOS Dark Vibrancy (Frosted Glass) & Ultra-Clean Controls
+   Zero High-Contrast White Glows / Inset Highlights
    ========================================================================== */
 
 @import url("https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Outfit:wght@400;600;700;800&display=swap");
@@ -19,7 +19,7 @@ body, html, #root {
     overflow: hidden !important;
     background: transparent !important;
     background-color: transparent !important;
-    font-family: "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, sans-serif !important;
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Plus Jakarta Sans", "Helvetica Neue", sans-serif !important;
     color: #F8FAFC !important;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
@@ -30,7 +30,7 @@ div, span, p, a, h1, h2, h3, h4, h5, h6 {
     border: none;
 }
 
-/* --- 2. WEBGL BACKDROP & CINEMATIC VIGNETTE --- */
+/* --- 2. WEBGL BACKDROP & VIGNETTE --- */
 #bg-webgl-container {
     position: fixed !important;
     top: 0 !important;
@@ -76,88 +76,28 @@ div, span, p, a, h1, h2, h3, h4, h5, h6 {
 }
 
 /* 3.1 TOP WINDOW BAR CAPSULE ISLAND */
-.fs-window-bar-module-window-bar {
+.fs-window-bar-module-window-bar,
+.fs-window-bar-module-macos-container {
     flex-shrink: 0 !important;
     height: 44px !important;
-    border-radius: 18px !important;
+    border-radius: 16px !important;
     padding: 0 16px !important;
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.09) 0%, rgba(255, 255, 255, 0.02) 100%), rgba(10, 10, 16, 0.38) !important;
-    border: 1px solid rgba(255, 255, 255, 0.18) !important;
-    border-top: 1px solid rgba(255, 255, 255, 0.38) !important;
-    backdrop-filter: blur(20px) saturate(200%) !important;
-    -webkit-backdrop-filter: blur(20px) saturate(200%) !important;
-    box-shadow: 0 12px 35px rgba(0, 0, 0, 0.35), inset 0 1px 1px rgba(255, 255, 255, 0.30) !important;
+    background: rgba(20, 20, 26, 0.65) !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    backdrop-filter: blur(28px) saturate(180%) !important;
+    -webkit-backdrop-filter: blur(28px) saturate(180%) !important;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.30) !important;
     display: flex !important;
     align-items: center !important;
-    position: relative !important;
+    justify-content: space-between !important;
     z-index: 100 !important;
-    -webkit-app-region: drag !important;
 }
 
-.fs-window-bar-module-macos-container,
-.fs-window-bar-module-windows-container {
-    width: 100% !important;
-    height: 100% !important;
-    background: transparent !important;
-    border: none !important;
-    border-radius: 0 !important;
-    box-shadow: none !important;
-    backdrop-filter: none !important;
-    -webkit-backdrop-filter: none !important;
-    padding: 0 !important;
-    margin: 0 !important;
-    display: flex !important;
-    align-items: center !important;
-    position: relative !important;
-    -webkit-app-region: drag !important;
-}
-
-.fs-window-bar-module-macos-button-group {
-    position: absolute !important;
-    left: 0 !important;
-    top: 50% !important;
-    transform: translateY(-50%) !important;
-    display: grid !important;
-    grid-template-columns: repeat(3, 22px) !important;
-    height: 20px !important;
-    align-items: center !important;
-    -webkit-app-region: no-drag !important;
-    z-index: 101 !important;
-}
-
-.fs-window-bar-module-macos-button {
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    width: 22px !important;
-    height: 20px !important;
-    cursor: pointer !important;
-    -webkit-app-region: no-drag !important;
-}
-
-.fs-window-bar-module-macos-button img {
-    width: 15px !important;
-    height: 15px !important;
-    display: block !important;
-}
-
-.fs-window-bar-module-macos-container .fs-window-bar-module-player-status-container {
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    width: 100% !important;
-    max-width: calc(100% - 160px) !important;
-    margin: 0 auto !important;
-    padding: 0 !important;
-}
-
-.fs-window-bar-module-title,
-.fs-window-bar-module-player-status-text {
+.fs-window-bar-module-title {
     font-size: 13px !important;
-    font-weight: 600 !important;
-    color: rgba(255, 255, 255, 0.90) !important;
-    letter-spacing: 0.2px !important;
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5) !important;
+    font-weight: 500 !important;
+    color: rgba(255, 255, 255, 0.88) !important;
+    letter-spacing: -0.1px !important;
 }
 
 /* 3.2 MAIN WORKSPACE CONTAINER */
@@ -179,20 +119,19 @@ div, span, p, a, h1, h2, h3, h4, h5, h6 {
     gap: 10px !important;
 }
 
-/* 3.3 LEFT NAVIGATION SIDEBAR (PERSONAL OS LIQUID GLASS) */
+/* 3.3 LEFT NAVIGATION SIDEBAR (APPLE STANDARD VIBRANCY) */
 #sidebar,
 .fs-left-sidebar-module-container {
     width: 250px !important;
     min-width: 230px !important;
     height: 100% !important;
-    border-radius: 24px !important;
+    border-radius: 18px !important;
     overflow: hidden !important;
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.02) 100%), rgba(10, 10, 16, 0.35) !important;
-    border: 1px solid rgba(255, 255, 255, 0.18) !important;
-    border-top: 1px solid rgba(255, 255, 255, 0.38) !important;
-    backdrop-filter: blur(20px) saturate(200%) !important;
-    -webkit-backdrop-filter: blur(20px) saturate(200%) !important;
-    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.45), inset 0 1px 1px rgba(255, 255, 255, 0.30) !important;
+    background: rgba(18, 18, 24, 0.62) !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    backdrop-filter: blur(28px) saturate(180%) !important;
+    -webkit-backdrop-filter: blur(28px) saturate(180%) !important;
+    box-shadow: 0 16px 36px rgba(0, 0, 0, 0.35) !important;
     padding: 14px 10px !important;
 }
 
@@ -206,28 +145,28 @@ div, span, p, a, h1, h2, h3, h4, h5, h6 {
 .fs-sidebar-module-container .mantine-TextInput-input,
 .fs-search-input-module-input {
     background: rgba(255, 255, 255, 0.06) !important;
-    border: 1px solid rgba(255, 255, 255, 0.14) !important;
-    border-top: 1px solid rgba(255, 255, 255, 0.25) !important;
-    border-radius: 12px !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    border-radius: 10px !important;
     color: #FFFFFF !important;
     padding: 7px 12px !important;
     font-size: 13px !important;
     backdrop-filter: blur(12px) !important;
     transition: all 0.2s ease !important;
+    box-shadow: none !important;
 }
 
 .fs-sidebar-module-container input[type="search"]:focus,
 .fs-sidebar-module-container .mantine-TextInput-input:focus,
 .fs-search-input-module-input:focus {
-    background: rgba(255, 255, 255, 0.10) !important;
-    border-color: rgba(255, 255, 255, 0.40) !important;
-    box-shadow: 0 0 14px rgba(255, 255, 255, 0.15) !important;
+    background: rgba(255, 255, 255, 0.09) !important;
+    border-color: rgba(255, 255, 255, 0.20) !important;
+    box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.10) !important;
 }
 
-/* Sidebar Navigation Items - Clean Ghost & Glass State (NO BINAURAL PURPLE PILLS) */
+/* Sidebar Navigation Items - Apple macOS List Style */
 .fs-sidebar-item-module-link,
 .fs-sidebar-item-module-root {
-    border-radius: 12px !important;
+    border-radius: 10px !important;
     margin: 2px 4px !important;
     padding: 7px 12px !important;
     background: transparent !important;
@@ -236,25 +175,23 @@ div, span, p, a, h1, h2, h3, h4, h5, h6 {
     color: rgba(255, 255, 255, 0.72) !important;
     font-size: 13px !important;
     font-weight: 500 !important;
-    transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1) !important;
+    transition: background-color 0.15s ease, color 0.15s ease !important;
 }
 
 .fs-sidebar-item-module-link:hover,
 .fs-sidebar-item-module-root:hover {
     background: rgba(255, 255, 255, 0.08) !important;
-    border: 1px solid rgba(255, 255, 255, 0.12) !important;
+    border: 1px solid rgba(255, 255, 255, 0.06) !important;
     color: #FFFFFF !important;
-    transform: translateX(2px) !important;
 }
 
-/* Targeted Active Selector (excludes generic .mantine-active) */
+/* Targeted Active Selector */
 .fs-sidebar-item-module-link[data-active="true"],
 .fs-sidebar-item-module-link.active,
 .fs-sidebar-item-module-link[aria-current="page"] {
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.15) 0%, rgba(255, 255, 255, 0.04) 100%) !important;
-    border: 1px solid rgba(255, 255, 255, 0.25) !important;
-    border-top: 1px solid rgba(255, 255, 255, 0.45) !important;
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.35) !important;
+    background: rgba(255, 255, 255, 0.12) !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.20) !important;
     color: #FFFFFF !important;
     font-weight: 600 !important;
 }
@@ -266,26 +203,25 @@ div, span, p, a, h1, h2, h3, h4, h5, h6 {
     background: transparent !important;
     border: none !important;
     box-shadow: none !important;
-    color: rgba(255, 255, 255, 0.50) !important;
+    color: rgba(255, 255, 255, 0.45) !important;
     font-size: 11px !important;
-    font-weight: 700 !important;
-    letter-spacing: 0.6px !important;
+    font-weight: 600 !important;
+    letter-spacing: 0.5px !important;
     text-transform: uppercase !important;
 }
 
-/* 3.4 MAIN CONTENT BODY (RIGHT STAGE ISLAND) */
+/* 3.4 MAIN CONTENT BODY (STAGE ISLAND) */
 .fs-main-content-module-main-content-body {
     flex: 1 !important;
     height: 100% !important;
     min-width: 0 !important;
-    border-radius: 24px !important;
+    border-radius: 18px !important;
     overflow: hidden !important;
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.06) 0%, rgba(255, 255, 255, 0.01) 100%), rgba(8, 8, 12, 0.28) !important;
-    border: 1px solid rgba(255, 255, 255, 0.16) !important;
-    border-top: 1px solid rgba(255, 255, 255, 0.35) !important;
-    backdrop-filter: blur(20px) saturate(200%) !important;
-    -webkit-backdrop-filter: blur(20px) saturate(200%) !important;
-    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.45), inset 0 1px 1px rgba(255, 255, 255, 0.28) !important;
+    background: rgba(16, 16, 22, 0.55) !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    backdrop-filter: blur(28px) saturate(180%) !important;
+    -webkit-backdrop-filter: blur(28px) saturate(180%) !important;
+    box-shadow: 0 16px 36px rgba(0, 0, 0, 0.35) !important;
 }
 
 .fs-main-content-module-main-content-body-scroll,
@@ -300,14 +236,13 @@ div, span, p, a, h1, h2, h3, h4, h5, h6 {
     width: 280px !important;
     min-width: 240px !important;
     height: 100% !important;
-    border-radius: 24px !important;
+    border-radius: 18px !important;
     overflow: hidden !important;
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.02) 100%), rgba(10, 10, 16, 0.35) !important;
-    border: 1px solid rgba(255, 255, 255, 0.18) !important;
-    border-top: 1px solid rgba(255, 255, 255, 0.38) !important;
-    backdrop-filter: blur(20px) saturate(200%) !important;
-    -webkit-backdrop-filter: blur(20px) saturate(200%) !important;
-    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.45), inset 0 1px 1px rgba(255, 255, 255, 0.30) !important;
+    background: rgba(18, 18, 24, 0.62) !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    backdrop-filter: blur(28px) saturate(180%) !important;
+    -webkit-backdrop-filter: blur(28px) saturate(180%) !important;
+    box-shadow: 0 16px 36px rgba(0, 0, 0, 0.35) !important;
     transition: all 0.25s ease !important;
 }
 
@@ -322,41 +257,50 @@ div, span, p, a, h1, h2, h3, h4, h5, h6 {
 }
 
 .fs-resize-handle-module-handle {
-    background: rgba(255, 255, 255, 0.08) !important;
+    background: rgba(255, 255, 255, 0.06) !important;
     transition: background 0.2s ease !important;
 }
 
 .fs-resize-handle-module-handle:hover {
-    background: rgba(255, 255, 255, 0.25) !important;
+    background: rgba(255, 255, 255, 0.18) !important;
 }
 
-/* --- 4. ALBUM & MEDIA CARDS --- */
+/* --- 4. ALBUM & MEDIA CARDS (APPLE MUSIC STANDARD) --- */
 .fs-item-card-module-container {
     border: none !important;
     background: transparent !important;
     box-shadow: none !important;
     padding: 0 !important;
-    transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1) !important;
+    transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
 }
 
 .fs-item-card-module-container:hover {
-    transform: translateY(-4px) scale(1.01) !important;
+    transform: translateY(-2px) !important;
 }
 
-.fs-item-card-module-image-container,
-.fs-image-module-image-container {
-    border-radius: 16px !important;
+/* Outer image container */
+.fs-item-card-module-image-container {
+    border-radius: 12px !important;
     overflow: hidden !important;
-    border: 1px solid rgba(255, 255, 255, 0.16) !important;
-    border-top: 1px solid rgba(255, 255, 255, 0.35) !important;
-    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.45) !important;
-    background: rgba(255, 255, 255, 0.04) !important;
-    transition: all 0.25s ease !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.35) !important;
+    background: transparent !important;
+    transition: all 0.2s ease !important;
 }
 
 .fs-item-card-module-container:hover .fs-item-card-module-image-container {
-    border-color: rgba(255, 255, 255, 0.35) !important;
-    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.55), 0 0 20px rgba(255, 255, 255, 0.15) !important;
+    border-color: rgba(255, 255, 255, 0.18) !important;
+    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.45) !important;
+}
+
+/* Inner image container: no double border, no fake background */
+.fs-item-card-module-image-container .fs-image-module-image-container,
+.fs-image-module-image-container {
+    border-radius: 12px !important;
+    overflow: hidden !important;
+    border: none !important;
+    box-shadow: none !important;
+    background: transparent !important;
 }
 
 .fs-item-card-module-detail-container,
@@ -374,13 +318,13 @@ div, span, p, a, h1, h2, h3, h4, h5, h6 {
 
 .fs-item-card-module-muted,
 .fs-item-card-module-artists-row {
-    color: rgba(255, 255, 255, 0.55) !important;
+    color: rgba(255, 255, 255, 0.50) !important;
     font-size: 12px !important;
     border: none !important;
     box-shadow: none !important;
 }
 
-/* Disallow misplaced sidebar album thumbnail - album art belongs in the player dock */
+/* Disallow misplaced sidebar album thumbnail */
 #sidebar .fs-sidebar-module-image-container,
 .fs-sidebar-module-image-container,
 .fs-sidebar-module-sidebar-image {
@@ -401,20 +345,19 @@ div, span, p, a, h1, h2, h3, h4, h5, h6 {
     visibility: hidden !important;
 }
 
-/* --- 5. FLOATING MEDIA PLAYER DOCK (PERSONAL OS MASTER DOCK) --- */
+/* --- 5. FLOATING MEDIA PLAYER DOCK (APPLE macOS DOCK) --- */
 #player-bar {
     position: fixed !important;
     bottom: 12px !important;
     left: 14px !important;
     right: 14px !important;
     height: 72px !important;
-    border-radius: 22px !important;
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.10) 0%, rgba(255, 255, 255, 0.02) 100%), rgba(10, 10, 16, 0.50) !important;
-    border: 1px solid rgba(255, 255, 255, 0.20) !important;
-    border-top: 1px solid rgba(255, 255, 255, 0.42) !important;
-    backdrop-filter: blur(24px) saturate(210%) !important;
-    -webkit-backdrop-filter: blur(24px) saturate(210%) !important;
-    box-shadow: 0 25px 70px rgba(0, 0, 0, 0.55), inset 0 1px 1px rgba(255, 255, 255, 0.35) !important;
+    border-radius: 18px !important;
+    background: rgba(22, 22, 28, 0.72) !important;
+    border: 1px solid rgba(255, 255, 255, 0.09) !important;
+    backdrop-filter: blur(28px) saturate(180%) !important;
+    -webkit-backdrop-filter: blur(28px) saturate(180%) !important;
+    box-shadow: 0 18px 45px rgba(0, 0, 0, 0.45) !important;
     z-index: 9999 !important;
     padding: 0 20px !important;
     display: flex !important;
@@ -445,23 +388,22 @@ div, span, p, a, h1, h2, h3, h4, h5, h6 {
     height: 52px !important;
     min-width: 52px !important;
     min-height: 52px !important;
-    border-radius: 12px !important;
+    border-radius: 10px !important;
     overflow: hidden !important;
     position: relative !important;
-    border: 1px solid rgba(255, 255, 255, 0.22) !important;
-    border-top: 1px solid rgba(255, 255, 255, 0.38) !important;
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.45), inset 0 1px 1px rgba(255, 255, 255, 0.25) !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35) !important;
     object-fit: cover !important;
     cursor: pointer !important;
-    transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s ease !important;
+    transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s ease, border-color 0.2s ease !important;
 }
 
 .fs-left-controls-module-image:hover,
 .fs-left-controls-module-image-wrapper img:hover,
 .fs-left-controls-module-playerbar-image:hover {
-    transform: scale(1.05) !important;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.55), 0 0 14px rgba(255, 255, 255, 0.25) !important;
-    border-color: rgba(255, 255, 255, 0.35) !important;
+    transform: scale(1.03) !important;
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.45) !important;
+    border-color: rgba(255, 255, 255, 0.16) !important;
 }
 
 .fs-left-controls-module-metadata-stack {
@@ -478,21 +420,21 @@ div, span, p, a, h1, h2, h3, h4, h5, h6 {
     width: 100% !important;
 }
 
-/* Hero Play/Pause Button - Apple Minimalist White Pure Glass */
+/* Hero Play/Pause Button - Standard macOS Solid White with Ambient Dark Shadow */
 .fs-center-controls-module-buttons-container button:nth-child(3),
 button[title*="Play"], button[title*="Reproduzir"], button[title*="Pausar"] {
     border-radius: 50% !important;
     background: #FFFFFF !important;
     color: #0A0A0E !important;
-    border: 1px solid rgba(255, 255, 255, 0.85) !important;
-    box-shadow: 0 4px 18px rgba(255, 255, 255, 0.30) !important;
-    transition: all 0.20s cubic-bezier(0.16, 1, 0.3, 1) !important;
+    border: none !important;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.30) !important;
+    transition: transform 0.15s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.15s ease !important;
 }
 
 .fs-center-controls-module-buttons-container button:nth-child(3):hover,
 button[title*="Play"]:hover, button[title*="Reproduzir"]:hover, button[title*="Pausar"]:hover {
-    transform: scale(1.08) !important;
-    box-shadow: 0 6px 24px rgba(255, 255, 255, 0.45) !important;
+    transform: scale(1.05) !important;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.40) !important;
 }
 
 /* Secondary Controls (Shuffle, Prev, Next, Repeat, Queue) */
@@ -500,9 +442,10 @@ button[title*="Play"]:hover, button[title*="Reproduzir"]:hover, button[title*="P
 .fs-playerbar-module-right-grid-item button {
     background: transparent !important;
     border: 1px solid transparent !important;
-    border-radius: 10px !important;
+    border-radius: 8px !important;
     color: rgba(255, 255, 255, 0.70) !important;
-    transition: all 0.15s ease !important;
+    transition: background-color 0.15s ease, color 0.15s ease !important;
+    box-shadow: none !important;
 }
 
 .fs-center-controls-module-buttons-container button:not(:nth-child(3)):hover,
@@ -513,39 +456,39 @@ button[title*="Play"]:hover, button[title*="Reproduzir"]:hover, button[title*="P
 
 /* Scrubber / Progress Bar */
 .mantine-Slider-track {
-    background: rgba(255, 255, 255, 0.14) !important;
+    background: rgba(255, 255, 255, 0.12) !important;
     height: 4px !important;
     border-radius: 2px !important;
     transition: height 0.15s ease !important;
 }
 
 .mantine-Slider-root:hover .mantine-Slider-track {
-    height: 6px !important;
+    height: 5px !important;
 }
 
 .mantine-Slider-bar {
     background: #FFFFFF !important;
     border-radius: 2px !important;
-    box-shadow: 0 0 8px rgba(255, 255, 255, 0.5) !important;
+    box-shadow: none !important;
 }
 
 .mantine-Slider-thumb {
     background: #FFFFFF !important;
     border: none !important;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4) !important;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.35) !important;
     width: 12px !important;
     height: 12px !important;
 }
 
-/* --- 6. SONGS TABLE & LIST VIEW (HIGH-SPEED FLUID SCROLLING) --- */
+/* --- 6. SONGS TABLE & LIST VIEW --- */
 .fs-virtual-table-module-row,
 [role="row"] {
     background: transparent !important;
     border: none !important;
     border-bottom: 1px solid rgba(255, 255, 255, 0.04) !important;
-    border-radius: 10px !important;
+    border-radius: 8px !important;
     margin: 1px 0 !important;
-    transition: background-color 0.12s ease, border-color 0.12s ease !important;
+    transition: background-color 0.12s ease !important;
     will-change: transform;
     contain: layout style;
 }
@@ -553,7 +496,7 @@ button[title*="Play"]:hover, button[title*="Reproduzir"]:hover, button[title*="P
 .fs-virtual-table-module-row:hover,
 [role="row"]:hover {
     background: rgba(255, 255, 255, 0.06) !important;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.04) !important;
 }
 
 /* GPU Accelerated Zero-Lag Virtual Scroll Containers */
@@ -568,18 +511,18 @@ button[title*="Play"]:hover, button[title*="Reproduzir"]:hover, button[title*="P
 
 .fs-virtual-table-module-row[data-selected="true"],
 .fs-song-row-module-playing {
-    background: rgba(255, 255, 255, 0.12) !important;
-    border: 1px solid rgba(255, 255, 255, 0.22) !important;
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.20) !important;
+    background: rgba(255, 255, 255, 0.10) !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.20) !important;
 }
 
 .fs-virtual-table-module-header, thead, thead tr {
     background: transparent !important;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06) !important;
     font-size: 11px !important;
-    font-weight: 700 !important;
-    color: rgba(255, 255, 255, 0.50) !important;
-    letter-spacing: 0.8px !important;
+    font-weight: 600 !important;
+    color: rgba(255, 255, 255, 0.45) !important;
+    letter-spacing: 0.6px !important;
     text-transform: uppercase !important;
 }
 
@@ -592,14 +535,15 @@ button[title*="Play"]:hover, button[title*="Reproduzir"]:hover, button[title*="P
 
 .fs-action-bar-module-container button {
     background: rgba(255, 255, 255, 0.05) !important;
-    border: 1px solid rgba(255, 255, 255, 0.10) !important;
-    border-radius: 10px !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    border-radius: 8px !important;
     color: rgba(255, 255, 255, 0.80) !important;
-    transition: all 0.15s ease !important;
+    transition: background-color 0.15s ease !important;
+    box-shadow: none !important;
 }
 
 .fs-action-bar-module-container button:hover {
-    background: rgba(255, 255, 255, 0.12) !important;
+    background: rgba(255, 255, 255, 0.10) !important;
     color: #FFFFFF !important;
 }
 
@@ -613,124 +557,29 @@ button[title*="Play"]:hover, button[title*="Reproduzir"]:hover, button[title*="P
     pointer-events: auto !important;
 }
 
-/* Neon Pulse Animation for Bubble Glass Widget */
-@keyframes bubble-neon-pulse {
-    0%, 100% {
-        border-color: rgba(0, 240, 255, 0.60);
-        box-shadow: 
-            0 0 10px rgba(0, 240, 255, 0.45),
-            0 0 22px rgba(0, 240, 255, 0.22),
-            0 8px 32px rgba(0, 0, 0, 0.55),
-            inset 0 1.5px 2px rgba(255, 255, 255, 0.85),
-            inset 0 -1.5px 2px rgba(0, 0, 0, 0.35),
-            inset 0 0 12px rgba(0, 240, 255, 0.25);
-    }
-    50% {
-        border-color: rgba(0, 255, 242, 1);
-        box-shadow: 
-            0 0 20px rgba(0, 240, 255, 0.90),
-            0 0 38px rgba(168, 85, 247, 0.60),
-            0 0 55px rgba(0, 240, 255, 0.40),
-            0 10px 36px rgba(0, 0, 0, 0.65),
-            inset 0 1.5px 3px rgba(255, 255, 255, 1),
-            inset 0 -1.5px 2px rgba(0, 0, 0, 0.40),
-            inset 0 0 20px rgba(0, 240, 255, 0.55);
-    }
-}
-
-@keyframes neon-beacon-blink {
-    0%, 100% {
-        background-color: #00f0ff;
-        box-shadow: 0 0 6px #00f0ff, 0 0 14px rgba(0, 240, 255, 0.7);
-        opacity: 0.75;
-        transform: scale(0.92);
-    }
-    50% {
-        background-color: #38bdf8;
-        box-shadow: 0 0 16px #00f0ff, 0 0 28px #c084fc, 0 0 40px #00f0ff;
-        opacity: 1;
-        transform: scale(1.22);
-    }
-}
-
 #personal-os-shader-pill {
-    position: fixed !important;
-    top: 8px !important;
-    right: 18px !important;
-    z-index: 999999 !important;
     display: inline-flex !important;
     align-items: center !important;
-    gap: 9px !important;
-    padding: 6px 16px !important;
-    border-radius: 9999px !important; /* Bubble Glass */
-    background: radial-gradient(120% 120% at 50% 0%, rgba(255, 255, 255, 0.28) 0%, rgba(255, 255, 255, 0.08) 45%, rgba(12, 12, 22, 0.65) 100%) !important;
-    border: 1.5px solid rgba(0, 240, 255, 0.60) !important;
+    gap: 8px !important;
+    padding: 5px 14px !important;
+    border-radius: 14px !important;
+    background: rgba(20, 20, 26, 0.65) !important;
+    border: 1px solid rgba(255, 255, 255, 0.09) !important;
     color: #FFFFFF !important;
     font-size: 12px !important;
-    font-weight: 600 !important;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+    font-weight: 500 !important;
     cursor: pointer !important;
     user-select: none !important;
-    transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), background 0.25s ease, border-color 0.25s ease !important;
-    backdrop-filter: blur(28px) saturate(200%) !important;
-    -webkit-backdrop-filter: blur(28px) saturate(200%) !important;
-    animation: bubble-neon-pulse 2.2s infinite ease-in-out !important;
-    -webkit-app-region: no-drag !important;
+    transition: all 0.2s ease !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25) !important;
+    backdrop-filter: blur(20px) !important;
+    -webkit-backdrop-filter: blur(20px) !important;
+    z-index: 99999 !important;
 }
 
 #personal-os-shader-pill:hover {
-    background: radial-gradient(120% 120% at 50% 0%, rgba(255, 255, 255, 0.36) 0%, rgba(255, 255, 255, 0.14) 45%, rgba(18, 18, 30, 0.75) 100%) !important;
-    transform: translateY(-1px) scale(1.04) !important;
-}
-
-#personal-os-shader-pill:active {
-    transform: translateY(0px) scale(0.98) !important;
-}
-
-#personal-os-shader-pill .shader-glow-dot {
-    width: 8px !important;
-    height: 8px !important;
-    border-radius: 50% !important;
-    flex-shrink: 0 !important;
-    animation: neon-beacon-blink 1.8s infinite ease-in-out !important;
-}
-
-.theme-widget-tag {
-    font-size: 9.5px !important;
-    font-weight: 800 !important;
-    letter-spacing: 0.9px !important;
-    text-transform: uppercase !important;
-    padding: 2px 7px !important;
-    border-radius: 9999px !important;
-    background: rgba(0, 240, 255, 0.16) !important;
-    border: 1px solid rgba(0, 240, 255, 0.45) !important;
-    color: #00f0ff !important;
-    text-shadow: 0 0 10px rgba(0, 240, 255, 0.85) !important;
-    box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.4), 0 0 8px rgba(0, 240, 255, 0.25) !important;
-    display: inline-flex !important;
-    align-items: center !important;
-}
-
-#personal-os-pill-label {
-    display: inline-flex !important;
-    align-items: center !important;
-    gap: 4px !important;
-    color: #F8FAFC !important;
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8) !important;
-    font-size: 12px !important;
-    font-weight: 600 !important;
-}
-
-.theme-widget-arrow {
-    font-size: 8px !important;
-    color: rgba(255, 255, 255, 0.75) !important;
-    margin-left: 2px !important;
-    transition: transform 0.2s ease !important;
-}
-
-#personal-os-shader-pill:hover .theme-widget-arrow {
-    transform: translateY(1px) !important;
-    color: #00f0ff !important;
+    background: rgba(30, 30, 38, 0.75) !important;
+    border-color: rgba(255, 255, 255, 0.16) !important;
 }
 
 #personal-os-shader-backdrop {
@@ -739,9 +588,9 @@ button[title*="Play"]:hover, button[title*="Reproduzir"]:hover, button[title*="P
     left: 0 !important;
     width: 100vw !important;
     height: 100vh !important;
-    background: rgba(0, 0, 0, 0.40) !important;
-    backdrop-filter: blur(12px) saturate(180%) !important;
-    -webkit-backdrop-filter: blur(12px) saturate(180%) !important;
+    background: rgba(0, 0, 0, 0.45) !important;
+    backdrop-filter: blur(16px) saturate(160%) !important;
+    -webkit-backdrop-filter: blur(16px) saturate(160%) !important;
     z-index: 100000 !important;
     display: none;
 }
@@ -754,13 +603,12 @@ button[title*="Play"]:hover, button[title*="Reproduzir"]:hover, button[title*="P
     width: 660px !important;
     max-width: 90vw !important;
     max-height: 82vh !important;
-    border-radius: 24px !important;
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.12) 0%, rgba(18, 18, 26, 0.55) 100%) !important;
-    border: 1px solid rgba(255, 255, 255, 0.25) !important;
-    border-top: 1px solid rgba(255, 255, 255, 0.45) !important;
-    backdrop-filter: blur(28px) saturate(200%) !important;
-    -webkit-backdrop-filter: blur(28px) saturate(200%) !important;
-    box-shadow: 0 30px 80px rgba(0, 0, 0, 0.70), inset 0 1px 2px rgba(255, 255, 255, 0.35) !important;
+    border-radius: 18px !important;
+    background: rgba(24, 24, 30, 0.88) !important;
+    border: 1px solid rgba(255, 255, 255, 0.10) !important;
+    backdrop-filter: blur(30px) saturate(180%) !important;
+    -webkit-backdrop-filter: blur(30px) saturate(180%) !important;
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.60) !important;
     z-index: 100001 !important;
     padding: 24px !important;
     display: none;
@@ -771,30 +619,31 @@ button[title*="Play"]:hover, button[title*="Reproduzir"]:hover, button[title*="P
 
 .shader-ctrl-btn {
     padding: 7px 14px !important;
-    border-radius: 12px !important;
+    border-radius: 10px !important;
     background: rgba(255, 255, 255, 0.06) !important;
-    border: 1px solid rgba(255, 255, 255, 0.14) !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
     color: rgba(255, 255, 255, 0.85) !important;
     font-size: 12px !important;
-    font-weight: 600 !important;
+    font-weight: 500 !important;
     cursor: pointer !important;
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
     gap: 6px !important;
-    transition: all 0.2s ease !important;
+    transition: all 0.15s ease !important;
+    box-shadow: none !important;
 }
 
 .shader-ctrl-btn:hover {
-    background: rgba(255, 255, 255, 0.12) !important;
+    background: rgba(255, 255, 255, 0.10) !important;
     color: #FFFFFF !important;
 }
 
 .shader-ctrl-btn.active {
-    background: rgba(255, 255, 255, 0.22) !important;
-    border-color: rgba(255, 255, 255, 0.45) !important;
+    background: rgba(255, 255, 255, 0.18) !important;
+    border-color: rgba(255, 255, 255, 0.20) !important;
     color: #FFFFFF !important;
-    box-shadow: 0 0 16px rgba(255, 255, 255, 0.20) !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25) !important;
 }
 
 .shader-grid-list {
@@ -806,11 +655,11 @@ button[title*="Play"]:hover, button[title*="Reproduzir"]:hover, button[title*="P
 }
 
 .shader-category-title {
-    font-size: 12px !important;
-    font-weight: 700 !important;
+    font-size: 11px !important;
+    font-weight: 600 !important;
     text-transform: uppercase !important;
-    letter-spacing: 0.8px !important;
-    color: rgba(255, 255, 255, 0.5) !important;
+    letter-spacing: 0.6px !important;
+    color: rgba(255, 255, 255, 0.45) !important;
     margin-bottom: 8px !important;
 }
 
@@ -822,9 +671,9 @@ button[title*="Play"]:hover, button[title*="Reproduzir"]:hover, button[title*="P
 
 .shader-item-card {
     padding: 10px 12px !important;
-    border-radius: 14px !important;
+    border-radius: 10px !important;
     background: rgba(255, 255, 255, 0.05) !important;
-    border: 1px solid rgba(255, 255, 255, 0.10) !important;
+    border: 1px solid rgba(255, 255, 255, 0.06) !important;
     color: rgba(255, 255, 255, 0.85) !important;
     font-size: 12px !important;
     font-weight: 500 !important;
@@ -832,34 +681,33 @@ button[title*="Play"]:hover, button[title*="Reproduzir"]:hover, button[title*="P
     display: flex !important;
     align-items: center !important;
     gap: 8px !important;
-    transition: all 0.2s ease !important;
+    transition: all 0.15s ease !important;
+    box-shadow: none !important;
 }
 
 .shader-item-card:hover {
-    background: rgba(255, 255, 255, 0.12) !important;
-    border-color: rgba(255, 255, 255, 0.25) !important;
-    transform: translateY(-2px) !important;
+    background: rgba(255, 255, 255, 0.10) !important;
+    border-color: rgba(255, 255, 255, 0.12) !important;
     color: #FFFFFF !important;
 }
 
 .shader-item-card.active {
-    background: rgba(255, 255, 255, 0.20) !important;
-    border-color: rgba(255, 255, 255, 0.45) !important;
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.30) !important;
+    background: rgba(255, 255, 255, 0.16) !important;
+    border-color: rgba(255, 255, 255, 0.18) !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25) !important;
     color: #FFFFFF !important;
-    font-weight: 700 !important;
+    font-weight: 600 !important;
 }
 
-/* --- 8. MANTINE MODALS & DROPDOWNS --- */
+/* --- 8. MANTINE MODALS & DROPDOWNS (APPLE macOS HIG STYLE) --- */
 .mantine-Modal-content,
 .mantine-Dialog-root {
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.12) 0%, rgba(18, 18, 26, 0.45) 100%) !important;
-    border: 1px solid rgba(255, 255, 255, 0.25) !important;
-    border-top: 1px solid rgba(255, 255, 255, 0.45) !important;
-    border-radius: 24px !important;
-    backdrop-filter: blur(24px) saturate(200%) !important;
-    -webkit-backdrop-filter: blur(24px) saturate(200%) !important;
-    box-shadow: 0 30px 80px rgba(0, 0, 0, 0.70) !important;
+    background: rgba(26, 26, 32, 0.88) !important;
+    border: 1px solid rgba(255, 255, 255, 0.10) !important;
+    border-radius: 18px !important;
+    backdrop-filter: blur(30px) saturate(180%) !important;
+    -webkit-backdrop-filter: blur(30px) saturate(180%) !important;
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.60) !important;
     color: #FFFFFF !important;
 }
 
@@ -869,24 +717,24 @@ button[title*="Play"]:hover, button[title*="Reproduzir"]:hover, button[title*="P
 
 .mantine-Menu-dropdown,
 .mantine-Popover-dropdown {
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.12) 0%, rgba(18, 18, 26, 0.50) 100%) !important;
-    border: 1px solid rgba(255, 255, 255, 0.22) !important;
-    border-top: 1px solid rgba(255, 255, 255, 0.40) !important;
-    border-radius: 16px !important;
-    backdrop-filter: blur(24px) saturate(200%) !important;
-    -webkit-backdrop-filter: blur(24px) saturate(200%) !important;
-    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.60) !important;
+    background: rgba(28, 28, 34, 0.85) !important;
+    border: 1px solid rgba(255, 255, 255, 0.09) !important;
+    border-radius: 14px !important;
+    backdrop-filter: blur(30px) saturate(180%) !important;
+    -webkit-backdrop-filter: blur(30px) saturate(180%) !important;
+    box-shadow: 0 20px 48px rgba(0, 0, 0, 0.50), 0 2px 8px rgba(0, 0, 0, 0.25) !important;
     padding: 6px !important;
 }
 
 .mantine-Menu-item {
-    border-radius: 10px !important;
+    border-radius: 8px !important;
     color: rgba(255, 255, 255, 0.85) !important;
-    transition: all 0.15s ease !important;
+    transition: background-color 0.12s ease !important;
+    box-shadow: none !important;
 }
 
 .mantine-Menu-item:hover, .mantine-Menu-item[data-hovered="true"] {
-    background: rgba(255, 255, 255, 0.12) !important;
+    background: rgba(255, 255, 255, 0.10) !important;
     color: #FFFFFF !important;
 }
 
@@ -901,15 +749,15 @@ button[title*="Play"]:hover, button[title*="Reproduzir"]:hover, button[title*="P
 }
 
 ::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.20) !important;
+    background: rgba(255, 255, 255, 0.18) !important;
     border-radius: 10px !important;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-    background: rgba(255, 255, 255, 0.40) !important;
+    background: rgba(255, 255, 255, 0.32) !important;
 }
 
-/* --- 10. FULLSCREEN & EXPANDED PLAYER PERSONAL OS LIQUID GLASS --- */
+/* --- 10. FULLSCREEN & EXPANDED PLAYER --- */
 #main-content:has(.fs-full-screen-player-module-container) > #sidebar,
 #main-content:has(.fs-full-screen-player-module-container) > #sidebar-queue,
 #main-content:has(.fs-full-screen-player-module-container) > .fs-main-content-module-main-content-body {
@@ -940,16 +788,15 @@ button[title*="Play"]:hover, button[title*="Reproduzir"]:hover, button[title*="P
     top: 14px !important;
     left: 14px !important;
     padding: 6px 12px !important;
-    border-radius: 16px !important;
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.03) 100%), rgba(14, 14, 22, 0.45) !important;
-    border: 1px solid rgba(255, 255, 255, 0.20) !important;
-    border-top: 1px solid rgba(255, 255, 255, 0.40) !important;
-    backdrop-filter: blur(24px) saturate(200%) !important;
-    -webkit-backdrop-filter: blur(24px) saturate(200%) !important;
-    box-shadow: 0 12px 35px rgba(0, 0, 0, 0.40), inset 0 1px 1px rgba(255, 255, 255, 0.35) !important;
+    border-radius: 14px !important;
+    background: rgba(20, 20, 26, 0.65) !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    backdrop-filter: blur(28px) saturate(180%) !important;
+    -webkit-backdrop-filter: blur(28px) saturate(180%) !important;
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.35) !important;
     z-index: 100 !important;
-    opacity: 0.8 !important;
-    transition: opacity 0.25s ease !important;
+    opacity: 0.85 !important;
+    transition: opacity 0.2s ease !important;
 }
 
 .fs-full-screen-player-module-container:hover .full-screen-player-controls-container:not(.fs-full-screen-player-queue-module-controls-container) {
@@ -957,13 +804,14 @@ button[title*="Play"]:hover, button[title*="Reproduzir"]:hover, button[title*="P
 }
 
 .fs-full-screen-player-module-container .full-screen-player-controls-container button {
-    border-radius: 10px !important;
-    color: rgba(255, 255, 255, 0.90) !important;
-    transition: all 0.2s ease !important;
+    border-radius: 8px !important;
+    color: rgba(255, 255, 255, 0.88) !important;
+    transition: background-color 0.15s ease !important;
+    box-shadow: none !important;
 }
 
 .fs-full-screen-player-module-container .full-screen-player-controls-container button:hover {
-    background: rgba(255, 255, 255, 0.18) !important;
+    background: rgba(255, 255, 255, 0.12) !important;
     color: #FFFFFF !important;
 }
 
@@ -971,53 +819,51 @@ button[title*="Play"]:hover, button[title*="Reproduzir"]:hover, button[title*="P
     bottom: 14px !important;
     right: 20px !important;
     padding: 6px 12px !important;
-    border-radius: 16px !important;
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.10) 0%, rgba(255, 255, 255, 0.02) 100%), rgba(10, 10, 16, 0.40) !important;
-    border: 1px solid rgba(255, 255, 255, 0.18) !important;
-    border-top: 1px solid rgba(255, 255, 255, 0.38) !important;
-    backdrop-filter: blur(20px) saturate(200%) !important;
-    -webkit-backdrop-filter: blur(20px) saturate(200%) !important;
-    box-shadow: 0 12px 35px rgba(0, 0, 0, 0.35), inset 0 1px 1px rgba(255, 255, 255, 0.30) !important;
+    border-radius: 14px !important;
+    background: rgba(20, 20, 26, 0.65) !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    backdrop-filter: blur(28px) saturate(180%) !important;
+    -webkit-backdrop-filter: blur(28px) saturate(180%) !important;
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.35) !important;
     z-index: 100 !important;
 }
 
 .fs-full-screen-player-queue-module-controls-container button {
-    border-radius: 10px !important;
+    border-radius: 8px !important;
     color: rgba(255, 255, 255, 0.85) !important;
-    transition: all 0.2s ease !important;
+    transition: background-color 0.15s ease !important;
+    box-shadow: none !important;
 }
 
 .fs-full-screen-player-queue-module-controls-container button:hover {
-    background: rgba(255, 255, 255, 0.15) !important;
+    background: rgba(255, 255, 255, 0.12) !important;
     color: #FFFFFF !important;
 }
 
 .fs-full-screen-player-image-module-image-container {
-    border-radius: 28px !important;
+    border-radius: 20px !important;
     padding: 14px !important;
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.10) 0%, rgba(255, 255, 255, 0.02) 100%), rgba(10, 10, 16, 0.35) !important;
-    border: 1px solid rgba(255, 255, 255, 0.20) !important;
-    border-top: 1px solid rgba(255, 255, 255, 0.42) !important;
-    backdrop-filter: blur(28px) saturate(200%) !important;
-    -webkit-backdrop-filter: blur(28px) saturate(200%) !important;
-    box-shadow: 0 30px 80px rgba(0, 0, 0, 0.60), inset 0 1px 2px rgba(255, 255, 255, 0.40) !important;
+    background: rgba(18, 18, 24, 0.55) !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    backdrop-filter: blur(28px) saturate(180%) !important;
+    -webkit-backdrop-filter: blur(28px) saturate(180%) !important;
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.50) !important;
     max-height: 65vh !important;
-    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1) !important;
+    transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1) !important;
 }
 
 .fs-full-screen-player-image-module-image {
-    border-radius: 18px !important;
-    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.45) !important;
+    border-radius: 14px !important;
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.40) !important;
 }
 
 .fs-full-screen-player-queue-module-grid-container {
-    border-radius: 24px !important;
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.02) 100%), rgba(10, 10, 16, 0.35) !important;
-    border: 1px solid rgba(255, 255, 255, 0.18) !important;
-    border-top: 1px solid rgba(255, 255, 255, 0.38) !important;
-    backdrop-filter: blur(24px) saturate(200%) !important;
-    -webkit-backdrop-filter: blur(24px) saturate(200%) !important;
-    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.45), inset 0 1px 1px rgba(255, 255, 255, 0.30) !important;
+    border-radius: 18px !important;
+    background: rgba(18, 18, 24, 0.62) !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    backdrop-filter: blur(28px) saturate(180%) !important;
+    -webkit-backdrop-filter: blur(28px) saturate(180%) !important;
+    box-shadow: 0 16px 36px rgba(0, 0, 0, 0.35) !important;
     margin-right: 14px !important;
     margin-bottom: 14px !important;
     height: calc(100% - 28px) !important;
@@ -1027,4 +873,3 @@ button[title*="Play"]:hover, button[title*="Reproduzir"]:hover, button[title*="P
 .fs-full-screen-player-queue-module-grid-container:before {
     display: none !important;
 }
-
