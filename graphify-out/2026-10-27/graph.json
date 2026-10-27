@@ -4224,7 +4224,7 @@
       "file_type": "code",
       "norm_label": "inittraybridge()",
       "source_file": "customizations/assets/feishin-personal-os.js",
-      "source_location": "L362"
+      "source_location": "L385"
     },
     {
       "id": "customizations_assets_feishin_personal_os_inittraybridge_broadcaststate",
@@ -4236,7 +4236,7 @@
       "file_type": "code",
       "norm_label": "broadcaststate()",
       "source_file": "customizations/assets/feishin-personal-os.js",
-      "source_location": "L394"
+      "source_location": "L417"
     },
     {
       "id": "customizations_assets_feishin_personal_os_inittraybridge_getcoverurl",
@@ -4248,7 +4248,7 @@
       "file_type": "code",
       "norm_label": "getcoverurl()",
       "source_file": "customizations/assets/feishin-personal-os.js",
-      "source_location": "L387"
+      "source_location": "L410"
     },
     {
       "id": "customizations_assets_feishin_personal_os_inittraybridge_getplayerstore",
@@ -4260,7 +4260,7 @@
       "file_type": "code",
       "norm_label": "getplayerstore()",
       "source_file": "customizations/assets/feishin-personal-os.js",
-      "source_location": "L365"
+      "source_location": "L388"
     },
     {
       "id": "customizations_assets_feishin_personal_os_inittraybridge_getplayerstore_search",
@@ -4272,7 +4272,7 @@
       "file_type": "code",
       "norm_label": "search()",
       "source_file": "customizations/assets/feishin-personal-os.js",
-      "source_location": "L373"
+      "source_location": "L396"
     },
     {
       "id": "customizations_assets_feishin_personal_os_inittraybridge_handleaction",
@@ -4284,7 +4284,7 @@
       "file_type": "code",
       "norm_label": "handleaction()",
       "source_file": "customizations/assets/feishin-personal-os.js",
-      "source_location": "L448"
+      "source_location": "L471"
     },
     {
       "id": "customizations_assets_feishin_personal_os_mountshaderswitcherui",
@@ -8121,7 +8121,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "customizations/assets/feishin-personal-os.js",
-      "source_location": "L350",
+      "source_location": "L373",
       "weight": 1.0
     },
     {
@@ -8133,7 +8133,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "customizations/assets/feishin-personal-os.js",
-      "source_location": "L351",
+      "source_location": "L374",
       "weight": 1.0
     },
     {
@@ -8145,7 +8145,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "customizations/assets/feishin-personal-os.js",
-      "source_location": "L395",
+      "source_location": "L418",
       "weight": 1.0
     },
     {
@@ -8157,7 +8157,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "customizations/assets/feishin-personal-os.js",
-      "source_location": "L419",
+      "source_location": "L442",
       "weight": 1.0
     },
     {
@@ -8169,7 +8169,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "customizations/assets/feishin-personal-os.js",
-      "source_location": "L449",
+      "source_location": "L472",
       "weight": 1.0
     },
     {
@@ -15105,7 +15105,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "customizations/assets/feishin-personal-os.js",
-      "source_location": "L448",
+      "source_location": "L471",
       "weight": 1.0
     },
     {
@@ -15117,7 +15117,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "customizations/assets/feishin-personal-os.js",
-      "source_location": "L373",
+      "source_location": "L396",
       "weight": 1.0
     },
     {
@@ -15830,7 +15830,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "customizations/assets/feishin-personal-os.js",
-      "source_location": "L362",
+      "source_location": "L385",
       "weight": 1.0
     },
     {
@@ -15863,7 +15863,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "customizations/assets/feishin-personal-os.js",
-      "source_location": "L365",
+      "source_location": "L388",
       "weight": 1.0
     },
     {
@@ -15874,7 +15874,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "customizations/assets/feishin-personal-os.js",
-      "source_location": "L387",
+      "source_location": "L410",
       "weight": 1.0
     },
     {
@@ -22563,7 +22563,7 @@
       "confidence_score": 0.85,
       "context": "argument",
       "source_file": "customizations/assets/feishin-personal-os.js",
-      "source_location": "L477",
+      "source_location": "L500",
       "weight": 1.0
     },
     {
@@ -22575,7 +22575,7 @@
       "confidence_score": 0.85,
       "context": "argument",
       "source_file": "customizations/assets/feishin-personal-os.js",
-      "source_location": "L473",
+      "source_location": "L496",
       "weight": 1.0
     },
     {
@@ -22976,5 +22976,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "687ca6f87d2df96574655c61e3150d5e97d4c655"
+  "built_at_commit": "a622ddd9856e3d8a1c12c2308ea594dd1ef5c4e4"
 }

@@ -31,7 +31,8 @@ import './webgl-backgrounds.js';
         { id: 'siderays', name: 'Side Rays', icon: '🔆' },
         { id: 'beams', name: 'Beams Flow', icon: '🌠' },
         { id: 'lightning', name: 'Lightning Storm', icon: '🌩️' },
-        { id: 'linewaves', name: 'Line Waves', icon: '〰️' }
+        { id: 'linewaves', name: 'Line Waves', icon: '〰️' },
+        { id: 'lighttunnel', name: 'Light Tunnel', icon: '🚇' }
       ]
     },
     {
@@ -42,7 +43,9 @@ import './webgl-backgrounds.js';
         { id: 'silk', name: 'Pure Silk', icon: '🪡' },
         { id: 'floatinglines', name: 'Floating Lines', icon: '🪄' },
         { id: 'ghostfibers', name: 'Ghost Fibers', icon: '🕸️' },
-        { id: 'webthreads', name: 'Web Threads', icon: '🕷️' }
+        { id: 'webthreads', name: 'Web Threads', icon: '🕷️' },
+        { id: 'acidsquares', name: 'Acid Squares', icon: '🟩' },
+        { id: 'moltenmetal', name: 'Molten Metal', icon: '🪨' }
       ]
     },
     {
@@ -60,7 +63,8 @@ import './webgl-backgrounds.js';
         { id: 'magicrings', name: 'Magic Rings', icon: '💫' },
         { id: 'letterglitch', name: 'Letter Glitch', icon: '🔡' },
         { id: 'evileye', name: 'Evil Eye', icon: '👁️' },
-        { id: 'particles', name: 'Starfield Particles', icon: '⭐' }
+        { id: 'particles', name: 'Starfield Particles', icon: '⭐' },
+        { id: 'morphslider', name: 'Morph Slider', icon: '🖼️' }
       ]
     }
   ];

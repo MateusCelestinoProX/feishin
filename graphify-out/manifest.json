@@ -6,9 +6,9 @@
     "semantic_hash": ""
   },
   "customizations/assets/feishin-personal-os.js": {
-    "mtime": 1793070699.9944544,
-    "seen": 1793071085.98369,
-    "ast_hash": "df934cfab3f333c11c32f4106cf4f79e",
+    "mtime": 1793072784.2656646,
+    "seen": 1793073274.291083,
+    "ast_hash": "7a4027de7b183e5d3272c0a2618b9dc5",
     "semantic_hash": ""
   },
   "customizations/assets/ogl.js": {
@@ -24,9 +24,9 @@
     "semantic_hash": ""
   },
   "customizations/assets/webgl-backgrounds.js": {
-    "mtime": 1793061904.958662,
-    "seen": 1793062008.2642891,
-    "ast_hash": "a25216792f53a95bbb2b425d8b24fe7b",
+    "mtime": 1793073109.925067,
+    "seen": 1793073274.291091,
+    "ast_hash": "7f38a1394be558ee8ca0ab6be636e717",
     "semantic_hash": ""
   },
   "customizations/i18n/feishin_pt_full.json": {
@@ -42,9 +42,9 @@
     "semantic_hash": ""
   },
   "scripts/apply_customizations.py": {
-    "mtime": 1793069217.6419203,
-    "seen": 1793069500.918102,
-    "ast_hash": "e85ec28169fde13a8d4f30cdf2a3688f",
+    "mtime": 1793072855.3521833,
+    "seen": 1793073274.291095,
+    "ast_hash": "592be5163ea753c429b4c1007ceb29dd",
     "semantic_hash": ""
   },
   "scripts/build_full_pt_br.py": {
@@ -72,9 +72,9 @@
     "semantic_hash": ""
   },
   "customizations/index.html": {
-    "mtime": 1793061904.993095,
-    "seen": 1793062008.2643032,
-    "ast_hash": "a66ee31a791162e248d527301cbe60f8",
+    "mtime": 1793072833.3755012,
+    "seen": 1793073274.291102,
+    "ast_hash": "a5aed086eee1fafd7a158ad656a4d8d1",
     "semantic_hash": ""
   },
   "customizations/patches/patch_main.py": {
@@ -87,6 +87,12 @@
     "mtime": 1793069859.2993295,
     "seen": 1793069988.078223,
     "ast_hash": "973512e06e0f3c4eb46d3d9d137efc80",
+    "semantic_hash": ""
+  },
+  "customizations/assets/three.min.js": {
+    "mtime": 1793072488.896948,
+    "seen": 1793073274.2910888,
+    "ast_hash": "eb8549863a97355411c3259a3f93b8e1",
     "semantic_hash": ""
   }
 }
