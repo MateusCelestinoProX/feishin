@@ -840,91 +840,111 @@
   }
 
   // 8. Mount Tab Switcher on Início & Hook Dashboard
+  let isMounting = false;
+  let mountDebounceTimer = null;
+
+  function scheduleMount() {
+    if (mountDebounceTimer) return;
+    mountDebounceTimer = setTimeout(() => {
+      mountDebounceTimer = null;
+      mountAnalyticsUI();
+    }, 120);
+  }
+
+  function getHomeStack() {
+    return document.querySelector('main .mantine-Stack-root') ||
+           document.querySelector('.fs-native-scroll-area-module-scroll-area .mantine-Stack-root') ||
+           document.querySelector('.fs-main-content-module-main-content-body-scroll .mantine-Stack-root') ||
+           document.querySelector('.fs-main-content-module-main-content-body .mantine-Stack-root');
+  }
+
   async function mountAnalyticsUI() {
-    const hash = window.location.hash || '';
-    const isHomeRoute = hash.includes('home') || 
-                        hash.includes('analytics') || 
-                        hash === '#/' || 
-                        hash === '' || 
-                        hash === '#';
+    if (isMounting) return;
+    isMounting = true;
+    try {
+      const hash = window.location.hash || '';
+      const isHomeRoute = hash.includes('home') || 
+                          hash.includes('analytics') || 
+                          hash === '#/' || 
+                          hash === '' || 
+                          hash === '#';
 
-    // Check if sidebar navigation item exists
-    ensureSidebarAnalyticsItem();
+      // Check if sidebar navigation item exists
+      ensureSidebarAnalyticsItem();
 
-    if (!isHomeRoute) {
-      return;
-    }
-
-    // If navigating to #/analytics, auto-switch to analytics tab
-    if (hash.includes('analytics')) {
-      activeTab = 'analytics';
-      localStorage.setItem('feishin_home_active_tab', 'analytics');
-    }
-
-    // Find the main viewport or stack container of the Home page
-    const viewports = Array.from(document.querySelectorAll('.fs-main-content-module-main-content-body [data-overlayscrollbars-viewport]'));
-    const homeViewport = viewports[0];
-    if (!homeViewport) return;
-
-    const stack = homeViewport.querySelector('.mantine-Stack-root');
-    if (!stack) return;
-
-    // Check if Tab Switcher is already mounted
-    let switcher = document.getElementById('feishin-home-tabs-bar');
-    if (!switcher) {
-      switcher = document.createElement('div');
-      switcher.id = 'feishin-home-tabs-bar';
-      switcher.className = 'feishin-home-tabs-container';
-      switcher.innerHTML = `
-        <div class="feishin-home-tabs-group">
-          <button class="feishin-tab-btn ${activeTab === 'feed' ? 'active' : ''}" data-tab="feed" type="button">
-            <span>🏠</span> Início & Descobertas
-          </button>
-          <button class="feishin-tab-btn ${activeTab === 'analytics' ? 'active' : ''}" data-tab="analytics" type="button">
-            <span>📊</span> Painel de Analytics
-            <span class="tab-badge-live"><span class="pulse-dot"></span> LIVE</span>
-          </button>
-        </div>
-        <div class="feishin-home-tabs-right">
-          <span class="feishin-live-sync-pill">● Navidrome VPS</span>
-          <button class="feishin-refresh-btn" id="feishin-analytics-refresh-btn" type="button" title="Atualizar Métricas">
-            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5">
-              <path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.3"/>
-            </svg>
-            <span>Atualizar</span>
-          </button>
-        </div>
-      `;
-
-      // Insert at the very top of the stack
-      stack.prepend(switcher);
-
-      // Tab switcher clicks
-      switcher.querySelectorAll('.feishin-tab-btn').forEach(btn => {
-        btn.onclick = (e) => {
-          e.preventDefault();
-          e.stopPropagation();
-          const targetTab = btn.getAttribute('data-tab');
-          switchTab(targetTab);
-        };
-      });
-
-      // Refresh button
-      const refreshBtn = switcher.querySelector('#feishin-analytics-refresh-btn');
-      if (refreshBtn) {
-        refreshBtn.onclick = async (e) => {
-          e.preventDefault();
-          e.stopPropagation();
-          refreshBtn.classList.add('rotating');
-          cachedLibraryStats = null;
-          await updateDashboardContent();
-          setTimeout(() => refreshBtn.classList.remove('rotating'), 600);
-        };
+      if (!isHomeRoute) {
+        return;
       }
-    }
 
-    // Toggle Content Views based on activeTab
-    applyTabVisibility(stack);
+      // If navigating to #/analytics, auto-switch to analytics tab
+      if (hash.includes('analytics')) {
+        activeTab = 'analytics';
+        localStorage.setItem('feishin_home_active_tab', 'analytics');
+      }
+
+      // Find the main stack container of the Home page
+      const stack = getHomeStack();
+      if (!stack) return;
+
+      // Check if Tab Switcher is already mounted
+      let switcher = document.getElementById('feishin-home-tabs-bar');
+      if (!switcher) {
+        switcher = document.createElement('div');
+        switcher.id = 'feishin-home-tabs-bar';
+        switcher.className = 'feishin-home-tabs-container';
+        switcher.innerHTML = `
+          <div class="feishin-home-tabs-group">
+            <button class="feishin-tab-btn ${activeTab === 'feed' ? 'active' : ''}" data-tab="feed" type="button">
+              <span>🏠</span> Início & Descobertas
+            </button>
+            <button class="feishin-tab-btn ${activeTab === 'analytics' ? 'active' : ''}" data-tab="analytics" type="button">
+              <span>📊</span> Painel de Analytics
+              <span class="tab-badge-live"><span class="pulse-dot"></span> LIVE</span>
+            </button>
+          </div>
+          <div class="feishin-home-tabs-right">
+            <span class="feishin-live-sync-pill">● Navidrome VPS</span>
+            <button class="feishin-refresh-btn" id="feishin-analytics-refresh-btn" type="button" title="Atualizar Métricas">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5">
+                <path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.3"/>
+              </svg>
+              <span>Atualizar</span>
+            </button>
+          </div>
+        `;
+
+        // Insert at the very top of the stack
+        stack.prepend(switcher);
+
+        // Tab switcher clicks
+        switcher.querySelectorAll('.feishin-tab-btn').forEach(btn => {
+          btn.onclick = (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            const targetTab = btn.getAttribute('data-tab');
+            switchTab(targetTab);
+          };
+        });
+
+        // Refresh button
+        const refreshBtn = switcher.querySelector('#feishin-analytics-refresh-btn');
+        if (refreshBtn) {
+          refreshBtn.onclick = async (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            refreshBtn.classList.add('rotating');
+            cachedLibraryStats = null;
+            await updateDashboardContent();
+            setTimeout(() => refreshBtn.classList.remove('rotating'), 600);
+          };
+        }
+      }
+
+      // Toggle Content Views based on activeTab
+      applyTabVisibility(stack);
+    } finally {
+      isMounting = false;
+    }
   }
 
   // 9. Switch Tabs
@@ -945,13 +965,14 @@
       sidebarItem.classList.toggle('active', tab === 'analytics');
     }
 
-    const stack = document.querySelector('.fs-main-content-module-main-content-body [data-overlayscrollbars-viewport] .mantine-Stack-root');
+    const stack = getHomeStack();
     if (stack) {
       applyTabVisibility(stack);
     }
   }
 
   function applyTabVisibility(stack) {
+    if (!stack) return;
     // Collect all native children except our switcher and our dashboard
     Array.from(stack.children).forEach(child => {
       if (child.id === 'feishin-home-tabs-bar' || child.id === 'feishin-analytics-dashboard') {
@@ -1093,21 +1114,38 @@
 
   // 12. MutationObserver & Navigation Listeners
   window.addEventListener('hashchange', () => {
-    mountAnalyticsUI();
+    scheduleMount();
   });
 
-  const domObserver = new MutationObserver(() => {
-    mountAnalyticsUI();
+  const domObserver = new MutationObserver((mutations) => {
+    let shouldSchedule = false;
+    for (const m of mutations) {
+      const t = m.target;
+      if (t && (
+        t.id === 'feishin-analytics-dashboard' ||
+        t.closest?.('#feishin-analytics-dashboard') ||
+        t.id === 'feishin-home-tabs-bar' ||
+        t.closest?.('#feishin-home-tabs-bar') ||
+        t.id === 'personal-os-sidebar-analytics-item'
+      )) {
+        continue;
+      }
+      shouldSchedule = true;
+      break;
+    }
+    if (shouldSchedule) {
+      scheduleMount();
+    }
   });
 
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', () => {
       domObserver.observe(document.body, { childList: true, subtree: true });
-      mountAnalyticsUI();
+      scheduleMount();
     });
   } else {
     domObserver.observe(document.body, { childList: true, subtree: true });
-    mountAnalyticsUI();
+    scheduleMount();
   }
 
   // Expose API for debugging

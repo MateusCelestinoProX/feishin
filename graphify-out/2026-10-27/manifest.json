@@ -6,9 +6,9 @@
     "semantic_hash": ""
   },
   "customizations/assets/feishin-personal-os.js": {
-    "mtime": 1793116958.496548,
-    "seen": 1793117019.886337,
-    "ast_hash": "04fc7cdd6ce0128a14bc8ec22fe31fc2",
+    "mtime": 1793118698.4841654,
+    "seen": 1793120032.2435808,
+    "ast_hash": "64f79fc37dbf7c8084d667f76fb7ca13",
     "semantic_hash": ""
   },
   "customizations/assets/ogl.js": {
@@ -72,9 +72,9 @@
     "semantic_hash": ""
   },
   "customizations/index.html": {
-    "mtime": 1793117231.657741,
-    "seen": 1793117582.985014,
-    "ast_hash": "e9c6d1775b43d21084366e1c1cfef0ed",
+    "mtime": 1793119419.7042482,
+    "seen": 1793120032.24364,
+    "ast_hash": "bd4b129228fcf1e6955ad79866802f4c",
     "semantic_hash": ""
   },
   "customizations/patches/patch_main.py": {
@@ -96,15 +96,15 @@
     "semantic_hash": ""
   },
   "customizations/assets/music-analytics.js": {
-    "mtime": 1793117375.6030982,
-    "seen": 1793117582.984965,
-    "ast_hash": "8a0b54f4e09786cd4819068bf89d60d3",
+    "mtime": 1793120020.2556686,
+    "seen": 1793120032.2435892,
+    "ast_hash": "c02c6dacd3974342296b1cd3cecfe954",
     "semantic_hash": ""
   },
   "customizations/assets/feishin-tags-engine.js": {
-    "mtime": 1793117478.8603556,
-    "seen": 1793117582.98496,
-    "ast_hash": "5adc240ce6b03b878e3608efc0b632f0",
+    "mtime": 1793119988.6035554,
+    "seen": 1793120032.243586,
+    "ast_hash": "2f42b84672aa810c17412608252186f3",
     "semantic_hash": ""
   },
   "scripts/capture_feishin.mjs": {
@@ -117,6 +117,24 @@
     "mtime": 1793117649.3812633,
     "seen": 1793118376.727932,
     "ast_hash": "3d7f7ed050b1996b6ff4a363dc2ac266",
+    "semantic_hash": ""
+  },
+  "scripts/feishin_cdp.py": {
+    "mtime": 1793118893.4165294,
+    "seen": 1793120032.2436202,
+    "ast_hash": "77c34dd879c333318ebe4ff07ad9c2cc",
+    "semantic_hash": ""
+  },
+  "scripts/test_live_styling.mjs": {
+    "mtime": 1793119031.683683,
+    "seen": 1793120032.243627,
+    "ast_hash": "19b216aafcbee927c7ec750abd6591ac",
+    "semantic_hash": ""
+  },
+  "scripts/verify_tags_feature.py": {
+    "mtime": 1793118832.0172172,
+    "seen": 1793120032.2436328,
+    "ast_hash": "3e0cc7798e431304a1823db10fe0dc1a",
     "semantic_hash": ""
   }
 }
