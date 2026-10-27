@@ -713,24 +713,91 @@ if (typeof window !== 'undefined') {
     }
   });
 
-  // 7.4. Ative atalhos nativos de navegação do macOS (Command+[ e Command+])
+  // 7.4. Engine de navegação por etapas (Command+[ e Command+])
+  // Protegida contra conflitos no Tag Editor, campos de texto e modais
   function initNavigationShortcuts() {
     if (window.__feishinNavShortcutsInitialized) return;
     window.__feishinNavShortcutsInitialized = true;
 
+    let isNavigating = false;
+
     window.addEventListener(
       'keydown',
       (e) => {
+        // Apenas Cmd+[ e Cmd+] (macOS) ou Ctrl+[ e Ctrl+] (outros SOs) sem Shift nem Alt
         const isCmd = e.metaKey || (e.ctrlKey && !navigator.userAgent.includes('Mac'));
-        if (isCmd && !e.altKey && !e.shiftKey) {
-          if (e.key === '[' || e.code === 'BracketLeft') {
-            e.preventDefault();
-            window.history.back();
-          } else if (e.key === ']' || e.code === 'BracketRight') {
-            e.preventDefault();
-            window.history.forward();
+        if (!isCmd || e.altKey || e.shiftKey) return;
+
+        const isBack = e.key === '[' || e.code === 'BracketLeft';
+        const isForward = e.key === ']' || e.code === 'BracketRight';
+        if (!isBack && !isForward) return;
+
+        // REGRA DE PROTEÇÃO 1 (Tag Editor & Inputs):
+        // Se o usuário estiver focado em qualquer campo de texto (ex: nome da tag, URL, metadados),
+        // NUNCA dispara a navegação para não perder alterações nem interromper digitação.
+        const target = e.target || document.activeElement;
+        if (target) {
+          const tag = (target.tagName || '').toUpperCase();
+          const isEditable = target.isContentEditable;
+          const isInputText =
+            tag === 'INPUT' &&
+            !['button', 'submit', 'checkbox', 'radio', 'range'].includes(
+              (target.type || '').toLowerCase(),
+            );
+          const isTextArea = tag === 'TEXTAREA';
+          if (isInputText || isTextArea || isEditable) {
+            return;
           }
         }
+
+        // REGRA DE PROTEÇÃO 2 (Navegação Estrita por Etapas):
+        // Bloqueia múltiplos disparos sucessivos ou repetição rápida de tecla.
+        if (isNavigating) {
+          e.preventDefault();
+          return;
+        }
+
+        // REGRA DE PROTEÇÃO 3 (Modais e Painéis de Edição):
+        // Se houver modal aberto (como Tag Editor de metadados da música), voltar fecha o modal.
+        const activeModal = document.querySelector('.mantine-Modal-content, [role="dialog"]');
+        if (activeModal && activeModal.offsetParent !== null) {
+          if (isBack) {
+            e.preventDefault();
+            isNavigating = true;
+            const closeBtn = activeModal.querySelector(
+              '.mantine-Modal-close, [aria-label="Close modal"], button.mantine-CloseButton-root',
+            );
+            if (closeBtn) {
+              closeBtn.click();
+            } else {
+              window.dispatchEvent(
+                new KeyboardEvent('keydown', {
+                  bubbles: true,
+                  code: 'Escape',
+                  key: 'Escape',
+                  keyCode: 27,
+                }),
+              );
+            }
+            setTimeout(() => {
+              isNavigating = false;
+            }, 300);
+          }
+          return;
+        }
+
+        // REGRA DE PROTEÇÃO 4 (Navegação em Etapas):
+        // Volta ou avança exatamente uma tela no histórico
+        e.preventDefault();
+        isNavigating = true;
+        if (isBack) {
+          window.history.back();
+        } else {
+          window.history.forward();
+        }
+        setTimeout(() => {
+          isNavigating = false;
+        }, 300);
       },
       true,
     );

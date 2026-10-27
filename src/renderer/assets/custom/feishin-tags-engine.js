@@ -159,7 +159,12 @@
       this.tags = this.tags.filter(t => t.id !== id);
       delete this.taggedTracks[id];
       if (this.activeTabId === id) this.activeTabId = this.tags[0]?.id || null;
-      if (this.openedBoxTagId === id) this.openedBoxTagId = null;
+      if (this.openedBoxTagId === id) {
+        this.openedBoxTagId = null;
+        if (window.location.hash.includes('tag=')) {
+          window.location.hash = '#/library/genres';
+        }
+      }
       this.save();
       this.showToast(`Tag "${tagName}" removida.`);
       return true;
@@ -585,6 +590,14 @@
     return null;
   }
 
+  function getTagParamFromHash() {
+    const hash = window.location.hash || '';
+    const qIdx = hash.indexOf('?');
+    if (qIdx === -1) return null;
+    const params = new URLSearchParams(hash.substring(qIdx + 1));
+    return params.get('tag');
+  }
+
   // 5. TAGS PAGE VIEW RENDERER (Hero Boxes & Tag Editor + Tabs View)
   function initTagsPageRouter() {
     function checkRoute() {
@@ -593,8 +606,14 @@
       const mainBody = document.querySelector('.fs-main-content-module-main-content-body') || document.querySelector('main');
 
       if (isTagsRoute) {
-        ensureTagsPageMounted(mainBody);
+        const tagParam = getTagParamFromHash();
+        const tagChanged = engine.openedBoxTagId !== tagParam;
+        if (tagChanged) {
+          engine.openedBoxTagId = tagParam;
+        }
+        ensureTagsPageMounted(mainBody, tagChanged);
       } else {
+        engine.openedBoxTagId = null;
         const mountedEl = document.getElementById('fs-tags-page-mount');
         if (mountedEl) mountedEl.remove();
         if (mainBody) {
@@ -608,11 +627,12 @@
     }
 
     window.addEventListener('hashchange', checkRoute);
+    window.addEventListener('popstate', checkRoute);
     setInterval(checkRoute, 250);
     checkRoute();
   }
 
-  function ensureTagsPageMounted(mainBody) {
+  function ensureTagsPageMounted(mainBody, shouldReRender = false) {
     if (!mainBody) {
       mainBody = document.querySelector('.fs-main-content-module-main-content-body') || document.querySelector('main');
       if (!mainBody) return;
@@ -644,7 +664,7 @@
           ch.style.display = 'none';
         }
       });
-      if (!mountEl.hasChildNodes() || mountEl.innerHTML.trim() === '') {
+      if (shouldReRender || !mountEl.hasChildNodes() || mountEl.innerHTML.trim() === '') {
         renderTagsPage(mountEl);
       }
     }
@@ -881,8 +901,7 @@
       });
 
       box.addEventListener('click', () => {
-        engine.openedBoxTagId = tagId;
-        renderTagPlaylistView(container, tagId);
+        window.location.hash = '#/library/genres?tag=' + encodeURIComponent(tagId);
       });
     });
   }
@@ -939,8 +958,11 @@
 
     // Bind Back Button
     container.querySelector('#fs-btn-back-to-boxes')?.addEventListener('click', () => {
-      engine.openedBoxTagId = null;
-      renderView1_Boxes(container, engine.getTags());
+      if (window.history.length > 1) {
+        window.history.back();
+      } else {
+        window.location.hash = '#/library/genres';
+      }
     });
 
     // Bind Banner Play
