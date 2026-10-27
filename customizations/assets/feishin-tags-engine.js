@@ -1099,11 +1099,11 @@
             <div class="fs-tags-toggle-switch">
               <button type="button" class="fs-tags-toggle-btn ${viewMode === 'boxes' ? 'active' : ''}" id="fs-toggle-boxes">
                 <span>📦</span>
-                <span>Hero Boxes</span>
+                <span>Box</span>
               </button>
               <button type="button" class="fs-tags-toggle-btn ${viewMode === 'tabs' ? 'active' : ''}" id="fs-toggle-tabs">
                 <span>📑</span>
-                <span>Lista por Abas</span>
+                <span>Abas</span>
               </button>
             </div>
           </div>
