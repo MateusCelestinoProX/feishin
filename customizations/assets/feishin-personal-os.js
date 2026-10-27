@@ -6,6 +6,33 @@
 import './webgl-backgrounds.js';
 import './music-analytics.js';
 
+// ==========================================================================
+// RESILIENCE & CRASH IMMUNITY SAFEGUARDS
+// ==========================================================================
+if (typeof window !== 'undefined') {
+  window.addEventListener('error', (event) => {
+    console.warn('[Personal OS SafeGuard] Error interceptado:', event.error || event.message);
+  }, true);
+
+  window.addEventListener('unhandledrejection', (event) => {
+    console.warn('[Personal OS SafeGuard] Rejection interceptada:', event.reason);
+  }, true);
+
+  if (typeof HTMLCanvasElement !== 'undefined' && HTMLCanvasElement.prototype.getContext) {
+    const origGetContext = HTMLCanvasElement.prototype.getContext;
+    HTMLCanvasElement.prototype.getContext = function(type, ...args) {
+      const ctx = origGetContext.call(this, type, ...args);
+      if (ctx && (type === 'webgl' || type === 'webgl2' || type === 'experimental-webgl')) {
+        this.addEventListener('webglcontextlost', (e) => {
+          e.preventDefault();
+          console.warn('[Personal OS SafeGuard] WebGL context lost interceptado preventivamente.');
+        }, false);
+      }
+      return ctx;
+    };
+  }
+}
+
 (function() {
   console.log('[Personal OS Engine] Inicializando Shaders & Liquid Glass no Feishin...');
 

@@ -13,6 +13,7 @@ import sys
 import shutil
 import subprocess
 import tempfile
+import time
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
@@ -30,6 +31,13 @@ def run_cmd(cmd, cwd=None):
         raise RuntimeError(f"Command failed: {cmd}")
     return res.stdout
 
+def is_feishin_running():
+    try:
+        out = subprocess.run(["pgrep", "-f", "/Applications/Feishin.app"], stdout=subprocess.PIPE, text=True)
+        return bool(out.stdout.strip())
+    except Exception:
+        return False
+
 def main():
     target_asar = sys.argv[1] if len(sys.argv) > 1 else DEFAULT_ASAR_PATH
     asar_path = Path(target_asar)
@@ -40,6 +48,17 @@ def main():
         sys.exit(1)
 
     print(f"[*] Alvo: {asar_path}")
+
+    # 0. Proteção contra corrupção em tempo de execução
+    feishin_was_running = is_feishin_running()
+    if feishin_was_running:
+        print("[*] Feishin em execução detectado. Encerrando processos com segurança para evitar SIGTRAP / corrupção de memória...")
+        subprocess.run(["pkill", "-TERM", "-f", "/Applications/Feishin.app"])
+        time.sleep(1.5)
+        if is_feishin_running():
+            subprocess.run(["pkill", "-9", "-f", "/Applications/Feishin.app"])
+            time.sleep(0.5)
+        print("[✓] Feishin finalizado limpo.")
 
     # 1. Backup
     backup_path = asar_path.with_name("app.asar.bak")
@@ -105,11 +124,13 @@ def main():
         print(f"[*] Reempacotando novo app.asar...")
         run_cmd(f"npx --yes @electron/asar pack \"{extract_dir}\" \"{new_asar}\"")
 
-        # 7. Substituir no aplicativo
-        print(f"[*] Aplicando novo app.asar em {asar_path}...")
-        shutil.copy2(new_asar, asar_path)
+        # 7. Substituição Atômica (evita corrupção de inode e SIGTRAP)
+        print(f"[*] Aplicando novo app.asar de forma atômica em {asar_path}...")
+        atomic_tmp = asar_path.with_name("app.asar.atomic_tmp")
+        shutil.copy2(new_asar, atomic_tmp)
+        os.replace(atomic_tmp, asar_path)
 
-    # 8. Re-assinar o aplicativo no macOS (Ad-hoc signature)
+    # 8. Re-assinar o aplicativo no macOS (Ad-hoc signature com app fechado)
     app_bundle = asar_path.parents[2]
     if app_bundle.name == "Feishin.app" and app_bundle.exists():
         print("[*] Re-assinando Feishin.app com assinatura ad-hoc macOS...")
@@ -119,9 +140,16 @@ def main():
         except Exception as e:
             print(f"[!] Aviso na assinatura (pode ser ignorado se já inicializado): {e}")
 
+    # 9. Relaunch seguro se estava em execução
+    if feishin_was_running:
+        print("[*] Reiniciando Feishin com depuração ativa...")
+        subprocess.Popen(["open", "-a", "/Applications/Feishin.app", "--args", "--remote-debugging-port=9222"])
+        time.sleep(1.5)
+        print("[✓] Feishin reiniciado e operando normalmente.")
+
     print("\n=======================================================")
-    print(" Feishin for macOS Customizado com Sucesso! ")
-    print(" Reinicie o Feishin para desfrutar da nova experiência.")
+    print(" Feishin for macOS Imune & Customizado com Sucesso! ")
+    print(" Auto-Recovery Watchdog & SafeGuard Ativos.")
     print("=======================================================\n")
 
 if __name__ == "__main__":

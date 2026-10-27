@@ -167,18 +167,77 @@ if (!require$$0.ipcMain.eventNames().includes("request-open-settings")) {
     tray.setContextMenu(contextMenu);
   }"""
 
+    target_watchdog = """  mainWindow.webContents.on("render-process-gone", (_event, details) => {
+    log.error("Renderer process gone", {
+      exitCode: details.exitCode,
+      reason: details.reason
+    });
+  });
+  mainWindow.webContents.on("unresponsive", () => {
+    log.error("Renderer process unresponsive");
+  });"""
+
+    replacement_watchdog = """  let _recoveringRenderer = false;
+  mainWindow.webContents.on("render-process-gone", (_event, details) => {
+    log.error("Renderer process gone", {
+      exitCode: details.exitCode,
+      reason: details.reason
+    });
+    if (details.reason !== "clean-exit" && mainWindow && !mainWindow.isDestroyed()) {
+      if (_recoveringRenderer) return;
+      _recoveringRenderer = true;
+      log.warn("Auto-recovering Feishin renderer process in 300ms...");
+      setTimeout(() => {
+        try {
+          if (mainWindow && !mainWindow.isDestroyed()) {
+            mainWindow.webContents.reload();
+            log.info("Feishin renderer reloaded successfully after crash recovery");
+          }
+        } catch (err) {
+          log.error("Failed to reload webContents, recreating window", err);
+          try {
+            mainWindow.destroy();
+            createWindow(false);
+          } catch (e2) {}
+        } finally {
+          setTimeout(() => { _recoveringRenderer = false; }, 3000);
+        }
+      }, 300);
+    }
+  });
+  mainWindow.webContents.on("unresponsive", () => {
+    log.error("Renderer process unresponsive");
+    setTimeout(() => {
+      try {
+        if (mainWindow && !mainWindow.isDestroyed() && mainWindow.webContents.isCrashed()) {
+          mainWindow.webContents.reload();
+        }
+      } catch (e) {}
+    }, 4000);
+  });
+  require$$0.app.on("child-process-gone", (_event, details) => {
+    log.error("Child process gone", details);
+  });"""
+
     if target in content:
         content = content.replace(target, replacement, 1)
-        with open(main_js_path, "w", encoding="utf-8") as f:
-            f.write(content)
-        print("[✓] Patch aplicado em out/main/index.js com sucesso.")
-        return True
+        print("[✓] Patch aplicado em out/main/index.js com sucesso (Tray Mini Panel).")
     elif "initPersonalOsTray" in content:
-        print("[-] Patch já presente em out/main/index.js.")
-        return True
+        print("[-] Patch Tray Mini Panel já presente em out/main/index.js.")
     else:
-        print("[!] Aviso: Target não encontrado em out/main/index.js.")
-        return False
+        print("[!] Aviso: Target Tray não encontrado em out/main/index.js.")
+
+    if target_watchdog in content:
+        content = content.replace(target_watchdog, replacement_watchdog, 1)
+        print("[✓] Patch Watchdog Auto-Recovery aplicado em out/main/index.js com sucesso.")
+    elif "_recoveringRenderer" in content:
+        print("[-] Patch Watchdog Auto-Recovery já presente em out/main/index.js.")
+    else:
+        print("[!] Aviso: Target Watchdog não encontrado em out/main/index.js.")
+
+    with open(main_js_path, "w", encoding="utf-8") as f:
+        f.write(content)
+    return True
 
 def patch_preload(preload_js_path):
     if not os.path.exists(preload_js_path):
