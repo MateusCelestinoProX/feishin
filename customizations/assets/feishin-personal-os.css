@@ -420,38 +420,220 @@ div, span, p, a, h1, h2, h3, h4, h5, h6 {
     width: 100% !important;
 }
 
-/* Hero Play/Pause Button - Standard macOS Solid White with Ambient Dark Shadow */
-.fs-center-controls-module-buttons-container button:nth-child(3),
-button[title*="Play"], button[title*="Reproduzir"], button[title*="Pausar"] {
+/* === ULTRA HIGH CONTRAST PLAYER BAR BUTTONS & CONTROLS === */
+
+/* 5.2 HERO PLAY/PAUSE BUTTON - Apple Pure Solid White Circle */
+#player-bar .fs-player-button-module-main,
+.fs-center-controls-module-buttons-container .fs-player-button-module-main,
+button.fs-player-button-module-main {
+    width: 44px !important;
+    height: 44px !important;
+    min-width: 44px !important;
+    min-height: 44px !important;
     border-radius: 50% !important;
     background: #FFFFFF !important;
+    background-color: #FFFFFF !important;
     color: #0A0A0E !important;
-    border: none !important;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.30) !important;
-    transition: transform 0.15s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.15s ease !important;
+    border: 1px solid rgba(255, 255, 255, 0.95) !important;
+    box-shadow: 0 4px 18px rgba(255, 255, 255, 0.45), 0 0 12px rgba(255, 255, 255, 0.25) !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    opacity: 1 !important;
+    margin: 0 4px !important;
+    transition: all 0.20s cubic-bezier(0.16, 1, 0.3, 1) !important;
 }
 
-.fs-center-controls-module-buttons-container button:nth-child(3):hover,
-button[title*="Play"]:hover, button[title*="Reproduzir"]:hover, button[title*="Pausar"]:hover {
-    transform: scale(1.05) !important;
-    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.40) !important;
+#player-bar .fs-player-button-module-main:hover,
+button.fs-player-button-module-main:hover {
+    transform: scale(1.08) !important;
+    background: #FFFFFF !important;
+    box-shadow: 0 6px 24px rgba(255, 255, 255, 0.65), 0 0 16px rgba(255, 255, 255, 0.40) !important;
 }
 
-/* Secondary Controls (Shuffle, Prev, Next, Repeat, Queue) */
-.fs-center-controls-module-buttons-container button:not(:nth-child(3)),
-.fs-playerbar-module-right-grid-item button {
+#player-bar .fs-player-button-module-main:active,
+button.fs-player-button-module-main:active {
+    transform: scale(0.96) !important;
+}
+
+#player-bar .fs-player-button-module-main svg,
+button.fs-player-button-module-main svg {
+    color: #0A0A0E !important;
+    fill: #0A0A0E !important;
+    stroke: #0A0A0E !important;
+    width: 20px !important;
+    height: 20px !important;
+}
+
+#player-bar .fs-player-button-module-main svg * {
+    fill: #0A0A0E !important;
+    stroke: #0A0A0E !important;
+}
+
+/* 5.3 ALL SECONDARY / ACTION BUTTONS IN PLAYER BAR */
+#player-bar button:not(.fs-player-button-module-main),
+#player-bar .mantine-ActionIcon-root:not(.fs-player-button-module-main),
+.fs-center-controls-module-buttons-container button:not(.fs-player-button-module-main),
+.fs-playerbar-module-right-grid-item button:not(.fs-player-button-module-main),
+.fs-left-controls-module-left-controls-container button:not(.fs-player-button-module-main) {
+    color: #FFFFFF !important;
+    opacity: 0.95 !important;
+    border-radius: 8px !important;
     background: transparent !important;
     border: 1px solid transparent !important;
-    border-radius: 8px !important;
-    color: rgba(255, 255, 255, 0.70) !important;
-    transition: background-color 0.15s ease, color 0.15s ease !important;
-    box-shadow: none !important;
+    transition: all 0.15s ease !important;
 }
 
-.fs-center-controls-module-buttons-container button:not(:nth-child(3)):hover,
-.fs-playerbar-module-right-grid-item button:hover {
-    background: rgba(255, 255, 255, 0.08) !important;
+/* Hover effect for all secondary buttons */
+#player-bar button:not(.fs-player-button-module-main):hover,
+#player-bar .mantine-ActionIcon-root:not(.fs-player-button-module-main):hover {
+    background: rgba(255, 255, 255, 0.14) !important;
     color: #FFFFFF !important;
+    opacity: 1 !important;
+    transform: scale(1.08) !important;
+}
+
+/* Active / click effect */
+#player-bar button:not(.fs-player-button-module-main):active,
+#player-bar .mantine-ActionIcon-root:not(.fs-player-button-module-main):active {
+    transform: scale(0.94) !important;
+    background: rgba(255, 255, 255, 0.22) !important;
+}
+
+/* SVGs in Secondary Buttons - High Contrast Crisp Rendering */
+#player-bar button:not(.fs-player-button-module-main) svg,
+#player-bar .mantine-ActionIcon-root:not(.fs-player-button-module-main) svg {
+    color: #FFFFFF !important;
+    stroke: #FFFFFF !important;
+    filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.60)) !important;
+}
+
+/* Filled icon styles (stroke-width 0 like Repeat & Queue) */
+#player-bar button:not(.fs-player-button-module-main) svg[stroke-width="0"],
+#player-bar button:not(.fs-player-button-module-main) svg[stroke-width="0"] path {
+    fill: #FFFFFF !important;
+    stroke: none !important;
+}
+
+/* Outline icons: ensure fill is none so shapes do not fill up */
+#player-bar button:not(.fs-player-button-module-main) svg[stroke-width="2"]:not([fill="default"]) path,
+#player-bar button:not(.fs-player-button-module-main) svg[stroke-width="2"]:not([fill="default"]) rect {
+    fill: none !important;
+    stroke: #FFFFFF !important;
+}
+
+/* Polygons (Prev / Next triangles) */
+#player-bar .fs-center-controls-module-buttons-container button:not(.fs-player-button-module-main) polygon {
+    fill: #FFFFFF !important;
+    stroke: #FFFFFF !important;
+}
+
+/* Stop button (rect only-child) */
+#player-bar .fs-center-controls-module-buttons-container button svg:has(> rect:only-child) rect,
+#player-bar .fs-center-controls-module-buttons-container button:first-child rect {
+    fill: #FFFFFF !important;
+    stroke: #FFFFFF !important;
+}
+
+/* 3 dots menu vertical circles */
+#player-bar .fs-left-controls-module-metadata-stack button svg circle {
+    fill: #FFFFFF !important;
+    stroke: #FFFFFF !important;
+}
+
+/* Sidebar / panel outline button - ensure interior stays transparent */
+#player-bar button svg:has(path) rect {
+    fill: transparent !important;
+    stroke: #FFFFFF !important;
+}
+
+/* 5.4 AUTO DJ BUTTON */
+#player-bar .fs-button-module-root {
+    background: rgba(255, 255, 255, 0.12) !important;
+    border: 1px solid rgba(255, 255, 255, 0.28) !important;
+    color: #FFFFFF !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.6px !important;
+    font-size: 11px !important;
+    padding: 3px 10px !important;
+    border-radius: 6px !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35) !important;
+    opacity: 1 !important;
+    transition: all 0.15s ease !important;
+}
+
+#player-bar .fs-button-module-root:hover {
+    background: rgba(255, 255, 255, 0.22) !important;
+    border-color: rgba(255, 255, 255, 0.55) !important;
+    box-shadow: 0 0 12px rgba(255, 255, 255, 0.30) !important;
+    transform: scale(1.04) !important;
+}
+
+/* 5.5 RATING STARS */
+#player-bar .fs-rating-module-root svg {
+    stroke: rgba(255, 255, 255, 0.85) !important;
+    fill: transparent !important;
+    filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.6)) !important;
+}
+
+#player-bar .fs-rating-module-root svg[data-filled="true"],
+#player-bar .fs-rating-module-symbol-body[data-filled="true"] svg {
+    fill: #FFD23F !important;
+    stroke: #FFD23F !important;
+}
+
+/* 5.6 VOLUME SLIDER & SCRUBBER / PROGRESS BAR */
+.mantine-Slider-track {
+    background: rgba(255, 255, 255, 0.20) !important;
+    height: 4px !important;
+    border-radius: 2px !important;
+    transition: height 0.15s ease !important;
+}
+
+.mantine-Slider-root:hover .mantine-Slider-track {
+    height: 6px !important;
+}
+
+.mantine-Slider-bar {
+    background: #FFFFFF !important;
+    border-radius: 2px !important;
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.80) !important;
+}
+
+.mantine-Slider-thumb {
+    background: #FFFFFF !important;
+    border: 1px solid rgba(0, 0, 0, 0.20) !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.50) !important;
+    width: 12px !important;
+    height: 12px !important;
+}
+
+/* 5.7 TRACK TIME DURATION LABELS */
+#player-bar .fs-text-module-muted,
+#player-bar .current-duration,
+#player-bar .total-duration {
+    color: rgba(255, 255, 255, 0.90) !important;
+    font-size: 11px !important;
+    font-weight: 600 !important;
+}
+
+/* 5.8 ACTIVE BUTTON STATES (Shuffle/Repeat/Lyrics/Equalizer activated) */
+#player-bar button[data-active="true"],
+#player-bar button.fs-action-icon-module-active,
+#player-bar button[aria-pressed="true"],
+#player-bar button[data-variant="light"],
+#player-bar button[data-variant="filled"] {
+    background: rgba(167, 139, 250, 0.28) !important;
+    border: 1px solid rgba(167, 139, 250, 0.60) !important;
+    color: #FFFFFF !important;
+}
+
+#player-bar button[data-active="true"] svg,
+#player-bar button.fs-action-icon-module-active svg,
+#player-bar button[aria-pressed="true"] svg {
+    color: #C4B5FD !important;
+    stroke: #C4B5FD !important;
+    filter: drop-shadow(0 0 8px rgba(167, 139, 250, 0.70)) !important;
 }
 
 /* Scrubber / Progress Bar */
