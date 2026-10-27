@@ -15,14 +15,23 @@ import './music-analytics.js';
     if (rawSettings) {
       const s = JSON.parse(rawSettings);
       let changed = false;
+      const cleanItems = (items) => {
+        const seen = new Set();
+        return items.filter(item => {
+          if (!item || item.id === 'Albums' || item.id === 'Home') return false;
+          if (seen.has(item.id)) return false;
+          seen.add(item.id);
+          return true;
+        });
+      };
       if (s?.state?.general?.sidebarItems) {
         const prevLen = s.state.general.sidebarItems.length;
-        s.state.general.sidebarItems = s.state.general.sidebarItems.filter(item => item.id !== 'Albums' && item.id !== 'Home');
+        s.state.general.sidebarItems = cleanItems(s.state.general.sidebarItems);
         if (s.state.general.sidebarItems.length !== prevLen) changed = true;
       }
       if (s?.general?.sidebarItems) {
         const prevLen = s.general.sidebarItems.length;
-        s.general.sidebarItems = s.general.sidebarItems.filter(item => item.id !== 'Albums' && item.id !== 'Home');
+        s.general.sidebarItems = cleanItems(s.general.sidebarItems);
         if (s.general.sidebarItems.length !== prevLen) changed = true;
       }
       if (changed) {
@@ -531,6 +540,14 @@ import './music-analytics.js';
           el.remove();
         }
       });
+
+      // Deduplicate Radio Stations if rendered multiple times
+      const radios = document.querySelectorAll('.fs-sidebar-module-accordion-content a[href="#/radio"]');
+      if (radios.length > 1) {
+        for (let i = 1; i < radios.length; i++) {
+          radios[i].remove();
+        }
+      }
 
       const parent = document.querySelector('.fs-sidebar-module-accordion-content');
       if (!parent) return;

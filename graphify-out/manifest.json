@@ -6,9 +6,9 @@
     "semantic_hash": ""
   },
   "customizations/assets/feishin-personal-os.js": {
-    "mtime": 1793127905.6703992,
-    "seen": 1793128092.639841,
-    "ast_hash": "aac878d9266896c293c93f1a042ce75a",
+    "mtime": 1793132998.70772,
+    "seen": 1793133039.493474,
+    "ast_hash": "85095b8bc8bb080bfdef45825ffb225c",
     "semantic_hash": ""
   },
   "customizations/assets/ogl.js": {
@@ -123,6 +123,12 @@
     "mtime": 1793118832.0172172,
     "seen": 1793120032.2436328,
     "ast_hash": "3e0cc7798e431304a1823db10fe0dc1a",
+    "semantic_hash": ""
+  },
+  "sidebar-BLJHaOap.js": {
+    "mtime": 1793129915.4246151,
+    "seen": 1793133039.493491,
+    "ast_hash": "09b29c13852172d52ced8933d54531e8",
     "semantic_hash": ""
   }
 }
