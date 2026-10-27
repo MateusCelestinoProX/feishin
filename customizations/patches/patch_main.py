@@ -36,8 +36,8 @@ function createTrayMiniWindow() {
   if (trayMiniWindow && !trayMiniWindow.isDestroyed()) return trayMiniWindow;
 
   trayMiniWindow = new require$$0.BrowserWindow({
-    width: 380,
-    height: 520,
+    width: 330,
+    height: 470,
     show: false,
     frame: false,
     fullscreenable: false,
@@ -46,8 +46,8 @@ function createTrayMiniWindow() {
     backgroundColor: "#00000000",
     alwaysOnTop: true,
     skipTaskbar: true,
-    hasShadow: false,
-    vibrancy: "under-window",
+    hasShadow: true,
+    vibrancy: "popover",
     visualEffectState: "active",
     webPreferences: {
       backgroundThrottling: false,
