@@ -75,29 +75,32 @@ div, span, p, a, h1, h2, h3, h4, h5, h6 {
     background: transparent !important;
 }
 
-/* 3.1 TOP WINDOW BAR CAPSULE ISLAND */
+/* 3.1 TOP WINDOW BAR COMPLETELY REMOVED */
 .fs-window-bar-module-window-bar,
 .fs-window-bar-module-macos-container {
-    flex-shrink: 0 !important;
-    height: 44px !important;
-    border-radius: 16px !important;
-    padding: 0 16px !important;
-    background: rgba(20, 20, 26, 0.65) !important;
-    border: 1px solid rgba(255, 255, 255, 0.08) !important;
-    backdrop-filter: blur(28px) saturate(180%) !important;
-    -webkit-backdrop-filter: blur(28px) saturate(180%) !important;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.30) !important;
-    display: flex !important;
-    align-items: center !important;
-    justify-content: space-between !important;
-    z-index: 100 !important;
+    display: none !important;
+    height: 0 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    border: none !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
 }
 
 .fs-window-bar-module-title {
-    font-size: 13px !important;
-    font-weight: 500 !important;
-    color: rgba(255, 255, 255, 0.88) !important;
-    letter-spacing: -0.1px !important;
+    display: none !important;
+}
+
+/* Invisible Top Drag Handle to smoothly move frameless window on macOS */
+#personal-os-drag-handle {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100vw !important;
+    height: 12px !important;
+    z-index: 99998 !important;
+    -webkit-app-region: drag !important;
+    pointer-events: auto !important;
 }
 
 /* 3.2 MAIN WORKSPACE CONTAINER */
@@ -729,9 +732,9 @@ button.fs-player-button-module-main svg {
     color: #FFFFFF !important;
 }
 
-/* --- 7. PERSONAL OS QUICK SHADER PILL & MODAL --- */
-#personal-os-shader-pill,
-#personal-os-shader-pill *,
+/* --- 7. PERSONAL OS SIDEBAR BACKGROUNDS ITEM & MODAL --- */
+#personal-os-sidebar-backgrounds-item,
+#personal-os-sidebar-backgrounds-item *,
 #personal-os-shader-modal,
 #personal-os-shader-modal *,
 #personal-os-shader-backdrop {
@@ -739,29 +742,29 @@ button.fs-player-button-module-main svg {
     pointer-events: auto !important;
 }
 
-#personal-os-shader-pill {
-    display: inline-flex !important;
-    align-items: center !important;
-    gap: 8px !important;
-    padding: 5px 14px !important;
-    border-radius: 14px !important;
-    background: rgba(20, 20, 26, 0.65) !important;
-    border: 1px solid rgba(255, 255, 255, 0.09) !important;
-    color: #FFFFFF !important;
-    font-size: 12px !important;
-    font-weight: 500 !important;
+#personal-os-sidebar-backgrounds-item {
     cursor: pointer !important;
     user-select: none !important;
-    transition: all 0.2s ease !important;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25) !important;
-    backdrop-filter: blur(20px) !important;
-    -webkit-backdrop-filter: blur(20px) !important;
-    z-index: 99999 !important;
+    transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1) !important;
 }
 
-#personal-os-shader-pill:hover {
-    background: rgba(30, 30, 38, 0.75) !important;
-    border-color: rgba(255, 255, 255, 0.16) !important;
+#personal-os-sidebar-backgrounds-item:hover {
+    background: rgba(255, 255, 255, 0.08) !important;
+    border: 1px solid rgba(255, 255, 255, 0.12) !important;
+    color: #FFFFFF !important;
+    transform: translateX(2px) !important;
+}
+
+#personal-os-sidebar-backgrounds-item.active {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.15) 0%, rgba(255, 255, 255, 0.04) 100%) !important;
+    border: 1px solid rgba(255, 255, 255, 0.25) !important;
+    border-top: 1px solid rgba(255, 255, 255, 0.45) !important;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.35) !important;
+    color: #FFFFFF !important;
+}
+
+#personal-os-shader-pill {
+    display: none !important;
 }
 
 #personal-os-shader-backdrop {

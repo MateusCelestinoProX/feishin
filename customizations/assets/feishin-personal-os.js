@@ -143,31 +143,28 @@ import './webgl-backgrounds.js';
   function updatePillLabel(text) {
     const lbl = document.getElementById('personal-os-pill-label');
     if (lbl) lbl.textContent = text;
+    const item = document.getElementById('personal-os-sidebar-backgrounds-item');
+    if (item) item.title = `Personal OS — Planos de Fundo (${text})`;
   }
 
-  // 6. Mount UI Controls
+  // 6. Mount Sidebar Backgrounds Navigation Item & Modal UI
   function mountShaderSwitcherUI() {
-    if (document.getElementById('personal-os-shader-pill')) return;
+    // If top bar exists, ensure it is completely hidden
+    const topBar = document.querySelector('.fs-window-bar-module-window-bar');
+    if (topBar) {
+      topBar.style.setProperty('display', 'none', 'important');
+    }
 
-    // Header Pill Button (Bubble Glass Neon Theme Widget)
-    const pill = document.createElement('button');
-    pill.id = 'personal-os-shader-pill';
-    pill.type = 'button';
-    pill.title = 'Personal OS — Temas & Shaders';
-    pill.innerHTML = `
-      <div class="shader-glow-dot"></div>
-      <span class="theme-widget-tag">THEME</span>
-      <span id="personal-os-pill-label">🔮 Plasma Wave</span>
-      <span class="theme-widget-arrow">▾</span>
-    `;
+    // Invisible Drag handle for moving frameless window on macOS
+    if (!document.getElementById('personal-os-drag-handle')) {
+      const dragHandle = document.createElement('div');
+      dragHandle.id = 'personal-os-drag-handle';
+      document.body.appendChild(dragHandle);
+    }
 
-    // Always float safely at top-right corner with no-drag guarantees
-    pill.style.position = 'fixed';
-    pill.style.top = '8px';
-    pill.style.right = '18px';
-    pill.style.zIndex = '999999';
-    pill.style.webkitAppRegion = 'no-drag';
-    document.body.appendChild(pill);
+    // Remove legacy top pill if any exists
+    const oldPill = document.getElementById('personal-os-shader-pill');
+    if (oldPill) oldPill.remove();
 
     // Backdrop
     let backdrop = document.getElementById('personal-os-shader-backdrop');
@@ -279,12 +276,16 @@ import './webgl-backgrounds.js';
     function openModal() {
       backdrop.style.display = 'block';
       modal.style.display = 'flex';
+      const item = document.getElementById('personal-os-sidebar-backgrounds-item');
+      if (item) item.classList.add('active');
       updateModalUI();
     }
 
     function closeModal() {
       backdrop.style.display = 'none';
       modal.style.display = 'none';
+      const item = document.getElementById('personal-os-sidebar-backgrounds-item');
+      if (item) item.classList.remove('active');
     }
 
     function toggleModal() {
@@ -295,14 +296,60 @@ import './webgl-backgrounds.js';
       }
     }
 
-    // Toggle Modal on Pill Click & Pointerdown (Guarantees zero drag interception)
-    pill.addEventListener('pointerdown', (e) => e.stopPropagation());
-    pill.addEventListener('mousedown', (e) => e.stopPropagation());
-    pill.addEventListener('click', (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-      toggleModal();
-    });
+    // Ensure item in Left Sidebar as a native-feeling nav item
+    function ensureSidebarItem() {
+      const parent = document.querySelector('.fs-sidebar-module-accordion-content');
+      if (!parent) return;
+
+      let item = document.getElementById('personal-os-sidebar-backgrounds-item');
+      if (!item) {
+        item = document.createElement('a');
+        item.id = 'personal-os-sidebar-backgrounds-item';
+        item.className = 'mantine-focus-never mantine-active fs-button-module-root fs-sidebar-item-module-link fs-sidebar-item-module-root m_77c9d27d mantine-Button-root m_87cf2631 mantine-UnstyledButton-root';
+        item.setAttribute('data-variant', 'subtle');
+        item.setAttribute('data-size', 'sm');
+        item.setAttribute('draggable', 'false');
+        item.setAttribute('title', 'Personal OS — Temas & Shaders');
+        item.style.cssText = '--button-height: var(--button-height-sm); --button-padding-x: var(--button-padding-x-sm); --button-fz: var(--mantine-font-size-sm); --button-bg: transparent; --button-hover: var(--mantine-color-primary-light-hover); --button-color: var(--mantine-color-primary-light-color); --button-bd: calc(0.0625rem * var(--mantine-scale)) solid transparent; cursor: pointer; user-select: none; -webkit-app-region: no-drag;';
+
+        item.innerHTML = `
+          <span class="fs-sidebar-item-module-inner m_80f1301b mantine-Button-inner">
+            <span class="fs-sidebar-item-module-label m_811560b9 mantine-Button-label">
+              <div class="m_4081bf90 mantine-Group-root" style="--group-gap: var(--mantine-spacing-md); --group-align: center; --group-justify: flex-start; --group-wrap: wrap;">
+                <span class="fs-sidebar-icon-module-wrapper">
+                  <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 24 24" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12 2C6.49 2 2 6.49 2 12C2 17.51 6.49 22 12 22C12.55 22 13 21.55 13 21C13 20.75 12.9 20.53 12.75 20.36C12.6 20.19 12.5 19.97 12.5 19.72C12.5 19.17 12.95 18.72 13.5 18.72H15C18.86 18.72 22 15.58 22 11.72C22 6.36 17.52 2 12 2ZM12 4C16.41 4 20 7.46 20 11.72C20 14.48 17.76 16.72 15 16.72H13.5C11.85 16.72 10.5 18.07 10.5 19.72C10.5 20.24 10.7 20.71 11.02 21.07C11.13 21.19 11.2 21.34 11.2 21.5C11.2 21.78 10.98 22 10.7 22H12C6.49 22 2 17.51 2 12C2 6.49 6.49 4 12 4ZM6.5 10C5.67 10 5 10.67 5 11.5C5 12.33 5.67 13 6.5 13C7.33 13 8 12.33 8 11.5C8 10.67 7.33 10 6.5 10ZM9.5 7C8.67 7 8 7.67 8 8.5C8 9.33 8.67 10 9.5 10C10.33 10 11 9.33 11 8.5C11 7.67 10.33 7 9.5 7ZM14.5 7C13.67 7 13 7.67 13 8.5C13 9.33 13.67 10 14.5 10C15.33 10 16 9.33 16 8.5C16 7.67 15.33 7 14.5 7ZM17.5 10C16.67 10 16 10.67 16 11.5C16 12.33 16.67 13 17.5 13C18.33 13 19 12.33 19 11.5C19 10.67 18.33 10 17.5 10Z"></path>
+                  </svg>
+                </span>
+                <span>BACKGROUNDS</span>
+              </div>
+            </span>
+          </span>
+        `;
+
+        item.addEventListener('pointerdown', (e) => e.stopPropagation());
+        item.addEventListener('mousedown', (e) => e.stopPropagation());
+        item.addEventListener('click', (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          toggleModal();
+        });
+
+        parent.appendChild(item);
+      } else if (item.parentElement !== parent) {
+        parent.appendChild(item);
+      }
+    }
+
+    ensureSidebarItem();
+
+    // Reconnect whenever React reconciles/updates DOM
+    if (!window.__PERSONAL_OS_SIDEBAR_OBSERVER__) {
+      window.__PERSONAL_OS_SIDEBAR_OBSERVER__ = new MutationObserver(() => {
+        ensureSidebarItem();
+      });
+      window.__PERSONAL_OS_SIDEBAR_OBSERVER__.observe(document.body, { childList: true, subtree: true });
+    }
 
     backdrop.addEventListener('click', (e) => {
       e.preventDefault();
