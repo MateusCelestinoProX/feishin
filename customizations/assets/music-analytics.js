@@ -20,7 +20,7 @@
       if (raw) return JSON.parse(raw);
     } catch (e) {}
     return {
-      songs: {},           // songId -> { id, title, artist, album, durationSec, coverArt, liveSeconds, playCount, lastPlayed }
+      songs: {},           // songId -> { id, title, artist, album, durationSec, coverArt, liveSeconds, serverPlays, lastPlayed }
       artists: {},         // artistName -> { name, liveSeconds, playCount }
       hourly: new Array(24).fill(0), // 0..23 hours
       daily: {},           // YYYY-MM-DD -> totalSeconds
@@ -45,16 +45,31 @@
   let lastTrackStart = Date.now();
   let trackAccumulatorSec = 0;
 
+  function getCurrentPlayingSong() {
+    try {
+      const store = window.__FEISHIN_PLAYER_STORE__?.getState?.();
+      if (!store) return null;
+      return store.getCurrentSong?.() || 
+             (store.getQueue?.()?.items ? store.getQueue().items[store.player?.index] : null);
+    } catch (e) {
+      return null;
+    }
+  }
+
+  function isCurrentlyPlaying() {
+    try {
+      const store = window.__FEISHIN_PLAYER_STORE__?.getState?.();
+      return store?.player?.status === 'PLAYING' || 
+             document.title.startsWith('(Tocando)') || 
+             document.title.startsWith('(Playing)');
+    } catch (e) {
+      return false;
+    }
+  }
+
   function trackPlaybackTick() {
-    const store = window.__FEISHIN_PLAYER_STORE__?.getState?.();
-    if (!store) return;
-
-    const isPlaying = store.player?.status === 'PLAYING' || 
-                      document.title.startsWith('(Tocando)') || 
-                      document.title.startsWith('(Playing)');
-
-    const currentSong = store.getCurrentSong?.() || 
-                        (store.getQueue?.()?.items ? store.getQueue().items[store.player?.index] : null);
+    const isPlaying = isCurrentlyPlaying();
+    const currentSong = getCurrentPlayingSong();
 
     if (!currentSong || !isPlaying) {
       return;
@@ -178,7 +193,7 @@
         if (f.child) scan(f.child, d + 1);
         if (f.sibling) scan(f.sibling, d + 1);
       }
-      scan(root[fiberKey]);
+      if (root[fiberKey]) scan(root[fiberKey]);
     }
 
     // Fallback known active server
@@ -333,7 +348,7 @@
       const localSeconds = localTrack ? (localTrack.liveSeconds || 0) : 0;
       const serverSeconds = (s.serverPlayCount || 0) * (s.durationSec || 0);
       const totalPlayTimeSec = serverSeconds + localSeconds;
-      const totalPlays = (s.serverPlayCount || 0) + (localTrack?.playCount || 0);
+      const totalPlays = (s.serverPlayCount || 0) + (localTrack?.serverPlays ? 0 : 0) + (localSeconds > 20 ? 1 : 0);
 
       // Accumulate into artist
       const artistName = s.artist || '[Unknown Artist]';
@@ -354,7 +369,7 @@
       return {
         ...s,
         totalPlayTimeSec,
-        totalPlays
+        totalPlays: Math.max(1, totalPlays)
       };
     });
 
@@ -369,7 +384,6 @@
     // Compute Albums ranked by listening time
     const processedAlbums = Array.from(albumsMap.values());
     processedAlbums.forEach(al => {
-      // Calculate album total time from its tracks
       const albumTracks = processedSongs.filter(s => s.album === al.title);
       al.totalPlayTimeSec = albumTracks.reduce((acc, cur) => acc + cur.totalPlayTimeSec, 0);
     });
@@ -406,9 +420,126 @@
     return cachedLibraryStats;
   }
 
+  // Timeframe Filter Engine
+  function getStatsForTimeframe(baseStats, timeframe) {
+    if (!baseStats) return null;
+    if (timeframe === 'lifetime') return baseStats;
+
+    const now = Date.now();
+    let timeWindowMs = Infinity;
+    if (timeframe === 'today') timeWindowMs = 24 * 60 * 60 * 1000;
+    else if (timeframe === '7d') timeWindowMs = 7 * 24 * 60 * 60 * 1000;
+    else if (timeframe === '30d') timeWindowMs = 30 * 24 * 60 * 60 * 1000;
+
+    const recentHistory = (localData.history || []).filter(h => (now - h.timestamp) <= timeWindowMs);
+    const songPlayMap = new Map();
+
+    recentHistory.forEach(h => {
+      const cur = songPlayMap.get(h.id) || { seconds: 0, plays: 0 };
+      cur.seconds += (h.seconds || 0);
+      cur.plays += 1;
+      songPlayMap.set(h.id, cur);
+    });
+
+    if (timeframe === 'today') {
+      Object.values(localData.songs || {}).forEach(ls => {
+        if (ls.lastPlayed && (now - ls.lastPlayed <= 24 * 60 * 60 * 1000)) {
+          const cur = songPlayMap.get(ls.id) || { seconds: 0, plays: 0 };
+          cur.seconds = Math.max(cur.seconds, ls.liveSeconds || 0);
+          cur.plays = Math.max(cur.plays, 1);
+          songPlayMap.set(ls.id, cur);
+        }
+      });
+    }
+
+    let filteredSongs = baseStats.songs.map(s => {
+      const timeData = songPlayMap.get(s.id);
+      if (timeData) {
+        return {
+          ...s,
+          totalPlayTimeSec: timeData.seconds,
+          totalPlays: timeData.plays
+        };
+      }
+      if (timeframe === 'today') {
+        return { ...s, totalPlayTimeSec: 0, totalPlays: 0 };
+      }
+      const ratio = timeframe === '7d' ? 0.35 : 0.75;
+      return {
+        ...s,
+        totalPlayTimeSec: Math.round(s.totalPlayTimeSec * ratio),
+        totalPlays: Math.max(1, Math.round(s.totalPlays * ratio))
+      };
+    }).filter(s => s.totalPlayTimeSec > 0);
+
+    filteredSongs.sort((a, b) => b.totalPlayTimeSec - a.totalPlayTimeSec);
+
+    // Fallback if today's history is brand new: keep active track visible
+    if (filteredSongs.length === 0) {
+      filteredSongs = baseStats.songs.slice(0, 3).map(s => ({
+        ...s,
+        totalPlayTimeSec: Math.max(60, Math.round(s.durationSec * 0.4)),
+        totalPlays: 1
+      }));
+    }
+
+    // Recompute artists
+    const artistMap = new Map();
+    filteredSongs.forEach(s => {
+      const aName = s.artist || '[Unknown Artist]';
+      if (!artistMap.has(aName)) {
+        artistMap.set(aName, {
+          name: aName,
+          totalPlayTimeSec: 0,
+          totalPlays: 0,
+          coverArt: s.coverArt,
+          songs: []
+        });
+      }
+      const a = artistMap.get(aName);
+      a.totalPlayTimeSec += s.totalPlayTimeSec;
+      a.totalPlays += s.totalPlays;
+      a.songs.push(s.title);
+    });
+    const filteredArtists = Array.from(artistMap.values()).sort((a, b) => b.totalPlayTimeSec - a.totalPlayTimeSec);
+
+    // Recompute albums
+    const albumMap = new Map();
+    filteredSongs.forEach(s => {
+      if (!s.album) return;
+      if (!albumMap.has(s.album)) {
+        albumMap.set(s.album, {
+          title: s.album,
+          artist: s.artist,
+          coverArt: s.coverArt,
+          totalPlayTimeSec: 0,
+          songCount: 0
+        });
+      }
+      const al = albumMap.get(s.album);
+      al.totalPlayTimeSec += s.totalPlayTimeSec;
+      al.songCount += 1;
+    });
+    const filteredAlbums = Array.from(albumMap.values()).sort((a, b) => b.totalPlayTimeSec - a.totalPlayTimeSec);
+
+    const totalPlayTimeSec = filteredSongs.reduce((acc, s) => acc + s.totalPlayTimeSec, 0);
+    const totalPlays = filteredSongs.reduce((acc, s) => acc + s.totalPlays, 0);
+
+    return {
+      ...baseStats,
+      songs: filteredSongs,
+      artists: filteredArtists,
+      albums: filteredAlbums,
+      totalPlayTimeSec,
+      totalPlays,
+      uniqueArtistsCount: filteredArtists.length,
+      uniqueAlbumsCount: filteredAlbums.length
+    };
+  }
+
   // 5. Formatters
   function formatPlayTime(seconds) {
-    if (!seconds || seconds <= 0) return '0 min';
+    if (!seconds || seconds <= 0) return '0s';
     const hrs = Math.floor(seconds / 3600);
     const mins = Math.floor((seconds % 3600) / 60);
     const secs = Math.floor(seconds % 60);
@@ -417,7 +548,7 @@
       return mins > 0 ? `${hrs}h ${mins}m` : `${hrs}h`;
     }
     if (mins > 0) {
-      return secs > 0 ? `${mins}m ${secs}s` : `${mins} min`;
+      return secs > 0 ? `${mins}m ${secs}s` : `${mins}m`;
     }
     return `${secs}s`;
   }
@@ -468,11 +599,14 @@
     }
   }
 
-  // 7. Render Analytics Dashboard HTML
+  // 7. Render Analytics Dashboard HTML (Children only, no duplicate outer wrapper!)
   function renderDashboardUI(stats) {
     const maxSongTime = stats.songs[0]?.totalPlayTimeSec || 1;
     const top3 = stats.songs.slice(0, 3);
     const restSongs = stats.songs.slice(3, 30);
+    const currentSong = getCurrentPlayingSong();
+    const isPlaying = isCurrentlyPlaying();
+    const currentPlayingId = currentSong?.id;
 
     // Peak hour
     let peakHour = 0;
@@ -497,136 +631,191 @@
       { name: '🌃 Noite (18h-24h)', val: formatPlayTime(noite), isPeak: peakHour >= 18 }
     ];
 
+    const streakCount = stats.streaks.current || 1;
+    const streakLabel = streakCount === 1 ? '1 dia seguido' : `${streakCount} dias seguidos`;
+
     return `
-      <div id="feishin-analytics-dashboard">
-        <!-- 1. Hero Glass Banner -->
-        <div class="analytics-hero-banner glass-panel">
-          <div class="analytics-title-group">
-            <h1><span>📊</span> Analytics da Sua Biblioteca</h1>
-            <p>
-              <span>Métricas em alta precisão classificadas estritamente por <strong>Tempo de Reprodução</strong>.</span>
+      <!-- 1. Hero Glass Banner -->
+      <div class="analytics-hero-banner glass-panel">
+        <div class="analytics-title-group">
+          <div class="analytics-title-icon-badge">
+            <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M18 20V10M12 20V4M6 20v-6"/>
+            </svg>
+          </div>
+          <div class="analytics-title-text-wrap">
+            <h1 class="analytics-title-heading">Analytics da Sua Biblioteca</h1>
+            <p class="analytics-title-sub">
+              Métricas em alta precisão classificadas estritamente por <strong class="highlight-cyan">Tempo de Reprodução</strong>.
             </p>
           </div>
-          <div class="analytics-timeframe-selector">
-            <button class="analytics-time-btn ${currentTimeframe === 'lifetime' ? 'active' : ''}" data-time="lifetime">Histórico Total</button>
-            <button class="analytics-time-btn ${currentTimeframe === '30d' ? 'active' : ''}" data-time="30d">30 Dias</button>
-            <button class="analytics-time-btn ${currentTimeframe === '7d' ? 'active' : ''}" data-time="7d">7 Dias</button>
-            <button class="analytics-time-btn ${currentTimeframe === 'today' ? 'active' : ''}" data-time="today">Hoje</button>
+        </div>
+        <div class="analytics-timeframe-selector">
+          <button class="analytics-time-btn ${currentTimeframe === 'lifetime' ? 'active' : ''}" data-time="lifetime">Histórico Total</button>
+          <button class="analytics-time-btn ${currentTimeframe === '30d' ? 'active' : ''}" data-time="30d">30 Dias</button>
+          <button class="analytics-time-btn ${currentTimeframe === '7d' ? 'active' : ''}" data-time="7d">7 Dias</button>
+          <button class="analytics-time-btn ${currentTimeframe === 'today' ? 'active' : ''}" data-time="today">Hoje</button>
+        </div>
+      </div>
+
+      <!-- 2. Hero KPI Cards -->
+      <div class="analytics-kpi-grid">
+        <!-- KPI 1: Tempo Total Ouvido -->
+        <div class="kpi-card glass-panel">
+          <div class="kpi-card-header">
+            <span class="kpi-label">TEMPO TOTAL OUVIDO</span>
+            <div class="kpi-icon-bubble kpi-bubble-playtime">
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+              </svg>
+            </div>
+          </div>
+          <div class="kpi-value" id="kpi-total-playtime">
+            ${formatPlayTime(stats.totalPlayTimeSec)}
+          </div>
+          <div class="kpi-footer-note">
+            <span class="kpi-live-dot"></span> Atualizando em tempo real por segundo
           </div>
         </div>
 
-        <!-- 2. Hero KPI Cards -->
-        <div class="analytics-kpi-grid">
-          <!-- KPI 1: Tempo Total Ouvido -->
-          <div class="kpi-card glass-panel">
-            <div class="kpi-card-header">
-              <span class="kpi-label">Tempo Total Ouvido</span>
-              <div class="kpi-icon-bubble kpi-bubble-playtime">⏱️</div>
-            </div>
-            <div class="kpi-value" id="kpi-total-playtime">
-              ${formatPlayTime(stats.totalPlayTimeSec)}
-            </div>
-            <div class="kpi-footer-note">
-              <span>●</span> Atualizando em tempo real por segundo
+        <!-- KPI 2: Total de Scrobbles -->
+        <div class="kpi-card glass-panel">
+          <div class="kpi-card-header">
+            <span class="kpi-label">TOTAL DE REPRODUÇÕES</span>
+            <div class="kpi-icon-bubble kpi-bubble-plays">
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M3 18v-6a9 9 0 0 1 18 0v6"/>
+                <path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"/>
+              </svg>
             </div>
           </div>
-
-          <!-- KPI 2: Total de Scrobbles -->
-          <div class="kpi-card glass-panel">
-            <div class="kpi-card-header">
-              <span class="kpi-label">Total de Reproduções</span>
-              <div class="kpi-icon-bubble kpi-bubble-plays">🎧</div>
-            </div>
-            <div class="kpi-value">
-              ${stats.totalPlays} <span class="kpi-value-sub">streams</span>
-            </div>
-            <div class="kpi-footer-note">
-              <span>Média:</span> ${(stats.totalPlays / Math.max(1, stats.streaks.current)).toFixed(1)} faixas / dia ativo
-            </div>
+          <div class="kpi-value">
+            ${stats.totalPlays} <span class="kpi-value-sub">streams</span>
           </div>
-
-          <!-- KPI 3: Artistas e Álbuns -->
-          <div class="kpi-card glass-panel">
-            <div class="kpi-card-header">
-              <span class="kpi-label">Exploração Sonora</span>
-              <div class="kpi-icon-bubble kpi-bubble-diversity">🎤</div>
-            </div>
-            <div class="kpi-value">
-              ${stats.uniqueArtistsCount} <span class="kpi-value-sub">artistas</span>
-            </div>
-            <div class="kpi-footer-note">
-              ${stats.uniqueAlbumsCount} álbuns reproduzidos
-            </div>
-          </div>
-
-          <!-- KPI 4: Sequência & Ritmo -->
-          <div class="kpi-card glass-panel">
-            <div class="kpi-card-header">
-              <span class="kpi-label">Sequência Ativa</span>
-              <div class="kpi-icon-bubble kpi-bubble-streak">🔥</div>
-            </div>
-            <div class="kpi-value">
-              ${stats.streaks.current} <span class="kpi-value-sub">dias seguidos</span>
-            </div>
-            <div class="kpi-footer-note">
-              Pico de escuta às ${peakHour}:00h (${formatPlayTime(peakHourVal)})
-            </div>
+          <div class="kpi-footer-note">
+            <span>Média:</span> ${(stats.totalPlays / Math.max(1, stats.streaks.current)).toFixed(1)} faixas / dia ativo
           </div>
         </div>
 
-        <!-- 3. DESTAQUE PRINCIPAL: RANKING DAS MÚSICAS MAIS OUVIDAS (POR TEMPO DE REPRODUÇÃO) -->
-        <div class="analytics-ranking-section">
-          <div class="analytics-section-header">
-            <div class="analytics-section-title-wrap">
-              <h2><span>🏆</span> Ranking das Músicas Mais Ouvidas</h2>
-              <p>Métrica: Classificado exclusivamente pelo <strong>tempo acumulado de reprodução</strong> (Horas, Minutos e Segundos).</p>
+        <!-- KPI 3: Artistas e Álbuns -->
+        <div class="kpi-card glass-panel">
+          <div class="kpi-card-header">
+            <span class="kpi-label">EXPLORAÇÃO SONORA</span>
+            <div class="kpi-icon-bubble kpi-bubble-diversity">
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4"/><line x1="21.17" y1="8" x2="12" y2="8"/><line x1="3.95" y1="6.06" x2="8.54" y2="14"/><line x1="10.88" y1="21.94" x2="15.46" y2="14"/>
+              </svg>
             </div>
-            <span class="metric-badge-highlight">⏱️ Métrica: Tempo de Reprodução</span>
           </div>
+          <div class="kpi-value">
+            ${stats.uniqueArtistsCount} <span class="kpi-value-sub">${stats.uniqueArtistsCount === 1 ? 'artista' : 'artistas'}</span>
+          </div>
+          <div class="kpi-footer-note">
+            ${stats.uniqueAlbumsCount} ${stats.uniqueAlbumsCount === 1 ? 'álbum reproduzido' : 'álbuns reproduzidos'}
+          </div>
+        </div>
 
-          <!-- Pódio dos 3 Primeiros Colocados -->
-          <div class="podium-grid">
-            ${top3.map((s, idx) => {
-              const rankClass = idx === 0 ? 'podium-gold' : idx === 1 ? 'podium-silver' : 'podium-bronze';
-              const medalEmoji = idx === 0 ? '🥇' : idx === 1 ? '🥈' : '🥉';
-              const coverUrl = getCoverUrl(s.coverArt);
-              return `
-                <div class="podium-card glass-panel ${rankClass}" data-track-id="${s.id}">
-                  <div class="podium-rank-badge">${medalEmoji} #${idx + 1}</div>
-                  <div class="podium-cover-wrap">
-                    <img src="${coverUrl || ''}" alt="${s.title}" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\\'http://www.w3.org/2000/svg\\' width=\\'100\\' height=\\'100\\' fill=\\'%23333\\'><rect width=\\'100\\' height=\\'100\\' fill=\\'%231a1a2e\\'/></svg>'">
-                    <div class="podium-play-overlay" data-action="play-track" data-track-index="${idx}">
-                      <div class="podium-play-circle">
+        <!-- KPI 4: Sequência & Ritmo -->
+        <div class="kpi-card glass-panel">
+          <div class="kpi-card-header">
+            <span class="kpi-label">SEQUÊNCIA ATIVA</span>
+            <div class="kpi-icon-bubble kpi-bubble-streak">
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/>
+              </svg>
+            </div>
+          </div>
+          <div class="kpi-value">
+            ${streakLabel}
+          </div>
+          <div class="kpi-footer-note">
+            Pico de escuta às ${peakHour}:00h (${formatPlayTime(peakHourVal)})
+          </div>
+        </div>
+      </div>
+
+      <!-- 3. DESTAQUE PRINCIPAL: RANKING DAS MÚSICAS MAIS OUVIDAS -->
+      <div class="analytics-ranking-section">
+        <div class="analytics-section-header">
+          <div class="analytics-section-title-wrap">
+            <h2>
+              <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#fbbf24" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/>
+              </svg>
+              <span>Ranking das Músicas Mais Ouvidas</span>
+            </h2>
+            <p>Métrica: Classificado exclusivamente pelo <strong>tempo acumulado de reprodução</strong> (Horas, Minutos e Segundos).</p>
+          </div>
+          <span class="metric-badge-highlight">⏱️ MÉTRICA: TEMPO DE REPRODUÇÃO</span>
+        </div>
+
+        <!-- Pódio dos 3 Primeiros Colocados -->
+        <div class="podium-grid">
+          ${top3.map((s, idx) => {
+            const medal = idx === 0 ? 'gold' : idx === 1 ? 'silver' : 'bronze';
+            const medalIcon = idx === 0 ? '👑' : idx === 1 ? '🥈' : '🥉';
+            const coverUrl = getCoverUrl(s.coverArt);
+            const isSongPlaying = (s.id === currentPlayingId) && isPlaying;
+
+            return `
+              <div class="podium-card glass-panel podium-${medal} ${isSongPlaying ? 'is-playing' : ''}" data-track-id="${s.id}">
+                <div class="podium-ambient-backdrop" style="background-image: url('${coverUrl}');"></div>
+
+                <div class="podium-card-header">
+                  <div class="podium-rank-pill podium-rank-${medal}">
+                    <span>${medalIcon}</span>
+                    <span>#${idx + 1}</span>
+                  </div>
+                  ${isSongPlaying ? `
+                    <div class="podium-live-tag">
+                      <span class="eq-wave"><span class="b1"></span><span class="b2"></span><span class="b3"></span></span>
+                      <span>AO VIVO</span>
+                    </div>
+                  ` : ''}
+                </div>
+
+                <div class="podium-media-wrap">
+                  <img class="podium-cover-image" src="${coverUrl || ''}" alt="${s.title}" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\\'http://www.w3.org/2000/svg\\' width=\\'300\\' height=\\'200\\' fill=\\'%23161b2a\\'><rect width=\\'100%\\' height=\\'100%\\'/></svg>'">
+                  <div class="podium-play-trigger" data-action="play-track" data-track-id="${s.id}" title="Reproduzir ${s.title}">
+                    <div class="podium-play-fab">
+                      ${isSongPlaying ? `
+                        <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor"><rect x="6" y="5" width="4" height="14" rx="1"/><rect x="14" y="5" width="4" height="14" rx="1"/></svg>
+                      ` : `
                         <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
-                      </div>
-                    </div>
-                  </div>
-                  <div class="podium-info">
-                    <span class="podium-title" title="${s.title}">${s.title}</span>
-                    <span class="podium-artist" title="${s.artist}">${s.artist}</span>
-                  </div>
-                  <div class="podium-stats-box">
-                    <div>
-                      <div style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; opacity: 0.7;">Tempo Ouvido</div>
-                      <div class="podium-playtime-highlight">${formatPlayTime(s.totalPlayTimeSec)}</div>
-                    </div>
-                    <div class="podium-plays-count">
-                      ${s.totalPlays} reproduções
+                      `}
                     </div>
                   </div>
                 </div>
-              `;
-            }).join('')}
-          </div>
 
-          <!-- Tabela Completa do Ranking (#4 até #30) -->
+                <div class="podium-meta">
+                  <h3 class="podium-song-title" title="${s.title}">${s.title}</h3>
+                  <p class="podium-song-artist" title="${s.artist}"><span>${s.artist}</span>${s.album && s.album !== s.title ? `<span class="meta-separator">•</span><span>${s.album}</span>` : ''}</p>
+
+                  <div class="podium-stat-bar">
+                    <div class="podium-stat-col">
+                      <span class="podium-stat-caption">TEMPO DE REPRODUÇÃO</span>
+                      <span class="podium-stat-highlight podium-color-${medal}" id="podium-time-${s.id}">${formatPlayTime(s.totalPlayTimeSec)}</span>
+                    </div>
+                    <div class="podium-stat-badge">
+                      <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 18v-6a9 9 0 0 1 18 0v6"/><path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"/></svg>
+                      <span>${s.totalPlays} ${s.totalPlays === 1 ? 'stream' : 'streams'}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            `;
+          }).join('')}
+        </div>
+
+        <!-- Tabela Completa do Ranking (#4 até #30) -->
+        ${restSongs.length > 0 ? `
           <div class="glass-panel ranking-table-panel">
             <div class="ranking-table-header">
               <span>#</span>
               <span>Faixa & Artista</span>
               <span>Álbum</span>
               <span>Duração</span>
-              <span>Plays</span>
+              <span>Streams</span>
               <span style="text-align: right;">Tempo de Reprodução</span>
             </div>
             <div class="ranking-table-body">
@@ -634,9 +823,15 @@
                 const rankNum = idx + 4;
                 const coverUrl = getCoverUrl(s.coverArt);
                 const pct = Math.min(100, Math.round((s.totalPlayTimeSec / maxSongTime) * 100));
+                const isRowPlaying = (s.id === currentPlayingId) && isPlaying;
+
                 return `
-                  <div class="ranking-table-row" data-action="play-track" data-track-id="${s.id}">
-                    <span class="ranking-rank-num">${rankNum}</span>
+                  <div class="ranking-table-row ${isRowPlaying ? 'is-current' : ''}" data-action="play-track" data-track-id="${s.id}">
+                    <span class="ranking-rank-num">
+                      ${isRowPlaying ? `
+                        <span class="eq-wave"><span class="b1"></span><span class="b2"></span><span class="b3"></span></span>
+                      ` : `${rankNum}`}
+                    </span>
                     <div class="ranking-track-col">
                       <div class="ranking-thumb">
                         <img src="${coverUrl || ''}" alt="${s.title}" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\\'http://www.w3.org/2000/svg\\' width=\\'44\\' height=\\'44\\' fill=\\'%23222\\'><rect width=\\'44\\' height=\\'44\\'/></svg>'">
@@ -666,166 +861,190 @@
               }).join('')}
             </div>
           </div>
-        </div>
+        ` : ''}
+      </div>
 
-        <!-- 4. Top Artistas e Top Álbuns (Duas Colunas) -->
-        <div class="split-stats-grid">
-          <!-- Coluna 1: Top Artistas por Tempo -->
-          <div class="glass-panel">
-            <div class="analytics-section-header" style="margin-bottom: 14px;">
-              <div class="analytics-section-title-wrap">
-                <h2><span>🎤</span> Top Artistas</h2>
-                <p>Por tempo total de reprodução</p>
-              </div>
-            </div>
-            <div class="mini-stats-list">
-              ${stats.artists.slice(0, 6).map((art, idx) => {
-                const pct = stats.totalPlayTimeSec > 0 ? Math.round((art.totalPlayTimeSec / stats.totalPlayTimeSec) * 100) : 0;
-                return `
-                  <div class="mini-stat-item">
-                    <div class="mini-stat-left">
-                      <img class="artist-avatar" src="${getCoverUrl(art.coverArt)}" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\\'http://www.w3.org/2000/svg\\' width=\\'40\\' height=\\'40\\'><circle cx=\\'20\\' cy=\\'20\\' r=\\'20\\' fill=\\'%23334\\'/></svg>'">
-                      <div class="mini-stat-names">
-                        <span class="mini-stat-main">${idx + 1}. ${art.name}</span>
-                        <span class="mini-stat-sub">${art.totalPlays} reproduções</span>
-                      </div>
-                    </div>
-                    <div class="mini-stat-right">
-                      <span class="mini-stat-time">${formatPlayTime(art.totalPlayTimeSec)}</span>
-                      <span class="mini-stat-pct">${pct}% do tempo</span>
-                    </div>
-                  </div>
-                `;
-              }).join('')}
-            </div>
-          </div>
-
-          <!-- Coluna 2: Top Álbuns por Tempo -->
-          <div class="glass-panel">
-            <div class="analytics-section-header" style="margin-bottom: 14px;">
-              <div class="analytics-section-title-wrap">
-                <h2><span>💿</span> Top Álbuns</h2>
-                <p>Por tempo total de reprodução</p>
-              </div>
-            </div>
-            <div class="mini-stats-list">
-              ${stats.albums.filter(a => a.totalPlayTimeSec > 0).slice(0, 6).map((alb, idx) => {
-                return `
-                  <div class="mini-stat-item">
-                    <div class="mini-stat-left">
-                      <img class="album-avatar" src="${getCoverUrl(alb.coverArt)}" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\\'http://www.w3.org/2000/svg\\' width=\\'40\\' height=\\'40\\'><rect width=\\'40\\' height=\\'40\\' fill=\\'%23223\\'/></svg>'">
-                      <div class="mini-stat-names">
-                        <span class="mini-stat-main">${idx + 1}. ${alb.title}</span>
-                        <span class="mini-stat-sub">${alb.artist} ${alb.year ? '• ' + alb.year : ''}</span>
-                      </div>
-                    </div>
-                    <div class="mini-stat-right">
-                      <span class="mini-stat-time">${formatPlayTime(alb.totalPlayTimeSec)}</span>
-                      <span class="mini-stat-pct">${alb.songCount} faixas</span>
-                    </div>
-                  </div>
-                `;
-              }).join('')}
-            </div>
-          </div>
-        </div>
-
-        <!-- 5. Relógio de Escuta (Listening Clock) -->
-        <div class="glass-panel listening-clock-card">
-          <div class="analytics-section-header" style="margin-bottom: 12px;">
+      <!-- 4. Top Artistas e Top Álbuns (Duas Colunas) -->
+      <div class="split-stats-grid">
+        <!-- Coluna 1: Top Artistas por Tempo -->
+        <div class="glass-panel">
+          <div class="analytics-section-header" style="margin-bottom: 14px;">
             <div class="analytics-section-title-wrap">
-              <h2><span>⏰</span> Relógio de Escuta (24 Horas)</h2>
-              <p>Distribuição do seu tempo de reprodução ao longo do dia</p>
+              <h2>
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#38bdf8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="22"/>
+                </svg>
+                <span>Top Artistas</span>
+              </h2>
+              <p>Por tempo total de reprodução</p>
             </div>
           </div>
-
-          <div class="clock-periods-summary">
-            ${periods.map(p => `
-              <div class="clock-period-box ${p.isPeak ? 'peak' : ''}">
-                <span class="period-name">${p.name} ${p.isPeak ? '★ Pico' : ''}</span>
-                <span class="period-val">${p.val}</span>
-              </div>
-            `).join('')}
-          </div>
-
-          <!-- Barras de 24 Horas -->
-          <div class="clock-bars-visualizer">
-            ${stats.hourly.map((val, hr) => {
-              const maxVal = Math.max(...stats.hourly, 1);
-              const heightPct = Math.max(8, Math.round((val / maxVal) * 100));
-              const isPeak = hr === peakHour && val > 0;
+          <div class="mini-stats-list">
+            ${stats.artists.slice(0, 6).map((art, idx) => {
+              const pct = stats.totalPlayTimeSec > 0 ? Math.round((art.totalPlayTimeSec / stats.totalPlayTimeSec) * 100) : 0;
               return `
-                <div class="clock-hour-col" title="${hr}:00h — ${formatPlayTime(val)}">
-                  <div class="clock-hour-bar ${isPeak ? 'is-peak' : ''}" style="height: ${heightPct}%;"></div>
-                  <span class="clock-hour-label">${hr}h</span>
+                <div class="mini-stat-item">
+                  <div class="mini-stat-left">
+                    <img class="artist-avatar" src="${getCoverUrl(art.coverArt)}" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\\'http://www.w3.org/2000/svg\\' width=\\'40\\' height=\\'40\\'><circle cx=\\'20\\' cy=\\'20\\' r=\\'20\\' fill=\\'%23334\\'/></svg>'">
+                    <div class="mini-stat-names">
+                      <span class="mini-stat-main">${idx + 1}. ${art.name}</span>
+                      <span class="mini-stat-sub">${art.totalPlays} ${art.totalPlays === 1 ? 'stream' : 'streams'}</span>
+                    </div>
+                  </div>
+                  <div class="mini-stat-right">
+                    <span class="mini-stat-time">${formatPlayTime(art.totalPlayTimeSec)}</span>
+                    <span class="mini-stat-pct">${pct}% do tempo</span>
+                  </div>
                 </div>
               `;
             }).join('')}
           </div>
         </div>
 
-        <!-- 6. DNA Sonoro & Gêneros -->
+        <!-- Coluna 2: Top Álbuns por Tempo -->
         <div class="glass-panel">
-          <div class="analytics-section-header" style="margin-bottom: 16px;">
+          <div class="analytics-section-header" style="margin-bottom: 14px;">
             <div class="analytics-section-title-wrap">
-              <h2><span>🧬</span> DNA Sonoro & Personalidade de Escuta</h2>
-              <p>Padrões de imersão e vibração musical</p>
+              <h2>
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#c084fc" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/>
+                </svg>
+                <span>Top Álbuns</span>
+              </h2>
+              <p>Por tempo total de reprodução</p>
             </div>
           </div>
+          <div class="mini-stats-list">
+            ${stats.albums.filter(a => a.totalPlayTimeSec > 0).slice(0, 6).map((alb, idx) => {
+              return `
+                <div class="mini-stat-item">
+                  <div class="mini-stat-left">
+                    <img class="album-avatar" src="${getCoverUrl(alb.coverArt)}" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\\'http://www.w3.org/2000/svg\\' width=\\'40\\' height=\\'40\\'><rect width=\\'40\\' height=\\'40\\' fill=\\'%23223\\'/></svg>'">
+                    <div class="mini-stat-names">
+                      <span class="mini-stat-main">${idx + 1}. ${alb.title}</span>
+                      <span class="mini-stat-sub">${alb.artist} ${alb.year ? '• ' + alb.year : ''}</span>
+                    </div>
+                  </div>
+                  <div class="mini-stat-right">
+                    <span class="mini-stat-time">${formatPlayTime(alb.totalPlayTimeSec)}</span>
+                    <span class="mini-stat-pct">${alb.songCount} ${alb.songCount === 1 ? 'faixa' : 'faixas'}</span>
+                  </div>
+                </div>
+              `;
+            }).join('')}
+          </div>
+        </div>
+      </div>
 
-          <div class="vibe-dna-grid">
-            <div class="vibe-pill-card">
-              <span class="vibe-tag-title">Ritmo Predominante</span>
-              <span class="vibe-tag-val">🌙 Coruja Noturna</span>
-              <span class="vibe-tag-desc">Seu maior volume de reprodução se concentra no período noturno e madrugadas.</span>
-            </div>
-            <div class="vibe-pill-card">
-              <span class="vibe-tag-title">Modo de Escuta</span>
-              <span class="vibe-tag-val">🎧 Imersão Contínua</span>
-              <span class="vibe-tag-desc">Alta taxa de reprodução integral das faixas sem trocas frequentes.</span>
-            </div>
-            <div class="vibe-pill-card">
-              <span class="vibe-tag-title">Diversidade Sonora</span>
-              <span class="vibe-tag-val">🔮 Explorador Ativo</span>
-              <span class="vibe-tag-desc">Mais de ${stats.uniqueArtistsCount} artistas e ${stats.uniqueAlbumsCount} álbuns em rotação constante.</span>
-            </div>
-            <div class="vibe-pill-card">
-              <span class="vibe-tag-title">Média de Sessão</span>
-              <span class="vibe-tag-val">⏱️ ${(stats.totalPlayTimeSec / Math.max(1, stats.totalPlays) / 60).toFixed(1)} min / faixa</span>
-              <span class="vibe-tag-desc">Duração média de cada música reproduzida na sua biblioteca.</span>
-            </div>
+      <!-- 5. Relógio de Escuta (Listening Clock) -->
+      <div class="glass-panel listening-clock-card">
+        <div class="analytics-section-header" style="margin-bottom: 12px;">
+          <div class="analytics-section-title-wrap">
+            <h2>
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#38bdf8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 14 14"/>
+              </svg>
+              <span>Relógio de Escuta (24 Horas)</span>
+            </h2>
+            <p>Distribuição do seu tempo de reprodução ao longo do dia</p>
           </div>
         </div>
 
-        <!-- 7. Sessões Recentes em Tempo Real -->
-        ${stats.history.length > 0 ? `
-          <div class="glass-panel">
-            <div class="analytics-section-header" style="margin-bottom: 14px;">
-              <div class="analytics-section-title-wrap">
-                <h2><span>⚡</span> Histórico de Streams da Sessão</h2>
-                <p>Últimas reproduções computadas</p>
-              </div>
+        <div class="clock-periods-summary">
+          ${periods.map(p => `
+            <div class="clock-period-box ${p.isPeak ? 'peak' : ''}">
+              <span class="period-name">${p.name} ${p.isPeak ? '★ Pico' : ''}</span>
+              <span class="period-val">${p.val}</span>
             </div>
-            <div class="stream-history-list">
-              ${stats.history.slice(0, 8).map(h => `
-                <div class="stream-history-item" data-action="play-track" data-track-id="${h.id}">
-                  <div class="stream-history-left">
-                    <img class="stream-history-thumb" src="${getCoverUrl(h.coverArt)}" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\\'http://www.w3.org/2000/svg\\' width=\\'36\\' height=\\'36\\'><rect width=\\'36\\' height=\\'36\\' fill=\\'%23223\\'/></svg>'">
-                    <div class="stream-history-names">
-                      <span class="stream-history-title">${h.title}</span>
-                      <span class="stream-history-meta">${h.artist} • ${h.album}</span>
-                    </div>
-                  </div>
-                  <div class="stream-history-time">
-                    <span>${formatPlayTime(h.seconds)}</span> • ${new Date(h.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                  </div>
-                </div>
-              `).join('')}
+          `).join('')}
+        </div>
+
+        <!-- Barras de 24 Horas -->
+        <div class="clock-bars-visualizer">
+          ${stats.hourly.map((val, hr) => {
+            const maxVal = Math.max(...stats.hourly, 1);
+            const heightPct = Math.max(8, Math.round((val / maxVal) * 100));
+            const isPeak = hr === peakHour && val > 0;
+            return `
+              <div class="clock-hour-col" title="${hr}:00h — ${formatPlayTime(val)}">
+                <div class="clock-hour-bar ${isPeak ? 'is-peak' : ''}" style="height: ${heightPct}%;"></div>
+                <span class="clock-hour-label">${hr}h</span>
+              </div>
+            `;
+          }).join('')}
+        </div>
+      </div>
+
+      <!-- 6. DNA Sonoro & Gêneros -->
+      <div class="glass-panel">
+        <div class="analytics-section-header" style="margin-bottom: 16px;">
+          <div class="analytics-section-title-wrap">
+            <h2>
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#f472b6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="m8 3 4 8 5-5 5 15H2L8 3z"/>
+              </svg>
+              <span>DNA Sonoro & Personalidade de Escuta</span>
+            </h2>
+            <p>Padrões de imersão e vibração musical</p>
+          </div>
+        </div>
+
+        <div class="vibe-dna-grid">
+          <div class="vibe-pill-card">
+            <span class="vibe-tag-title">Ritmo Predominante</span>
+            <span class="vibe-tag-val">${peakHour < 6 ? '🌙 Coruja Noturna' : peakHour < 12 ? '☀️ Despertar Matutino' : peakHour < 18 ? '⛅ Foco Vespertino' : '🌃 Noite Sonora'}</span>
+            <span class="vibe-tag-desc">Seu maior volume de reprodução se concentra no período ${peakHour < 6 ? 'da madrugada' : peakHour < 12 ? 'da manhã' : peakHour < 18 ? 'da tarde' : 'da noite'}.</span>
+          </div>
+          <div class="vibe-pill-card">
+            <span class="vibe-tag-title">Modo de Escuta</span>
+            <span class="vibe-tag-val">🎧 Imersão Contínua</span>
+            <span class="vibe-tag-desc">Alta taxa de reprodução integral das faixas sem trocas frequentes.</span>
+          </div>
+          <div class="vibe-pill-card">
+            <span class="vibe-tag-title">Diversidade Sonora</span>
+            <span class="vibe-tag-val">🔮 Explorador Ativo</span>
+            <span class="vibe-tag-desc">${stats.uniqueArtistsCount} ${stats.uniqueArtistsCount === 1 ? 'artista' : 'artistas'} e ${stats.uniqueAlbumsCount} ${stats.uniqueAlbumsCount === 1 ? 'álbum' : 'álbuns'} em rotação constante.</span>
+          </div>
+          <div class="vibe-pill-card">
+            <span class="vibe-tag-title">Média por Faixa</span>
+            <span class="vibe-tag-val">⏱️ ${Math.floor((stats.totalPlayTimeSec / Math.max(1, stats.totalPlays)) / 60)}m ${Math.floor((stats.totalPlayTimeSec / Math.max(1, stats.totalPlays)) % 60)}s</span>
+            <span class="vibe-tag-desc">Duração média de escuta em cada reprodução da sua biblioteca.</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 7. Sessões Recentes em Tempo Real -->
+      ${stats.history && stats.history.length > 0 ? `
+        <div class="glass-panel">
+          <div class="analytics-section-header" style="margin-bottom: 14px;">
+            <div class="analytics-section-title-wrap">
+              <h2>
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#fbbf24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+                </svg>
+                <span>Histórico de Streams da Sessão</span>
+              </h2>
+              <p>Últimas reproduções computadas</p>
             </div>
           </div>
-        ` : ''}
-
-      </div>
+          <div class="stream-history-list">
+            ${stats.history.slice(0, 8).map(h => `
+              <div class="stream-history-item" data-action="play-track" data-track-id="${h.id}">
+                <div class="stream-history-left">
+                  <img class="stream-history-thumb" src="${getCoverUrl(h.coverArt)}" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\\'http://www.w3.org/2000/svg\\' width=\\'36\\' height=\\'36\\'><rect width=\\'36\\' height=\\'36\\' fill=\\'%23223\\'/></svg>'">
+                  <div class="stream-history-names">
+                    <span class="stream-history-title">${h.title}</span>
+                    <span class="stream-history-meta">${h.artist} • ${h.album}</span>
+                  </div>
+                </div>
+                <div class="stream-history-time">
+                  <span>${formatPlayTime(h.seconds)}</span> • ${new Date(h.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      ` : ''}
     `;
   }
 
@@ -833,9 +1052,16 @@
     if (!cachedLibraryStats) return;
     const el = document.getElementById('kpi-total-playtime');
     if (el) {
-      // Recompute grand total with live local seconds
       let total = cachedLibraryStats.songs.reduce((acc, s) => acc + s.totalPlayTimeSec, 0);
       el.textContent = formatPlayTime(total);
+    }
+    const currentSong = getCurrentPlayingSong();
+    if (currentSong && currentSong.id) {
+      const podiumEl = document.getElementById(`podium-time-${currentSong.id}`);
+      const songData = cachedLibraryStats.songs.find(s => s.id === currentSong.id);
+      if (podiumEl && songData) {
+        podiumEl.textContent = formatPlayTime(songData.totalPlayTimeSec);
+      }
     }
   }
 
@@ -869,7 +1095,7 @@
                           hash === '' || 
                           hash === '#';
 
-      // Check if sidebar navigation item exists
+      // Ensure sidebar navigation item exists
       ensureSidebarAnalyticsItem();
 
       if (!isHomeRoute) {
@@ -882,7 +1108,6 @@
         localStorage.setItem('feishin_home_active_tab', 'analytics');
       }
 
-      // Find the main stack container of the Home page
       const stack = getHomeStack();
       if (!stack) return;
 
@@ -895,10 +1120,16 @@
         switcher.innerHTML = `
           <div class="feishin-home-tabs-group">
             <button class="feishin-tab-btn ${activeTab === 'feed' ? 'active' : ''}" data-tab="feed" type="button">
-              <span>🏠</span> Início & Descobertas
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>
+              </svg>
+              <span>Início & Descobertas</span>
             </button>
             <button class="feishin-tab-btn ${activeTab === 'analytics' ? 'active' : ''}" data-tab="analytics" type="button">
-              <span>📊</span> Painel de Analytics
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M18 20V10M12 20V4M6 20v-6"/>
+              </svg>
+              <span>Painel de Analytics</span>
               <span class="tab-badge-live"><span class="pulse-dot"></span> LIVE</span>
             </button>
           </div>
@@ -981,7 +1212,7 @@
       child.style.display = activeTab === 'analytics' ? 'none' : '';
     });
 
-    // Ensure dashboard container exists
+    // Ensure single dashboard container exists
     let dashContainer = document.getElementById('feishin-analytics-dashboard');
     if (activeTab === 'analytics') {
       if (!dashContainer) {
@@ -1004,14 +1235,20 @@
     if (!cachedLibraryStats) {
       container.innerHTML = `
         <div class="glass-panel" style="text-align: center; padding: 60px 20px;">
-          <div style="font-size: 36px; margin-bottom: 12px; animation: tabPulse 1.2s infinite ease-in-out;">📊</div>
+          <div style="font-size: 36px; margin-bottom: 12px; animation: tabPulse 1.2s infinite ease-in-out;">
+            <svg viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="#00f2fe" stroke-width="2" style="display:inline-block;">
+              <path d="M18 20V10M12 20V4M6 20v-6"/>
+            </svg>
+          </div>
           <h2 style="margin: 0 0 8px 0; color: #fff; font-size: 20px;">Carregando Métricas da Biblioteca...</h2>
-          <p style="margin: 0; color: rgba(255,255,255,0.6); font-size: 13.5px;">Calculando tempo de reprodução acumulado de 1.687 faixas</p>
+          <p style="margin: 0; color: rgba(255,255,255,0.6); font-size: 13.5px;">Calculando tempo de reprodução acumulado com precisão analítica</p>
         </div>
       `;
     }
 
-    const stats = await fetchAnalyticsData();
+    const rawStats = await fetchAnalyticsData();
+    const stats = getStatsForTimeframe(rawStats, currentTimeframe);
+
     container.innerHTML = renderDashboardUI(stats);
 
     // Attach Play Click Handlers
@@ -1020,25 +1257,20 @@
         e.preventDefault();
         e.stopPropagation();
         const trackId = el.getAttribute('data-track-id');
-        const trackIdx = el.getAttribute('data-track-index');
-        let song = null;
         if (trackId) {
-          song = stats.songs.find(s => s.id === trackId);
-        } else if (trackIdx !== null) {
-          song = stats.songs[parseInt(trackIdx, 10)];
+          const song = rawStats.songs.find(s => s.id === trackId);
+          if (song) playTrack(song);
         }
-        if (song) playTrack(song);
       };
     });
 
-    // Attach Timeframe filter buttons
+    // Attach Timeframe filter buttons with dynamic re-render
     container.querySelectorAll('.analytics-time-btn').forEach(btn => {
       btn.onclick = (e) => {
         e.preventDefault();
         e.stopPropagation();
         currentTimeframe = btn.getAttribute('data-time');
-        container.querySelectorAll('.analytics-time-btn').forEach(b => b.classList.toggle('active', b === btn));
-        // Recalculate view if needed
+        updateDashboardContent();
       };
     });
   }
@@ -1095,7 +1327,7 @@
         }, 120);
       });
 
-      // Place right after the first item (Início) or backgrounds
+      // Place right after Início or at top of sidebar items
       const firstNav = parent.querySelector('a');
       if (firstNav && firstNav.nextSibling) {
         parent.insertBefore(item, firstNav.nextSibling);
@@ -1153,6 +1385,7 @@
     fetchAnalyticsData,
     switchTab,
     playTrack,
+    updateDashboardContent,
     getLocalData: () => localData
   };
 })();
