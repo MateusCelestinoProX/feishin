@@ -236,6 +236,10 @@ def patch_bundle(file_path):
                 sb_js = sb_js.replace('function Je(e){return e.id!=="Collections"&&e.route}', 'function Je(e){return e.id!=="Collections"&&e.id!=="Albums"&&e.id!=="Home"&&e.route}', 1)
                 sb_mod = True
                 print(f"[✓] Patch Sidebar Remoção de Álbuns e Início aplicado em {sidebar_bundle.name}")
+            if 'function Xe(e){return!e.disabled}' in sb_js:
+                sb_js = sb_js.replace('function Xe(e){return!e.disabled}', 'function Xe(e){return!e.disabled&&e.id!=="Albums"&&e.id!=="Home"}', 1)
+                sb_mod = True
+                print(f"[✓] Patch Sidebar Xe Remoção de Álbuns e Início aplicado em {sidebar_bundle.name}")
             if sb_mod:
                 with open(sidebar_bundle, "w", encoding="utf-8") as f:
                     f.write(sb_js)

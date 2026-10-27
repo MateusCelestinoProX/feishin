@@ -1161,8 +1161,23 @@
   }
 
   // 6. INITIALIZATION
-  initContextMenuObserver();
-  initTagsPageRouter();
+  function startTagsEngine() {
+    try {
+      initContextMenuObserver();
+    } catch (e) {
+      console.error('[Tags Engine] Erro ao iniciar context menu observer:', e);
+    }
+    try {
+      initTagsPageRouter();
+    } catch (e) {
+      console.error('[Tags Engine] Erro ao iniciar router de tags:', e);
+    }
+    console.log('[Tags Engine] Sistema de Tags carregado e ativo.');
+  }
 
-  console.log('[Tags Engine] Sistema de Tags carregado e ativo.');
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', startTagsEngine);
+  } else {
+    startTagsEngine();
+  }
 })();
