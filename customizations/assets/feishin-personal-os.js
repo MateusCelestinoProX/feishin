@@ -119,17 +119,13 @@ import './webgl-backgrounds.js';
     updateModalUI();
   }
 
-  window.applyPersonalOsShader = applyShader;
-  window.PERSONAL_OS_SHADERS = SHADER_CATALOG;
-
-  // 5. Rotative Cycle
+  // 5. Rotative Mode Engine
   function startRotative() {
     stopRotative();
-    if (!isRotative || isEcoMode) return;
     rotativeTimer = setInterval(() => {
+      if (isEcoMode) return;
       currentRotativeIdx = (currentRotativeIdx + 1) % FLAT_SHADERS.length;
-      const nextShader = FLAT_SHADERS[currentRotativeIdx].id;
-      applyShader(nextShader);
+      applyShader(FLAT_SHADERS[currentRotativeIdx].id);
     }, rotativeSeconds * 1000);
   }
 
@@ -140,143 +136,179 @@ import './webgl-backgrounds.js';
     }
   }
 
-  // 6. Quick Shader Pill & Modal UI
   function updatePillLabel(text) {
-    const label = document.getElementById('personal-os-pill-label');
-    if (label) label.textContent = text;
+    const lbl = document.getElementById('personal-os-pill-label');
+    if (lbl) lbl.textContent = text;
   }
 
+  // 6. Mount UI Controls
   function mountShaderSwitcherUI() {
     if (document.getElementById('personal-os-shader-pill')) return;
 
-    // Header Pill
-    const pill = document.createElement('div');
+    // Header Pill Button
+    const pill = document.createElement('button');
     pill.id = 'personal-os-shader-pill';
+    pill.type = 'button';
     pill.title = 'Personal OS WebGL Shaders & Liquid Glass';
     pill.innerHTML = `
       <div class="shader-glow-dot"></div>
       <span id="personal-os-pill-label">🔮 Plasma Wave</span>
       <span class="badge-bg-num">${FLAT_SHADERS.length} fundos</span>
-      <span style="font-size: 8px; opacity: 0.6; margin-left: 2px;">▾</span>
+      <span style="font-size: 8px; opacity: 0.7; margin-left: 2px;">▾</span>
     `;
 
-    // Try finding the window bar or top bar
-    const windowBar = document.querySelector('.fs-window-bar-module-window-bar') || 
-                      document.querySelector('.fs-window-bar-module-macos-container');
+    // Always float safely at top-right with no-drag guarantees
+    pill.style.position = 'fixed';
+    pill.style.top = '7px';
+    pill.style.right = '40px';
+    pill.style.zIndex = '99999';
+    pill.style.webkitAppRegion = 'no-drag';
+    document.body.appendChild(pill);
 
-    if (windowBar) {
-      pill.style.position = 'relative';
-      pill.style.margin = '0 10px';
-      windowBar.appendChild(pill);
-    } else {
-      // Fixed floating in top bar
-      pill.style.position = 'fixed';
-      pill.style.top = '7px';
-      pill.style.right = '70px';
-      pill.style.zIndex = '99999';
-      document.body.appendChild(pill);
+    // Backdrop
+    let backdrop = document.getElementById('personal-os-shader-backdrop');
+    if (!backdrop) {
+      backdrop = document.createElement('div');
+      backdrop.id = 'personal-os-shader-backdrop';
+      backdrop.style.display = 'none';
+      backdrop.style.webkitAppRegion = 'no-drag';
+      document.body.appendChild(backdrop);
     }
 
     // Modal / Popover
-    const modal = document.createElement('div');
-    modal.id = 'personal-os-shader-modal';
-    modal.style.display = 'none';
+    let modal = document.getElementById('personal-os-shader-modal');
+    if (!modal) {
+      modal = document.createElement('div');
+      modal.id = 'personal-os-shader-modal';
+      modal.style.display = 'none';
+      modal.style.webkitAppRegion = 'no-drag';
 
-    modal.innerHTML = `
-      <div class="shader-modal-header">
-        <h3><span>🔮</span> Shaders Personal OS</h3>
-        <button class="shader-modal-close" id="shader-modal-close-btn">✕</button>
-      </div>
-      <div class="shader-modal-controls">
-        <button class="shader-ctrl-btn ${isRotative ? 'active' : ''}" id="shader-rotative-toggle">
-          <span>🔄</span> Rotativo: ${isRotative ? 'Ativo' : 'Fixo'}
-        </button>
-        <button class="shader-ctrl-btn ${isEcoMode ? 'active' : ''}" id="shader-eco-toggle">
-          <span>${isEcoMode ? '▶️' : '🍃'}</span> ${isEcoMode ? 'Retomar' : 'Eco Mode'}
-        </button>
-      </div>
-      <div class="shader-grid-list" id="shader-grid-list-container">
-        <!-- populated dynamically -->
-      </div>
-    `;
+      modal.innerHTML = `
+        <div class="shader-modal-header">
+          <h3><span>🔮</span> Shaders Personal OS</h3>
+          <button class="shader-modal-close" id="shader-modal-close-btn" type="button">✕</button>
+        </div>
+        <div class="shader-modal-controls">
+          <button class="shader-ctrl-btn ${isRotative ? 'active' : ''}" id="shader-rotative-toggle" type="button">
+            <span>🔄</span> Rotativo: ${isRotative ? 'Ativo' : 'Fixo'}
+          </button>
+          <button class="shader-ctrl-btn ${isEcoMode ? 'active' : ''}" id="shader-eco-toggle" type="button">
+            <span>${isEcoMode ? '▶️' : '🍃'}</span> ${isEcoMode ? 'Retomar' : 'Eco Mode'}
+          </button>
+        </div>
+        <div class="shader-grid-list" id="shader-grid-list-container">
+          <!-- populated dynamically -->
+        </div>
+      `;
 
-    document.body.appendChild(modal);
+      document.body.appendChild(modal);
 
-    // Populate Shaders in Grid
-    const listContainer = modal.querySelector('#shader-grid-list-container');
-    SHADER_CATALOG.forEach(cat => {
-      const catHeader = document.createElement('div');
-      catHeader.className = 'shader-category-title';
-      catHeader.textContent = cat.category;
-      listContainer.appendChild(catHeader);
+      // Populate Shaders in Grid
+      const listContainer = modal.querySelector('#shader-grid-list-container');
+      SHADER_CATALOG.forEach(cat => {
+        const catHeader = document.createElement('div');
+        catHeader.className = 'shader-category-title';
+        catHeader.textContent = cat.category;
+        listContainer.appendChild(catHeader);
 
-      cat.items.forEach(sh => {
-        const card = document.createElement('div');
-        card.className = `shader-item-card ${sh.id === activeShader ? 'active' : ''}`;
-        card.setAttribute('data-shader-id', sh.id);
-        card.innerHTML = `
-          <span>${sh.icon} ${sh.name}</span>
-          <span class="shader-item-badge">${sh.id}</span>
-        `;
-        card.onclick = (e) => {
-          e.stopPropagation();
-          isEcoMode = false;
-          localStorage.setItem('feishin_shader_eco', 'false');
-          applyShader(sh.id);
-          setTimeout(() => {
-            modal.style.display = 'none';
-          }, 350);
-        };
-        listContainer.appendChild(card);
+        cat.items.forEach(sh => {
+          const card = document.createElement('div');
+          card.className = `shader-item-card ${sh.id === activeShader ? 'active' : ''}`;
+          card.setAttribute('data-shader-id', sh.id);
+          card.innerHTML = `
+            <span>${sh.icon} ${sh.name}</span>
+            <span class="shader-item-badge">${sh.id}</span>
+          `;
+          card.onclick = (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            isEcoMode = false;
+            localStorage.setItem('feishin_shader_eco', 'false');
+            applyShader(sh.id);
+            setTimeout(() => {
+              closeModal();
+            }, 250);
+          };
+          listContainer.appendChild(card);
+        });
       });
+
+      // Close Modal Button
+      modal.querySelector('#shader-modal-close-btn').onclick = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        closeModal();
+      };
+
+      // Rotative Mode Toggle
+      modal.querySelector('#shader-rotative-toggle').onclick = function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        isRotative = !isRotative;
+        localStorage.setItem('feishin_shader_rotative', isRotative);
+        this.classList.toggle('active', isRotative);
+        this.innerHTML = `<span>🔄</span> Rotativo: ${isRotative ? 'Ativo' : 'Fixo'}`;
+        if (isRotative) {
+          startRotative();
+        } else {
+          stopRotative();
+        }
+      };
+
+      // Eco Mode Toggle
+      modal.querySelector('#shader-eco-toggle').onclick = function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        isEcoMode = !isEcoMode;
+        localStorage.setItem('feishin_shader_eco', isEcoMode);
+        this.classList.toggle('active', isEcoMode);
+        this.innerHTML = `<span>${isEcoMode ? '▶️' : '🍃'}</span> ${isEcoMode ? 'Retomar' : 'Eco Mode'}`;
+        if (isEcoMode) {
+          if (window.stopWebGLBackground) window.stopWebGLBackground();
+          updatePillLabel('🍃 Eco Mode');
+        } else {
+          applyShader(activeShader);
+        }
+      };
+    }
+
+    function openModal() {
+      backdrop.style.display = 'block';
+      modal.style.display = 'flex';
+      updateModalUI();
+    }
+
+    function closeModal() {
+      backdrop.style.display = 'none';
+      modal.style.display = 'none';
+    }
+
+    function toggleModal() {
+      if (modal.style.display === 'flex') {
+        closeModal();
+      } else {
+        openModal();
+      }
+    }
+
+    // Toggle Modal on Pill Click & Pointerdown (Guarantees zero drag interception)
+    pill.addEventListener('pointerdown', (e) => e.stopPropagation());
+    pill.addEventListener('mousedown', (e) => e.stopPropagation());
+    pill.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      toggleModal();
     });
 
-    // Toggle Modal on Pill Click
-    pill.onclick = (e) => {
+    backdrop.addEventListener('click', (e) => {
+      e.preventDefault();
       e.stopPropagation();
-      modal.style.display = modal.style.display === 'none' ? 'flex' : 'none';
-      if (modal.style.display === 'flex') updateModalUI();
-    };
+      closeModal();
+    });
 
-    // Close Modal Button
-    modal.querySelector('#shader-modal-close-btn').onclick = (e) => {
-      e.stopPropagation();
-      modal.style.display = 'none';
-    };
-
-    // Rotative Mode Toggle
-    modal.querySelector('#shader-rotative-toggle').onclick = function(e) {
-      e.stopPropagation();
-      isRotative = !isRotative;
-      localStorage.setItem('feishin_shader_rotative', isRotative);
-      this.classList.toggle('active', isRotative);
-      this.innerHTML = `<span>🔄</span> Rotativo: ${isRotative ? 'Ativo' : 'Fixo'}`;
-      if (isRotative) {
-        startRotative();
-      } else {
-        stopRotative();
-      }
-    };
-
-    // Eco Mode Toggle
-    modal.querySelector('#shader-eco-toggle').onclick = function(e) {
-      e.stopPropagation();
-      isEcoMode = !isEcoMode;
-      localStorage.setItem('feishin_shader_eco', isEcoMode);
-      this.classList.toggle('active', isEcoMode);
-      this.innerHTML = `<span>${isEcoMode ? '▶️' : '🍃'}</span> ${isEcoMode ? 'Retomar' : 'Eco Mode'}`;
-      if (isEcoMode) {
-        if (window.stopWebGLBackground) window.stopWebGLBackground();
-        updatePillLabel('🍃 Eco Mode');
-      } else {
-        applyShader(activeShader);
-      }
-    };
-
-    // Close when clicking outside
-    document.addEventListener('click', (e) => {
-      if (!modal.contains(e.target) && !pill.contains(e.target)) {
-        modal.style.display = 'none';
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && modal.style.display === 'flex') {
+        closeModal();
       }
     });
 
