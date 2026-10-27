@@ -1171,12 +1171,17 @@ if (typeof window !== 'undefined') {
   }
 
   // ==========================================================================
-  // 12. PLAYER KILL SWITCH & GLASS CONFIRMATION DIALOG (BOTÃO X)
-  // Adiciona botão "X" na barra de controle do player que fecha a música atual,
+  // 12. PLAYER KILL SWITCH & GLASS CONFIRMATION DIALOG (BOTÃO X NO EXTREMO CANTO DIREITO)
+  // Adiciona botão "X" no extremo canto direito da barra do player que fecha a música atual,
   // interrompe a reprodução e limpa a playlist/fila de reprodução, com diálogo glass.
+  // Suporta atalho: pressionar Esc 2 vezes quando algo estiver tocando abre o modal.
+  // No modal: Esc fecha (cancela) e Enter é sim (confirma encerramento).
   // ==========================================================================
   function initPlayerKillSwitch() {
-    console.log('[Personal OS] Ativando Kill Switch do Player (Botão X + Glass Dialog)...');
+    console.log('[Personal OS] Ativando Kill Switch do Player (Botão X Canto Direito + Esc 2x + Glass Dialog)...');
+
+    let lastEscTime = 0;
+    let activeCloseDialog = null;
 
     function executeKillSwitch() {
       console.log('[Personal OS] Executando Kill Switch: Encerrando música e limpando fila...');
@@ -1274,10 +1279,10 @@ if (typeof window !== 'undefined') {
           </div>
           <div class="feishin-glass-dialog-actions">
             <button type="button" class="feishin-glass-btn feishin-glass-btn-cancel" id="feishin-kill-cancel-btn">
-              Cancelar
+              Cancelar <span style="opacity: 0.6; font-size: 11px; margin-left: 4px;">(Esc)</span>
             </button>
             <button type="button" class="feishin-glass-btn feishin-glass-btn-danger" id="feishin-kill-confirm-btn">
-              Encerrar e Limpar
+              Encerrar e Limpar <span style="opacity: 0.8; font-size: 11px; margin-left: 4px;">(Enter)</span>
             </button>
           </div>
         </div>
@@ -1286,25 +1291,14 @@ if (typeof window !== 'undefined') {
       document.body.appendChild(backdrop);
 
       const closeDialog = () => {
-        window.removeEventListener('keydown', handleKey);
+        activeCloseDialog = null;
         backdrop.style.opacity = '0';
         const box = backdrop.querySelector('.feishin-glass-dialog-box');
         if (box) box.style.transform = 'scale(0.92)';
         setTimeout(() => backdrop.remove(), 160);
       };
 
-      const handleKey = (e) => {
-        if (e.key === 'Escape') {
-          e.preventDefault();
-          closeDialog();
-        } else if (e.key === 'Enter') {
-          e.preventDefault();
-          executeKillSwitch();
-          closeDialog();
-        }
-      };
-
-      window.addEventListener('keydown', handleKey);
+      activeCloseDialog = closeDialog;
 
       backdrop.onclick = (e) => {
         if (e.target === backdrop) closeDialog();
@@ -1321,6 +1315,60 @@ if (typeof window !== 'undefined') {
         };
       }
     }
+
+    // Atalhos Globais: Esc 2x abre modal; No modal, Esc fecha e Enter confirma
+    window.addEventListener('keydown', (e) => {
+      const dialog = document.getElementById('feishin-kill-switch-dialog-backdrop');
+
+      // Se o modal estiver aberto:
+      if (dialog) {
+        if (e.key === 'Escape') {
+          e.preventDefault();
+          e.stopPropagation();
+          if (typeof activeCloseDialog === 'function') activeCloseDialog();
+          else dialog.remove();
+          lastEscTime = 0;
+          return;
+        }
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          e.stopPropagation();
+          executeKillSwitch();
+          if (typeof activeCloseDialog === 'function') activeCloseDialog();
+          else dialog.remove();
+          lastEscTime = 0;
+          return;
+        }
+        return;
+      }
+
+      // Se o modal NÃO estiver aberto: escuta Esc duplo (Esc 2 vezes) quando houver áudio/fila
+      if (e.key === 'Escape') {
+        if (['INPUT', 'TEXTAREA'].includes(document.activeElement?.tagName)) return;
+
+        const store = (window.__FEISHIN_PLAYER_STORE__ && window.__FEISHIN_PLAYER_STORE__.getState)
+          ? window.__FEISHIN_PLAYER_STORE__.getState()
+          : null;
+        const q = store?.getQueue?.();
+        const hasQueue = q && ((q.items && q.items.length > 0) || (Array.isArray(q) && q.length > 0));
+        const current = store?.getCurrentSong?.();
+        const isPlaying = store?.player?.status === 'playing' || store?.player?.status === 'paused';
+        const hasActiveAudio = !!(hasQueue || current || isPlaying);
+
+        if (!hasActiveAudio) return;
+
+        const now = Date.now();
+        if (now - lastEscTime < 500) {
+          // Esc pressionado 2 vezes consecutivas em menos de 500ms
+          lastEscTime = 0;
+          e.preventDefault();
+          e.stopPropagation();
+          openKillSwitchGlassDialog();
+        } else {
+          lastEscTime = now;
+        }
+      }
+    }, true);
 
     function updateKillButtonState() {
       const btn = document.getElementById('feishin-kill-switch-btn');
@@ -1348,19 +1396,27 @@ if (typeof window !== 'undefined') {
     }
 
     function mountKillButton() {
-      const center = document.querySelector('.fs-center-controls-module-buttons-container');
-      if (!center) return;
+      // Alvo: extremo canto direito da barra do player (.fs-playerbar-module-right-grid-item)
+      const rightGrid = document.querySelector('.fs-playerbar-module-right-grid-item');
+      if (!rightGrid) return;
+
+      const flex = rightGrid.querySelector('[class*="mantine-Flex-root"], div');
+      if (!flex) return;
+
+      const row1 = flex.children[1] || flex;
 
       let btn = document.getElementById('feishin-kill-switch-btn');
-      if (!btn) {
+      if (!btn || btn.parentElement !== row1) {
+        if (btn) btn.remove();
+
         btn = document.createElement('button');
         btn.id = 'feishin-kill-switch-btn';
-        btn.className = 'mantine-focus-never mantine-active fs-action-icon-module-root m_8d3f4000 mantine-ActionIcon-root m_87cf2631 mantine-UnstyledButton-root feishin-kill-btn';
+        btn.className = 'mantine-focus-never mantine-active fs-action-icon-module-root m_8d3f4000 mantine-ActionIcon-root m_87cf2631 mantine-UnstyledButton-root feishin-kill-btn feishin-kill-btn-right';
         btn.setAttribute('type', 'button');
-        btn.setAttribute('title', 'Encerrar reprodução e limpar fila (X)');
+        btn.setAttribute('title', 'Fechar música e matar fila (X) — ou pressione Esc 2x');
         btn.innerHTML = `
           <span class="m_8d3afb97 mantine-ActionIcon-icon">
-            <svg stroke="currentColor" fill="none" stroke-width="2.2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" height="15" width="15" xmlns="http://www.w3.org/2000/svg">
+            <svg stroke="currentColor" fill="none" stroke-width="2.3" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" height="15" width="15" xmlns="http://www.w3.org/2000/svg">
               <line x1="18" y1="6" x2="6" y2="18"></line>
               <line x1="6" y1="6" x2="18" y2="18"></line>
             </svg>
@@ -1373,12 +1429,7 @@ if (typeof window !== 'undefined') {
           openKillSwitchGlassDialog();
         };
 
-        const stopBtn = center.children[0];
-        if (stopBtn && stopBtn !== btn) {
-          stopBtn.after(btn);
-        } else {
-          center.prepend(btn);
-        }
+        row1.appendChild(btn);
       }
       updateKillButtonState();
     }

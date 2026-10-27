@@ -233,13 +233,7 @@
     }
 
     promptCreateTagAndAssign(songs) {
-      const name = window.prompt('Digite o nome da nova tag:');
-      if (name && name.trim()) {
-        const newTag = this.createTag(name.trim());
-        if (newTag && songs && songs.length) {
-          songs.forEach(s => this.assignTrack(s, newTag.id));
-        }
-      }
+      openTagEditorModal(null, songs);
     }
 
     playTag(tagId, shuffle = false) {
@@ -670,29 +664,442 @@
     }
   }
 
+  // ==========================================================================
+  // HELPERS: ESCAPE, IMAGE PROCESSOR & MODAL ENGINE
+  // ==========================================================================
+  function escapeHtml(str) {
+    if (!str) return '';
+    return String(str)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#039;');
+  }
+
+  function isDataUrl(url) {
+    return typeof url === 'string' && url.startsWith('data:');
+  }
+
+  function closeTagModals() {
+    const existing = document.getElementById('fs-tag-modal-container');
+    if (existing) existing.remove();
+  }
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      closeTagModals();
+    }
+  });
+
+  // UPLOAD UNIVERSAL DE IMAGEM (QUALQUER FORMATO)
+  // Suporta PNG, JPG, WEBP, GIF, SVG, AVIF, BMP, ICO.
+  // Preserva SVGs vetoriais e GIFs animados. Redimensiona imagens raster grandes via Canvas.
+  function processImageFile(file) {
+    return new Promise((resolve, reject) => {
+      if (!file) return reject(new Error('Nenhum arquivo fornecido'));
+
+      const isSvg = file.type === 'image/svg+xml' || (file.name && file.name.toLowerCase().endsWith('.svg'));
+      const isGif = file.type === 'image/gif' || (file.name && file.name.toLowerCase().endsWith('.gif'));
+
+      const reader = new FileReader();
+      reader.onerror = () => reject(new Error('Falha ao ler o arquivo de imagem'));
+      reader.onload = (e) => {
+        const dataUrl = e.target.result;
+
+        // Manter integridade pura de SVG vetorial e GIF animado
+        // Arquivos leves (< 250KB) também não necessitam de recompressão
+        if (isSvg || isGif || file.size < 250 * 1024) {
+          return resolve(dataUrl);
+        }
+
+        // Para fotos e imagens de alta resolução (PNG/JPG/WEBP/AVIF/BMP):
+        // Redimensionar para no máximo 1280px para garantir nitidez retina sem estourar localStorage
+        const img = new Image();
+        img.onerror = () => resolve(dataUrl);
+        img.onload = () => {
+          try {
+            const maxDim = 1280;
+            let width = img.width;
+            let height = img.height;
+
+            if (width > maxDim || height > maxDim) {
+              if (width > height) {
+                height = Math.round((height * maxDim) / width);
+                width = maxDim;
+              } else {
+                width = Math.round((width * maxDim) / height);
+                height = maxDim;
+              }
+            }
+
+            const canvas = document.createElement('canvas');
+            canvas.width = width;
+            canvas.height = height;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0, width, height);
+
+            let optimizedUrl = canvas.toDataURL('image/webp', 0.88);
+            if (!optimizedUrl || optimizedUrl.length < 50) {
+              optimizedUrl = canvas.toDataURL('image/jpeg', 0.88);
+            }
+            resolve(optimizedUrl || dataUrl);
+          } catch (err) {
+            resolve(dataUrl);
+          }
+        };
+        img.src = dataUrl;
+      };
+      reader.readAsDataURL(file);
+    });
+  }
+
+  // MODAL CONFIRMAÇÃO DE EXCLUSÃO (MINIMALISTA)
+  function openDeleteConfirmModal(tagId) {
+    closeTagModals();
+    const tag = engine.getTag(tagId);
+    if (!tag) return;
+
+    const modalBackdrop = document.createElement('div');
+    modalBackdrop.id = 'fs-tag-modal-container';
+    modalBackdrop.className = 'fs-tag-modal-backdrop';
+
+    modalBackdrop.innerHTML = `
+      <div class="fs-tag-modal-dialog fs-delete-dialog" role="dialog" aria-modal="true">
+        <div class="fs-delete-icon-wrap">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
+        </div>
+        <h3 class="fs-delete-title">Excluir Tag</h3>
+        <p class="fs-delete-msg">
+          Deseja realmente apagar a tag <strong>"${escapeHtml(tag.name)}"</strong>?<br>
+          As músicas permanecerão intactas na sua biblioteca.
+        </p>
+        <div class="fs-delete-actions">
+          <button type="button" class="fs-modal-btn-cancel" id="fs-delete-cancel">Cancelar</button>
+          <button type="button" class="fs-btn-confirm-delete" id="fs-delete-confirm">Sim, Excluir</button>
+        </div>
+      </div>
+    `;
+
+    document.body.appendChild(modalBackdrop);
+
+    modalBackdrop.querySelector('#fs-delete-cancel')?.addEventListener('click', closeTagModals);
+    modalBackdrop.querySelector('#fs-delete-confirm')?.addEventListener('click', () => {
+      engine.deleteTag(tagId);
+      closeTagModals();
+    });
+
+    modalBackdrop.addEventListener('click', (e) => {
+      if (e.target === modalBackdrop) closeTagModals();
+    });
+  }
+
+  // MODAL ELEGANTE DO TAG EDITOR (CRIAR / EDITAR)
+  function openTagEditorModal(tagId = null, initialSongs = null) {
+    closeTagModals();
+
+    const isEdit = Boolean(tagId);
+    const tag = isEdit ? engine.getTag(tagId) : null;
+    if (isEdit && !tag) return;
+
+    let currentName = tag ? tag.name : '';
+    let currentImage = tag ? tag.heroImage : PRESET_HEROES[Math.floor(Math.random() * PRESET_HEROES.length)].url;
+
+    const modalBackdrop = document.createElement('div');
+    modalBackdrop.id = 'fs-tag-modal-container';
+    modalBackdrop.className = 'fs-tag-modal-backdrop';
+
+    modalBackdrop.innerHTML = `
+      <div class="fs-tag-modal-dialog" role="dialog" aria-modal="true">
+        <!-- Header -->
+        <div class="fs-tag-modal-header">
+          <div class="fs-tag-modal-title-group">
+            <div class="fs-tag-modal-icon-badge">
+              <span>${isEdit ? '✏️' : '✨'}</span>
+            </div>
+            <div>
+              <h2 class="fs-tag-modal-title">${isEdit ? 'Editar Tag' : 'Criar Nova Tag'}</h2>
+              <span style="font-size: 11.5px; color: rgba(255,255,255,0.45);">Personalize o nome e a Hero Image da sua tag</span>
+            </div>
+          </div>
+          <button type="button" class="fs-tag-modal-close-btn" id="fs-modal-close" title="Fechar (Esc)">✕</button>
+        </div>
+
+        <!-- Body -->
+        <div class="fs-tag-modal-body">
+          <!-- Left: Real-time Live Preview -->
+          <div class="fs-tag-modal-preview-col">
+            <span class="fs-tag-modal-label">PRÉVIA EM TEMPO REAL</span>
+            <div class="fs-hero-box fs-modal-preview-card" id="fs-modal-preview-box" style="background-image: url('${currentImage}');">
+              <div class="fs-hero-box-overlay"></div>
+              <div class="fs-hero-box-top">
+                <span class="fs-hero-box-tag-pill">🏷️ Tag</span>
+                <span class="fs-hero-box-count-pill">${isEdit ? engine.getSongsForTag(tag.id).length : (initialSongs ? initialSongs.length : 0)} faixas</span>
+              </div>
+              <div class="fs-hero-box-bottom">
+                <h3 class="fs-hero-box-title" id="fs-modal-preview-title">${escapeHtml(currentName) || 'Nome da Tag'}</h3>
+                <div class="fs-hero-box-actions" style="opacity: 0.85; pointer-events: none;">
+                  <div class="fs-hero-btn-play"><span>▶ Tocar Tag</span></div>
+                </div>
+              </div>
+            </div>
+            <span class="fs-tag-preview-hint">Esta imagem é exibida no card da biblioteca e no banner superior da playlist.</span>
+          </div>
+
+          <!-- Right: Controls -->
+          <div class="fs-tag-modal-form-col">
+            <!-- Tag Name Input -->
+            <div class="fs-modal-field-group">
+              <label class="fs-tag-modal-label" for="fs-modal-input-name">NOME DA TAG *</label>
+              <input type="text" id="fs-modal-input-name" class="fs-modal-text-input" placeholder="Ex: Synthwave, Madrugada, Jazz & Soul..." value="${escapeHtml(currentName)}" autocomplete="off" />
+            </div>
+
+            <!-- Image Upload Dropzone -->
+            <div class="fs-modal-field-group">
+              <label class="fs-tag-modal-label">HERO IMAGE (UPLOAD DE QUALQUER FORMATO)</label>
+              
+              <div class="fs-tag-upload-dropzone" id="fs-tag-dropzone">
+                <input type="file" id="fs-tag-file-input" accept="image/*,.png,.jpg,.jpeg,.webp,.gif,.svg,.avif,.bmp,.ico" style="display: none;" />
+                <div class="fs-dropzone-icon">
+                  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                </div>
+                <div class="fs-dropzone-text" id="fs-dropzone-label">
+                  <strong>Clique para selecionar</strong> ou arraste qualquer imagem aqui
+                </div>
+                <div class="fs-dropzone-subtext" id="fs-dropzone-sublabel">
+                  Suporta PNG, JPG, WEBP, GIF, SVG, AVIF (otimização e retina sharp)
+                </div>
+              </div>
+
+              <!-- Secondary Option: URL / Presets -->
+              <div class="fs-modal-secondary-options">
+                <details class="fs-modal-details" id="fs-modal-details-presets">
+                  <summary class="fs-modal-details-summary">Ou use uma URL de imagem / Presets rápidos</summary>
+                  <div class="fs-modal-details-content">
+                    <input type="text" id="fs-modal-input-url" class="fs-modal-text-input" placeholder="Cole uma URL (https://...)" value="${isDataUrl(currentImage) ? '' : escapeHtml(currentImage)}" />
+                    <div class="fs-presets-chips-compact">
+                      ${PRESET_HEROES.map(p => `
+                        <button type="button" class="fs-preset-chip-compact" data-url="${p.url}">
+                          <span>${p.icon}</span> <span>${p.name}</span>
+                        </button>
+                      `).join('')}
+                    </div>
+                  </div>
+                </details>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="fs-tag-modal-footer">
+          <div>
+            ${isEdit ? `
+              <button type="button" class="fs-modal-btn-delete" id="fs-modal-delete-btn" title="Excluir esta tag permanentemente">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                <span>Excluir Tag</span>
+              </button>
+            ` : ''}
+          </div>
+          <div class="fs-modal-footer-right">
+            <button type="button" class="fs-modal-btn-cancel" id="fs-modal-cancel-btn">Cancelar</button>
+            <button type="button" class="fs-modal-btn-save" id="fs-modal-save-btn">
+              <span>${isEdit ? 'Salvar Alterações' : 'Criar Tag'}</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    `;
+
+    document.body.appendChild(modalBackdrop);
+
+    // Elements
+    const nameInput = modalBackdrop.querySelector('#fs-modal-input-name');
+    const urlInput = modalBackdrop.querySelector('#fs-modal-input-url');
+    const previewBox = modalBackdrop.querySelector('#fs-modal-preview-box');
+    const previewTitle = modalBackdrop.querySelector('#fs-modal-preview-title');
+    const dropzone = modalBackdrop.querySelector('#fs-tag-dropzone');
+    const fileInput = modalBackdrop.querySelector('#fs-tag-file-input');
+    const dropzoneLabel = modalBackdrop.querySelector('#fs-dropzone-label');
+    const dropzoneSublabel = modalBackdrop.querySelector('#fs-dropzone-sublabel');
+    const closeBtn = modalBackdrop.querySelector('#fs-modal-close');
+    const cancelBtn = modalBackdrop.querySelector('#fs-modal-cancel-btn');
+    const saveBtn = modalBackdrop.querySelector('#fs-modal-save-btn');
+    const deleteBtn = modalBackdrop.querySelector('#fs-modal-delete-btn');
+
+    // Autofocus name input
+    setTimeout(() => nameInput?.focus(), 60);
+
+    // Live update title
+    nameInput?.addEventListener('input', () => {
+      currentName = nameInput.value;
+      previewTitle.textContent = currentName.trim() || 'Nome da Tag';
+    });
+
+    // Helper to update active image
+    function updateActiveImage(imgSrc, sourceLabel = null) {
+      currentImage = imgSrc;
+      previewBox.style.backgroundImage = `url('${imgSrc}')`;
+      if (sourceLabel) {
+        dropzoneLabel.innerHTML = `<strong>${escapeHtml(sourceLabel)}</strong> pronta!`;
+        dropzoneSublabel.innerHTML = `<span class="fs-dropzone-loaded-badge">✓ Imagem carregada</span> Clique para trocar`;
+      }
+    }
+
+    // Dropzone Click
+    dropzone?.addEventListener('click', (e) => {
+      if (e.target !== fileInput) {
+        fileInput.click();
+      }
+    });
+
+    // Handle File
+    async function handleFile(file) {
+      if (!file) return;
+      try {
+        dropzoneLabel.innerHTML = '<strong>Carregando imagem...</strong>';
+        dropzoneSublabel.textContent = 'Processando e otimizando formato...';
+        const dataUrl = await processImageFile(file);
+        updateActiveImage(dataUrl, file.name);
+      } catch (err) {
+        console.error('[Tags Engine] Erro no upload da imagem:', err);
+        engine.showToast('Erro ao processar imagem selecionada.', 'error');
+        dropzoneLabel.innerHTML = '<strong>Clique para selecionar</strong> ou arraste qualquer imagem';
+        dropzoneSublabel.textContent = 'Suporta PNG, JPG, WEBP, GIF, SVG, AVIF';
+      }
+    }
+
+    fileInput?.addEventListener('change', () => {
+      if (fileInput.files && fileInput.files[0]) {
+        handleFile(fileInput.files[0]);
+      }
+    });
+
+    // Drag and Drop
+    dropzone?.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      dropzone.classList.add('dragover');
+    });
+
+    dropzone?.addEventListener('dragleave', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      dropzone.classList.remove('dragover');
+    });
+
+    dropzone?.addEventListener('drop', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      dropzone.classList.remove('dragover');
+      if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0]) {
+        handleFile(e.dataTransfer.files[0]);
+      }
+    });
+
+    // URL input
+    urlInput?.addEventListener('input', () => {
+      const val = urlInput.value.trim();
+      if (val) {
+        updateActiveImage(val);
+      }
+    });
+
+    // Preset Chips
+    modalBackdrop.querySelectorAll('.fs-preset-chip-compact').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        const url = btn.getAttribute('data-url');
+        if (url) {
+          if (urlInput) urlInput.value = url;
+          updateActiveImage(url, btn.textContent.trim());
+        }
+      });
+    });
+
+    // Save Action
+    function submitModal() {
+      const finalName = (nameInput?.value || '').trim();
+      if (!finalName) {
+        engine.showToast('Por favor, informe o nome da tag.', 'warning');
+        nameInput?.focus();
+        return;
+      }
+
+      if (isEdit) {
+        engine.updateTag(tag.id, {
+          name: finalName,
+          heroImage: currentImage
+        });
+      } else {
+        const newTag = engine.createTag(finalName, currentImage);
+        if (newTag && initialSongs && initialSongs.length) {
+          initialSongs.forEach(s => engine.assignTrack(s, newTag.id));
+        }
+      }
+
+      closeTagModals();
+    }
+
+    saveBtn?.addEventListener('click', submitModal);
+
+    nameInput?.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        submitModal();
+      }
+    });
+
+    // Delete Action
+    deleteBtn?.addEventListener('click', () => {
+      closeTagModals();
+      openDeleteConfirmModal(tag.id);
+    });
+
+    // Close actions
+    closeBtn?.addEventListener('click', closeTagModals);
+    cancelBtn?.addEventListener('click', closeTagModals);
+
+    modalBackdrop.addEventListener('click', (e) => {
+      if (e.target === modalBackdrop) {
+        closeTagModals();
+      }
+    });
+  }
+
+  // ==========================================================================
+  // RENDER MAIN TAGS PAGE
+  // ==========================================================================
   function renderTagsPage(container) {
     const allTags = engine.getTags();
     const viewMode = engine.viewMode; // 'boxes' | 'tabs'
 
     container.innerHTML = `
       <div class="fs-tags-container">
-        <!-- TOP CONTROL BAR WITH VIEW TOGGLE -->
+        <!-- TOP CONTROL BAR WITH VIEW TOGGLE & ACTIONS -->
         <div class="fs-tags-top-bar">
           <div class="fs-tags-title-block">
             <h1 class="fs-tags-title">🏷️ Tags</h1>
             <span class="fs-tags-count-badge">${allTags.length} tags</span>
           </div>
 
-          <!-- THE TOGGLE SWITCH -->
-          <div class="fs-tags-toggle-switch">
-            <button type="button" class="fs-tags-toggle-btn ${viewMode === 'boxes' ? 'active' : ''}" id="fs-toggle-boxes">
-              <span>📦</span>
-              <span>Hero Boxes & Editor</span>
+          <div class="fs-tags-top-bar-actions">
+            <button type="button" class="fs-btn-new-tag-primary" id="fs-btn-top-new-tag" title="Criar Nova Tag com Hero Image">
+              <span style="font-size: 15px; font-weight: 800;">+</span>
+              <span>Nova Tag</span>
             </button>
-            <button type="button" class="fs-tags-toggle-btn ${viewMode === 'tabs' ? 'active' : ''}" id="fs-toggle-tabs">
-              <span>📑</span>
-              <span>Lista por Abas</span>
-            </button>
+
+            <!-- THE TOGGLE SWITCH -->
+            <div class="fs-tags-toggle-switch">
+              <button type="button" class="fs-tags-toggle-btn ${viewMode === 'boxes' ? 'active' : ''}" id="fs-toggle-boxes">
+                <span>📦</span>
+                <span>Hero Boxes</span>
+              </button>
+              <button type="button" class="fs-tags-toggle-btn ${viewMode === 'tabs' ? 'active' : ''}" id="fs-toggle-tabs">
+                <span>📑</span>
+                <span>Lista por Abas</span>
+              </button>
+            </div>
           </div>
         </div>
 
@@ -700,6 +1107,11 @@
         <div id="fs-tags-view-content" class="fs-tags-view-content"></div>
       </div>
     `;
+
+    // Bind Top New Tag Button
+    container.querySelector('#fs-btn-top-new-tag')?.addEventListener('click', () => {
+      openTagEditorModal();
+    });
 
     // Bind Toggle Buttons
     const toggleBoxes = container.querySelector('#fs-toggle-boxes');
@@ -729,7 +1141,7 @@
   }
 
   // ==========================================================================
-  // VIEW 1: HERO BOXES & TAG EDITOR PANEL
+  // VIEW 1: HERO BOXES (MINIMALISTA COM AÇÕES DIRETAS)
   // ==========================================================================
   function renderView1_Boxes(container, allTags) {
     // If a box is currently opened/clicked, render its playlist!
@@ -738,72 +1150,46 @@
       return;
     }
 
-    container.innerHTML = `
-      <!-- 1. TAG EDITOR PANEL -->
-      <div class="fs-tag-editor-panel">
-        <div class="fs-tag-editor-header">
-          <div style="display: flex; align-items: center; gap: 8px;">
-            <span style="font-size: 18px;">✨</span>
-            <span style="font-size: 15px; font-weight: 700; color: #fff;">Painel do Tag Editor</span>
-          </div>
-          <span style="font-size: 12px; color: rgba(255,255,255,0.5);">Adicione, personalize imagens ou remova tags</span>
-        </div>
-
-        <!-- ADD TAG FORM -->
-        <div class="fs-tag-editor-form">
-          <div class="fs-tag-form-group">
-            <label class="fs-tag-label">Nome da Tag</label>
-            <input type="text" id="fs-new-tag-name" class="fs-tag-input" placeholder="Ex: Rock Clássico, Synthwave, Madrugada..." />
-          </div>
-
-          <div class="fs-tag-form-group">
-            <label class="fs-tag-label">Hero Image (URL ou escolha um Preset abaixo)</label>
-            <input type="text" id="fs-new-tag-image" class="fs-tag-input" placeholder="https://..." value="${PRESET_HEROES[0].url}" />
-          </div>
-
-          <button type="button" id="fs-btn-add-tag" class="fs-tag-btn-primary">
-            <span>+</span> <span>Adicionar Tag</span>
+    if (allTags.length === 0) {
+      container.innerHTML = `
+        <div class="fs-tag-empty-state" style="padding: 70px 20px; text-align: center;">
+          <div style="font-size: 44px; margin-bottom: 14px;">🏷️</div>
+          <h2 style="color: #fff; font-size: 19px; font-weight: 700; margin-bottom: 8px;">Nenhuma tag criada ainda</h2>
+          <p style="color: rgba(255,255,255,0.5); font-size: 13.5px; max-width: 440px; margin: 0 auto 22px;">
+            Crie tags com upload de imagens personalizadas para organizar sua biblioteca de forma elegante e inteligente.
+          </p>
+          <button type="button" id="fs-empty-btn-create" class="fs-btn-new-tag-primary" style="padding: 10px 20px; font-size: 13px;">
+            <span>+</span> <span>Criar Primeira Tag</span>
           </button>
         </div>
+      `;
+      container.querySelector('#fs-empty-btn-create')?.addEventListener('click', () => {
+        openTagEditorModal();
+      });
+      return;
+    }
 
-        <!-- PRESET PALETTE -->
-        <div class="fs-presets-palette-wrapper">
-          <span style="font-size: 11px; font-weight: 600; text-transform: uppercase; color: rgba(255,255,255,0.4); margin-bottom: 6px; display: block;">Hero Images Rápidas:</span>
-          <div class="fs-presets-chips">
-            ${PRESET_HEROES.map(p => `
-              <button type="button" class="fs-preset-chip" data-url="${p.url}">
-                <span>${p.icon}</span> <span>${p.name}</span>
-              </button>
-            `).join('')}
-          </div>
+    container.innerHTML = `
+      <!-- MINIMALIST SUBHEADER BAR -->
+      <div class="fs-tags-minimal-bar">
+        <div class="fs-tags-minimal-chips">
+          <span style="font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: rgba(255,255,255,0.45); margin-right: 4px;">Gerenciar:</span>
+          ${allTags.map(tag => {
+            const count = engine.getSongsForTag(tag.id).length;
+            return `
+              <div class="fs-tag-manager-pill" data-pill-id="${tag.id}" title="Clique para abrir playlist ou editar">
+                <img src="${tag.heroImage}" class="fs-tag-mini-thumb" alt="" />
+                <span class="fs-tag-manager-name">${escapeHtml(tag.name)}</span>
+                <span class="fs-tag-manager-count">${count}</span>
+                <button type="button" class="fs-tag-mini-btn fs-tag-btn-edit" data-id="${tag.id}" title="Editar Tag">✏️</button>
+              </div>
+            `;
+          }).join('')}
         </div>
-
-        <!-- EXISTING TAGS MANAGER -->
-        <div class="fs-tags-manager-section">
-          <span style="font-size: 11px; font-weight: 600; text-transform: uppercase; color: rgba(255,255,255,0.4); margin-bottom: 8px; display: block;">Tags Cadastradas:</span>
-          <div class="fs-tags-manager-list">
-            ${allTags.map(tag => {
-              const count = engine.getSongsForTag(tag.id).length;
-              return `
-                <div class="fs-tag-manager-pill">
-                  <img src="${tag.heroImage}" class="fs-tag-mini-thumb" alt="" />
-                  <span class="fs-tag-manager-name">${tag.name}</span>
-                  <span class="fs-tag-manager-count">${count}</span>
-                  <button type="button" class="fs-tag-mini-btn fs-tag-btn-edit" data-id="${tag.id}" title="Editar Nome / Imagem">✏️</button>
-                  <button type="button" class="fs-tag-mini-btn fs-tag-btn-del" data-id="${tag.id}" title="Remover Tag">✕</button>
-                </div>
-              `;
-            }).join('')}
-          </div>
-        </div>
+        <span style="font-size: 11.5px; color: rgba(255,255,255,0.45); white-space: nowrap;">Passe o mouse no card para editar ou excluir</span>
       </div>
 
-      <!-- 2. HERO BOXES GRID -->
-      <div class="fs-hero-boxes-header">
-        <h2 style="font-size: 18px; font-weight: 700; color: #fff; margin: 0;">Boxes de Tags</h2>
-        <span style="font-size: 12px; color: rgba(255,255,255,0.5);">Clique em qualquer box para abrir sua playlist completa</span>
-      </div>
-
+      <!-- HERO BOXES GRID -->
       <div class="fs-hero-boxes-grid">
         ${allTags.map(tag => {
           const songs = engine.getSongsForTag(tag.id);
@@ -813,11 +1199,19 @@
               
               <div class="fs-hero-box-top">
                 <span class="fs-hero-box-tag-pill">🏷️ Tag</span>
-                <span class="fs-hero-box-count-pill">${songs.length} faixas</span>
+                <div class="fs-hero-box-top-actions">
+                  <span class="fs-hero-box-count-pill">${songs.length} faixas</span>
+                  <button type="button" class="fs-hero-card-action-btn fs-card-edit-btn" data-edit-id="${tag.id}" title="Editar Nome / Capa da Tag">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+                  </button>
+                  <button type="button" class="fs-hero-card-action-btn fs-card-delete-btn" data-delete-id="${tag.id}" title="Excluir Tag">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                  </button>
+                </div>
               </div>
 
               <div class="fs-hero-box-bottom">
-                <h3 class="fs-hero-box-title">${tag.name}</h3>
+                <h3 class="fs-hero-box-title">${escapeHtml(tag.name)}</h3>
                 
                 <div class="fs-hero-box-actions">
                   <button type="button" class="fs-hero-btn-play" data-play-id="${tag.id}" title="Tocar Todas as Faixas">
@@ -836,53 +1230,30 @@
       </div>
     `;
 
-    // Bind Add Tag Form
-    const nameInput = container.querySelector('#fs-new-tag-name');
-    const imageInput = container.querySelector('#fs-new-tag-image');
-    const addBtn = container.querySelector('#fs-btn-add-tag');
-
-    container.querySelectorAll('.fs-preset-chip').forEach(btn => {
-      btn.addEventListener('click', () => {
-        imageInput.value = btn.getAttribute('data-url');
+    // Bind Edit Buttons
+    container.querySelectorAll('.fs-card-edit-btn, .fs-tag-btn-edit').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const id = btn.getAttribute('data-edit-id') || btn.getAttribute('data-id');
+        if (id) openTagEditorModal(id);
       });
     });
 
-    addBtn.addEventListener('click', () => {
-      const name = nameInput.value;
-      const img = imageInput.value;
-      if (name && name.trim()) {
-        engine.createTag(name, img);
-        nameInput.value = '';
-      }
-    });
-
-    nameInput.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') addBtn.click();
-    });
-
-    // Bind Edit & Delete Buttons
-    container.querySelectorAll('.fs-tag-btn-edit').forEach(btn => {
+    // Bind Delete Buttons
+    container.querySelectorAll('.fs-card-delete-btn').forEach(btn => {
       btn.addEventListener('click', (e) => {
         e.stopPropagation();
-        const id = btn.getAttribute('data-id');
-        const tag = engine.getTag(id);
-        if (!tag) return;
-        const newName = window.prompt('Editar nome da tag:', tag.name);
-        if (newName === null) return;
-        const newImg = window.prompt('Editar URL da Hero Image:', tag.heroImage);
-        engine.updateTag(id, { name: newName, heroImage: newImg || tag.heroImage });
+        const id = btn.getAttribute('data-delete-id');
+        if (id) openDeleteConfirmModal(id);
       });
     });
 
-    container.querySelectorAll('.fs-tag-btn-del').forEach(btn => {
-      btn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        const id = btn.getAttribute('data-id');
-        const tag = engine.getTag(id);
-        if (!tag) return;
-        if (window.confirm(`Tem certeza que deseja remover a tag "${tag.name}"?`)) {
-          engine.deleteTag(id);
-        }
+    // Bind Pill clicks
+    container.querySelectorAll('.fs-tag-manager-pill').forEach(pill => {
+      pill.addEventListener('click', (e) => {
+        if (e.target.closest('.fs-tag-btn-edit')) return;
+        const id = pill.getAttribute('data-pill-id');
+        if (id) window.location.hash = '#/library/genres?tag=' + encodeURIComponent(id);
       });
     });
 
@@ -900,7 +1271,10 @@
         engine.playTag(tagId, true);
       });
 
-      box.addEventListener('click', () => {
+      box.addEventListener('click', (e) => {
+        if (e.target.closest('.fs-hero-card-action-btn') || e.target.closest('.fs-hero-box-actions')) {
+          return;
+        }
         window.location.hash = '#/library/genres?tag=' + encodeURIComponent(tagId);
       });
     });
@@ -983,11 +1357,18 @@
   function renderView2_Tabs(container, allTags) {
     if (allTags.length === 0) {
       container.innerHTML = `
-        <div style="text-align: center; padding: 60px 20px; color: rgba(255,255,255,0.5);">
-          <h3>Nenhuma tag criada ainda</h3>
-          <p>Mude para a visualização "Hero Boxes & Editor" para cadastrar suas primeiras tags!</p>
+        <div style="text-align: center; padding: 70px 20px; color: rgba(255,255,255,0.5);">
+          <div style="font-size: 40px; margin-bottom: 12px;">📑</div>
+          <h3 style="color: #fff; font-size: 18px; font-weight: 700; margin-bottom: 8px;">Nenhuma tag criada ainda</h3>
+          <p style="font-size: 13.5px; margin-bottom: 20px;">Crie sua primeira tag com capa e nome personalizados para visualizar por abas.</p>
+          <button type="button" id="fs-tabs-empty-create" class="fs-btn-new-tag-primary">
+            <span>+</span> <span>Criar Primeira Tag</span>
+          </button>
         </div>
       `;
+      container.querySelector('#fs-tabs-empty-create')?.addEventListener('click', () => {
+        openTagEditorModal();
+      });
       return;
     }
 
@@ -1008,11 +1389,15 @@
             return `
               <button type="button" class="fs-tag-pill-btn ${isActive ? 'active' : ''}" data-tag-id="${t.id}">
                 <img src="${t.heroImage}" class="fs-tag-pill-thumb" alt="" />
-                <span class="fs-tag-pill-name">${t.name}</span>
+                <span class="fs-tag-pill-name">${escapeHtml(t.name)}</span>
                 <span class="fs-tag-pill-count">${count}</span>
               </button>
             `;
           }).join('')}
+          <button type="button" class="fs-tag-pill-btn fs-tag-pill-add-btn" id="fs-tabs-add-tag-btn" title="Criar Nova Tag">
+            <span style="font-size: 13px; font-weight: bold;">+</span>
+            <span>Nova Tag</span>
+          </button>
         </div>
 
         <!-- ACTIVE TAG ACTION BAR -->
@@ -1021,8 +1406,10 @@
             <img src="${activeTag.heroImage}" class="fs-active-tag-large-thumb" alt="" />
             <div>
               <div style="display: flex; align-items: center; gap: 8px;">
-                <h2 style="font-size: 20px; font-weight: 700; color: #fff; margin: 0;">${activeTag.name}</h2>
+                <h2 style="font-size: 20px; font-weight: 700; color: #fff; margin: 0;">${escapeHtml(activeTag.name)}</h2>
                 <span style="font-size: 11px; padding: 2px 8px; border-radius: 99px; background: rgba(167, 139, 250, 0.2); color: #c4b5fd; font-weight: 600;">${songs.length} faixas</span>
+                <button type="button" class="fs-tag-mini-btn" id="fs-tabs-edit-active-tag" title="Editar Tag" style="margin-left: 4px; font-size: 13px;">✏️</button>
+                <button type="button" class="fs-tag-mini-btn" id="fs-tabs-del-active-tag" title="Excluir Tag" style="font-size: 13px; color: #f87171;">✕</button>
               </div>
               <span style="font-size: 12px; color: rgba(255,255,255,0.5);">Lista dinâmica atribuída a esta tag</span>
             </div>
@@ -1048,12 +1435,26 @@
     `;
 
     // Bind Tag Pill Switches
-    container.querySelectorAll('.fs-tag-pill-btn').forEach(btn => {
+    container.querySelectorAll('.fs-tag-pill-btn:not(#fs-tabs-add-tag-btn)').forEach(btn => {
       btn.addEventListener('click', () => {
         engine.activeTabId = btn.getAttribute('data-tag-id');
         engine.searchQuery = '';
         renderView2_Tabs(container, allTags);
       });
+    });
+
+    // Bind Add Tag Button
+    container.querySelector('#fs-tabs-add-tag-btn')?.addEventListener('click', () => {
+      openTagEditorModal();
+    });
+
+    // Bind Edit and Delete for Active Tag
+    container.querySelector('#fs-tabs-edit-active-tag')?.addEventListener('click', () => {
+      openTagEditorModal(activeTag.id);
+    });
+
+    container.querySelector('#fs-tabs-del-active-tag')?.addEventListener('click', () => {
+      openDeleteConfirmModal(activeTag.id);
     });
 
     // Bind Search Input

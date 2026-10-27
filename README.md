@@ -45,10 +45,11 @@ Motor gráfico em tempo real renderizado sobre OGL (`ogl.js` + `webgl-background
 ### 7. ⚡ Ação Rápida: Botão "Tocar a seguir" no Clique Direito
 - Adiciona a ação "Tocar a seguir" diretamente no primeiro nível do menu de contexto de faixas, sem exigir a navegação por submenus.
 
-### 8. 🛑 Kill Switch da Reprodução (Botão X + Dialog Box Glass)
-- Botão `✕` estilizado e alinhado aos controles centrais do player.
-- Diálogo Glass com blur translúcido para confirmação.
-- Interrupção imediata de áudio, limpeza completa da fila (`clearQueue()`) e sincronização instantânea com o Mini Painel.
+### 8. 🛑 Kill Switch da Reprodução (Botão X no Canto Direito + Atalho Esc 2x + Dialog Box Glass)
+- **Botão no Extremo Canto Direito**: Botão `✕` estilizado e integrado ao extremo canto direito da barra do player (após o controle de volume).
+- **Atalho de Teclado (Esc 2x)**: Pressionar `Esc` 2 vezes consecutivas com áudio em andamento abre o dialog box glass de confirmação.
+- **Navegação no Dialog Box**: Tecla `Esc` fecha o modal (cancela) e tecla `Enter` confirma como "Sim", encerrando a reprodução.
+- **Encerramento Cirúrgico**: Interrupção imediata de áudio, limpeza completa da fila/playlist (`clearQueue()`) e sincronização instantânea com o Mini Painel.
 
 ### 9. 🏷️ Sistema de Tags & Menu de Contexto Dinâmico
 - Motor autônomo em `feishin-tags-engine.js` para categorização inteligente de faixas por tags e metadados.

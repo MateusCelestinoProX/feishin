@@ -1672,151 +1672,540 @@ button.fs-player-button-module-main svg {
     box-shadow: 0 4px 14px rgba(139, 92, 246, 0.25) !important;
 }
 
-/* 2. TAG EDITOR PANEL */
-.fs-tag-editor-panel {
-    background: rgba(18, 18, 26, 0.65) !important;
-    border: 1px solid rgba(255, 255, 255, 0.1) !important;
-    border-top: 1px solid rgba(255, 255, 255, 0.2) !important;
-    border-radius: 18px !important;
-    backdrop-filter: blur(28px) saturate(180%) !important;
-    -webkit-backdrop-filter: blur(28px) saturate(180%) !important;
-    padding: 20px 24px !important;
-    box-shadow: 0 16px 36px rgba(0, 0, 0, 0.35) !important;
+/* 2. TAG EDITOR & MODAL SYSTEM (MINIMALIST & ELEGANT) */
+.fs-tags-top-bar-actions {
     display: flex !important;
-    flex-direction: column !important;
-    gap: 16px !important;
+    align-items: center !important;
+    gap: 12px !important;
 }
 
-.fs-tag-editor-header {
+.fs-btn-new-tag-primary {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    padding: 8px 16px !important;
+    border-radius: 12px !important;
+    background: linear-gradient(135deg, rgba(139, 92, 246, 0.85) 0%, rgba(109, 40, 217, 0.95) 100%) !important;
+    border: 1px solid rgba(255, 255, 255, 0.25) !important;
+    color: #FFFFFF !important;
+    font-size: 13px !important;
+    font-weight: 700 !important;
+    cursor: pointer !important;
+    backdrop-filter: blur(10px) !important;
+    box-shadow: 0 4px 18px rgba(109, 40, 217, 0.35) !important;
+    transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+.fs-btn-new-tag-primary:hover {
+    transform: translateY(-1px) scale(1.02) !important;
+    box-shadow: 0 6px 24px rgba(139, 92, 246, 0.5) !important;
+    filter: brightness(1.1) !important;
+}
+
+/* Minimalist Subheader Bar */
+.fs-tags-minimal-bar {
     display: flex !important;
     align-items: center !important;
     justify-content: space-between !important;
+    padding: 10px 16px !important;
+    border-radius: 14px !important;
+    background: rgba(255, 255, 255, 0.03) !important;
+    border: 1px solid rgba(255, 255, 255, 0.06) !important;
+    margin-bottom: 20px !important;
     flex-wrap: wrap !important;
+    gap: 10px !important;
+}
+
+.fs-tags-minimal-chips {
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    flex-wrap: wrap !important;
+}
+
+/* Card Hover Actions (Edit & Delete on each Hero Box) */
+.fs-hero-box-top-actions {
+    display: flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+}
+
+.fs-hero-card-action-btn {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 28px !important;
+    height: 28px !important;
+    border-radius: 8px !important;
+    background: rgba(12, 12, 18, 0.75) !important;
+    backdrop-filter: blur(12px) !important;
+    border: 1px solid rgba(255, 255, 255, 0.15) !important;
+    color: rgba(255, 255, 255, 0.75) !important;
+    cursor: pointer !important;
+    opacity: 0 !important;
+    transform: scale(0.9) !important;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+.fs-hero-box:hover .fs-hero-card-action-btn {
+    opacity: 1 !important;
+    transform: scale(1) !important;
+}
+
+.fs-hero-card-action-btn:hover {
+    color: #FFFFFF !important;
+    background: rgba(167, 139, 250, 0.3) !important;
+    border-color: rgba(167, 139, 250, 0.5) !important;
+    transform: scale(1.1) !important;
+}
+
+.fs-hero-card-action-btn.fs-card-delete-btn:hover {
+    background: rgba(239, 68, 68, 0.3) !important;
+    border-color: rgba(239, 68, 68, 0.5) !important;
+    color: #FCA5A5 !important;
+}
+
+/* Modal Backdrop & Animations */
+.fs-tag-modal-backdrop {
+    position: fixed !important;
+    inset: 0 !important;
+    z-index: 999999 !important;
+    background: rgba(6, 7, 14, 0.78) !important;
+    backdrop-filter: blur(24px) saturate(160%) !important;
+    -webkit-backdrop-filter: blur(24px) saturate(160%) !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 24px !important;
+    animation: fsFadeIn 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
+}
+
+@keyframes fsFadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes fsModalPop {
+    from { opacity: 0; transform: scale(0.94) translateY(12px); }
+    to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+.fs-tag-modal-dialog {
+    width: 100% !important;
+    max-width: 720px !important;
+    max-height: 90vh !important;
+    background: rgba(18, 18, 28, 0.94) !important;
+    border: 1px solid rgba(255, 255, 255, 0.12) !important;
+    border-top: 1px solid rgba(255, 255, 255, 0.25) !important;
+    border-radius: 24px !important;
+    box-shadow: 0 24px 70px rgba(0, 0, 0, 0.65), 0 0 40px rgba(139, 92, 246, 0.2) !important;
+    display: flex !important;
+    flex-direction: column !important;
+    overflow: hidden !important;
+    animation: fsModalPop 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
+}
+
+.fs-tag-modal-header {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    padding: 20px 26px !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+    background: rgba(255, 255, 255, 0.02) !important;
+}
+
+.fs-tag-modal-title-group {
+    display: flex !important;
+    align-items: center !important;
+    gap: 12px !important;
+}
+
+.fs-tag-modal-icon-badge {
+    width: 38px !important;
+    height: 38px !important;
+    border-radius: 10px !important;
+    background: linear-gradient(135deg, rgba(139, 92, 246, 0.25), rgba(167, 139, 250, 0.1)) !important;
+    border: 1px solid rgba(167, 139, 250, 0.3) !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    font-size: 18px !important;
+}
+
+.fs-tag-modal-title {
+    font-size: 18px !important;
+    font-weight: 700 !important;
+    color: #FFFFFF !important;
+    margin: 0 !important;
+    letter-spacing: -0.01em !important;
+}
+
+.fs-tag-modal-close-btn {
+    width: 32px !important;
+    height: 32px !important;
+    border-radius: 50% !important;
+    background: rgba(255, 255, 255, 0.06) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    color: rgba(255, 255, 255, 0.6) !important;
+    cursor: pointer !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    font-size: 14px !important;
+    transition: all 0.15s ease !important;
+}
+
+.fs-tag-modal-close-btn:hover {
+    background: rgba(255, 255, 255, 0.15) !important;
+    color: #FFFFFF !important;
+    transform: scale(1.08) !important;
+}
+
+/* Modal Body */
+.fs-tag-modal-body {
+    padding: 24px 26px !important;
+    overflow-y: auto !important;
+    display: grid !important;
+    grid-template-columns: 240px 1fr !important;
+    gap: 24px !important;
+}
+
+@media (max-width: 640px) {
+    .fs-tag-modal-body {
+        grid-template-columns: 1fr !important;
+    }
+}
+
+.fs-tag-modal-preview-col {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 10px !important;
+}
+
+.fs-modal-preview-card {
+    height: 180px !important;
+    border-radius: 16px !important;
+    pointer-events: none !important;
+}
+
+.fs-tag-preview-hint {
+    font-size: 11px !important;
+    color: rgba(255, 255, 255, 0.4) !important;
+    line-height: 1.4 !important;
+}
+
+.fs-tag-modal-form-col {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 18px !important;
+}
+
+.fs-modal-field-group {
+    display: flex !important;
+    flex-direction: column !important;
     gap: 8px !important;
 }
 
-.fs-tag-editor-form {
-    display: flex !important;
-    align-items: flex-end !important;
-    gap: 12px !important;
-    flex-wrap: wrap !important;
-}
-
-.fs-tag-form-group {
-    display: flex !important;
-    flex-direction: column !important;
-    gap: 6px !important;
-    flex: 1 !important;
-    min-width: 220px !important;
-}
-
-.fs-tag-label {
+.fs-tag-modal-label {
     font-size: 11px !important;
     font-weight: 700 !important;
     text-transform: uppercase !important;
-    letter-spacing: 0.05em !important;
-    color: rgba(255, 255, 255, 0.5) !important;
+    letter-spacing: 0.06em !important;
+    color: rgba(255, 255, 255, 0.65) !important;
 }
 
-.fs-tag-input {
-    background: rgba(10, 10, 14, 0.6) !important;
+.fs-modal-text-input {
+    width: 100% !important;
+    background: rgba(12, 12, 18, 0.65) !important;
     border: 1px solid rgba(255, 255, 255, 0.12) !important;
-    border-radius: 10px !important;
-    padding: 10px 14px !important;
+    border-radius: 12px !important;
+    padding: 11px 15px !important;
     color: #FFFFFF !important;
-    font-size: 13px !important;
+    font-size: 13.5px !important;
     outline: none !important;
     transition: all 0.2s ease !important;
 }
 
-.fs-tag-input:focus {
+.fs-modal-text-input:focus {
     border-color: #A78BFA !important;
-    box-shadow: 0 0 0 3px rgba(167, 139, 250, 0.2) !important;
+    background: rgba(14, 14, 22, 0.85) !important;
+    box-shadow: 0 0 0 3px rgba(167, 139, 250, 0.25) !important;
 }
 
-.fs-tag-btn-primary {
-    display: inline-flex !important;
-    align-items: center !important;
-    gap: 8px !important;
-    background: linear-gradient(135deg, #8B5CF6 0%, #6D28D9 100%) !important;
-    color: #FFFFFF !important;
-    border: 1px solid rgba(255, 255, 255, 0.25) !important;
-    padding: 10px 20px !important;
-    border-radius: 10px !important;
-    font-size: 13px !important;
-    font-weight: 700 !important;
+/* Upload Dropzone */
+.fs-tag-upload-dropzone {
+    border: 2px dashed rgba(167, 139, 250, 0.35) !important;
+    border-radius: 14px !important;
+    background: rgba(255, 255, 255, 0.02) !important;
+    padding: 22px 16px !important;
+    text-align: center !important;
     cursor: pointer !important;
-    transition: all 0.2s ease !important;
-    box-shadow: 0 6px 18px rgba(109, 40, 217, 0.35) !important;
-}
-
-.fs-tag-btn-primary:hover:not(:disabled) {
-    transform: translateY(-1px) !important;
-    box-shadow: 0 8px 22px rgba(109, 40, 217, 0.5) !important;
-    filter: brightness(1.1) !important;
-}
-
-.fs-tag-btn-primary:disabled {
-    opacity: 0.5 !important;
-    cursor: not-allowed !important;
-}
-
-.fs-tag-btn-secondary {
-    display: inline-flex !important;
+    transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1) !important;
+    position: relative !important;
+    display: flex !important;
+    flex-direction: column !important;
     align-items: center !important;
+    justify-content: center !important;
     gap: 8px !important;
-    background: rgba(255, 255, 255, 0.1) !important;
-    color: #FFFFFF !important;
-    border: 1px solid rgba(255, 255, 255, 0.15) !important;
-    padding: 10px 18px !important;
-    border-radius: 10px !important;
-    font-size: 13px !important;
-    font-weight: 600 !important;
-    cursor: pointer !important;
-    transition: all 0.2s ease !important;
 }
 
-.fs-tag-btn-secondary:hover:not(:disabled) {
-    background: rgba(255, 255, 255, 0.18) !important;
-    color: #FFFFFF !important;
+.fs-tag-upload-dropzone:hover {
+    border-color: #A78BFA !important;
+    background: rgba(167, 139, 250, 0.06) !important;
+    box-shadow: 0 0 20px rgba(167, 139, 250, 0.15) !important;
 }
 
-/* Presets Chips */
-.fs-presets-chips {
+.fs-tag-upload-dropzone.dragover {
+    border-color: #C4B5FD !important;
+    background: rgba(167, 139, 250, 0.15) !important;
+    box-shadow: 0 0 30px rgba(167, 139, 250, 0.3) !important;
+    transform: scale(1.01) !important;
+}
+
+.fs-dropzone-icon {
+    color: #A78BFA !important;
     display: flex !important;
     align-items: center !important;
-    gap: 8px !important;
-    flex-wrap: wrap !important;
+    justify-content: center !important;
+    margin-bottom: 2px !important;
 }
 
-.fs-preset-chip {
+.fs-dropzone-text {
+    font-size: 13px !important;
+    color: #FFFFFF !important;
+    line-height: 1.3 !important;
+}
+
+.fs-dropzone-text strong {
+    color: #C4B5FD !important;
+}
+
+.fs-dropzone-subtext {
+    font-size: 11px !important;
+    color: rgba(255, 255, 255, 0.45) !important;
+}
+
+.fs-dropzone-loaded-badge {
     display: inline-flex !important;
     align-items: center !important;
     gap: 6px !important;
-    padding: 5px 10px !important;
-    border-radius: 8px !important;
-    background: rgba(255, 255, 255, 0.05) !important;
-    border: 1px solid rgba(255, 255, 255, 0.08) !important;
-    color: rgba(255, 255, 255, 0.75) !important;
+    padding: 4px 10px !important;
+    border-radius: 99px !important;
+    background: rgba(167, 139, 250, 0.2) !important;
+    border: 1px solid rgba(167, 139, 250, 0.4) !important;
+    color: #E9D5FF !important;
+    font-size: 11.5px !important;
+    font-weight: 600 !important;
+}
+
+/* Secondary URL / Presets Accordion */
+.fs-modal-secondary-options {
+    margin-top: 4px !important;
+}
+
+.fs-modal-details {
+    background: rgba(255, 255, 255, 0.02) !important;
+    border: 1px solid rgba(255, 255, 255, 0.06) !important;
+    border-radius: 12px !important;
+    padding: 10px 14px !important;
+}
+
+.fs-modal-details-summary {
     font-size: 12px !important;
+    font-weight: 600 !important;
+    color: rgba(255, 255, 255, 0.55) !important;
+    cursor: pointer !important;
+    user-select: none !important;
+    outline: none !important;
+    transition: color 0.15s ease !important;
+}
+
+.fs-modal-details-summary:hover {
+    color: #C4B5FD !important;
+}
+
+.fs-modal-details-content {
+    margin-top: 10px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 10px !important;
+}
+
+.fs-presets-chips-compact {
+    display: flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+    flex-wrap: wrap !important;
+}
+
+.fs-preset-chip-compact {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 5px !important;
+    padding: 4px 8px !important;
+    border-radius: 6px !important;
+    background: rgba(255, 255, 255, 0.04) !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    color: rgba(255, 255, 255, 0.7) !important;
+    font-size: 11px !important;
     cursor: pointer !important;
     transition: all 0.15s ease !important;
 }
 
-.fs-preset-chip:hover {
+.fs-preset-chip-compact:hover {
     background: rgba(167, 139, 250, 0.2) !important;
     border-color: rgba(167, 139, 250, 0.4) !important;
     color: #FFFFFF !important;
 }
 
-/* Existing Tags Manager List */
-.fs-tags-manager-list {
+/* Modal Footer */
+.fs-tag-modal-footer {
     display: flex !important;
     align-items: center !important;
-    gap: 8px !important;
-    flex-wrap: wrap !important;
+    justify-content: space-between !important;
+    padding: 18px 26px !important;
+    border-top: 1px solid rgba(255, 255, 255, 0.08) !important;
+    background: rgba(255, 255, 255, 0.02) !important;
 }
 
+.fs-modal-footer-right {
+    display: flex !important;
+    align-items: center !important;
+    gap: 12px !important;
+    margin-left: auto !important;
+}
+
+.fs-modal-btn-cancel {
+    padding: 9px 18px !important;
+    border-radius: 10px !important;
+    background: rgba(255, 255, 255, 0.06) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    color: rgba(255, 255, 255, 0.75) !important;
+    font-size: 13px !important;
+    font-weight: 600 !important;
+    cursor: pointer !important;
+    transition: all 0.15s ease !important;
+}
+
+.fs-modal-btn-cancel:hover {
+    background: rgba(255, 255, 255, 0.12) !important;
+    color: #FFFFFF !important;
+}
+
+.fs-modal-btn-save {
+    padding: 9px 22px !important;
+    border-radius: 10px !important;
+    background: linear-gradient(135deg, #8B5CF6 0%, #6D28D9 100%) !important;
+    border: 1px solid rgba(255, 255, 255, 0.25) !important;
+    color: #FFFFFF !important;
+    font-size: 13px !important;
+    font-weight: 700 !important;
+    cursor: pointer !important;
+    box-shadow: 0 4px 16px rgba(109, 40, 217, 0.35) !important;
+    transition: all 0.2s ease !important;
+}
+
+.fs-modal-btn-save:hover {
+    transform: translateY(-1px) !important;
+    box-shadow: 0 6px 20px rgba(139, 92, 246, 0.5) !important;
+    filter: brightness(1.1) !important;
+}
+
+.fs-modal-btn-delete {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+    padding: 8px 14px !important;
+    border-radius: 10px !important;
+    background: rgba(239, 68, 68, 0.12) !important;
+    border: 1px solid rgba(239, 68, 68, 0.25) !important;
+    color: #FCA5A5 !important;
+    font-size: 12.5px !important;
+    font-weight: 600 !important;
+    cursor: pointer !important;
+    transition: all 0.15s ease !important;
+}
+
+.fs-modal-btn-delete:hover {
+    background: rgba(239, 68, 68, 0.22) !important;
+    border-color: rgba(239, 68, 68, 0.45) !important;
+    color: #FFFFFF !important;
+}
+
+/* Delete Confirm Dialog */
+.fs-delete-dialog {
+    max-width: 440px !important;
+    text-align: center !important;
+    padding: 26px !important;
+}
+
+.fs-delete-icon-wrap {
+    width: 48px !important;
+    height: 48px !important;
+    border-radius: 50% !important;
+    background: rgba(239, 68, 68, 0.15) !important;
+    border: 1px solid rgba(239, 68, 68, 0.3) !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    margin: 0 auto 16px !important;
+    color: #EF4444 !important;
+    font-size: 22px !important;
+}
+
+.fs-delete-title {
+    font-size: 18px !important;
+    font-weight: 700 !important;
+    color: #FFFFFF !important;
+    margin: 0 0 8px 0 !important;
+}
+
+.fs-delete-msg {
+    font-size: 13.5px !important;
+    color: rgba(255, 255, 255, 0.6) !important;
+    line-height: 1.5 !important;
+    margin: 0 0 24px 0 !important;
+}
+
+.fs-delete-actions {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 12px !important;
+}
+
+.fs-btn-confirm-delete {
+    padding: 10px 20px !important;
+    border-radius: 10px !important;
+    background: linear-gradient(135deg, #EF4444 0%, #DC2626 100%) !important;
+    border: 1px solid rgba(255, 255, 255, 0.2) !important;
+    color: #FFFFFF !important;
+    font-size: 13px !important;
+    font-weight: 700 !important;
+    cursor: pointer !important;
+    box-shadow: 0 4px 16px rgba(220, 38, 38, 0.35) !important;
+    transition: all 0.2s ease !important;
+}
+
+.fs-btn-confirm-delete:hover {
+    transform: translateY(-1px) !important;
+    box-shadow: 0 6px 20px rgba(239, 68, 68, 0.5) !important;
+    filter: brightness(1.1) !important;
+}
+
+.fs-tag-pill-add-btn {
+    border: 1px dashed rgba(167, 139, 250, 0.4) !important;
+    background: rgba(167, 139, 250, 0.08) !important;
+    color: #C4B5FD !important;
+}
+
+.fs-tag-pill-add-btn:hover {
+    border-color: #A78BFA !important;
+    background: rgba(167, 139, 250, 0.18) !important;
+    color: #FFFFFF !important;
+}
+
+/* Backward Compatibility Tag Manager Pills */
 .fs-tag-manager-pill {
     display: inline-flex !important;
     align-items: center !important;
@@ -1827,6 +2216,12 @@ button.fs-player-button-module-main svg {
     border: 1px solid rgba(255, 255, 255, 0.1) !important;
     font-size: 12px !important;
     color: #FFFFFF !important;
+    transition: all 0.15s ease !important;
+}
+
+.fs-tag-manager-pill:hover {
+    background: rgba(255, 255, 255, 0.1) !important;
+    border-color: rgba(167, 139, 250, 0.4) !important;
 }
 
 .fs-tag-mini-thumb {
