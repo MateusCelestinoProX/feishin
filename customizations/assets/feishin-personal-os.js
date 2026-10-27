@@ -149,23 +149,23 @@ import './webgl-backgrounds.js';
   function mountShaderSwitcherUI() {
     if (document.getElementById('personal-os-shader-pill')) return;
 
-    // Header Pill Button
+    // Header Pill Button (Bubble Glass Neon Theme Widget)
     const pill = document.createElement('button');
     pill.id = 'personal-os-shader-pill';
     pill.type = 'button';
-    pill.title = 'Personal OS WebGL Shaders & Liquid Glass';
+    pill.title = 'Personal OS — Temas & Shaders';
     pill.innerHTML = `
       <div class="shader-glow-dot"></div>
+      <span class="theme-widget-tag">THEME</span>
       <span id="personal-os-pill-label">🔮 Plasma Wave</span>
-      <span class="badge-bg-num">${FLAT_SHADERS.length} fundos</span>
-      <span style="font-size: 8px; opacity: 0.7; margin-left: 2px;">▾</span>
+      <span class="theme-widget-arrow">▾</span>
     `;
 
-    // Always float safely at top-right with no-drag guarantees
+    // Always float safely at top-right corner with no-drag guarantees
     pill.style.position = 'fixed';
-    pill.style.top = '7px';
-    pill.style.right = '40px';
-    pill.style.zIndex = '99999';
+    pill.style.top = '8px';
+    pill.style.right = '18px';
+    pill.style.zIndex = '999999';
     pill.style.webkitAppRegion = 'no-drag';
     document.body.appendChild(pill);
 
@@ -189,7 +189,7 @@ import './webgl-backgrounds.js';
 
       modal.innerHTML = `
         <div class="shader-modal-header">
-          <h3><span>🔮</span> Shaders Personal OS</h3>
+          <h3><span>🎨</span> Temas & Shaders</h3>
           <button class="shader-modal-close" id="shader-modal-close-btn" type="button">✕</button>
         </div>
         <div class="shader-modal-controls">
