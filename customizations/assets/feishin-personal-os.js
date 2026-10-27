@@ -396,17 +396,35 @@ import './webgl-backgrounds.js';
     initTrayBridge();
     initFullScreenFreeSpaceDismiss();
 
-    // Enforce album art staying in playerbar dock corner (never in sidebar)
+    // Enforce album art staying in playerbar dock corner and queue inside full-screen player
     try {
       const rawApp = localStorage.getItem('store_app');
       if (rawApp) {
         const parsed = JSON.parse(rawApp);
+        let changed = false;
         if (parsed?.state?.sidebar?.image) {
           parsed.state.sidebar.image = false;
-          localStorage.setItem('store_app', JSON.stringify(parsed));
+          changed = true;
+        }
+        if (parsed?.state?.sidebar?.rightExpanded) {
+          parsed.state.sidebar.rightExpanded = false;
+          changed = true;
+        }
+        if (changed) localStorage.setItem('store_app', JSON.stringify(parsed));
+      }
+
+      // Enforce activeTab: "queue" in full-screen player
+      const rawFs = localStorage.getItem('store_full_screen_player');
+      if (rawFs) {
+        const parsedFs = JSON.parse(rawFs);
+        if (parsedFs?.state && parsedFs.state.activeTab !== 'queue') {
+          parsedFs.state.activeTab = 'queue';
+          localStorage.setItem('store_full_screen_player', JSON.stringify(parsedFs));
         }
       }
     } catch (e) {}
+
+    initPlayerSplitQueue();
 
     const enforcePlayerCoverArt = () => {
       const sidebarImg = document.querySelector('.fs-sidebar-module-image-container');
@@ -630,6 +648,62 @@ import './webgl-backgrounds.js';
           bubbles: true,
           cancelable: true
         }));
+      }
+    }, true);
+  }
+
+  // ==========================================================================
+  // 11. PLAYER SPLIT QUEUE (50/50: CAPA DA TRACK + FILA DE REPRODUÇÃO)
+  // Divide a tela da música permanentemente em 2: metade esquerda a capa,
+  // metade direita a fila de reprodução integrada, eliminando o balão lateral.
+  // ==========================================================================
+  function initPlayerSplitQueue() {
+    console.log('[Personal OS] Ativando Reprodutor com Tela Dividida (Capa + Fila)...');
+
+    const enforceQueueActive = () => {
+      const fsContainer = document.querySelector('.fs-full-screen-player-module-container');
+      if (!fsContainer) return;
+
+      // 1. Assegura persistência de activeTab: "queue"
+      try {
+        const rawFs = localStorage.getItem('store_full_screen_player');
+        if (rawFs) {
+          const parsedFs = JSON.parse(rawFs);
+          if (parsedFs?.state && parsedFs.state.activeTab !== 'queue') {
+            parsedFs.state.activeTab = 'queue';
+            localStorage.setItem('store_full_screen_player', JSON.stringify(parsedFs));
+          }
+        }
+      } catch (e) {}
+
+      // 2. Se a fila estiver colapsada no DOM, dispara o clique no botão de fila
+      const qg = fsContainer.querySelector('.fs-full-screen-player-queue-module-grid-container');
+      if (qg && (qg.classList.contains('fs-full-screen-player-queue-module-grid-container-collapsed') || qg.children.length === 0)) {
+        const queueControls = fsContainer.querySelector('.fs-full-screen-player-queue-module-controls-container');
+        const btns = queueControls ? queueControls.querySelectorAll('button') : [];
+        if (btns[0]) btns[0].click();
+      }
+    };
+
+    // Observa entrada na tela da música
+    const playerObserver = new MutationObserver(() => {
+      enforceQueueActive();
+    });
+    playerObserver.observe(document.body, { childList: true, subtree: true });
+    enforceQueueActive();
+
+    // Redireciona clique no botão de fila da dock inferior para abrir a tela da música
+    window.addEventListener('click', (e) => {
+      const queueToggle = e.target.closest('.fs-playerbar-module-right-grid-item button');
+      if (queueToggle && queueToggle.querySelector('rect[width="18"]')) {
+        e.preventDefault();
+        e.stopPropagation();
+        const isFS = !!document.querySelector('.fs-full-screen-player-module-container');
+        if (!isFS) {
+          const cover = document.querySelector('.fs-left-controls-module-image') || document.querySelector('#player-bar img');
+          cover?.click();
+        }
+        setTimeout(enforceQueueActive, 100);
       }
     }, true);
   }

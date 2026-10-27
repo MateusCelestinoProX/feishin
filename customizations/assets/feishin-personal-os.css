@@ -233,20 +233,26 @@ div, span, p, a, h1, h2, h3, h4, h5, h6 {
 }
 
 /* 3.5 RIGHT SIDEBAR (QUEUE / LYRICS / INFO DOCKED ISLAND) */
+/* A fila de reprodução agora fica permanentemente dentro do reprodutor (tela da música) */
 #sidebar-queue,
-.fs-right-sidebar-module-right-sidebar-container {
-    order: 10 !important;
-    width: 280px !important;
-    min-width: 240px !important;
-    height: 100% !important;
-    border-radius: 18px !important;
-    overflow: hidden !important;
-    background: rgba(18, 18, 24, 0.62) !important;
-    border: 1px solid rgba(255, 255, 255, 0.08) !important;
-    backdrop-filter: blur(28px) saturate(180%) !important;
-    -webkit-backdrop-filter: blur(28px) saturate(180%) !important;
-    box-shadow: 0 16px 36px rgba(0, 0, 0, 0.35) !important;
-    transition: all 0.25s ease !important;
+.fs-right-sidebar-module-right-sidebar-container,
+.fs-main-content-module-right-expanded > #sidebar-queue {
+    display: none !important;
+    width: 0 !important;
+    min-width: 0 !important;
+    max-width: 0 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    border: none !important;
+    pointer-events: none !important;
+    visibility: hidden !important;
+}
+
+/* Permitir que o corpo principal ocupe 100% da largura útil sem o balão lateral */
+.fs-main-content-module-main-content-body {
+    flex: 1 1 0% !important;
+    width: 100% !important;
+    max-width: 100% !important;
 }
 
 #sidebar-play-queue-container,
@@ -942,7 +948,7 @@ button.fs-player-button-module-main svg {
     background: rgba(255, 255, 255, 0.32) !important;
 }
 
-/* --- 10. FULLSCREEN & EXPANDED PLAYER --- */
+/* --- 10. FULLSCREEN & EXPANDED PLAYER PERSONAL OS LIQUID GLASS (50/50 SPLIT: CAPA + FILA) --- */
 #main-content:has(.fs-full-screen-player-module-container) > #sidebar,
 #main-content:has(.fs-full-screen-player-module-container) > #sidebar-queue,
 #main-content:has(.fs-full-screen-player-module-container) > .fs-main-content-module-main-content-body {
@@ -954,6 +960,8 @@ button.fs-player-button-module-main svg {
 .fs-mobile-layout-module-full-screen-player-overlay {
     background: transparent !important;
     background-color: transparent !important;
+    width: 100vw !important;
+    height: 100vh !important;
 }
 
 .fs-full-screen-player-module-background-image,
@@ -969,19 +977,138 @@ button.fs-player-button-module-main svg {
     background-color: transparent !important;
 }
 
+/* Layout Responsivo em 2 Colunas Perfeitas */
+.fs-full-screen-player-module-responsive-container {
+    display: flex !important;
+    flex-direction: row !important;
+    width: 100% !important;
+    height: 100% !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    box-sizing: border-box !important;
+    padding: 0 16px !important;
+}
+
+/* PARTE 1 (ESQUERDA): Capa da Track (50%) */
+.fs-full-screen-player-module-image-column,
+.fs-full-screen-player-module-image-column.fs-full-screen-player-module-image-column-full {
+    flex: 0 0 50% !important;
+    width: 50% !important;
+    max-width: 50% !important;
+    height: 100% !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+
+.fs-full-screen-player-image-module-player-container {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 100% !important;
+    height: 100% !important;
+    padding: 1.5rem !important;
+}
+
+.fs-full-screen-player-image-module-image-container {
+    border-radius: 28px !important;
+    padding: 14px !important;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.10) 0%, rgba(255, 255, 255, 0.02) 100%), rgba(10, 10, 16, 0.35) !important;
+    border: 1px solid rgba(255, 255, 255, 0.20) !important;
+    border-top: 1px solid rgba(255, 255, 255, 0.42) !important;
+    backdrop-filter: blur(28px) saturate(200%) !important;
+    -webkit-backdrop-filter: blur(28px) saturate(200%) !important;
+    box-shadow: 0 30px 80px rgba(0, 0, 0, 0.60), inset 0 1px 2px rgba(255, 255, 255, 0.40) !important;
+    max-height: 65vh !important;
+    max-width: 65vh !important;
+    aspect-ratio: 1 / 1 !important;
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1) !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+
+.fs-full-screen-player-image-module-image {
+    border-radius: 18px !important;
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.45) !important;
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important;
+}
+
+/* PARTE 2 (DIREITA): A Fila de Reprodução dentro do Reprodutor (50%) */
+.fs-full-screen-player-queue-module-grid-container,
+.fs-full-screen-player-queue-module-grid-container.fs-full-screen-player-queue-module-grid-container-collapsed {
+    flex: 0 0 calc(50% - 20px) !important;
+    width: calc(50% - 20px) !important;
+    max-width: calc(50% - 20px) !important;
+    display: block !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    pointer-events: auto !important;
+    border-radius: 24px !important;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.02) 100%), rgba(10, 10, 16, 0.38) !important;
+    border: 1px solid rgba(255, 255, 255, 0.18) !important;
+    border-top: 1px solid rgba(255, 255, 255, 0.38) !important;
+    backdrop-filter: blur(28px) saturate(200%) !important;
+    -webkit-backdrop-filter: blur(28px) saturate(200%) !important;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.45), inset 0 1px 1px rgba(255, 255, 255, 0.30) !important;
+    margin-top: 16px !important;
+    margin-right: 16px !important;
+    margin-bottom: 96px !important; /* Espaço para o player dock inferior */
+    height: calc(100% - 116px) !important;
+    overflow: hidden !important;
+}
+
+.fs-full-screen-player-queue-module-grid-container:before {
+    display: none !important;
+}
+
+/* Fila de reprodução interna no reprodutor */
+.fs-full-screen-player-queue-module-queue-container {
+    height: 100% !important;
+    width: 100% !important;
+    padding: 8px !important;
+    box-sizing: border-box !important;
+}
+
+.fs-full-screen-player-queue-module-grid-container .fs-item-table-list-module-item-table-container,
+.fs-full-screen-player-queue-module-grid-container .fs-item-table-list-module-item-table-grid-container {
+    background: transparent !important;
+    background-color: transparent !important;
+}
+
+.fs-full-screen-player-queue-module-grid-container [role="row"] {
+    border-radius: 12px !important;
+    margin-bottom: 3px !important;
+    transition: background 0.15s ease !important;
+}
+
+.fs-full-screen-player-queue-module-grid-container [role="row"]:hover {
+    background: rgba(255, 255, 255, 0.12) !important;
+}
+
+.fs-full-screen-player-queue-module-grid-container [role="row"][data-selected="true"],
+.fs-full-screen-player-queue-module-grid-container [role="row"][aria-selected="true"] {
+    background: rgba(255, 255, 255, 0.18) !important;
+    box-shadow: inset 3px 0 0 #00F0FF !important;
+}
+
+/* Botões de controle superior do reprodutor (voltar, config, etc.) */
 .fs-full-screen-player-module-container .full-screen-player-controls-container:not(.fs-full-screen-player-queue-module-controls-container) {
     top: 14px !important;
     left: 14px !important;
     padding: 6px 12px !important;
-    border-radius: 14px !important;
-    background: rgba(20, 20, 26, 0.65) !important;
-    border: 1px solid rgba(255, 255, 255, 0.08) !important;
-    backdrop-filter: blur(28px) saturate(180%) !important;
-    -webkit-backdrop-filter: blur(28px) saturate(180%) !important;
-    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.35) !important;
+    border-radius: 16px !important;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.03) 100%), rgba(14, 14, 22, 0.45) !important;
+    border: 1px solid rgba(255, 255, 255, 0.20) !important;
+    border-top: 1px solid rgba(255, 255, 255, 0.40) !important;
+    backdrop-filter: blur(24px) saturate(200%) !important;
+    -webkit-backdrop-filter: blur(24px) saturate(200%) !important;
+    box-shadow: 0 12px 35px rgba(0, 0, 0, 0.40), inset 0 1px 1px rgba(255, 255, 255, 0.35) !important;
     z-index: 100 !important;
-    opacity: 0.85 !important;
-    transition: opacity 0.2s ease !important;
+    opacity: 0.8 !important;
+    transition: opacity 0.25s ease !important;
 }
 
 .fs-full-screen-player-module-container:hover .full-screen-player-controls-container:not(.fs-full-screen-player-queue-module-controls-container) {
@@ -989,72 +1116,39 @@ button.fs-player-button-module-main svg {
 }
 
 .fs-full-screen-player-module-container .full-screen-player-controls-container button {
-    border-radius: 8px !important;
-    color: rgba(255, 255, 255, 0.88) !important;
-    transition: background-color 0.15s ease !important;
-    box-shadow: none !important;
+    border-radius: 10px !important;
+    color: rgba(255, 255, 255, 0.90) !important;
+    transition: all 0.2s ease !important;
 }
 
 .fs-full-screen-player-module-container .full-screen-player-controls-container button:hover {
-    background: rgba(255, 255, 255, 0.12) !important;
+    background: rgba(255, 255, 255, 0.18) !important;
     color: #FFFFFF !important;
 }
 
+/* Botões da aba da fila do reprodutor (topo direito) */
 .fs-full-screen-player-queue-module-controls-container {
-    bottom: 14px !important;
+    top: 14px !important;
+    bottom: auto !important;
     right: 20px !important;
     padding: 6px 12px !important;
-    border-radius: 14px !important;
-    background: rgba(20, 20, 26, 0.65) !important;
-    border: 1px solid rgba(255, 255, 255, 0.08) !important;
-    backdrop-filter: blur(28px) saturate(180%) !important;
-    -webkit-backdrop-filter: blur(28px) saturate(180%) !important;
-    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.35) !important;
+    border-radius: 16px !important;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.10) 0%, rgba(255, 255, 255, 0.02) 100%), rgba(10, 10, 16, 0.40) !important;
+    border: 1px solid rgba(255, 255, 255, 0.18) !important;
+    border-top: 1px solid rgba(255, 255, 255, 0.38) !important;
+    backdrop-filter: blur(20px) saturate(200%) !important;
+    -webkit-backdrop-filter: blur(20px) saturate(200%) !important;
+    box-shadow: 0 12px 35px rgba(0, 0, 0, 0.35), inset 0 1px 1px rgba(255, 255, 255, 0.30) !important;
     z-index: 100 !important;
 }
 
 .fs-full-screen-player-queue-module-controls-container button {
-    border-radius: 8px !important;
+    border-radius: 10px !important;
     color: rgba(255, 255, 255, 0.85) !important;
-    transition: background-color 0.15s ease !important;
-    box-shadow: none !important;
+    transition: all 0.2s ease !important;
 }
 
 .fs-full-screen-player-queue-module-controls-container button:hover {
-    background: rgba(255, 255, 255, 0.12) !important;
+    background: rgba(255, 255, 255, 0.15) !important;
     color: #FFFFFF !important;
-}
-
-.fs-full-screen-player-image-module-image-container {
-    border-radius: 20px !important;
-    padding: 14px !important;
-    background: rgba(18, 18, 24, 0.55) !important;
-    border: 1px solid rgba(255, 255, 255, 0.08) !important;
-    backdrop-filter: blur(28px) saturate(180%) !important;
-    -webkit-backdrop-filter: blur(28px) saturate(180%) !important;
-    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.50) !important;
-    max-height: 65vh !important;
-    transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1) !important;
-}
-
-.fs-full-screen-player-image-module-image {
-    border-radius: 14px !important;
-    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.40) !important;
-}
-
-.fs-full-screen-player-queue-module-grid-container {
-    border-radius: 18px !important;
-    background: rgba(18, 18, 24, 0.62) !important;
-    border: 1px solid rgba(255, 255, 255, 0.08) !important;
-    backdrop-filter: blur(28px) saturate(180%) !important;
-    -webkit-backdrop-filter: blur(28px) saturate(180%) !important;
-    box-shadow: 0 16px 36px rgba(0, 0, 0, 0.35) !important;
-    margin-right: 14px !important;
-    margin-bottom: 14px !important;
-    height: calc(100% - 28px) !important;
-    overflow: hidden !important;
-}
-
-.fs-full-screen-player-queue-module-grid-container:before {
-    display: none !important;
 }
