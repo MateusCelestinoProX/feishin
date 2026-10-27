@@ -19,8 +19,10 @@ Motor gráfico em tempo real renderizado sobre OGL (`ogl.js` + `webgl-background
 - **🧪 Fluidos & Orgânico**: Ferrofluid, Liquid Chrome, Pure Silk, Floating Lines, Ghost Fibers, Web Threads.
 - **🎮 Cyber & Arcade**: Retro Grid, Digital Matrix, Cyber Glitch, Hex Grid, Neon Rings.
 - **✨ Partículas & Fogo**: Starfield, Deep Fire, Ember Drift, Stardust.
-- **Modal de Controle Flutuante**: Seletor rápido de shaders na interface, botão **Eco Mode** para economia de bateria e **Modo Rotativo** automático.
-- **Gestão Térmica e de Bateria**: Auto-pausa quando o Feishin é minimizado ou fica em segundo plano (`visibilitychange`).
+- **Painel Quadrado em 4 Colunas (Grid Mode)**: Modal com geometria rigorosamente quadrada (`aspect-ratio: 1 / 1`), grid de 4 colunas exibindo 1 shader por espaço disponível e filtros dinâmicos de categoria.
+- **Controle Deslizante de Blur do Vidro**: Slider em tempo real ajustando o desfoque de todos os painéis glassmorphic (`--personal-os-glass-blur: 0px` a `60px`).
+- **Controle Deslizante de Escurecimento do Shader**: Slider em tempo real atenuando o background WebGL (`--personal-os-shader-dim: 0%` a `90%`).
+- **Gestão Térmica e de Bateria**: Auto-pausa quando o Feishin é minimizado ou fica em segundo plano (`visibilitychange`), além dos botões **Eco Mode** e **Modo Rotativo** automático.
 
 ### 3. 🇧🇷 Localização Integral em Português do Brasil (100% PT-BR)
 - Injeção profunda no motor **i18next** (`window.__PT_BR_FULL__` + `pt-br-full.js`).

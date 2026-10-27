@@ -1552,3 +1552,797 @@ button.fs-player-button-module-main svg {
     background: rgba(255, 255, 255, 0.15) !important;
     color: #FFFFFF !important;
 }
+
+
+/* ==========================================================================
+   FEISHIN TAGS SYSTEM & ENGINE — STYLING
+   Glassmorphism de alta fidelidade para Tag Editor, Hero Boxes e Abas
+   ========================================================================== */
+
+/* Page Mount & Root */
+.fs-tags-page-root {
+    width: 100% !important;
+    height: 100% !important;
+    overflow-y: auto !important;
+    padding: 24px 32px 100px 32px !important;
+    color: #FFFFFF !important;
+    font-family: "Plus Jakarta Sans", "Outfit", -apple-system, sans-serif !important;
+}
+
+.fs-tags-container {
+    max-width: 1400px !important;
+    margin: 0 auto !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 24px !important;
+}
+
+/* 1. TOP CONTROL BAR & VIEW TOGGLE */
+.fs-tags-top-bar {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    flex-wrap: wrap !important;
+    gap: 16px !important;
+    padding-bottom: 20px !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+}
+
+.fs-tags-title-block {
+    display: flex !important;
+    align-items: center !important;
+    gap: 12px !important;
+}
+
+.fs-tags-title {
+    font-size: 28px !important;
+    font-weight: 800 !important;
+    letter-spacing: -0.02em !important;
+    margin: 0 !important;
+    background: linear-gradient(135deg, #FFFFFF 0%, #C4B5FD 100%) !important;
+    -webkit-background-clip: text !important;
+    -webkit-text-fill-color: transparent !important;
+}
+
+.fs-tags-count-badge {
+    font-size: 12px !important;
+    font-weight: 700 !important;
+    padding: 4px 10px !important;
+    border-radius: 99px !important;
+    background: rgba(167, 139, 250, 0.15) !important;
+    border: 1px solid rgba(167, 139, 250, 0.35) !important;
+    color: #C4B5FD !important;
+}
+
+/* O TOGGLE SWITCH */
+.fs-tags-toggle-switch {
+    display: flex !important;
+    align-items: center !important;
+    padding: 4px !important;
+    border-radius: 14px !important;
+    background: rgba(18, 18, 24, 0.65) !important;
+    border: 1px solid rgba(255, 255, 255, 0.12) !important;
+    backdrop-filter: blur(20px) !important;
+    -webkit-backdrop-filter: blur(20px) !important;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3) !important;
+}
+
+.fs-tags-toggle-btn {
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    padding: 8px 16px !important;
+    border: none !important;
+    border-radius: 10px !important;
+    background: transparent !important;
+    color: rgba(255, 255, 255, 0.6) !important;
+    font-size: 13px !important;
+    font-weight: 600 !important;
+    cursor: pointer !important;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+.fs-tags-toggle-btn:hover {
+    color: #FFFFFF !important;
+    background: rgba(255, 255, 255, 0.06) !important;
+}
+
+.fs-tags-toggle-btn.active {
+    background: linear-gradient(135deg, rgba(167, 139, 250, 0.3) 0%, rgba(139, 92, 246, 0.2) 100%), rgba(255, 255, 255, 0.1) !important;
+    color: #FFFFFF !important;
+    border: 1px solid rgba(167, 139, 250, 0.45) !important;
+    box-shadow: 0 4px 14px rgba(139, 92, 246, 0.25) !important;
+}
+
+/* 2. TAG EDITOR PANEL */
+.fs-tag-editor-panel {
+    background: rgba(18, 18, 26, 0.65) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    border-top: 1px solid rgba(255, 255, 255, 0.2) !important;
+    border-radius: 18px !important;
+    backdrop-filter: blur(28px) saturate(180%) !important;
+    -webkit-backdrop-filter: blur(28px) saturate(180%) !important;
+    padding: 20px 24px !important;
+    box-shadow: 0 16px 36px rgba(0, 0, 0, 0.35) !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 16px !important;
+}
+
+.fs-tag-editor-header {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    flex-wrap: wrap !important;
+    gap: 8px !important;
+}
+
+.fs-tag-editor-form {
+    display: flex !important;
+    align-items: flex-end !important;
+    gap: 12px !important;
+    flex-wrap: wrap !important;
+}
+
+.fs-tag-form-group {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 6px !important;
+    flex: 1 !important;
+    min-width: 220px !important;
+}
+
+.fs-tag-label {
+    font-size: 11px !important;
+    font-weight: 700 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.05em !important;
+    color: rgba(255, 255, 255, 0.5) !important;
+}
+
+.fs-tag-input {
+    background: rgba(10, 10, 14, 0.6) !important;
+    border: 1px solid rgba(255, 255, 255, 0.12) !important;
+    border-radius: 10px !important;
+    padding: 10px 14px !important;
+    color: #FFFFFF !important;
+    font-size: 13px !important;
+    outline: none !important;
+    transition: all 0.2s ease !important;
+}
+
+.fs-tag-input:focus {
+    border-color: #A78BFA !important;
+    box-shadow: 0 0 0 3px rgba(167, 139, 250, 0.2) !important;
+}
+
+.fs-tag-btn-primary {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    background: linear-gradient(135deg, #8B5CF6 0%, #6D28D9 100%) !important;
+    color: #FFFFFF !important;
+    border: 1px solid rgba(255, 255, 255, 0.25) !important;
+    padding: 10px 20px !important;
+    border-radius: 10px !important;
+    font-size: 13px !important;
+    font-weight: 700 !important;
+    cursor: pointer !important;
+    transition: all 0.2s ease !important;
+    box-shadow: 0 6px 18px rgba(109, 40, 217, 0.35) !important;
+}
+
+.fs-tag-btn-primary:hover:not(:disabled) {
+    transform: translateY(-1px) !important;
+    box-shadow: 0 8px 22px rgba(109, 40, 217, 0.5) !important;
+    filter: brightness(1.1) !important;
+}
+
+.fs-tag-btn-primary:disabled {
+    opacity: 0.5 !important;
+    cursor: not-allowed !important;
+}
+
+.fs-tag-btn-secondary {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    background: rgba(255, 255, 255, 0.1) !important;
+    color: #FFFFFF !important;
+    border: 1px solid rgba(255, 255, 255, 0.15) !important;
+    padding: 10px 18px !important;
+    border-radius: 10px !important;
+    font-size: 13px !important;
+    font-weight: 600 !important;
+    cursor: pointer !important;
+    transition: all 0.2s ease !important;
+}
+
+.fs-tag-btn-secondary:hover:not(:disabled) {
+    background: rgba(255, 255, 255, 0.18) !important;
+    color: #FFFFFF !important;
+}
+
+/* Presets Chips */
+.fs-presets-chips {
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    flex-wrap: wrap !important;
+}
+
+.fs-preset-chip {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+    padding: 5px 10px !important;
+    border-radius: 8px !important;
+    background: rgba(255, 255, 255, 0.05) !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    color: rgba(255, 255, 255, 0.75) !important;
+    font-size: 12px !important;
+    cursor: pointer !important;
+    transition: all 0.15s ease !important;
+}
+
+.fs-preset-chip:hover {
+    background: rgba(167, 139, 250, 0.2) !important;
+    border-color: rgba(167, 139, 250, 0.4) !important;
+    color: #FFFFFF !important;
+}
+
+/* Existing Tags Manager List */
+.fs-tags-manager-list {
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    flex-wrap: wrap !important;
+}
+
+.fs-tag-manager-pill {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    padding: 4px 10px !important;
+    border-radius: 99px !important;
+    background: rgba(255, 255, 255, 0.06) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    font-size: 12px !important;
+    color: #FFFFFF !important;
+}
+
+.fs-tag-mini-thumb {
+    width: 18px !important;
+    height: 18px !important;
+    border-radius: 50% !important;
+    object-fit: cover !important;
+}
+
+.fs-tag-manager-count {
+    padding: 1px 6px !important;
+    border-radius: 99px !important;
+    background: rgba(167, 139, 250, 0.25) !important;
+    color: #C4B5FD !important;
+    font-size: 10px !important;
+    font-weight: 700 !important;
+}
+
+.fs-tag-mini-btn {
+    background: transparent !important;
+    border: none !important;
+    color: rgba(255, 255, 255, 0.5) !important;
+    cursor: pointer !important;
+    padding: 2px !important;
+    font-size: 11px !important;
+    border-radius: 4px !important;
+    transition: all 0.15s ease !important;
+}
+
+.fs-tag-mini-btn:hover {
+    color: #FFFFFF !important;
+    transform: scale(1.15) !important;
+}
+
+/* 3. HERO BOXES GRID */
+.fs-hero-boxes-header {
+    display: flex !important;
+    align-items: baseline !important;
+    justify-content: space-between !important;
+    margin-top: 10px !important;
+    margin-bottom: -6px !important;
+}
+
+.fs-hero-boxes-grid {
+    display: grid !important;
+    grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)) !important;
+    gap: 20px !important;
+    width: 100% !important;
+}
+
+.fs-hero-box {
+    position: relative !important;
+    height: 220px !important;
+    border-radius: 18px !important;
+    background-size: cover !important;
+    background-position: center !important;
+    border: 1px solid rgba(255, 255, 255, 0.12) !important;
+    overflow: hidden !important;
+    cursor: pointer !important;
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.35) !important;
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1) !important;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: space-between !important;
+    padding: 18px !important;
+}
+
+.fs-hero-box:hover {
+    transform: translateY(-4px) scale(1.01) !important;
+    border-color: rgba(167, 139, 250, 0.5) !important;
+    box-shadow: 0 20px 45px rgba(0, 0, 0, 0.5), 0 0 25px rgba(139, 92, 246, 0.25) !important;
+}
+
+.fs-hero-box-overlay {
+    position: absolute !important;
+    inset: 0 !important;
+    background: linear-gradient(180deg, rgba(10, 10, 14, 0.15) 0%, rgba(10, 10, 16, 0.88) 85%) !important;
+    z-index: 1 !important;
+    pointer-events: none !important;
+    transition: background 0.3s ease !important;
+}
+
+.fs-hero-box:hover .fs-hero-box-overlay {
+    background: linear-gradient(180deg, rgba(10, 10, 14, 0.05) 0%, rgba(10, 10, 16, 0.92) 80%) !important;
+}
+
+.fs-hero-box-top {
+    position: relative !important;
+    z-index: 2 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+}
+
+.fs-hero-box-tag-pill {
+    font-size: 11px !important;
+    font-weight: 700 !important;
+    padding: 4px 10px !important;
+    border-radius: 99px !important;
+    background: rgba(10, 10, 16, 0.65) !important;
+    border: 1px solid rgba(255, 255, 255, 0.15) !important;
+    backdrop-filter: blur(10px) !important;
+    color: #FFFFFF !important;
+}
+
+.fs-hero-box-count-pill {
+    font-size: 11px !important;
+    font-weight: 700 !important;
+    padding: 4px 10px !important;
+    border-radius: 99px !important;
+    background: rgba(139, 92, 246, 0.3) !important;
+    border: 1px solid rgba(167, 139, 250, 0.4) !important;
+    color: #FFFFFF !important;
+    backdrop-filter: blur(10px) !important;
+}
+
+.fs-hero-box-bottom {
+    position: relative !important;
+    z-index: 2 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 8px !important;
+}
+
+.fs-hero-box-title {
+    font-size: 22px !important;
+    font-weight: 800 !important;
+    color: #FFFFFF !important;
+    letter-spacing: -0.01em !important;
+    margin: 0 !important;
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.6) !important;
+}
+
+.fs-hero-box-actions {
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    opacity: 0 !important;
+    transform: translateY(6px) !important;
+    transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+.fs-hero-box:hover .fs-hero-box-actions {
+    opacity: 1 !important;
+    transform: translateY(0) !important;
+}
+
+.fs-hero-btn-play {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+    padding: 6px 14px !important;
+    border-radius: 8px !important;
+    background: #8B5CF6 !important;
+    color: #FFFFFF !important;
+    border: none !important;
+    font-size: 12px !important;
+    font-weight: 700 !important;
+    cursor: pointer !important;
+    box-shadow: 0 4px 12px rgba(139, 92, 246, 0.4) !important;
+    transition: all 0.15s ease !important;
+}
+
+.fs-hero-btn-play:hover {
+    background: #7C3AED !important;
+    transform: scale(1.05) !important;
+}
+
+.fs-hero-btn-shuffle {
+    display: inline-flex !important;
+    align-items: center !important;
+    padding: 6px 10px !important;
+    border-radius: 8px !important;
+    background: rgba(255, 255, 255, 0.15) !important;
+    color: #FFFFFF !important;
+    border: 1px solid rgba(255, 255, 255, 0.2) !important;
+    font-size: 12px !important;
+    cursor: pointer !important;
+    backdrop-filter: blur(8px) !important;
+}
+
+.fs-hero-box-footer-hint {
+    font-size: 11px !important;
+    color: rgba(255, 255, 255, 0.45) !important;
+    transition: color 0.2s ease !important;
+}
+
+.fs-hero-box:hover .fs-hero-box-footer-hint {
+    color: #C4B5FD !important;
+}
+
+/* 4. TAG PLAYLIST VIEW (Inside clicked box) */
+.fs-tag-playlist-view {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 20px !important;
+}
+
+.fs-tag-hero-banner {
+    position: relative !important;
+    height: 240px !important;
+    border-radius: 20px !important;
+    background-size: cover !important;
+    background-position: center !important;
+    border: 1px solid rgba(255, 255, 255, 0.15) !important;
+    overflow: hidden !important;
+    padding: 24px 32px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: space-between !important;
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.45) !important;
+}
+
+.fs-tag-hero-banner-overlay {
+    position: absolute !important;
+    inset: 0 !important;
+    background: linear-gradient(180deg, rgba(10, 10, 16, 0.4) 0%, rgba(10, 10, 18, 0.92) 100%) !important;
+    z-index: 1 !important;
+}
+
+.fs-tag-btn-back {
+    position: relative !important;
+    z-index: 2 !important;
+    align-self: flex-start !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+    padding: 6px 14px !important;
+    border-radius: 8px !important;
+    background: rgba(10, 10, 16, 0.6) !important;
+    border: 1px solid rgba(255, 255, 255, 0.18) !important;
+    color: #FFFFFF !important;
+    font-size: 12px !important;
+    font-weight: 600 !important;
+    cursor: pointer !important;
+    backdrop-filter: blur(12px) !important;
+    transition: all 0.2s ease !important;
+}
+
+.fs-tag-btn-back:hover {
+    background: rgba(255, 255, 255, 0.15) !important;
+    transform: translateX(-2px) !important;
+}
+
+.fs-tag-hero-banner-content {
+    position: relative !important;
+    z-index: 2 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 6px !important;
+}
+
+.fs-tag-badge-pill {
+    font-size: 10px !important;
+    font-weight: 800 !important;
+    letter-spacing: 0.08em !important;
+    color: #A78BFA !important;
+}
+
+.fs-tag-banner-title {
+    font-size: 34px !important;
+    font-weight: 800 !important;
+    margin: 0 !important;
+    color: #FFFFFF !important;
+    letter-spacing: -0.02em !important;
+}
+
+.fs-tag-banner-meta {
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    font-size: 13px !important;
+    color: rgba(255, 255, 255, 0.65) !important;
+    margin-bottom: 6px !important;
+}
+
+.fs-tag-banner-actions {
+    display: flex !important;
+    align-items: center !important;
+    gap: 10px !important;
+}
+
+/* 5. VIEW 2: ABAS COM BOTÕES NO TOPO */
+.fs-tabs-view-container {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 20px !important;
+}
+
+.fs-tabs-buttons-bar {
+    display: flex !important;
+    align-items: center !important;
+    gap: 10px !important;
+    overflow-x: auto !important;
+    padding-bottom: 8px !important;
+    scrollbar-width: thin !important;
+}
+
+.fs-tag-pill-btn {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    padding: 8px 16px !important;
+    border-radius: 99px !important;
+    background: rgba(18, 18, 24, 0.6) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    backdrop-filter: blur(16px) !important;
+    color: rgba(255, 255, 255, 0.75) !important;
+    font-size: 13px !important;
+    font-weight: 600 !important;
+    cursor: pointer !important;
+    white-space: nowrap !important;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+.fs-tag-pill-btn:hover {
+    background: rgba(255, 255, 255, 0.1) !important;
+    color: #FFFFFF !important;
+    border-color: rgba(255, 255, 255, 0.2) !important;
+}
+
+.fs-tag-pill-btn.active {
+    background: linear-gradient(135deg, rgba(167, 139, 250, 0.35) 0%, rgba(139, 92, 246, 0.2) 100%), rgba(20, 20, 28, 0.8) !important;
+    border-color: #A78BFA !important;
+    color: #FFFFFF !important;
+    box-shadow: 0 4px 18px rgba(139, 92, 246, 0.3) !important;
+    transform: translateY(-1px) !important;
+}
+
+.fs-tag-pill-thumb {
+    width: 20px !important;
+    height: 20px !important;
+    border-radius: 50% !important;
+    object-fit: cover !important;
+}
+
+.fs-tag-pill-count {
+    padding: 2px 7px !important;
+    border-radius: 99px !important;
+    background: rgba(255, 255, 255, 0.12) !important;
+    font-size: 11px !important;
+    font-weight: 700 !important;
+}
+
+.fs-tag-pill-btn.active .fs-tag-pill-count {
+    background: rgba(167, 139, 250, 0.4) !important;
+    color: #FFFFFF !important;
+}
+
+/* Active Tag Action Bar (View 2) */
+.fs-active-tag-action-bar {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    flex-wrap: wrap !important;
+    gap: 16px !important;
+    background: rgba(18, 18, 24, 0.5) !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    border-radius: 14px !important;
+    padding: 14px 20px !important;
+    backdrop-filter: blur(20px) !important;
+}
+
+.fs-active-tag-large-thumb {
+    width: 44px !important;
+    height: 44px !important;
+    border-radius: 10px !important;
+    object-fit: cover !important;
+    border: 1px solid rgba(255, 255, 255, 0.15) !important;
+}
+
+.fs-tag-search-input {
+    background: rgba(10, 10, 14, 0.5) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    border-radius: 8px !important;
+    padding: 8px 12px !important;
+    color: #FFFFFF !important;
+    font-size: 13px !important;
+    width: 220px !important;
+    outline: none !important;
+}
+
+.fs-tag-search-input:focus {
+    border-color: #A78BFA !important;
+}
+
+/* 6. TRACKLIST TABLE */
+.fs-tag-track-table {
+    width: 100% !important;
+    border-collapse: collapse !important;
+    font-size: 13px !important;
+    background: rgba(16, 16, 22, 0.4) !important;
+    border: 1px solid rgba(255, 255, 255, 0.06) !important;
+    border-radius: 14px !important;
+    overflow: hidden !important;
+    backdrop-filter: blur(16px) !important;
+}
+
+.fs-tag-track-table thead tr {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+}
+
+.fs-tag-track-table th {
+    padding: 12px 14px !important;
+    font-size: 11px !important;
+    font-weight: 700 !important;
+    color: rgba(255, 255, 255, 0.4) !important;
+    letter-spacing: 0.05em !important;
+    text-align: left !important;
+}
+
+.fs-tag-track-row {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.04) !important;
+    transition: background 0.15s ease !important;
+    cursor: default !important;
+}
+
+.fs-tag-track-row:hover {
+    background: rgba(255, 255, 255, 0.06) !important;
+}
+
+.fs-tag-track-row td {
+    padding: 10px 14px !important;
+    vertical-align: middle !important;
+}
+
+.fs-col-idx {
+    position: relative !important;
+}
+
+.fs-row-play-btn {
+    display: none !important;
+    background: #8B5CF6 !important;
+    border: none !important;
+    color: #FFFFFF !important;
+    border-radius: 50% !important;
+    width: 24px !important;
+    height: 24px !important;
+    font-size: 10px !important;
+    line-height: 24px !important;
+    text-align: center !important;
+    cursor: pointer !important;
+    margin: 0 auto !important;
+}
+
+.fs-tag-track-row:hover .fs-idx-num {
+    display: none !important;
+}
+
+.fs-tag-track-row:hover .fs-row-play-btn {
+    display: inline-block !important;
+}
+
+.fs-track-thumb-container {
+    width: 32px !important;
+    height: 32px !important;
+    border-radius: 6px !important;
+    background: rgba(255, 255, 255, 0.08) !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    font-size: 14px !important;
+}
+
+.fs-btn-remove-from-tag {
+    background: transparent !important;
+    border: none !important;
+    color: rgba(255, 255, 255, 0.3) !important;
+    font-size: 13px !important;
+    cursor: pointer !important;
+    padding: 4px 8px !important;
+    border-radius: 4px !important;
+    transition: all 0.15s ease !important;
+}
+
+.fs-btn-remove-from-tag:hover {
+    color: #EF4444 !important;
+    background: rgba(239, 68, 68, 0.15) !important;
+}
+
+.fs-tag-empty-state {
+    text-align: center !important;
+    padding: 60px 20px !important;
+}
+
+/* 7. CONTEXT MENU SUBMENU */
+.fs-tags-context-submenu {
+    position: fixed !important;
+    z-index: 10000 !important;
+    min-width: 180px !important;
+    border-radius: 12px !important;
+    background: rgba(20, 20, 28, 0.95) !important;
+    border: 1px solid rgba(255, 255, 255, 0.15) !important;
+    border-top: 1px solid rgba(255, 255, 255, 0.35) !important;
+    backdrop-filter: blur(28px) saturate(200%) !important;
+    -webkit-backdrop-filter: blur(28px) saturate(200%) !important;
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.6) !important;
+    padding: 6px 0 !important;
+}
+
+.fs-tags-submenu-row:hover {
+    background: rgba(167, 139, 250, 0.2) !important;
+    color: #FFFFFF !important;
+}
+
+/* 8. FLOATING TOAST */
+#fs-tags-floating-toast {
+    position: fixed !important;
+    bottom: 90px !important;
+    right: 28px !important;
+    z-index: 99999 !important;
+    background: rgba(20, 20, 28, 0.88) !important;
+    border: 1px solid rgba(167, 139, 250, 0.45) !important;
+    border-top: 1px solid rgba(255, 255, 255, 0.4) !important;
+    backdrop-filter: blur(28px) saturate(200%) !important;
+    -webkit-backdrop-filter: blur(28px) saturate(200%) !important;
+    box-shadow: 0 16px 36px rgba(0, 0, 0, 0.5), 0 0 20px rgba(139, 92, 246, 0.25) !important;
+    border-radius: 12px !important;
+    padding: 10px 18px !important;
+    font-size: 13px !important;
+    font-weight: 600 !important;
+    color: #FFFFFF !important;
+    opacity: 0 !important;
+    transform: translateY(12px) !important;
+    pointer-events: none !important;
+    transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+#fs-tags-floating-toast.fs-tags-toast-active {
+    opacity: 1 !important;
+    transform: translateY(0) !important;
+}
+
+#fs-tags-floating-toast.toast-error {
+    border-color: rgba(239, 68, 68, 0.5) !important;
+    box-shadow: 0 16px 36px rgba(0, 0, 0, 0.5), 0 0 20px rgba(239, 68, 68, 0.25) !important;
+}

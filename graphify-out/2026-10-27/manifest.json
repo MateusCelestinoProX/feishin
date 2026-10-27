@@ -6,9 +6,9 @@
     "semantic_hash": ""
   },
   "customizations/assets/feishin-personal-os.js": {
-    "mtime": 1793116055.4237154,
-    "seen": 1793116076.166194,
-    "ast_hash": "d40a699835f7cb4de06c1cbc4b15b662",
+    "mtime": 1793116958.496548,
+    "seen": 1793117019.886337,
+    "ast_hash": "04fc7cdd6ce0128a14bc8ec22fe31fc2",
     "semantic_hash": ""
   },
   "customizations/assets/ogl.js": {
@@ -18,9 +18,9 @@
     "semantic_hash": ""
   },
   "customizations/assets/pt-br-full.js": {
-    "mtime": 1793061904.9749744,
-    "seen": 1793062008.264287,
-    "ast_hash": "f1ad509f19139eb2be45a98ebd8d865a",
+    "mtime": 1793116912.041065,
+    "seen": 1793117019.8863502,
+    "ast_hash": "39dda82d78b293c77c95d47ca1023981",
     "semantic_hash": ""
   },
   "customizations/assets/webgl-backgrounds.js": {
@@ -30,21 +30,21 @@
     "semantic_hash": ""
   },
   "customizations/i18n/feishin_pt_full.json": {
-    "mtime": 1793061905.0039477,
-    "seen": 1793062008.264291,
-    "ast_hash": "ad04cc6dadc461e84b3290ac16eedb67",
+    "mtime": 1793116912.040149,
+    "seen": 1793117019.886359,
+    "ast_hash": "8fdf1066d18b17c4b7ad3ff960d5e093",
     "semantic_hash": ""
   },
   "customizations/patches/patch_bundle.py": {
-    "mtime": 1793115348.6436272,
-    "seen": 1793116076.166216,
-    "ast_hash": "c7a9f8c23bfa92b02285a06929898157",
+    "mtime": 1793116793.834451,
+    "seen": 1793117019.8863611,
+    "ast_hash": "e5aeb173137e38a031525c9338ab6d85",
     "semantic_hash": ""
   },
   "scripts/apply_customizations.py": {
-    "mtime": 1793072855.3521833,
-    "seen": 1793073274.291095,
-    "ast_hash": "592be5163ea753c429b4c1007ceb29dd",
+    "mtime": 1793116458.8569062,
+    "seen": 1793117019.886365,
+    "ast_hash": "deb5e08c2fa9262869ffdea0eaad8a31",
     "semantic_hash": ""
   },
   "scripts/build_full_pt_br.py": {
@@ -66,21 +66,21 @@
     "semantic_hash": ""
   },
   "README.md": {
-    "mtime": 1793115412.4591198,
-    "seen": 1793116076.166235,
-    "ast_hash": "fe79eca750533f6d7ae4b161a68b704a",
+    "mtime": 1793116805.3202662,
+    "seen": 1793117019.886375,
+    "ast_hash": "9078840cae4cd5589529f7d8658c0638",
     "semantic_hash": ""
   },
   "customizations/index.html": {
-    "mtime": 1793115605.5806043,
-    "seen": 1793116076.16624,
-    "ast_hash": "d546b564a66d34b3b64fc6cdf46a89ee",
+    "mtime": 1793116427.585923,
+    "seen": 1793117019.88638,
+    "ast_hash": "b7f262b874d9d39c09cdf52dd023a2e7",
     "semantic_hash": ""
   },
   "customizations/patches/patch_main.py": {
-    "mtime": 1793069896.6936977,
-    "seen": 1793069988.078217,
-    "ast_hash": "2845f57addb5453bbd643bc617077d20",
+    "mtime": 1793116191.239669,
+    "seen": 1793117019.8863628,
+    "ast_hash": "4714e07aff418b9dbf4d499b37c88a08",
     "semantic_hash": ""
   },
   "customizations/assets/tray-panel.html": {
@@ -93,6 +93,12 @@
     "mtime": 1793072488.896948,
     "seen": 1793073274.2910888,
     "ast_hash": "eb8549863a97355411c3259a3f93b8e1",
+    "semantic_hash": ""
+  },
+  "customizations/assets/music-analytics.js": {
+    "mtime": 1793117013.0646195,
+    "seen": 1793117019.8863418,
+    "ast_hash": "8b00de414ed455e53c6d018e568aca50",
     "semantic_hash": ""
   }
 }

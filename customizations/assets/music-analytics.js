@@ -820,10 +820,12 @@
 
   // 8. Mount Tab Switcher on Início & Hook Dashboard
   async function mountAnalyticsUI() {
-    const isHomeRoute = window.location.hash === '#/' || 
-                        window.location.hash === '' || 
-                        window.location.hash.startsWith('#/analytics') ||
-                        window.location.hash === '#';
+    const hash = window.location.hash || '';
+    const isHomeRoute = hash.includes('home') || 
+                        hash.includes('analytics') || 
+                        hash === '#/' || 
+                        hash === '' || 
+                        hash === '#';
 
     // Check if sidebar navigation item exists
     ensureSidebarAnalyticsItem();
@@ -833,7 +835,7 @@
     }
 
     // If navigating to #/analytics, auto-switch to analytics tab
-    if (window.location.hash.startsWith('#/analytics')) {
+    if (hash.includes('analytics')) {
       activeTab = 'analytics';
       localStorage.setItem('feishin_home_active_tab', 'analytics');
     }
@@ -1036,8 +1038,19 @@
       item.addEventListener('click', (e) => {
         e.preventDefault();
         e.stopPropagation();
-        window.location.hash = '#/analytics';
-        switchTab('analytics');
+        const inicioLink = Array.from(document.querySelectorAll('#sidebar a, #left-sidebar a')).find(a => 
+          a.getAttribute('href') === '#/home' || a.textContent.includes('Início') || a.textContent.includes('INÍCIO')
+        );
+        activeTab = 'analytics';
+        localStorage.setItem('feishin_home_active_tab', 'analytics');
+        if (inicioLink) {
+          inicioLink.click();
+        } else {
+          window.location.hash = '#/home';
+        }
+        setTimeout(() => {
+          switchTab('analytics');
+        }, 120);
       });
 
       // Place right after the first item (Início) or backgrounds
@@ -1049,7 +1062,8 @@
       }
     }
 
-    if (activeTab === 'analytics' && (window.location.hash === '#/' || window.location.hash === '#/analytics')) {
+    const currentHash = window.location.hash || '';
+    if (activeTab === 'analytics' && (currentHash.includes('home') || currentHash.includes('analytics') || currentHash === '#/')) {
       item.classList.add('active');
     } else {
       item.classList.remove('active');
@@ -1058,11 +1072,7 @@
 
   // 12. MutationObserver & Navigation Listeners
   window.addEventListener('hashchange', () => {
-    if (window.location.hash === '#/analytics') {
-      switchTab('analytics');
-    } else if (window.location.hash === '#/') {
-      mountAnalyticsUI();
-    }
+    mountAnalyticsUI();
   });
 
   const domObserver = new MutationObserver(() => {

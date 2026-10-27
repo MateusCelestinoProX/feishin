@@ -166,6 +166,22 @@ def patch_bundle(file_path):
         else:
             print(f"[!] Aviso: Padrão não encontrado: {old[:35]}...")
 
+    # 8. Patch no Menu de Contexto da Faixa (Botão "Tocar a seguir" no menu principal)
+    replacements_context_menu = [
+        (':Z=e[66],Z}',
+         ':Z=e[66],(n===he.SONG||n===he.PLAYLIST_SONG||n===he.QUEUE_SONG)?p.jsxs(p.Fragment,{children:[Z,p.jsx(mt.Item,{key:"play-next-main",leftIcon:"mediaPlayNext",onSelect:f,children:O})]}):Z}')
+    ]
+
+    for old, new in replacements_context_menu:
+        if old in js:
+            js = js.replace(old, new, 1)
+            modified = True
+            print(f"[✓] Patch Menu de Contexto aplicado: {old[:35]}...")
+        elif new in js:
+            print(f"[-] Patch Menu de Contexto já presente: {new[:35]}...")
+        else:
+            print(f"[!] Aviso: Padrão Menu de Contexto não encontrado: {old[:35]}...")
+
     if modified:
         with open(bundle_path, "w", encoding="utf-8") as f:
             f.write(js)
