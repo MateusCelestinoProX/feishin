@@ -12,6 +12,6 @@ if pgrep -x "Feishin" > /dev/null; then
     echo "[*] Reiniciando Feishin..."
     pkill -9 -f "Feishin" || true
     sleep 1
-    open -a "Feishin"
+    open -a "Feishin" --args --remote-debugging-port=9222
     echo "[✓] Feishin reiniciado!"
 fi

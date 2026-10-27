@@ -413,7 +413,7 @@ button[title*="Play"]:hover, button[title*="Reproduzir"]:hover, button[title*="P
     height: 12px !important;
 }
 
-/* --- 6. SONGS TABLE & LIST VIEW --- */
+/* --- 6. SONGS TABLE & LIST VIEW (HIGH-SPEED FLUID SCROLLING) --- */
 .fs-virtual-table-module-row,
 [role="row"] {
     background: transparent !important;
@@ -421,13 +421,25 @@ button[title*="Play"]:hover, button[title*="Reproduzir"]:hover, button[title*="P
     border-bottom: 1px solid rgba(255, 255, 255, 0.04) !important;
     border-radius: 10px !important;
     margin: 1px 0 !important;
-    transition: all 0.15s ease !important;
+    transition: background-color 0.12s ease, border-color 0.12s ease !important;
+    will-change: transform;
+    contain: layout style;
 }
 
 .fs-virtual-table-module-row:hover,
 [role="row"]:hover {
     background: rgba(255, 255, 255, 0.06) !important;
     border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+}
+
+/* GPU Accelerated Zero-Lag Virtual Scroll Containers */
+[role="grid"],
+.fs-item-table-container,
+.fs-item-table-list-module-height-100,
+.fs-main-content-module-main-content-body-scroll {
+    will-change: scroll-position;
+    transform: translateZ(0);
+    contain: strict;
 }
 
 .fs-virtual-table-module-row[data-selected="true"],

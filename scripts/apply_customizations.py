@@ -63,12 +63,17 @@ def main():
             sys.exit(1)
 
         # 3. Copiar assets customizados
-        print("[*] Injetando assets (Personal OS Glass, Shaders WebGL, PT-BR)...")
+        print("[*] Injetando assets (Personal OS Glass, Shaders WebGL, PT-BR, Tray Mini Panel)...")
         for asset in ["feishin-personal-os.css", "feishin-personal-os.js", "webgl-backgrounds.js", "ogl.js", "pt-br-full.js"]:
             src = ASSETS_DIR / asset
             if src.exists():
                 shutil.copy2(src, assets_dest / asset)
                 print(f"  [+] Injetado: {asset}")
+
+        tray_panel_src = ASSETS_DIR / "tray-panel.html"
+        if tray_panel_src.exists():
+            shutil.copy2(tray_panel_src, renderer_dir / "tray-panel.html")
+            print("  [+] Injetado: tray-panel.html (Mini Painel macOS)")
 
         # 4. Atualizar index.html
         custom_index = CUSTOMIZATIONS_DIR / "index.html"
@@ -86,6 +91,14 @@ def main():
         print(f"[*] Aplicando patches cirúrgicos no bundle: {target_bundle.name}...")
         patch_script = PATCHES_DIR / "patch_bundle.py"
         run_cmd(f"python3 \"{patch_script}\" \"{target_bundle}\"")
+
+        # 5b. Patch no processo principal e preload (Tray Mini Panel)
+        main_index_file = extract_dir / "out" / "main" / "index.js"
+        preload_index_file = extract_dir / "out" / "preload" / "index.js"
+        patch_main_script = PATCHES_DIR / "patch_main.py"
+        if patch_main_script.exists() and main_index_file.exists():
+            print("[*] Aplicando patches no processo principal e preload para Tray Mini Panel...")
+            run_cmd(f"python3 \"{patch_main_script}\" \"{main_index_file}\" \"{preload_index_file}\"")
 
         # 6. Reempacotar asar
         new_asar = Path(tmp_dir) / "app.asar"

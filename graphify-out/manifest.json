@@ -6,9 +6,9 @@
     "semantic_hash": ""
   },
   "customizations/assets/feishin-personal-os.js": {
-    "mtime": 1793067922.1836705,
-    "seen": 1793067965.360422,
-    "ast_hash": "dee5aa39525521bce89e30819f3017ed",
+    "mtime": 1793068496.1882088,
+    "seen": 1793068545.443615,
+    "ast_hash": "2cfa97e3dd5a7182f5a28ec5f71357d2",
     "semantic_hash": ""
   },
   "customizations/assets/ogl.js": {
@@ -36,15 +36,15 @@
     "semantic_hash": ""
   },
   "customizations/patches/patch_bundle.py": {
-    "mtime": 1793061938.0727491,
-    "seen": 1793062008.2642932,
-    "ast_hash": "f8c0e26b77a7c22591a2d6cc64b70a40",
+    "mtime": 1793068522.883268,
+    "seen": 1793068545.443626,
+    "ast_hash": "282bd314c19dcd1c13b45d79f6f35b3b",
     "semantic_hash": ""
   },
   "scripts/apply_customizations.py": {
-    "mtime": 1793061953.3312068,
-    "seen": 1793062008.264294,
-    "ast_hash": "9a17892fa7b56cdb0321131e8d4fe598",
+    "mtime": 1793068543.4132774,
+    "seen": 1793068545.44363,
+    "ast_hash": "ba2ed840909427d5b044c0195d366898",
     "semantic_hash": ""
   },
   "scripts/build_full_pt_br.py": {
@@ -75,6 +75,18 @@
     "mtime": 1793061904.993095,
     "seen": 1793062008.2643032,
     "ast_hash": "a66ee31a791162e248d527301cbe60f8",
+    "semantic_hash": ""
+  },
+  "customizations/patches/patch_main.py": {
+    "mtime": 1793068415.8485725,
+    "seen": 1793068545.443628,
+    "ast_hash": "14fdd2659b7b79d1e0210a080aa0d169",
+    "semantic_hash": ""
+  },
+  "customizations/assets/tray-panel.html": {
+    "mtime": 1793068342.4852622,
+    "seen": 1793068545.443638,
+    "ast_hash": "c81b6eb2979a8f22288a56608680baa8",
     "semantic_hash": ""
   }
 }

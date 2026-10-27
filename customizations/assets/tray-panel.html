@@ -1,0 +1,688 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Feishin — Mini Player Widget</title>
+  <style>
+    :root {
+      --bg-glass: rgba(16, 18, 27, 0.82);
+      --bg-glass-card: rgba(255, 255, 255, 0.06);
+      --bg-glass-card-hover: rgba(255, 255, 255, 0.12);
+      --bg-glass-card-active: rgba(124, 58, 237, 0.22);
+      --border-glass: rgba(255, 255, 255, 0.14);
+      --border-glass-top: rgba(255, 255, 255, 0.28);
+      --text-main: #F8FAFC;
+      --text-muted: #94A3B8;
+      --accent-violet: #8B5CF6;
+      --accent-cyan: #06B6D4;
+      --accent-gradient: linear-gradient(135deg, #8B5CF6 0%, #06B6D4 100%);
+      --glow-violet: rgba(139, 92, 246, 0.45);
+      --font-family: -apple-system, BlinkMacSystemFont, "Plus Jakarta Sans", "SF Pro Display", sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    body {
+      background: transparent;
+      color: var(--text-main);
+      font-family: var(--font-family);
+      overflow: hidden;
+      width: 100vw;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      padding: 10px;
+    }
+
+    /* Main Container Glass Window */
+    .widget-container {
+      width: 100%;
+      height: 100%;
+      background: var(--bg-glass);
+      backdrop-filter: blur(35px) saturate(210%);
+      -webkit-backdrop-filter: blur(35px) saturate(210%);
+      border: 1px solid var(--border-glass);
+      border-top: 1px solid var(--border-glass-top);
+      border-radius: 22px;
+      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.65), inset 0 1px 1px rgba(255, 255, 255, 0.2);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      animation: popIn 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    @keyframes popIn {
+      0% { opacity: 0; transform: translateY(-8px) scale(0.98); }
+      100% { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    /* Header */
+    .widget-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 16px 8px 16px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+    }
+
+    .widget-brand {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .brand-glow-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #10B981;
+      box-shadow: 0 0 10px #10B981;
+      transition: all 0.3s ease;
+    }
+
+    .brand-glow-dot.paused {
+      background: #F59E0B;
+      box-shadow: 0 0 10px #F59E0B;
+    }
+
+    .brand-title {
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.3px;
+      background: linear-gradient(135deg, #FFFFFF 20%, #CBD5E1 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .btn-header {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      color: var(--text-muted);
+      border-radius: 8px;
+      padding: 4px 8px;
+      font-size: 11px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .btn-header:hover {
+      background: rgba(255, 255, 255, 0.18);
+      color: var(--text-main);
+      transform: translateY(-1px);
+    }
+
+    /* Now Playing Hero */
+    .now-playing-box {
+      padding: 14px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .track-info-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .cover-art-container {
+      width: 58px;
+      height: 58px;
+      border-radius: 14px;
+      overflow: hidden;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+      flex-shrink: 0;
+      position: relative;
+    }
+
+    .cover-art-container img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .cover-art-fallback {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      background: linear-gradient(135deg, rgba(139, 92, 246, 0.3) 0%, rgba(6, 182, 212, 0.2) 100%);
+    }
+
+    .track-meta {
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+
+    .track-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text-main);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    }
+
+    .track-artist {
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--accent-cyan);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .track-album {
+      font-size: 11px;
+      font-weight: 400;
+      color: var(--text-muted);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* Progress Bar */
+    .progress-section {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .progress-bar-bg {
+      width: 100%;
+      height: 5px;
+      background: rgba(255, 255, 255, 0.12);
+      border-radius: 6px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .progress-bar-fill {
+      height: 100%;
+      background: var(--accent-gradient);
+      border-radius: 6px;
+      width: 0%;
+      transition: width 0.3s linear;
+      box-shadow: 0 0 10px var(--glow-violet);
+    }
+
+    .progress-times {
+      display: flex;
+      justify-content: space-between;
+      font-size: 10px;
+      font-weight: 600;
+      color: var(--text-muted);
+      font-variant-numeric: tabular-nums;
+    }
+
+    /* Playback Controls (Order: Retroceder, -3s, Play/Pause, +3s, Próxima) */
+    .controls-box {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      padding-top: 4px;
+    }
+
+    .ctrl-btn {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      color: var(--text-main);
+      border-radius: 12px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+      position: relative;
+    }
+
+    .ctrl-btn:hover {
+      background: rgba(255, 255, 255, 0.18);
+      border-color: rgba(255, 255, 255, 0.3);
+      transform: translateY(-2px);
+    }
+
+    .ctrl-btn:active {
+      transform: translateY(0) scale(0.95);
+    }
+
+    .ctrl-btn-skip {
+      width: 44px;
+      height: 38px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: -0.2px;
+    }
+
+    .ctrl-btn-step {
+      width: 42px;
+      height: 38px;
+      font-size: 15px;
+    }
+
+    .ctrl-btn-play {
+      width: 52px;
+      height: 52px;
+      border-radius: 50%;
+      background: var(--accent-gradient);
+      border: 1px solid rgba(255, 255, 255, 0.35);
+      color: #FFFFFF;
+      font-size: 20px;
+      box-shadow: 0 8px 24px var(--glow-violet);
+    }
+
+    .ctrl-btn-play:hover {
+      box-shadow: 0 10px 30px rgba(139, 92, 246, 0.65);
+      transform: translateY(-2px) scale(1.05);
+    }
+
+    /* Queue / Playlist Section */
+    .queue-section {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+      background: rgba(0, 0, 0, 0.18);
+    }
+
+    .queue-header {
+      padding: 10px 16px 6px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .queue-title {
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      color: var(--text-muted);
+    }
+
+    .queue-badge {
+      font-size: 10px;
+      font-weight: 600;
+      padding: 2px 7px;
+      border-radius: 10px;
+      background: rgba(139, 92, 246, 0.2);
+      border: 1px solid rgba(139, 92, 246, 0.35);
+      color: #DDD6FE;
+    }
+
+    .queue-list {
+      flex: 1;
+      overflow-y: auto;
+      padding: 4px 10px 10px 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    /* Sleek Scrollbar */
+    .queue-list::-webkit-scrollbar {
+      width: 5px;
+    }
+    .queue-list::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    .queue-list::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.16);
+      border-radius: 10px;
+    }
+    .queue-list::-webkit-scrollbar-thumb:hover {
+      background: rgba(255, 255, 255, 0.3);
+    }
+
+    .queue-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 7px 10px;
+      border-radius: 10px;
+      background: var(--bg-glass-card);
+      border: 1px solid transparent;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .queue-item:hover {
+      background: var(--bg-glass-card-hover);
+      border-color: rgba(255, 255, 255, 0.14);
+      transform: translateX(2px);
+    }
+
+    .queue-item.active {
+      background: var(--bg-glass-card-active);
+      border-color: rgba(139, 92, 246, 0.45);
+      box-shadow: inset 0 0 14px rgba(139, 92, 246, 0.2);
+    }
+
+    .queue-item-idx {
+      width: 22px;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-align: center;
+      flex-shrink: 0;
+    }
+
+    .queue-item.active .queue-item-idx {
+      color: var(--accent-cyan);
+    }
+
+    .queue-item-details {
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .queue-item-title {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-main);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .queue-item.active .queue-item-title {
+      color: #A78BFA;
+      font-weight: 700;
+    }
+
+    .queue-item-artist {
+      font-size: 10px;
+      font-weight: 400;
+      color: var(--text-muted);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .queue-item-dur {
+      font-size: 10px;
+      font-weight: 600;
+      color: var(--text-muted);
+      flex-shrink: 0;
+      font-variant-numeric: tabular-nums;
+    }
+
+    /* Sound Wave Equalizer for Active Track */
+    .sound-wave {
+      display: flex;
+      align-items: flex-end;
+      gap: 2px;
+      height: 12px;
+      width: 14px;
+    }
+
+    .sound-wave span {
+      display: block;
+      width: 3px;
+      background: var(--accent-cyan);
+      border-radius: 2px;
+      animation: wave 1s infinite ease-in-out alternate;
+    }
+
+    .sound-wave span:nth-child(1) { height: 40%; animation-delay: 0.1s; }
+    .sound-wave span:nth-child(2) { height: 100%; animation-delay: 0.3s; }
+    .sound-wave span:nth-child(3) { height: 60%; animation-delay: 0.2s; }
+
+    @keyframes wave {
+      0% { height: 20%; }
+      100% { height: 100%; }
+    }
+
+    .empty-queue {
+      padding: 30px 20px;
+      text-align: center;
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+  </style>
+</head>
+<body>
+  <div class="widget-container">
+    <!-- Header -->
+    <div class="widget-header">
+      <div class="widget-brand">
+        <div class="brand-glow-dot" id="playback-status-dot"></div>
+        <span class="brand-title">Feishin Personal OS</span>
+      </div>
+      <div class="header-actions">
+        <button class="btn-header" id="btn-open-app" title="Abrir Feishin Completo">
+          <span>↗</span> Abrir App
+        </button>
+      </div>
+    </div>
+
+    <!-- Now Playing Box -->
+    <div class="now-playing-box">
+      <div class="track-info-row">
+        <div class="cover-art-container">
+          <img id="track-cover" src="" alt="Capa" style="display: none;" />
+          <div class="cover-art-fallback" id="track-cover-fallback">🎵</div>
+        </div>
+        <div class="track-meta">
+          <div class="track-title" id="track-title">Carregando...</div>
+          <div class="track-artist" id="track-artist">Aguardando reprodução</div>
+          <div class="track-album" id="track-album">Feishin Music</div>
+        </div>
+      </div>
+
+      <!-- Progress Bar -->
+      <div class="progress-section">
+        <div class="progress-bar-bg">
+          <div class="progress-bar-fill" id="progress-fill"></div>
+        </div>
+        <div class="progress-times">
+          <span id="time-current">0:00</span>
+          <span id="time-total">0:00</span>
+        </div>
+      </div>
+
+      <!-- Controls: [Retroceder] [-3s] [Play/Pause] [+3s] [Avançar] -->
+      <div class="controls-box">
+        <!-- 1. Retroceder Faixa -->
+        <button class="ctrl-btn ctrl-btn-step" id="btn-prev" title="Retroceder para a faixa anterior">
+          ⏮
+        </button>
+
+        <!-- 2. Voltar 3s -->
+        <button class="ctrl-btn ctrl-btn-skip" id="btn-seek-back" title="Voltar 3 segundos">
+          ↺ 3s
+        </button>
+
+        <!-- 3. Play / Pause -->
+        <button class="ctrl-btn ctrl-btn-play" id="btn-play-pause" title="Play / Pausar">
+          ▶
+        </button>
+
+        <!-- 4. Avançar 3s -->
+        <button class="ctrl-btn ctrl-btn-skip" id="btn-seek-fwd" title="Avançar 3 segundos">
+          3s ↻
+        </button>
+
+        <!-- 5. Avançar Faixa -->
+        <button class="ctrl-btn ctrl-btn-step" id="btn-next" title="Avançar para a próxima faixa">
+          ⏭
+        </button>
+      </div>
+    </div>
+
+    <!-- Queue / Playlist List -->
+    <div class="queue-section">
+      <div class="queue-header">
+        <span class="queue-title">Fila & Playlist</span>
+        <span class="queue-badge" id="queue-count">0 faixas</span>
+      </div>
+      <div class="queue-list" id="queue-items-container">
+        <div class="empty-queue">Carregando fila de reprodução...</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const electron = window.require ? window.require('electron') : (typeof require !== 'undefined' ? require('electron') : null);
+    const ipcRenderer = electron ? electron.ipcRenderer : (window.api && window.api.ipc ? window.api.ipc : null);
+
+    let currentState = null;
+
+    function formatTime(seconds) {
+      if (!seconds || isNaN(seconds)) return "0:00";
+      const mins = Math.floor(seconds / 60);
+      const secs = Math.floor(seconds % 60);
+      return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+    }
+
+    function sendAction(action, payload = null) {
+      if (ipcRenderer) {
+        ipcRenderer.send('tray-panel-action', action, payload);
+      }
+    }
+
+    // Controls setup
+    document.getElementById('btn-prev').onclick = () => sendAction('previous');
+    document.getElementById('btn-seek-back').onclick = () => sendAction('skip-backward', 3);
+    document.getElementById('btn-play-pause').onclick = () => sendAction('play-pause');
+    document.getElementById('btn-seek-fwd').onclick = () => sendAction('skip-forward', 3);
+    document.getElementById('btn-next').onclick = () => sendAction('next');
+    document.getElementById('btn-open-app').onclick = () => sendAction('open-main-window');
+
+    function updateUI(state) {
+      if (!state) return;
+      currentState = state;
+
+      // Meta
+      document.getElementById('track-title').textContent = state.title || 'Sem faixa';
+      document.getElementById('track-artist').textContent = state.artist || 'Artista desconhecido';
+      document.getElementById('track-album').textContent = state.album || '';
+
+      // Cover Art
+      const coverImg = document.getElementById('track-cover');
+      const coverFallback = document.getElementById('track-cover-fallback');
+      if (state.coverUrl) {
+        coverImg.src = state.coverUrl;
+        coverImg.style.display = 'block';
+        coverFallback.style.display = 'none';
+      } else {
+        coverImg.style.display = 'none';
+        coverFallback.style.display = 'flex';
+      }
+
+      // Status indicator & Play/Pause icon
+      const dot = document.getElementById('playback-status-dot');
+      const btnPlay = document.getElementById('btn-play-pause');
+      if (state.isPlaying) {
+        dot.classList.remove('paused');
+        btnPlay.innerHTML = '⏸';
+        btnPlay.title = 'Pausar';
+      } else {
+        dot.classList.add('paused');
+        btnPlay.innerHTML = '▶';
+        btnPlay.title = 'Reproduzir';
+      }
+
+      // Progress
+      const curTime = state.timestamp || 0;
+      const totalTime = state.duration || 0;
+      document.getElementById('time-current').textContent = formatTime(curTime);
+      document.getElementById('time-total').textContent = formatTime(totalTime);
+
+      const pct = totalTime > 0 ? Math.min(100, Math.max(0, (curTime / totalTime) * 100)) : 0;
+      document.getElementById('progress-fill').style.width = `${pct}%`;
+
+      // Queue list
+      const container = document.getElementById('queue-items-container');
+      const badge = document.getElementById('queue-count');
+      const queue = state.queue || [];
+
+      badge.textContent = `${queue.length} faixa${queue.length === 1 ? '' : 's'}`;
+
+      if (queue.length === 0) {
+        container.innerHTML = '<div class="empty-queue">Nenhuma música na fila ou playlist ativa.</div>';
+        return;
+      }
+
+      container.innerHTML = '';
+      queue.forEach((track, i) => {
+        const itemEl = document.createElement('div');
+        itemEl.className = `queue-item ${track.isCurrent ? 'active' : ''}`;
+        
+        let indicatorHtml = `<span class="queue-item-idx">${i + 1}</span>`;
+        if (track.isCurrent && state.isPlaying) {
+          indicatorHtml = `
+            <div class="sound-wave">
+              <span></span><span></span><span></span>
+            </div>
+          `;
+        }
+
+        itemEl.innerHTML = `
+          ${indicatorHtml}
+          <div class="queue-item-details">
+            <div class="queue-item-title">${escapeHtml(track.name)}</div>
+            <div class="queue-item-artist">${escapeHtml(track.artist || '')}</div>
+          </div>
+          <div class="queue-item-dur">${formatTime(track.duration)}</div>
+        `;
+
+        itemEl.onclick = () => {
+          sendAction('play-index', { index: i });
+        };
+
+        container.appendChild(itemEl);
+      });
+    }
+
+    function escapeHtml(str) {
+      if (!str) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    }
+
+    // Listen for state from main process
+    if (ipcRenderer) {
+      ipcRenderer.on('tray-panel-update-state', (_e, state) => {
+        updateUI(state);
+      });
+      // Initial request
+      ipcRenderer.send('tray-panel-action', 'request-sync');
+    }
+  </script>
+</body>
+</html>

@@ -342,6 +342,7 @@ import './webgl-backgrounds.js';
   function initEngine() {
     ensureShaderContainer();
     mountShaderSwitcherUI();
+    initTrayBridge();
 
     // Loop checking until setWebGLBackground is available
     const checkInit = () => {
@@ -353,6 +354,132 @@ import './webgl-backgrounds.js';
       }
     };
     checkInit();
+  }
+
+  // ==========================================================================
+  // 9. TRAY MINI-PANEL & PERSONAL OS BRIDGE
+  // ==========================================================================
+  function initTrayBridge() {
+    console.log('[Personal OS] Conectando Tray Mini-Panel Bridge...');
+
+    function getPlayerStore() {
+      if (window.__FEISHIN_PLAYER_STORE__) return window.__FEISHIN_PLAYER_STORE__.getState();
+      if (window.__FEISHIN_STORE__) return window.__FEISHIN_STORE__;
+      const root = document.querySelector("#root");
+      if (!root) return null;
+      const fiberKey = Object.keys(root).find(k => k.startsWith("__reactContainer"));
+      if (!fiberKey) return null;
+      let store = null;
+      function search(f, depth) {
+        if (!f || depth > 30 || store) return;
+        if (f.memoizedProps && f.memoizedProps.value && typeof f.memoizedProps.value.getQueue === "function") {
+          store = f.memoizedProps.value;
+          return;
+        }
+        if (f.child) search(f.child, depth + 1);
+        if (f.sibling) search(f.sibling, depth + 1);
+      }
+      search(root[fiberKey], 0);
+      if (store) window.__FEISHIN_STORE__ = store;
+      return store;
+    }
+
+    function getCoverUrl() {
+      const img = document.querySelector("footer img") || 
+                  document.querySelector(".fs-player-bar-module-cover-art img") || 
+                  document.querySelector("img[alt]");
+      return img ? img.src : null;
+    }
+
+    function broadcastState() {
+      const store = getPlayerStore();
+      if (!store) return;
+      try {
+        const q = store.getQueue();
+        const items = Array.isArray(q) ? q : (q && q.items ? q.items : []);
+        const current = items.find(i => i.isCurrent) || store.getCurrentSong?.() || (items.length > 0 ? items[0] : null);
+        
+        // Elapsed & Duration
+        const timeStore = window.__FEISHIN_TIME_STORE__;
+        const timestamp = timeStore?.getState?.()?.timestamp || 0;
+        const duration = current?.duration ? (current.duration > 10000 ? Math.round(current.duration / 1000) : current.duration) : 0;
+        
+        // Status
+        let isPlaying = false;
+        const docTitle = document.title || "";
+        if (docTitle.startsWith("(Tocando)") || docTitle.startsWith("(Playing)")) {
+          isPlaying = true;
+        } else if (store.player?.status) {
+          isPlaying = store.player.status === "PLAYING";
+        }
+
+        const coverUrl = getCoverUrl();
+
+        const payload = {
+          title: current?.name || current?.title || "Nenhuma faixa selecionada",
+          artist: current?.artistName || (current?.artists?.map(a => a.name).join(", ")) || "Artista Desconhecido",
+          album: current?.album || current?.albumName || "",
+          coverUrl: coverUrl,
+          isPlaying: isPlaying,
+          timestamp: timestamp,
+          duration: duration,
+          queue: items.map((t, idx) => ({
+            index: idx,
+            id: t._uniqueId || t.id,
+            name: t.name || t.title || `Faixa ${idx + 1}`,
+            artist: t.artistName || (t.artists?.map(a => a.name).join(", ")) || "",
+            album: t.album || t.albumName || "",
+            duration: t.duration ? (t.duration > 10000 ? Math.round(t.duration / 1000) : t.duration) : 0,
+            isCurrent: current ? ((t._uniqueId && t._uniqueId === current._uniqueId) || (t.id && t.id === current.id)) : false
+          }))
+        };
+
+        if (window.api && window.api.ipc && typeof window.api.ipc.send === "function") {
+          window.api.ipc.send("tray-panel-send-state", payload);
+        }
+      } catch (e) {
+        console.warn("[TrayBridge Broadcast Error]", e);
+      }
+    }
+
+    function handleAction(action, payload) {
+      const store = getPlayerStore();
+      if (!store) return;
+      switch (action) {
+        case "previous":
+          store.mediaPrevious?.();
+          break;
+        case "skip-backward":
+          store.mediaSkipBackward?.(3);
+          break;
+        case "play-pause":
+          store.mediaTogglePlayPause?.();
+          break;
+        case "skip-forward":
+          store.mediaSkipForward?.(3);
+          break;
+        case "next":
+          store.mediaNext?.();
+          break;
+        case "play-index":
+          if (payload && typeof payload.index === "number") {
+            store.mediaPlayByIndex?.(payload.index);
+          }
+          break;
+      }
+      setTimeout(broadcastState, 150);
+    }
+
+    // Interval to keep mini panel state sync in real time
+    setInterval(broadcastState, 1000);
+
+    // Subscribe to IPC events if available
+    if (window.api && window.api.ipc && typeof window.api.ipc.on === "function") {
+      window.api.ipc.on("tray-panel-request-state", () => broadcastState());
+      window.api.ipc.on("tray-panel-execute-action", (_e, data) => {
+        if (data && data.action) handleAction(data.action, data.payload);
+      });
+    }
   }
 
   if (document.readyState === 'loading') {
