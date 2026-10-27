@@ -1074,14 +1074,19 @@
     mountDebounceTimer = setTimeout(() => {
       mountDebounceTimer = null;
       mountAnalyticsUI();
-    }, 120);
+    }, 80);
+  }
+
+  function getAnalyticsMountContainer() {
+    return document.querySelector('.fs-main-content-module-main-content-body-scroll') ||
+           document.querySelector('.fs-main-content-module-main-content-body') ||
+           document.querySelector('main');
   }
 
   function getHomeStack() {
-    return document.querySelector('main .mantine-Stack-root') ||
-           document.querySelector('.fs-native-scroll-area-module-scroll-area .mantine-Stack-root') ||
+    return document.querySelector('.fs-native-scroll-area-module-scroll-area .mantine-Stack-root') ||
            document.querySelector('.fs-main-content-module-main-content-body-scroll .mantine-Stack-root') ||
-           document.querySelector('.fs-main-content-module-main-content-body .mantine-Stack-root');
+           document.querySelector('main .mantine-Stack-root');
   }
 
   async function mountAnalyticsUI() {
@@ -1089,90 +1094,119 @@
     isMounting = true;
     try {
       const hash = window.location.hash || '';
-      const isHomeRoute = hash.includes('home') || 
-                          hash.includes('analytics') || 
-                          hash === '#/' || 
-                          hash === '' || 
-                          hash === '#';
+      const isAnalyticsRoute = hash.includes('analytics');
+      const isHomeRoute = hash === '#/' || hash === '' || hash === '#' || hash.includes('home');
 
       // Ensure sidebar navigation item exists
       ensureSidebarAnalyticsItem();
 
-      if (!isHomeRoute) {
-        return;
-      }
+      const mainContainer = getAnalyticsMountContainer();
+      if (!mainContainer) return;
 
-      // If navigating to #/analytics, auto-switch to analytics tab
-      if (hash.includes('analytics')) {
-        activeTab = 'analytics';
-        localStorage.setItem('feishin_home_active_tab', 'analytics');
-      }
+      let dashContainer = document.getElementById('feishin-analytics-dashboard');
 
-      const stack = getHomeStack();
-      if (!stack) return;
+      const shouldShowAnalytics = isAnalyticsRoute || (isHomeRoute && activeTab === 'analytics');
 
-      // Check if Tab Switcher is already mounted
-      let switcher = document.getElementById('feishin-home-tabs-bar');
-      if (!switcher) {
-        switcher = document.createElement('div');
-        switcher.id = 'feishin-home-tabs-bar';
-        switcher.className = 'feishin-home-tabs-container';
-        switcher.innerHTML = `
-          <div class="feishin-home-tabs-group">
-            <button class="feishin-tab-btn ${activeTab === 'feed' ? 'active' : ''}" data-tab="feed" type="button">
-              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>
-              </svg>
-              <span>Início & Descobertas</span>
-            </button>
-            <button class="feishin-tab-btn ${activeTab === 'analytics' ? 'active' : ''}" data-tab="analytics" type="button">
-              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M18 20V10M12 20V4M6 20v-6"/>
-              </svg>
-              <span>Painel de Analytics</span>
-              <span class="tab-badge-live"><span class="pulse-dot"></span> LIVE</span>
-            </button>
-          </div>
-          <div class="feishin-home-tabs-right">
-            <span class="feishin-live-sync-pill">● Navidrome VPS</span>
-            <button class="feishin-refresh-btn" id="feishin-analytics-refresh-btn" type="button" title="Atualizar Métricas">
-              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5">
-                <path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.3"/>
-              </svg>
-              <span>Atualizar</span>
-            </button>
-          </div>
-        `;
+      if (shouldShowAnalytics) {
+        if (!dashContainer) {
+          dashContainer = document.createElement('div');
+          dashContainer.id = 'feishin-analytics-dashboard';
+          mainContainer.appendChild(dashContainer);
+        } else if (dashContainer.parentElement !== mainContainer) {
+          mainContainer.appendChild(dashContainer);
+        }
 
-        // Insert at the very top of the stack
-        stack.prepend(switcher);
-
-        // Tab switcher clicks
-        switcher.querySelectorAll('.feishin-tab-btn').forEach(btn => {
-          btn.onclick = (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            const targetTab = btn.getAttribute('data-tab');
-            switchTab(targetTab);
-          };
+        // Hide all sibling elements inside mainContainer (including native <main>)
+        Array.from(mainContainer.children).forEach(child => {
+          if (child !== dashContainer) {
+            child.style.display = 'none';
+          }
         });
 
-        // Refresh button
-        const refreshBtn = switcher.querySelector('#feishin-analytics-refresh-btn');
-        if (refreshBtn) {
-          refreshBtn.onclick = async (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            refreshBtn.classList.add('rotating');
-            cachedLibraryStats = null;
-            await updateDashboardContent();
-            setTimeout(() => refreshBtn.classList.remove('rotating'), 600);
-          };
+        dashContainer.style.setProperty('display', 'flex', 'important');
+
+        const sidebarItem = document.getElementById('personal-os-sidebar-analytics-item');
+        if (sidebarItem) sidebarItem.classList.add('active');
+
+        updateDashboardContent();
+      } else {
+        if (dashContainer) {
+          dashContainer.style.setProperty('display', 'none', 'important');
         }
+        // Restore visibility of other elements inside mainContainer
+        Array.from(mainContainer.children).forEach(child => {
+          if (child !== dashContainer && child.style.display === 'none') {
+            child.style.display = '';
+          }
+        });
+
+        const sidebarItem = document.getElementById('personal-os-sidebar-analytics-item');
+        if (sidebarItem) sidebarItem.classList.remove('active');
       }
 
-      // Toggle Content Views based on activeTab
-      applyTabVisibility(stack);
+      // If on Home route, also mount the Tab Switcher in Home stack so user can toggle tabs
+      if (isHomeRoute) {
+        const stack = getHomeStack();
+        if (stack) {
+          let switcher = document.getElementById('feishin-home-tabs-bar');
+          if (!switcher) {
+            switcher = document.createElement('div');
+            switcher.id = 'feishin-home-tabs-bar';
+            switcher.className = 'feishin-home-tabs-container';
+            switcher.innerHTML = `
+              <div class="feishin-home-tabs-group">
+                <button class="feishin-tab-btn ${activeTab === 'feed' ? 'active' : ''}" data-tab="feed" type="button">
+                  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>
+                  </svg>
+                  <span>Início & Descobertas</span>
+                </button>
+                <button class="feishin-tab-btn ${activeTab === 'analytics' ? 'active' : ''}" data-tab="analytics" type="button">
+                  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M18 20V10M12 20V4M6 20v-6"/>
+                  </svg>
+                  <span>Painel de Analytics</span>
+                  <span class="tab-badge-live"><span class="pulse-dot"></span> LIVE</span>
+                </button>
+              </div>
+              <div class="feishin-home-tabs-right">
+                <span class="feishin-live-sync-pill">● Navidrome VPS</span>
+                <button class="feishin-refresh-btn" id="feishin-analytics-refresh-btn" type="button" title="Atualizar Métricas">
+                  <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.3"/>
+                  </svg>
+                  <span>Atualizar</span>
+                </button>
+              </div>
+            `;
+            stack.prepend(switcher);
+
+            switcher.querySelectorAll('.feishin-tab-btn').forEach(btn => {
+              btn.onclick = (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                const targetTab = btn.getAttribute('data-tab');
+                switchTab(targetTab);
+              };
+            });
+
+            const refreshBtn = switcher.querySelector('#feishin-analytics-refresh-btn');
+            if (refreshBtn) {
+              refreshBtn.onclick = async (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                refreshBtn.classList.add('rotating');
+                cachedLibraryStats = null;
+                await updateDashboardContent();
+                setTimeout(() => refreshBtn.classList.remove('rotating'), 600);
+              };
+            }
+          }
+        }
+      } else {
+        const switcher = document.getElementById('feishin-home-tabs-bar');
+        if (switcher) switcher.remove();
+      }
     } finally {
       isMounting = false;
     }
@@ -1190,47 +1224,20 @@
       });
     }
 
-    // Update sidebar active state
     const sidebarItem = document.getElementById('personal-os-sidebar-analytics-item');
     if (sidebarItem) {
       sidebarItem.classList.toggle('active', tab === 'analytics');
     }
 
-    const stack = getHomeStack();
-    if (stack) {
-      applyTabVisibility(stack);
-    }
-  }
-
-  function applyTabVisibility(stack) {
-    if (!stack) return;
-    // Collect all native children except our switcher and our dashboard
-    Array.from(stack.children).forEach(child => {
-      if (child.id === 'feishin-home-tabs-bar' || child.id === 'feishin-analytics-dashboard') {
-        return;
-      }
-      child.style.display = activeTab === 'analytics' ? 'none' : '';
-    });
-
-    // Ensure single dashboard container exists
-    let dashContainer = document.getElementById('feishin-analytics-dashboard');
-    if (activeTab === 'analytics') {
-      if (!dashContainer) {
-        dashContainer = document.createElement('div');
-        dashContainer.id = 'feishin-analytics-dashboard';
-        stack.appendChild(dashContainer);
-      }
-      dashContainer.style.display = 'flex';
-      updateDashboardContent();
-    } else {
-      if (dashContainer) dashContainer.style.display = 'none';
-    }
+    mountAnalyticsUI();
   }
 
   // 10. Update Dashboard Content
   async function updateDashboardContent() {
     const container = document.getElementById('feishin-analytics-dashboard');
     if (!container) return;
+
+    const prevScroll = container.scrollTop;
 
     if (!cachedLibraryStats) {
       container.innerHTML = `
@@ -1250,6 +1257,9 @@
     const stats = getStatsForTimeframe(rawStats, currentTimeframe);
 
     container.innerHTML = renderDashboardUI(stats);
+    if (prevScroll > 0) {
+      container.scrollTop = prevScroll;
+    }
 
     // Attach Play Click Handlers
     container.querySelectorAll('[data-action="play-track"]').forEach(el => {
@@ -1312,19 +1322,10 @@
       item.addEventListener('click', (e) => {
         e.preventDefault();
         e.stopPropagation();
-        const inicioLink = Array.from(document.querySelectorAll('#sidebar a, #left-sidebar a')).find(a => 
-          a.getAttribute('href') === '#/home' || a.textContent.includes('Início') || a.textContent.includes('INÍCIO')
-        );
         activeTab = 'analytics';
         localStorage.setItem('feishin_home_active_tab', 'analytics');
-        if (inicioLink) {
-          inicioLink.click();
-        } else {
-          window.location.hash = '#/home';
-        }
-        setTimeout(() => {
-          switchTab('analytics');
-        }, 120);
+        window.location.hash = '#/analytics';
+        scheduleMount();
       });
 
       // Place at top of sidebar items
@@ -1337,7 +1338,7 @@
     }
 
     const currentHash = window.location.hash || '';
-    if (activeTab === 'analytics' && (currentHash.includes('home') || currentHash.includes('analytics') || currentHash === '#/')) {
+    if (currentHash.includes('analytics') || (activeTab === 'analytics' && (currentHash === '#/' || currentHash === '' || currentHash.includes('home')))) {
       item.classList.add('active');
     } else {
       item.classList.remove('active');
@@ -1348,6 +1349,19 @@
   window.addEventListener('hashchange', () => {
     scheduleMount();
   });
+  window.addEventListener('popstate', () => {
+    scheduleMount();
+  });
+  setInterval(() => {
+    const hash = window.location.hash || '';
+    const shouldShow = hash.includes('analytics') || (activeTab === 'analytics' && (hash === '#/' || hash === '' || hash.includes('home')));
+    const dash = document.getElementById('feishin-analytics-dashboard');
+    if (shouldShow && (!dash || dash.style.display === 'none')) {
+      scheduleMount();
+    } else if (!shouldShow && dash && dash.style.display !== 'none') {
+      scheduleMount();
+    }
+  }, 250);
 
   const domObserver = new MutationObserver((mutations) => {
     let shouldSchedule = false;

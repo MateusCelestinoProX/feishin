@@ -681,6 +681,12 @@
     return typeof url === 'string' && url.startsWith('data:');
   }
 
+  function safeCssUrl(url) {
+    if (!url) return '';
+    const clean = String(url).replace(/'/g, "\\'");
+    return `url('${clean}')`;
+  }
+
   function closeTagModals() {
     const existing = document.getElementById('fs-tag-modal-container');
     if (existing) existing.remove();
@@ -830,7 +836,7 @@
           <!-- Left: Real-time Live Preview -->
           <div class="fs-tag-modal-preview-col">
             <span class="fs-tag-modal-label">PRÉVIA EM TEMPO REAL</span>
-            <div class="fs-hero-box fs-modal-preview-card" id="fs-modal-preview-box" style="background-image: url('${currentImage}');">
+            <div class="fs-hero-box fs-modal-preview-card" id="fs-modal-preview-box" style="background-image: ${safeCssUrl(currentImage)};">
               <div class="fs-hero-box-overlay"></div>
               <div class="fs-hero-box-top">
                 <span class="fs-hero-box-tag-pill">🏷️ Tag</span>
@@ -1178,7 +1184,7 @@
             const count = engine.getSongsForTag(tag.id).length;
             return `
               <div class="fs-tag-manager-pill" data-pill-id="${tag.id}" title="Clique para abrir playlist ou editar">
-                <img src="${tag.heroImage}" class="fs-tag-mini-thumb" alt="" />
+                <img src="${escapeHtml(tag.heroImage)}" class="fs-tag-mini-thumb" alt="" />
                 <span class="fs-tag-manager-name">${escapeHtml(tag.name)}</span>
                 <span class="fs-tag-manager-count">${count}</span>
                 <button type="button" class="fs-tag-mini-btn fs-tag-btn-edit" data-id="${tag.id}" title="Editar Tag">✏️</button>
@@ -1194,7 +1200,7 @@
         ${allTags.map(tag => {
           const songs = engine.getSongsForTag(tag.id);
           return `
-            <div class="fs-hero-box" data-id="${tag.id}" style="background-image: url('${tag.heroImage}');">
+            <div class="fs-hero-box" data-id="${tag.id}" style="background-image: ${safeCssUrl(tag.heroImage)};">
               <div class="fs-hero-box-overlay"></div>
               
               <div class="fs-hero-box-top">
@@ -1296,7 +1302,7 @@
     container.innerHTML = `
       <div class="fs-tag-playlist-view">
         <!-- HERO BANNER -->
-        <div class="fs-tag-hero-banner" style="background-image: url('${tag.heroImage}');">
+        <div class="fs-tag-hero-banner" style="background-image: ${safeCssUrl(tag.heroImage)};">
           <div class="fs-tag-hero-banner-overlay"></div>
           
           <button type="button" id="fs-btn-back-to-boxes" class="fs-tag-btn-back">
@@ -1388,7 +1394,7 @@
             const count = engine.getSongsForTag(t.id).length;
             return `
               <button type="button" class="fs-tag-pill-btn ${isActive ? 'active' : ''}" data-tag-id="${t.id}">
-                <img src="${t.heroImage}" class="fs-tag-pill-thumb" alt="" />
+                <img src="${escapeHtml(t.heroImage)}" class="fs-tag-pill-thumb" alt="" />
                 <span class="fs-tag-pill-name">${escapeHtml(t.name)}</span>
                 <span class="fs-tag-pill-count">${count}</span>
               </button>
@@ -1403,7 +1409,7 @@
         <!-- ACTIVE TAG ACTION BAR -->
         <div class="fs-active-tag-action-bar">
           <div style="display: flex; align-items: center; gap: 14px;">
-            <img src="${activeTag.heroImage}" class="fs-active-tag-large-thumb" alt="" />
+            <img src="${escapeHtml(activeTag.heroImage)}" class="fs-active-tag-large-thumb" alt="" />
             <div>
               <div style="display: flex; align-items: center; gap: 8px;">
                 <h2 style="font-size: 20px; font-weight: 700; color: #fff; margin: 0;">${escapeHtml(activeTag.name)}</h2>
