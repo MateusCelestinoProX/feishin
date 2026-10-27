@@ -53,10 +53,10 @@ Motor gráfico em tempo real renderizado sobre OGL (`ogl.js` + `webgl-background
 - **Ergonomia e Alta Densidade de Ação**: Elimina a necessidade de abrir o submenu "Tocar >" para enfileirar uma faixa para reprodução imediata a seguir.
 - **Suporte Multi-Seleção**: Suporta seleção individual ou múltipla de faixas com adição instantânea à fila via `addToQueueByData` / `addToQueueByFetch`.
 
-### 9. 🚫 Remoção Completa da Página de Álbuns (Interface e Código)
-- **Eliminação Visual da Barra Lateral**: Remoção definitiva do item "Álbuns" do menu de navegação da biblioteca (sidebar padrão e sidebar recolhida/mobile).
-- **Roteamento Cirúrgico com Redirecionamento**: Substituição da rota `/library/albums` por `<Navigate to="/library/songs" replace />`, garantindo que qualquer link residual redirecione instantaneamente para Faixas.
-- **Sanitização de Configurações e Paleta de Comandos**: Purga de `Albums` das preferências de reordenação de itens de barra lateral (`Hle`), da paleta de atalhos e do armazenamento persistente (`store_settings`).
+### 9. 🚫 Remoção Completa das Páginas de Álbuns e de Início (Interface e Código)
+- **Eliminação Visual da Barra Lateral**: Remoção definitiva dos itens "Início" e "Álbuns" do menu de navegação da biblioteca (sidebar padrão e sidebar recolhida/mobile).
+- **Roteamento Cirúrgico com Redirecionamento**: Substituição das rotas `/home` e `/library/albums` por `<Navigate to="/library/songs" replace />`, garantindo que qualquer tentativa de acesso redirecione instantaneamente para Faixas.
+- **Sanitização de Configurações e Paleta de Comandos**: Purga de `Home` e `Albums` das preferências de reordenação de itens de barra lateral (`Hle`), da paleta de atalhos e do armazenamento persistente (`store_settings`).
 
 ### 10. 🛑 Kill Switch da Reprodução (Botão X + Dialog Box Glass)
 - **Botão de Fechamento Integrado**: Botão `✕` estilizado e perfeitamente alinhado aos controles centrais da barra do player (ao lado de Parar/Stop).

@@ -1327,10 +1327,10 @@
         }, 120);
       });
 
-      // Place right after Início or at top of sidebar items
+      // Place at top of sidebar items
       const firstNav = parent.querySelector('a');
-      if (firstNav && firstNav.nextSibling) {
-        parent.insertBefore(item, firstNav.nextSibling);
+      if (firstNav) {
+        parent.insertBefore(item, firstNav);
       } else {
         parent.appendChild(item);
       }

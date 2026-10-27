@@ -357,7 +357,19 @@
         }
       }
     });
-    observer.observe(document.body, { childList: true, subtree: true });
+
+    const start = () => {
+      const target = document.body || document.documentElement;
+      if (target) {
+        observer.observe(target, { childList: true, subtree: true });
+      }
+    };
+
+    if (document.body) {
+      start();
+    } else {
+      document.addEventListener('DOMContentLoaded', start);
+    }
   }
 
   function checkAndInjectTagsMenuItem(dropdown) {
@@ -578,7 +590,7 @@
     function checkRoute() {
       const hash = window.location.hash || '';
       const isTagsRoute = hash.startsWith('#/library/genres') || hash.startsWith('#/library/tags');
-      const mainBody = document.querySelector('.fs-main-content-module-main-content-body, .fs-main-content-module-main-content-container, main');
+      const mainBody = document.querySelector('.fs-main-content-module-main-content-body') || document.querySelector('main');
 
       if (isTagsRoute) {
         ensureTagsPageMounted(mainBody);
@@ -587,14 +599,16 @@
         if (mountedEl) mountedEl.remove();
         if (mainBody) {
           Array.from(mainBody.children).forEach(ch => {
-            if (ch.style.display === 'none') ch.style.display = '';
+            if (ch.id !== 'fs-tags-page-mount' && ch.style.display === 'none') {
+              ch.style.display = '';
+            }
           });
         }
       }
     }
 
     window.addEventListener('hashchange', checkRoute);
-    setInterval(checkRoute, 300);
+    setInterval(checkRoute, 250);
     checkRoute();
   }
 
@@ -605,15 +619,17 @@
     }
 
     let mountEl = document.getElementById('fs-tags-page-mount');
-    if (!mountEl) {
+    if (!mountEl || !mainBody.contains(mountEl)) {
       // Oculta corpo nativo de gêneros
       Array.from(mainBody.children).forEach(ch => {
         if (ch.id !== 'fs-tags-page-mount') ch.style.display = 'none';
       });
 
-      mountEl = document.createElement('div');
-      mountEl.id = 'fs-tags-page-mount';
-      mountEl.className = 'fs-tags-page-root';
+      if (!mountEl) {
+        mountEl = document.createElement('div');
+        mountEl.id = 'fs-tags-page-mount';
+        mountEl.className = 'fs-tags-page-root';
+      }
       mainBody.appendChild(mountEl);
 
       engine.subscribe(() => {
@@ -624,7 +640,9 @@
     } else {
       mountEl.style.display = 'flex';
       Array.from(mainBody.children).forEach(ch => {
-        if (ch.id !== 'fs-tags-page-mount') ch.style.display = 'none';
+        if (ch.id !== 'fs-tags-page-mount' && ch.style.display !== 'none') {
+          ch.style.display = 'none';
+        }
       });
       if (!mountEl.hasChildNodes() || mountEl.innerHTML.trim() === '') {
         renderTagsPage(mountEl);
