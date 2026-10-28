@@ -726,12 +726,13 @@
                         } else if (window.AndroidBridge?.vibrate) {
                             window.AndroidBridge.vibrate(35);
                         }
+                        // Disparar no centro da tela para posicionamento centralizado
                         const ctxEvent = new MouseEvent('contextmenu', {
                             bubbles: true,
                             cancelable: true,
                             view: window,
-                            clientX: touchStartX,
-                            clientY: touchStartY,
+                            clientX: window.innerWidth / 2,
+                            clientY: window.innerHeight / 2,
                             button: 2
                         });
                         longPressTarget.dispatchEvent(ctxEvent);

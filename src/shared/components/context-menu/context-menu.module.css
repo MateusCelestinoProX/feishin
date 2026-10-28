@@ -1,14 +1,26 @@
 .content {
     z-index: 1000;
-    width: 16rem;
+    width: 17rem;
     min-width: 16rem;
-    max-width: 16rem;
+    max-width: min(22rem, 90vw);
     padding: var(--theme-spacing-xs);
     color: var(--theme-colors-foreground);
     background: var(--theme-colors-background);
     border: 1px solid var(--theme-colors-border);
     border-radius: var(--theme-radius-md);
     filter: drop-shadow(0 0 5px rgb(0 0 0 / 50%));
+}
+
+:global([data-radix-popper-content-wrapper]:has(> [data-feishin-context-menu="main"])) {
+    position: fixed !important;
+    left: 50% !important;
+    top: 50% !important;
+    transform: translate(-50%, -50%) !important;
+    z-index: 100000 !important;
+}
+
+.main-menu {
+    max-height: min(34rem, 80vh);
 }
 
 .inner-content {

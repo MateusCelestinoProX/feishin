@@ -92,7 +92,11 @@ function Content(props: ContentProps) {
         <AnimatePresence>
             {open && (
                 <RadixContextMenu.Portal forceMount>
-                    <RadixContextMenu.Content asChild className={styles.content}>
+                    <RadixContextMenu.Content
+                        asChild
+                        className={clsx(styles.content, styles.mainMenu)}
+                        data-feishin-context-menu="main"
+                    >
                         <motion.div
                             animate="show"
                             className={styles.content}
@@ -245,7 +249,8 @@ function SubmenuContent(props: SubmenuContentProps) {
             {open && (
                 <RadixContextMenu.Portal forceMount>
                     <RadixContextMenu.SubContent
-                        className={styles.content}
+                        className={clsx(styles.content, styles.submenu)}
+                        data-feishin-context-menu="sub"
                         onMouseEnter={handleMouseEnter}
                         onMouseLeave={handleMouseLeave}
                     >

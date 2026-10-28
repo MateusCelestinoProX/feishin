@@ -50,11 +50,15 @@ export const ContextMenuController = createCallable<ContextMenuControllerProps, 
             const handleContextMenu = () => {
                 event.preventDefault();
 
+                // Sempre centralizar o menu de opções na viewport (macOS Desktop e Android Mobile)
+                const clientX = typeof window !== 'undefined' ? window.innerWidth / 2 : event.clientX;
+                const clientY = typeof window !== 'undefined' ? window.innerHeight / 2 : event.clientY;
+
                 triggerRef.current?.dispatchEvent(
                     new MouseEvent('contextmenu', {
                         bubbles: true,
-                        clientX: event.clientX,
-                        clientY: event.clientY,
+                        clientX,
+                        clientY,
                     }),
                 );
             };

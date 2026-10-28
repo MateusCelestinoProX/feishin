@@ -312,10 +312,135 @@
         }
     }, true);
 
+    // 4.1 Injetar Estilos de Centralização Obrigatória da Caixa de Opções (macOS & Android)
+    function injectCenterMenuStyles() {
+        if (document.getElementById('feishin-centered-menu-styles')) return;
+        const style = document.createElement('style');
+        style.id = 'feishin-centered-menu-styles';
+        style.textContent = `
+            /* Sempre centralizar caixa de opções de contexto em qualquer resolução (macOS & Android) */
+            [data-radix-popper-content-wrapper]:has(> [role="menu"]:not([aria-labelledby])),
+            [data-radix-popper-content-wrapper]:has(> [data-feishin-context-menu="main"]),
+            [data-feishin-menu-wrapper="main"] {
+                position: fixed !important;
+                left: 50% !important;
+                top: 50% !important;
+                transform: translate(-50%, -50%) !important;
+                z-index: 100000 !important;
+                max-height: 90vh !important;
+                max-width: 90vw !important;
+            }
+
+            [data-radix-popper-content-wrapper]:has(> [role="menu"]:not([aria-labelledby])) > [role="menu"],
+            [data-radix-popper-content-wrapper]:has(> [data-feishin-context-menu="main"]) > [role="menu"],
+            [data-feishin-menu-wrapper="main"] > [role="menu"] {
+                display: flex !important;
+                flex-direction: column !important;
+                max-height: min(38rem, 84vh) !important;
+                width: min(20rem, 86vw) !important;
+                min-width: 16rem !important;
+                overflow: hidden !important;
+                box-shadow: 0 24px 64px rgba(0, 0, 0, 0.75), 0 0 0 1px rgba(255, 255, 255, 0.12) !important;
+                border-radius: 20px !important;
+                backdrop-filter: blur(28px) saturate(190%) !important;
+                -webkit-backdrop-filter: blur(28px) saturate(190%) !important;
+                animation: feishinMenuCenterPop 0.22s cubic-bezier(0.16, 1, 0.3, 1) !important;
+            }
+
+            [data-feishin-menu-wrapper="main"] .fs-scroll-area-module-scroll-area,
+            [data-radix-popper-content-wrapper]:has(> [role="menu"]:not([aria-labelledby])) .fs-scroll-area-module-scroll-area {
+                flex: 1 1 auto !important;
+                min-height: 0 !important;
+                overflow-y: auto !important;
+            }
+
+            [data-feishin-menu-wrapper="main"] .fs-context-menu-preview-module-container,
+            [data-radix-popper-content-wrapper]:has(> [role="menu"]:not([aria-labelledby])) .fs-context-menu-preview-module-container {
+                flex-shrink: 0 !important;
+                margin-top: auto !important;
+                border-top: 1px solid rgba(255, 255, 255, 0.08) !important;
+                background: rgba(255, 255, 255, 0.03) !important;
+            }
+
+            .feishin-delete-menu-item:hover,
+            .feishin-delete-menu-item[data-highlighted] {
+                background: rgba(255, 77, 79, 0.16) !important;
+            }
+
+            @keyframes feishinMenuCenterPop {
+                from { opacity: 0; transform: scale(0.94); }
+                to { opacity: 1; transform: scale(1); }
+            }
+        `;
+        document.head.appendChild(style);
+    }
+
+    injectCenterMenuStyles();
+
     // Observar abertura de menus Radix na página
     const menuObserver = new MutationObserver(() => {
+        const activeMenus = document.querySelectorAll('[role="menu"], [data-radix-menu-content], .fs-context-menu-module-content');
+        if (activeMenus.length === 0) {
+            // Remover backdrop se nenhum menu estiver ativo
+            const existingBackdrop = document.getElementById('feishin-context-backdrop');
+            if (existingBackdrop) {
+                existingBackdrop.style.opacity = '0';
+                setTimeout(() => existingBackdrop.remove(), 200);
+            }
+            return;
+        }
+
+        // Centralizar o menu principal e exibir backdrop
+        for (const menu of activeMenus) {
+            const isSubmenu = menu.hasAttribute('aria-labelledby') || menu.dataset.feishinContextMenu === 'sub';
+            if (!isSubmenu) {
+                const wrapper = menu.closest('[data-radix-popper-content-wrapper]') || menu.parentElement;
+                if (wrapper) {
+                    wrapper.setAttribute('data-feishin-menu-wrapper', 'main');
+                    wrapper.style.setProperty('position', 'fixed', 'important');
+                    wrapper.style.setProperty('left', '50%', 'important');
+                    wrapper.style.setProperty('top', '50%', 'important');
+                    wrapper.style.setProperty('transform', 'translate(-50%, -50%)', 'important');
+                    wrapper.style.setProperty('z-index', '100000', 'important');
+                }
+
+                menu.style.setProperty('display', 'flex', 'important');
+                menu.style.setProperty('flex-direction', 'column', 'important');
+                menu.style.setProperty('overflow', 'hidden', 'important');
+
+                let backdrop = document.getElementById('feishin-context-backdrop');
+                if (!backdrop) {
+                    backdrop = document.createElement('div');
+                    backdrop.id = 'feishin-context-backdrop';
+                    backdrop.style.cssText = `
+                        position: fixed;
+                        inset: 0;
+                        background: rgba(0, 0, 0, 0.52);
+                        backdrop-filter: blur(10px);
+                        -webkit-backdrop-filter: blur(10px);
+                        z-index: 99998;
+                        opacity: 0;
+                        transition: opacity 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+                        pointer-events: auto;
+                    `;
+                    backdrop.onclick = (e) => {
+                        e.stopPropagation();
+                        document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+                        backdrop.style.opacity = '0';
+                        setTimeout(() => backdrop.remove(), 200);
+                    };
+                    document.body.appendChild(backdrop);
+                    requestAnimationFrame(() => { backdrop.style.opacity = '1'; });
+                }
+            }
+        }
+
         const menuContent = document.querySelector('[role="menu"], [data-radix-menu-content], .fs-context-menu-module-content');
         if (!menuContent || menuContent.dataset.deleteEngineInjected === 'true') return;
+        if (menuContent.querySelector('.feishin-delete-menu-item, [data-action="delete-song"]')) {
+            menuContent.dataset.deleteEngineInjected = 'true';
+            return;
+        }
 
         // Verificar se é um menu de música (contém itens como "Tocar", "Adicionar à playlist", "Informações")
         const menuText = menuContent.innerText.toLowerCase();
@@ -327,37 +452,30 @@
 
         menuContent.dataset.deleteEngineInjected = 'true';
 
-        // Criar item "Deletar Música" com estilo vermelho chamativo
+        // Criar divisor nativo
         const divider = document.createElement('div');
-        divider.className = 'feishin-delete-menu-divider';
-        divider.style.cssText = `
-            height: 1px;
-            margin: 6px 0;
-            background: rgba(255, 255, 255, 0.12);
-        `;
+        divider.className = 'fs-context-menu-module-divider feishin-delete-menu-divider';
+        divider.setAttribute('role', 'separator');
 
+        // Criar item nativo "Deletar Música"
         const deleteItem = document.createElement('div');
-        deleteItem.className = 'feishin-delete-menu-item';
+        deleteItem.className = 'fs-context-menu-module-item fs-context-menu-module-has-left-icon feishin-delete-menu-item';
         deleteItem.setAttribute('role', 'menuitem');
+        deleteItem.setAttribute('tabindex', '-1');
+        deleteItem.setAttribute('data-orientation', 'vertical');
+        deleteItem.setAttribute('data-radix-collection-item', '');
         deleteItem.style.cssText = `
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 9px 14px;
-            border-radius: 8px;
-            cursor: pointer;
-            user-select: none;
-            color: #ff4d4f;
-            font-size: 13.5px;
+            color: #ff4d4f !important;
             font-weight: 600;
-            transition: all 0.15s ease;
-            position: relative;
+            cursor: pointer;
+            transition: background 0.15s ease;
         `;
 
         deleteItem.innerHTML = `
-            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#ff4d4f" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;">
-                <polyline points="3 6 5 6 21 6"></polyline>
-                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+            <svg stroke="#ff4d4f" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" class="fs-context-menu-module-left-icon fs-icon-module-fill fs-icon-module-size-md" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg">
+                <path d="M3 6h18"></path>
+                <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path>
+                <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path>
                 <line x1="10" y1="11" x2="10" y2="17"></line>
                 <line x1="14" y1="11" x2="14" y2="17"></line>
             </svg>
@@ -365,7 +483,7 @@
         `;
 
         deleteItem.onmouseenter = () => {
-            deleteItem.style.background = 'rgba(255, 77, 79, 0.18)';
+            deleteItem.style.background = 'rgba(255, 77, 79, 0.16)';
         };
         deleteItem.onmouseleave = () => {
             deleteItem.style.background = 'transparent';
@@ -375,8 +493,10 @@
             e.preventDefault();
             e.stopPropagation();
 
-            // Fechar menu de contexto
+            // Fechar menu de contexto e backdrop
             menuContent.remove();
+            const existingBackdrop = document.getElementById('feishin-context-backdrop');
+            if (existingBackdrop) existingBackdrop.remove();
 
             // Descobrir qual música foi selecionada
             let songToTarget = null;
@@ -452,8 +572,26 @@
             });
         };
 
-        menuContent.appendChild(divider);
-        menuContent.appendChild(deleteItem);
+        // Inserir de forma nativa e cirúrgica dentro do scrollArea antes dos scrollbars ou antes do preview footer
+        const scrollArea = menuContent.querySelector('.fs-scroll-area-module-scroll-area');
+        const previewContainer = menuContent.querySelector('.fs-context-menu-preview-module-container');
+
+        if (scrollArea) {
+            const scrollbar = scrollArea.querySelector('.os-scrollbar');
+            if (scrollbar) {
+                scrollArea.insertBefore(divider, scrollbar);
+                scrollArea.insertBefore(deleteItem, scrollbar);
+            } else {
+                scrollArea.appendChild(divider);
+                scrollArea.appendChild(deleteItem);
+            }
+        } else if (previewContainer) {
+            menuContent.insertBefore(divider, previewContainer);
+            menuContent.insertBefore(deleteItem, previewContainer);
+        } else {
+            menuContent.appendChild(divider);
+            menuContent.appendChild(deleteItem);
+        }
     });
 
     menuObserver.observe(document.body, { childList: true, subtree: true });
