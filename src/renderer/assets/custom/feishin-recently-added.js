@@ -1,66 +1,48 @@
 // ==========================================================================
-// FEISHIN ULTRA-PREMIUM APPLE GLASS — RECENTLY ADDED & CINEMATIC TIMELINE
-// Real-time Chronological Ingestion, Liquid Glass Aesthetics & 3D Depth
+// FEISHIN ULTRA-PREMIUM APPLE GLASS — RECENTLY ADDED (HIERARQUIA CRONOLÓGICA)
+// Alocação Hierárquica Estrita por Data de Criação do Arquivo (birthTime)
 // ==========================================================================
 
 (function() {
-  console.log('[Recently Added Engine] Inicializando Adicionadas Recentemente & Linha do Tempo...');
+  console.log('[Recently Added Engine] Inicializando Adicionadas Recentemente (Hierarquia por Data de Criação)...');
 
-  const STORAGE_VIEW_KEY = 'feishin_recently_added_view_mode';
-  const STORAGE_CACHE_KEY = 'feishin_recently_added_cache_v1';
+  const STORAGE_CACHE_KEY = 'feishin_recently_added_cache_v3';
 
-  let currentViewMode = localStorage.getItem(STORAGE_VIEW_KEY) || 'timeline'; // 'timeline' | 'tracklist'
   let cachedSongs = [];
   let totalRecordCount = 0;
   let isFetching = false;
-  let hasFetchedAll = false;
   let searchQuery = '';
   let isMounting = false;
   let mountDebounceTimer = null;
+  let lastCheckedHash = '';
 
   // 1. Credentials & Auth Helper
-  function getQueryClient() {
-    if (window.__FEISHIN_QC__) return window.__FEISHIN_QC__;
-    const root = document.querySelector('#root');
-    if (!root) return null;
-    const k = Object.keys(root).find(key => key.startsWith('__reactContainer'));
-    if (!k) return null;
-    let fiber = root[k];
-    let depth = 0;
-    while (fiber && depth < 30) {
-      if (fiber.memoizedProps && fiber.memoizedProps.client && fiber.memoizedProps.client.getQueryCache) {
-        window.__FEISHIN_QC__ = fiber.memoizedProps.client;
-        return fiber.memoizedProps.client;
-      }
-      fiber = fiber.child;
-      depth++;
-    }
-    return null;
-  }
-
-  function getSubsonicCredentials() {
+  function getAuthInfo() {
     let url = null;
     let cred = null;
     let serverId = null;
+    let token = null;
 
     try {
       const auth = JSON.parse(localStorage.getItem('store_authentication') || '{}');
-      url = auth?.state?.currentServer?.url;
-      serverId = auth?.state?.currentServer?.id;
+      const s = auth?.state?.currentServer;
+      url = s?.url;
+      serverId = s?.id;
+      token = s?.ndCredential;
     } catch (e) {}
 
     const root = document.querySelector('#root');
-    if (root) {
+    if (root && (!cred || !serverId)) {
       function scan(f, d = 0) {
         if (!f || d > 60 || cred) return;
         if (f.memoizedState) {
-          let s = f.memoizedState;
-          while (s) {
-            if (s.memoizedState?.credential) {
-              cred = s.memoizedState.credential;
+          let st = f.memoizedState;
+          while (st) {
+            if (st.memoizedState?.credential) {
+              cred = st.memoizedState.credential;
               break;
             }
-            s = s.next;
+            st = st.next;
           }
         }
         if (f.child) scan(f.child, d + 1);
@@ -70,43 +52,50 @@
       if (fiberKey) scan(root[fiberKey]);
     }
 
-    return { url, cred, serverId };
+    return { url, cred, serverId, token };
   }
 
   function getCoverUrl(imageId) {
     if (!imageId) return '';
-    const { url, cred } = getSubsonicCredentials();
+    const { url, cred } = getAuthInfo();
     if (url && cred) {
       return `${url}/rest/getCoverArt.view?id=${encodeURIComponent(imageId)}&${cred}&v=1.13.0&c=Feishin&size=300`;
     }
     return '';
   }
 
-  // 2. Data Fetcher through Feishin's native Query Client
-  async function fetchRecentlyAddedBatch(startIndex = 0, limit = 100) {
-    const qc = getQueryClient();
-    if (!qc) throw new Error('Query Client not available');
+  function normalizeSong(s, serverId) {
+    const durSec = s.duration || 0;
+    const durMs = durSec > 10000 ? durSec : Math.round(durSec * 1000);
+    const creationTime = s.birthTime || s.createdAt || s.updatedAt || new Date().toISOString();
 
-    const queries = qc.getQueryCache().getAll();
-    const sampleQuery = queries.find(q => q.queryKey[1] === 'songs' && q.queryKey[2] === 'list');
-    if (!sampleQuery) throw new Error('Song list queryFn not found in cache');
-
-    const serverId = sampleQuery.queryKey[0];
-    const queryFn = sampleQuery.options.queryFn;
-
-    const res = await queryFn({
-      signal: new AbortController().signal,
-      queryKey: [serverId, 'songs', 'list', { sortBy: 'recentlyAdded', sortOrder: 'DESC' }, { limit, startIndex }]
-    });
-
-    return res;
+    return {
+      id: s.id,
+      name: s.title || s.name || 'Faixa',
+      title: s.title || s.name || 'Faixa',
+      artistName: s.artist || s.artistName || (s.artists?.[0]?.name) || '[Unknown Artist]',
+      album: s.album || s.albumName || '',
+      albumId: s.albumId || s.id,
+      duration: durMs,
+      imageId: s.id,
+      thumbHash: s.thumbHash || null,
+      birthTime: s.birthTime || null,
+      createdAt: s.createdAt || null,
+      creationTime: creationTime,
+      year: s.year || (s.releaseDate ? new Date(s.releaseDate).getFullYear() : null),
+      _serverId: s._serverId || serverId,
+      _serverType: 'navidrome',
+      _itemType: 'song',
+      _uniqueId: 'ra_' + s.id + '_' + Date.now()
+    };
   }
 
+  // 2. High-Performance Full Library Ingestion Sorted by birthTime (Creation Date)
   async function loadInitialSongs() {
     if (isFetching) return;
     isFetching = true;
 
-    // Load from cache first if available
+    // Load from cache first for zero-latency instant render
     try {
       const saved = localStorage.getItem(STORAGE_CACHE_KEY);
       if (saved) {
@@ -119,52 +108,60 @@
       }
     } catch (e) {}
 
+    const { url, serverId, token } = getAuthInfo();
+    if (!url || !token) {
+      isFetching = false;
+      return;
+    }
+
     try {
-      // 1. Fetch First Batch (100 songs)
-      const firstBatch = await fetchRecentlyAddedBatch(0, 100);
-      if (firstBatch && firstBatch.items) {
-        cachedSongs = firstBatch.items;
-        totalRecordCount = firstBatch.totalRecordCount || firstBatch.items.length;
-        renderViewContent();
+      // Step 1: Fetch first batch (0..100) sorted strictly by birthTime (file creation date)
+      const r0 = await fetch(`${url}/api/song?_start=0&_end=100&_order=DESC&_sort=birthTime`, {
+        headers: { 'x-nd-authorization': `Bearer ${token}` }
+      });
+      const totalHeader = r0.headers.get('x-total-count');
+      const total = totalHeader ? Number(totalHeader) : 1738;
+      totalRecordCount = total;
 
-        // 2. Fetch remaining pages sequentially/concurrently in the background
-        const total = totalRecordCount;
-        let startIndex = 100;
-        
-        while (startIndex < total) {
-          try {
-            const nextBatch = await fetchRecentlyAddedBatch(startIndex, 100);
-            if (!nextBatch || !nextBatch.items || nextBatch.items.length === 0) break;
-            
-            // Merge deduplicated
-            const existingIds = new Set(cachedSongs.map(s => s.id));
-            const newItems = nextBatch.items.filter(s => !existingIds.has(s.id));
-            cachedSongs = cachedSongs.concat(newItems);
-            startIndex += 100;
-
-            // Update badge count
-            updateBadgeCount(cachedSongs.length, totalRecordCount);
-
-            // Periodically refresh view if user is looking
-            if (startIndex % 300 === 0 || startIndex >= total) {
-              renderViewContent();
-            }
-          } catch (err) {
-            console.warn('[Recently Added] Erro em batch de paginação:', err);
-            break;
-          }
-        }
-
-        hasFetchedAll = true;
-        try {
-          // Cache up to 1000 items in localStorage for fast reload
-          localStorage.setItem(STORAGE_CACHE_KEY, JSON.stringify(cachedSongs.slice(0, 1000)));
-        } catch (e) {}
-
+      const page0 = await r0.json();
+      if (Array.isArray(page0)) {
+        cachedSongs = page0.map(s => normalizeSong(s, serverId));
         renderViewContent();
       }
+
+      // Step 2: Parallel fetch of remaining pages in chunks of 200
+      const fetchPromises = [];
+      for (let start = 100; start < total; start += 200) {
+        const end = Math.min(start + 200, total);
+        fetchPromises.push(
+          fetch(`${url}/api/song?_start=${start}&_end=${end}&_order=DESC&_sort=birthTime`, {
+            headers: { 'x-nd-authorization': `Bearer ${token}` }
+          })
+          .then(res => res.json())
+          .catch(() => [])
+        );
+      }
+
+      const allRemainingPages = await Promise.all(fetchPromises);
+      const remainingSongs = allRemainingPages.flat().map(s => normalizeSong(s, serverId));
+
+      // Deduplicate and combine
+      const seenIds = new Set(cachedSongs.map(s => s.id));
+      const freshAdditions = remainingSongs.filter(s => !seenIds.has(s.id));
+      cachedSongs = cachedSongs.concat(freshAdditions);
+      
+      // Ensure sorted strictly by creationTime descending
+      cachedSongs.sort((a, b) => new Date(b.creationTime) - new Date(a.creationTime));
+      totalRecordCount = cachedSongs.length;
+
+      // Save top 1200 tracks to cache
+      try {
+        localStorage.setItem(STORAGE_CACHE_KEY, JSON.stringify(cachedSongs.slice(0, 1200)));
+      } catch (e) {}
+
+      renderViewContent();
     } catch (e) {
-      console.error('[Recently Added] Erro ao carregar faixas:', e);
+      console.error('[Recently Added] Falha na ingestão de faixas:', e);
     } finally {
       isFetching = false;
     }
@@ -178,18 +175,18 @@
       return;
     }
 
-    const { serverId } = getSubsonicCredentials();
+    const { serverId } = getAuthInfo();
     const cleanItem = (s) => ({
       id: s.id,
       name: s.name || s.title || 'Faixa',
       title: s.name || s.title || 'Faixa',
       artistName: s.artistName || (s.artists?.[0]?.name) || '[Unknown Artist]',
       album: s.album || s.albumName || '',
-      duration: (s.duration || 0) > 10000 ? s.duration : (s.duration || 0) * 1000,
-      imageId: s.imageId || s.coverArt || s.id,
+      duration: s.duration,
+      imageId: s.imageId || s.id,
       thumbHash: s.thumbHash || null,
       _serverId: s._serverId || serverId,
-      _serverType: s._serverType || 'navidrome',
+      _serverType: 'navidrome',
       _itemType: 'song',
       _uniqueId: 'ra_' + s.id + '_' + Date.now()
     });
@@ -201,8 +198,7 @@
       store.addToQueueByType([cleanItem(song)], 'now');
     }
 
-    // Refresh view active playing indicator
-    setTimeout(renderActiveTrackIndicator, 200);
+    setTimeout(renderActiveTrackIndicator, 150);
   }
 
   function playAll(shuffle = false) {
@@ -219,83 +215,112 @@
     playTrack(songsToPlay[0], songsToPlay, 0);
   }
 
-  // 4. Grouping & Date Utilities
-  function parseDate(dateStr) {
-    if (!dateStr) return new Date();
-    return new Date(dateStr);
+  function playGroup(groupKey) {
+    const groups = groupSongsByCreationHierarchy(getFilteredSongs());
+    const group = groups.find(g => g.key === groupKey);
+    if (group && group.songs.length > 0) {
+      playTrack(group.songs[0], group.songs, 0);
+    }
   }
 
-  function formatRelativeDate(dateStr) {
-    if (!dateStr) return 'Recentemente';
-    const d = parseDate(dateStr);
+  // 4. Date Utilities & Hierarchical Clustering
+  function formatCreationDate(dateStr) {
+    if (!dateStr) return '—';
+    const d = new Date(dateStr);
+    if (isNaN(d.getTime())) return '—';
+
     const now = new Date();
-    const diffMs = now - d;
-    const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
-    const diffDays = Math.floor(diffHours / 24);
+    const isToday = d.toDateString() === now.toDateString();
+    const yesterday = new Date(now);
+    yesterday.setDate(now.getDate() - 1);
+    const isYesterday = d.toDateString() === yesterday.toDateString();
 
-    if (diffHours < 1) return 'Há poucos minutos';
-    if (diffHours < 24) return `Hoje às ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
-    if (diffDays === 1) return `Ontem às ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
-    if (diffDays < 7) return `Há ${diffDays} dias`;
+    const hours = String(d.getHours()).padStart(2, '0');
+    const mins = String(d.getMinutes()).padStart(2, '0');
 
-    const months = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
-    return `${d.getDate()} de ${months[d.getMonth()]}, ${d.getFullYear()} • ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+    if (isToday) return `Hoje às ${hours}:${mins}`;
+    if (isYesterday) return `Ontem às ${hours}:${mins}`;
+
+    const day = String(d.getDate()).padStart(2, '0');
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const year = d.getFullYear();
+    return `${day}/${month}/${year} ${hours}:${mins}`;
   }
 
-  function formatDuration(durMsOrSec) {
-    if (!durMsOrSec) return '0:00';
-    let totalSec = Math.round(durMsOrSec > 10000 ? durMsOrSec / 1000 : durMsOrSec);
+  function formatDuration(durMs) {
+    if (!durMs) return '0:00';
+    let totalSec = Math.round(durMs > 10000 ? durMs / 1000 : durMs);
     const m = Math.floor(totalSec / 60);
     const s = totalSec % 60;
     return `${m}:${String(s).padStart(2, '0')}`;
   }
 
-  function clusterSongsByEpoch(songs) {
-    const epochs = new Map();
+  function groupSongsByCreationHierarchy(songs) {
+    const groups = new Map();
     const now = new Date();
-    const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
-    const startOfYesterday = startOfToday - 86400000;
-    const startOfWeek = startOfToday - (now.getDay() * 86400000);
+    const todayStr = now.toDateString();
+
+    const yesterday = new Date(now);
+    yesterday.setDate(now.getDate() - 1);
+    const yesterdayStr = yesterday.toDateString();
+
+    const sevenDaysAgo = new Date(now);
+    sevenDaysAgo.setDate(now.getDate() - 7);
+
+    const fourteenDaysAgo = new Date(now);
+    fourteenDaysAgo.setDate(now.getDate() - 14);
 
     const monthNames = [
       'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
       'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
     ];
 
-    songs.forEach(s => {
-      const d = parseDate(s.createdAt || s.updatedAt);
-      const time = d.getTime();
+    songs.forEach(song => {
+      const d = new Date(song.creationTime);
+      const isInvalid = isNaN(d.getTime());
+      const songDate = isInvalid ? new Date() : d;
+
       let key = '';
       let title = '';
+      let subtitle = '';
       let icon = '📅';
 
-      if (time >= startOfToday) {
-        key = 'epoch-today';
+      if (songDate.toDateString() === todayStr) {
+        key = 'group-today';
         title = 'Hoje';
+        subtitle = `${songDate.getDate()} de ${monthNames[songDate.getMonth()]}`;
         icon = '⚡';
-      } else if (time >= startOfYesterday) {
-        key = 'epoch-yesterday';
+      } else if (songDate.toDateString() === yesterdayStr) {
+        key = 'group-yesterday';
         title = 'Ontem';
+        subtitle = `${songDate.getDate()} de ${monthNames[songDate.getMonth()]}`;
         icon = '✨';
-      } else if (time >= startOfWeek) {
-        key = 'epoch-this-week';
+      } else if (songDate >= sevenDaysAgo) {
+        key = 'group-this-week';
         title = 'Esta Semana';
+        subtitle = 'Últimos 7 dias';
         icon = '🔥';
+      } else if (songDate >= fourteenDaysAgo) {
+        key = 'group-last-week';
+        title = 'Semana Passada';
+        subtitle = 'Entre 7 e 14 dias atrás';
+        icon = '🗓️';
       } else {
-        const m = d.getMonth();
-        const y = d.getFullYear();
-        key = `epoch-${y}-${m}`;
+        const m = songDate.getMonth();
+        const y = songDate.getFullYear();
+        key = `group-${y}-${m}`;
         title = `${monthNames[m]} de ${y}`;
-        icon = '🌌';
+        subtitle = `Arquivos criados em ${monthNames[m]}`;
+        icon = '📁';
       }
 
-      if (!epochs.has(key)) {
-        epochs.set(key, { key, title, icon, songs: [] });
+      if (!groups.has(key)) {
+        groups.set(key, { key, title, subtitle, icon, songs: [] });
       }
-      epochs.get(key).songs.push(s);
+      groups.get(key).songs.push(song);
     });
 
-    return Array.from(epochs.values());
+    return Array.from(groups.values());
   }
 
   function getFilteredSongs() {
@@ -317,8 +342,23 @@
     }
   }
 
-  // 5. Renderers: Hero Header + Views
-  function renderHeroHeaderHtml(total, currentFiltered) {
+  function escapeHtml(str) {
+    if (!str) return '';
+    return String(str)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#039;');
+  }
+
+  // 5. Renderers: Hero Header + Hierarchical Tracklist (Clean & Fast)
+  function renderHeroHeaderHtml(total, filteredCount) {
+    const isFiltering = searchQuery && searchQuery.trim().length > 0;
+    const badgeText = isFiltering
+      ? `${filteredCount} de ${total.toLocaleString('pt-BR')} faixas`
+      : `${total.toLocaleString('pt-BR')} faixas`;
+
     return `
       <div class="ra-hero-header">
         <div class="ra-header-left">
@@ -331,11 +371,11 @@
           <div class="ra-header-titles">
             <div class="ra-header-title-row">
               <h1 class="ra-header-title">Adicionadas recentemente</h1>
-              <span class="ra-badge-count" id="ra-header-badge">${total.toLocaleString('pt-BR')} faixas</span>
+              <span class="ra-badge-count" id="ra-header-badge">${badgeText}</span>
             </div>
             <p class="ra-header-subtitle">
               <span class="pulse-dot-cyan"></span>
-              Ordem cronológica estrita • Da mais recente para a mais antiga
+              Alocação hierárquica por data de criação do arquivo • Ordem cronológica decrescente
             </p>
           </div>
         </div>
@@ -364,36 +404,17 @@
               <circle cx="11" cy="11" r="8"/>
               <line x1="21" y1="21" x2="16.65" y2="16.65"/>
             </svg>
-            <input type="text" class="ra-search-input" id="ra-search-field" placeholder="Buscar faixas..." value="${searchQuery}" />
-          </div>
-
-          <div class="ra-view-switcher">
-            <button type="button" class="ra-view-btn ${currentViewMode === 'tracklist' ? 'active' : ''}" data-view="tracklist" id="ra-view-tracklist-btn">
-              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2">
-                <line x1="8" y1="6" x2="21" y2="6"/>
-                <line x1="8" y1="12" x2="21" y2="12"/>
-                <line x1="8" y1="18" x2="21" y2="18"/>
-                <line x1="3" y1="6" x2="3.01" y2="6"/>
-                <line x1="3" y1="12" x2="3.01" y2="12"/>
-                <line x1="3" y1="18" x2="3.01" y2="18"/>
-              </svg>
-              <span>Faixas</span>
-            </button>
-            <button type="button" class="ra-view-btn ${currentViewMode === 'timeline' ? 'active' : ''}" data-view="timeline" id="ra-view-timeline-btn">
-              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2">
-                <circle cx="12" cy="12" r="10"/>
-                <polyline points="12 6 12 12 14 14"/>
-              </svg>
-              <span>Linha do Tempo</span>
-            </button>
+            <input type="text" class="ra-search-input" id="ra-search-field" placeholder="Buscar faixas..." value="${escapeHtml(searchQuery)}" />
+            ${isFiltering ? `
+              <button type="button" class="ra-search-clear-btn" id="ra-search-clear" title="Limpar busca">✕</button>
+            ` : ''}
           </div>
         </div>
       </div>
     `;
   }
 
-  // VIEW 1: Tracklist Table
-  function renderTracklistHtml(songs) {
+  function renderHierarchicalTracklistHtml(songs) {
     if (songs.length === 0) {
       return `
         <div class="ra-empty-state">
@@ -405,223 +426,136 @@
     }
 
     const currentId = getCurrentPlayingSongId();
+    const groups = groupSongsByCreationHierarchy(songs);
+    let globalIndex = 0;
 
     return `
-      <div class="ra-tracklist-container">
-        <table class="ra-tracklist-table">
-          <thead>
-            <tr>
-              <th style="width: 44px; text-align: center;">#</th>
-              <th style="width: 48px;"></th>
-              <th>TÍTULO</th>
-              <th>ÁLBUM</th>
-              <th>ADICIONADA EM</th>
-              <th style="width: 60px;">ANO</th>
-              <th style="width: 70px; text-align: right;">DURAÇÃO</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${songs.map((song, idx) => {
-              const isPlaying = song.id === currentId;
-              const coverUrl = getCoverUrl(song.imageId || song.id);
-              const dur = formatDuration(song.duration);
-              const addedStr = formatRelativeDate(song.createdAt || song.updatedAt);
-              return `
-                <tr class="ra-tracklist-row ${isPlaying ? 'is-playing' : ''}" data-id="${song.id}" data-index="${idx}">
-                  <td class="ra-col-idx">
-                    ${isPlaying ? `
-                      <div class="ra-mini-equalizer">
-                        <span></span><span></span><span></span><span></span>
-                      </div>
-                    ` : `
-                      <span class="ra-idx-num">${idx + 1}</span>
-                      <button type="button" class="ra-row-play-btn" data-play-id="${song.id}">▶</button>
-                    `}
-                  </td>
-                  <td class="ra-track-cover-cell">
-                    <div class="ra-track-thumb-box">
-                      ${coverUrl ? `<img class="ra-track-thumb-img" src="${coverUrl}" loading="lazy" />` : `<span>🎵</span>`}
-                    </div>
-                  </td>
-                  <td class="ra-track-title-cell">
-                    <div class="ra-track-title">${escapeHtml(song.name || song.title || 'Faixa')}</div>
-                    <div class="ra-track-artist">${escapeHtml(song.artistName || (song.artists?.[0]?.name) || '[Unknown Artist]')}</div>
-                  </td>
-                  <td>
-                    <div class="ra-track-album">${escapeHtml(song.album || song.albumName || '—')}</div>
-                  </td>
-                  <td>
-                    <span class="ra-track-added-date">${addedStr}</span>
-                  </td>
-                  <td style="color: rgba(255,255,255,0.45); font-size: 12.5px;">
-                    ${song.year || '—'}
-                  </td>
-                  <td class="ra-track-duration">
-                    ${dur}
-                  </td>
-                </tr>
-              `;
-            }).join('')}
-          </tbody>
-        </table>
-      </div>
-    `;
-  }
+      <div class="ra-hierarchical-sections-container">
+        ${groups.map(group => {
+          return `
+            <div class="ra-hierarchy-section" id="${group.key}">
+              <!-- Glass Hierarchy Section Header -->
+              <div class="ra-hierarchy-header">
+                <div class="ra-hierarchy-header-left">
+                  <span class="ra-hierarchy-icon">${group.icon}</span>
+                  <div class="ra-hierarchy-header-texts">
+                    <span class="ra-hierarchy-title">${escapeHtml(group.title)}</span>
+                    <span class="ra-hierarchy-subtitle">${escapeHtml(group.subtitle)}</span>
+                  </div>
+                  <span class="ra-hierarchy-count-pill">${group.songs.length} ${group.songs.length === 1 ? 'faixa' : 'faixas'}</span>
+                </div>
+                <div class="ra-hierarchy-header-right">
+                  <button type="button" class="ra-section-play-btn" data-group-key="${group.key}" title="Tocar todas desta seção">
+                    <svg viewBox="0 0 24 24" width="13" height="13" fill="currentColor">
+                      <polygon points="5 3 19 12 5 21 5 3"/>
+                    </svg>
+                    <span>Tocar Seção</span>
+                  </button>
+                </div>
+              </div>
 
-  // VIEW 2: Cinematic Glass Timeline
-  function renderTimelineHtml(songs) {
-    if (songs.length === 0) {
-      return `
-        <div class="ra-empty-state">
-          <div class="ra-empty-icon">⏳</div>
-          <h3 class="ra-empty-title">Linha do tempo vazia</h3>
-          <p class="ra-empty-desc">Nenhuma música corresponde ao filtro atual.</p>
-        </div>
-      `;
-    }
+              <!-- Section Tracks Table -->
+              <div class="ra-tracklist-container">
+                <table class="ra-tracklist-table">
+                  <thead>
+                    <tr>
+                      <th style="width: 44px; text-align: center;">#</th>
+                      <th style="width: 48px;"></th>
+                      <th>TÍTULO</th>
+                      <th>ÁLBUM</th>
+                      <th>DATA DE CRIAÇÃO DO ARQUIVO</th>
+                      <th style="width: 60px;">ANO</th>
+                      <th style="width: 70px; text-align: right;">DURAÇÃO</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    ${group.songs.map(song => {
+                      const idx = globalIndex++;
+                      const isPlaying = song.id === currentId;
+                      const coverUrl = getCoverUrl(song.imageId || song.id);
+                      const dur = formatDuration(song.duration);
+                      const creationStr = formatCreationDate(song.creationTime);
 
-    const currentId = getCurrentPlayingSongId();
-    const epochs = clusterSongsByEpoch(songs);
-
-    return `
-      <div class="ra-timeline-container">
-        <!-- Central Glass Spine -->
-        <div class="ra-timeline-spine"></div>
-
-        <!-- Quick Jump Scrubber HUD -->
-        <div class="ra-timeline-hud">
-          ${epochs.map(ep => `
-            <button type="button" class="ra-hud-item" data-jump-to="${ep.key}">
-              <span class="ra-hud-dot"></span>
-              <span>${ep.title}</span>
-            </button>
-          `).join('')}
-        </div>
-
-        ${epochs.map(epoch => `
-          <div class="ra-epoch-group" id="${epoch.key}">
-            <div class="ra-epoch-capsule-wrap">
-              <div class="ra-epoch-capsule">
-                <span class="ra-epoch-icon">${epoch.icon}</span>
-                <span class="ra-epoch-title">${epoch.title}</span>
-                <span class="ra-epoch-count-pill">${epoch.songs.length} faixas</span>
+                      return `
+                        <tr class="ra-tracklist-row ${isPlaying ? 'is-playing' : ''}" data-id="${song.id}" data-index="${idx}">
+                          <td class="ra-col-idx">
+                            ${isPlaying ? `
+                              <div class="ra-mini-equalizer">
+                                <span></span><span></span><span></span><span></span>
+                              </div>
+                            ` : `
+                              <span class="ra-idx-num">${idx + 1}</span>
+                              <button type="button" class="ra-row-play-btn" data-play-id="${song.id}">▶</button>
+                            `}
+                          </td>
+                          <td class="ra-track-cover-cell">
+                            <div class="ra-track-thumb-box">
+                              ${coverUrl ? `<img class="ra-track-thumb-img" src="${coverUrl}" loading="lazy" />` : `<span>🎵</span>`}
+                            </div>
+                          </td>
+                          <td class="ra-track-title-cell">
+                            <div class="ra-track-title">${escapeHtml(song.name || song.title || 'Faixa')}</div>
+                            <div class="ra-track-artist">${escapeHtml(song.artistName || (song.artists?.[0]?.name) || '[Unknown Artist]')}</div>
+                          </td>
+                          <td>
+                            <div class="ra-track-album">${escapeHtml(song.album || song.albumName || '—')}</div>
+                          </td>
+                          <td>
+                            <span class="ra-track-creation-date">
+                              <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" style="opacity: 0.6; vertical-align: -1px; margin-right: 4px;">
+                                <circle cx="12" cy="12" r="10"/>
+                                <polyline points="12 6 12 12 15 14"/>
+                              </svg>
+                              ${creationStr}
+                            </span>
+                          </td>
+                          <td style="color: rgba(255,255,255,0.45); font-size: 12.5px;">
+                            ${song.year || '—'}
+                          </td>
+                          <td class="ra-track-duration">
+                            ${dur}
+                          </td>
+                        </tr>
+                      `;
+                    }).join('')}
+                  </tbody>
+                </table>
               </div>
             </div>
-
-            <div class="ra-timeline-nodes-wrap">
-              ${epoch.songs.map((song, songIdx) => {
-                const isLeft = songIdx % 2 === 0;
-                const isPlaying = song.id === currentId;
-                const coverUrl = getCoverUrl(song.imageId || song.id);
-                const dur = formatDuration(song.duration);
-                const addedStr = formatRelativeDate(song.createdAt || song.updatedAt);
-
-                return `
-                  <div class="ra-timeline-node ${isLeft ? 'node-left' : 'node-right'}" data-node-id="${song.id}">
-                    <div class="ra-timeline-connector"></div>
-                    <div class="ra-timeline-dot"></div>
-
-                    <div class="ra-timeline-card ${isPlaying ? 'is-active-playing' : ''}" data-id="${song.id}">
-                      <div class="ra-card-art-wrap">
-                        ${coverUrl ? `<img class="ra-card-art-img" src="${coverUrl}" loading="lazy" />` : `<span>🎵</span>`}
-                        <button type="button" class="ra-card-play-btn" data-play-id="${song.id}" title="Tocar Agora">
-                          <div class="ra-card-play-circle">▶</div>
-                        </button>
-                      </div>
-
-                      <div class="ra-card-info">
-                        <div class="ra-card-meta-top">
-                          <span class="ra-card-time-badge">
-                            <svg viewBox="0 0 24 24" width="10" height="10" fill="none" stroke="currentColor" stroke-width="2.5">
-                              <circle cx="12" cy="12" r="10"/>
-                              <polyline points="12 6 12 12 15 14"/>
-                            </svg>
-                            ${addedStr}
-                          </span>
-                          <span class="ra-card-duration">${dur}</span>
-                        </div>
-
-                        <h4 class="ra-card-title" title="${escapeHtml(song.name || song.title || '')}">
-                          ${escapeHtml(song.name || song.title || 'Faixa')}
-                        </h4>
-                        <p class="ra-card-artist" title="${escapeHtml(song.artistName || '')}">
-                          ${escapeHtml(song.artistName || (song.artists?.[0]?.name) || '[Unknown Artist]')}
-                        </p>
-                        <p class="ra-card-album" title="${escapeHtml(song.album || '')}">
-                          ${escapeHtml(song.album || song.albumName || 'Álbum')}
-                        </p>
-
-                        ${isPlaying ? `
-                          <div class="ra-card-waveform-bar">
-                            <span></span><span></span><span></span><span></span><span></span>
-                          </div>
-                        ` : ''}
-                      </div>
-                    </div>
-                  </div>
-                `;
-              }).join('')}
-            </div>
-          </div>
-        `).join('')}
+          `;
+        }).join('')}
       </div>
     `;
-  }
-
-  function escapeHtml(str) {
-    if (!str) return '';
-    return String(str)
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;')
-      .replace(/"/g, '&quot;')
-      .replace(/'/g, '&#039;');
   }
 
   // 6. Bind Events
   function bindViewEvents(container) {
-    // 1. Play All & Shuffle
     container.querySelector('#ra-btn-play-all')?.addEventListener('click', () => playAll(false));
     container.querySelector('#ra-btn-shuffle-all')?.addEventListener('click', () => playAll(true));
 
-    // 2. Search Field Live Filter
     const searchField = container.querySelector('#ra-search-field');
     if (searchField) {
       searchField.addEventListener('input', (e) => {
         searchQuery = e.target.value;
-        const filtered = getFilteredSongs();
-        updateBadgeCount(filtered.length, totalRecordCount);
         renderViewContentOnly();
       });
     }
 
-    // 3. View Switcher Toggle
-    container.querySelector('#ra-view-tracklist-btn')?.addEventListener('click', () => {
-      if (currentViewMode === 'tracklist') return;
-      currentViewMode = 'tracklist';
-      localStorage.setItem(STORAGE_VIEW_KEY, 'tracklist');
+    container.querySelector('#ra-search-clear')?.addEventListener('click', () => {
+      searchQuery = '';
       renderViewContent();
     });
 
-    container.querySelector('#ra-view-timeline-btn')?.addEventListener('click', () => {
-      if (currentViewMode === 'timeline') return;
-      currentViewMode = 'timeline';
-      localStorage.setItem(STORAGE_VIEW_KEY, 'timeline');
-      renderViewContent();
-    });
-
-    // 4. Quick Jump HUD in Timeline
-    container.querySelectorAll('[data-jump-to]').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const targetId = btn.getAttribute('data-jump-to');
-        const targetEl = document.getElementById(targetId);
-        if (targetEl) {
-          targetEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }
+    // Play Section Button
+    container.querySelectorAll('.ra-section-play-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const groupKey = btn.getAttribute('data-group-key');
+        if (groupKey) playGroup(groupKey);
       });
     });
 
-    // 5. Track Click Handlers (Tracklist Rows & Timeline Cards)
+    // Track Rows Double-Click & Play Button
     container.querySelectorAll('.ra-tracklist-row').forEach(row => {
       row.addEventListener('dblclick', () => {
         const id = row.getAttribute('data-id');
@@ -636,43 +570,6 @@
         if (song) playTrack(song, getFilteredSongs(), Number(row.getAttribute('data-index') || 0));
       });
     });
-
-    container.querySelectorAll('.ra-timeline-card').forEach(card => {
-      const id = card.getAttribute('data-id');
-      const song = cachedSongs.find(s => s.id === id);
-
-      card.addEventListener('click', (e) => {
-        if (song) playTrack(song, getFilteredSongs());
-      });
-
-      card.querySelector('.ra-card-play-btn')?.addEventListener('click', (e) => {
-        e.stopPropagation();
-        if (song) playTrack(song, getFilteredSongs());
-      });
-
-      // 3D Interactive Tilt on Glass Pod
-      card.addEventListener('mousemove', (e) => {
-        const rect = card.getBoundingClientRect();
-        const x = (e.clientX - rect.left) / rect.width - 0.5;
-        const y = (e.clientY - rect.top) / rect.height - 0.5;
-        card.style.transform = `perspective(800px) rotateY(${x * 6}deg) rotateX(${-y * 6}deg) translateY(-4px) scale(1.015)`;
-      });
-
-      card.addEventListener('mouseleave', () => {
-        card.style.transform = '';
-      });
-    });
-  }
-
-  function updateBadgeCount(filteredCount, totalCount) {
-    const badge = document.getElementById('ra-header-badge');
-    if (badge) {
-      if (searchQuery && searchQuery.trim()) {
-        badge.textContent = `${filteredCount} de ${totalCount.toLocaleString('pt-BR')} faixas`;
-      } else {
-        badge.textContent = `${totalCount.toLocaleString('pt-BR')} faixas`;
-      }
-    }
   }
 
   function renderViewContentOnly() {
@@ -681,11 +578,15 @@
     const songs = getFilteredSongs();
     const prevScroll = document.getElementById('feishin-recently-added-view')?.scrollTop || 0;
 
-    if (currentViewMode === 'tracklist') {
-      body.innerHTML = renderTracklistHtml(songs);
-    } else {
-      body.innerHTML = renderTimelineHtml(songs);
+    const badge = document.getElementById('ra-header-badge');
+    if (badge) {
+      const isFiltering = searchQuery && searchQuery.trim().length > 0;
+      badge.textContent = isFiltering
+        ? `${songs.length} de ${(totalRecordCount || cachedSongs.length).toLocaleString('pt-BR')} faixas`
+        : `${(totalRecordCount || cachedSongs.length).toLocaleString('pt-BR')} faixas`;
     }
+
+    body.innerHTML = renderHierarchicalTracklistHtml(songs);
 
     const container = document.getElementById('feishin-recently-added-view');
     if (container) {
@@ -704,7 +605,7 @@
     container.innerHTML = `
       ${renderHeroHeaderHtml(totalRecordCount || cachedSongs.length, songs.length)}
       <div id="ra-content-body-wrap" style="width: 100%;">
-        ${currentViewMode === 'tracklist' ? renderTracklistHtml(songs) : renderTimelineHtml(songs)}
+        ${renderHierarchicalTracklistHtml(songs)}
       </div>
     `;
 
@@ -718,17 +619,17 @@
       const isCur = row.getAttribute('data-id') === currentId;
       row.classList.toggle('is-playing', isCur);
     });
-    document.querySelectorAll('.ra-timeline-card').forEach(card => {
-      const isCur = card.getAttribute('data-id') === currentId;
-      card.classList.toggle('is-active-playing', isCur);
-    });
   }
 
-  // 7. Mount & Navigation Management
+  // 7. Mount & Navigation Management (Conflict-Free Architecture)
   function getMountContainer() {
     return document.querySelector('.fs-main-content-module-main-content-body-scroll') ||
            document.querySelector('.fs-main-content-module-main-content-body') ||
            document.querySelector('main');
+  }
+
+  function isOtherCustomPageActive(hash) {
+    return hash.includes('analytics') || hash.startsWith('#/library/genres') || hash.startsWith('#/library/tags');
   }
 
   function ensureSidebarRecentlyAddedItem() {
@@ -743,8 +644,8 @@
       item.setAttribute('data-variant', 'subtle');
       item.setAttribute('data-size', 'sm');
       item.setAttribute('draggable', 'false');
-      item.setAttribute('title', 'Músicas Adicionadas Recentemente & Linha do Tempo');
-      item.style.cssText = '--button-height: var(--button-height-sm); --button-padding-x: var(--button-padding-x-sm); --button-fz: var(--mantine-font-size-sm); --button-bg: transparent; --button-hover: var(--mantine-color-primary-light-hover); --button-color: var(--mantine-color-primary-light-color); --button-bd: calc(0.0625rem * var(--mantine-scale)) solid transparent; cursor: pointer; user-select: none; -webkit-app-region: no-drag;';
+      item.setAttribute('title', 'Músicas Adicionadas Recentemente');
+      item.style.cssText = '--button-height: var(--button-height-sm); --button-padding-x: var(--button-padding-x-sm); --button-fz: 11px; --button-bg: transparent; --button-hover: var(--mantine-color-primary-light-hover); --button-color: var(--mantine-color-primary-light-color); --button-bd: calc(0.0625rem * var(--mantine-scale)) solid transparent; cursor: pointer; user-select: none; -webkit-app-region: no-drag;';
 
       item.innerHTML = `
         <span class="fs-sidebar-item-module-inner m_80f1301b mantine-Button-inner">
@@ -756,8 +657,7 @@
                   <polyline points="12 6 12 12 16 14"></polyline>
                 </svg>
               </span>
-              <span>ADICIONADAS RECENTEMENTE</span>
-              <span class="ra-sidebar-pill">TIME</span>
+              <span style="font-size: 11.5px; font-weight: 600; letter-spacing: -0.2px; white-space: nowrap;">ADICIONADAS RECENTEMENTE</span>
             </div>
           </span>
         </span>
@@ -772,7 +672,6 @@
         scheduleMount();
       });
 
-      // Place right under FAIXAS item (or below FAVORITOS)
       const faixasItem = parent.querySelector('a[href*="/library/songs"]');
       if (faixasItem && faixasItem.nextSibling) {
         parent.insertBefore(item, faixasItem.nextSibling);
@@ -807,6 +706,8 @@
       let viewContainer = document.getElementById('feishin-recently-added-view');
 
       if (isTargetRoute) {
+        document.body.classList.add('feishin-route-recently-added');
+
         if (!viewContainer) {
           viewContainer = document.createElement('div');
           viewContainer.id = 'feishin-recently-added-view';
@@ -815,7 +716,7 @@
           mainContainer.appendChild(viewContainer);
         }
 
-        // Hide sibling elements inside mainContainer
+        // Hide native siblings
         Array.from(mainContainer.children).forEach(child => {
           if (child !== viewContainer) {
             child.style.display = 'none';
@@ -830,9 +731,9 @@
         if (cachedSongs.length === 0) {
           viewContainer.innerHTML = `
             <div class="ra-empty-state" style="padding: 100px 20px;">
-              <div class="ra-empty-icon" style="animation: raDotPulse 1.5s infinite ease-in-out;">⏳</div>
+              <div class="ra-empty-icon" style="animation: raDotPulse 1.5s infinite ease-in-out;">⚡</div>
               <h3 class="ra-empty-title">Carregando Músicas Adicionadas Recentemente...</h3>
-              <p class="ra-empty-desc">Conectando ao catálogo Navidrome e estruturando a linha do tempo de vidro.</p>
+              <p class="ra-empty-desc">Conectando ao catálogo Navidrome e organizando por data de criação do arquivo.</p>
             </div>
           `;
           await loadInitialSongs();
@@ -840,18 +741,23 @@
           renderViewContent();
         }
       } else {
+        document.body.classList.remove('feishin-route-recently-added');
+
         if (viewContainer) {
           viewContainer.style.setProperty('display', 'none', 'important');
         }
-        // If not this route, restore other children unless analytics is active
-        const isAnalyticsActive = hash.includes('analytics');
-        if (!isAnalyticsActive) {
+
+        // Restore native siblings ONLY if no other custom view is active
+        if (!isOtherCustomPageActive(hash)) {
           Array.from(mainContainer.children).forEach(child => {
-            if (child !== viewContainer && child.id !== 'feishin-analytics-dashboard' && child.style.display === 'none') {
-              child.style.display = '';
+            if (child !== viewContainer && child.id !== 'feishin-analytics-dashboard' && child.id !== 'fs-tags-page-mount') {
+              if (child.style.display === 'none') {
+                child.style.display = '';
+              }
             }
           });
         }
+
         const sidebarItem = document.getElementById('personal-os-sidebar-recently-added-item');
         if (sidebarItem) sidebarItem.classList.remove('active');
       }
@@ -865,42 +771,36 @@
     mountDebounceTimer = setTimeout(() => {
       mountDebounceTimer = null;
       mountRecentlyAddedUI();
-    }, 60);
+    }, 50);
   }
 
-  // 8. Listeners & Observer
-  window.addEventListener('hashchange', scheduleMount);
-  window.addEventListener('popstate', scheduleMount);
-
-  setInterval(() => {
-    const hash = window.location.hash || '';
-    const shouldShow = hash.includes('recently-added');
-    const view = document.getElementById('feishin-recently-added-view');
-    if (shouldShow && (!view || view.style.display === 'none')) {
-      scheduleMount();
-    } else if (!shouldShow && view && view.style.display !== 'none') {
-      scheduleMount();
-    }
-  }, 300);
-
-  const observer = new MutationObserver((mutations) => {
-    let needsSchedule = false;
-    for (const m of mutations) {
-      const t = m.target;
-      if (t && (
-        t.id === 'feishin-recently-added-view' ||
-        t.closest?.('#feishin-recently-added-view') ||
-        t.id === 'personal-os-sidebar-recently-added-item'
-      )) {
-        continue;
-      }
-      needsSchedule = true;
-      break;
-    }
-    if (needsSchedule) scheduleMount();
+  // Navigation listeners
+  window.addEventListener('hashchange', () => {
+    scheduleMount();
+  });
+  window.addEventListener('popstate', () => {
+    scheduleMount();
   });
 
-  observer.observe(document.body, { childList: true, subtree: true });
+  // Periodic lightweight sanity check (every 400ms)
+  setInterval(() => {
+    const hash = window.location.hash || '';
+    if (hash !== lastCheckedHash) {
+      lastCheckedHash = hash;
+      scheduleMount();
+      return;
+    }
+
+    const shouldShow = hash.includes('recently-added');
+    const view = document.getElementById('feishin-recently-added-view');
+    const sidebarItem = document.getElementById('personal-os-sidebar-recently-added-item');
+
+    if (shouldShow && (!view || view.style.display === 'none')) {
+      scheduleMount();
+    } else if (!sidebarItem) {
+      ensureSidebarRecentlyAddedItem();
+    }
+  }, 400);
 
   // Initial schedule
   scheduleMount();
@@ -908,12 +808,9 @@
   // Expose API
   window.__FEISHIN_RECENTLY_ADDED__ = {
     playAll,
+    playGroup,
     getSongs: () => cachedSongs,
-    reload: loadInitialSongs,
-    setViewMode: (m) => {
-      currentViewMode = m;
-      renderViewContent();
-    }
+    reload: loadInitialSongs
   };
 
 })();

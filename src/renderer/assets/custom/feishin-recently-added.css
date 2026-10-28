@@ -1,6 +1,6 @@
 /* ==========================================================================
-   FEISHIN ULTRA-PREMIUM APPLE GLASS — RECENTLY ADDED & CINEMATIC TIMELINE
-   Design System: Frosted Liquid Glass, Neon Aura, Cinematic Depth & 3D Shimmer
+   FEISHIN ULTRA-PREMIUM APPLE GLASS — RECENTLY ADDED (HIERARQUIA CRONOLÓGICA)
+   Design System: Frosted Liquid Glass, Neon Aura, Hierarchical Date Clusters
    ========================================================================== */
 
 #feishin-recently-added-view {
@@ -45,8 +45,17 @@
   background: rgba(255, 255, 255, 0.32);
 }
 
+/* Route display enforcement to prevent DOM fighting */
+body.feishin-route-recently-added #feishin-recently-added-view {
+  display: flex !important;
+}
+body.feishin-route-recently-added .fs-main-content-module-main-content-body-scroll > main,
+body.feishin-route-recently-added .fs-main-content-module-main-content-body > main {
+  display: none !important;
+}
+
 /* ==========================================================================
-   HERO HEADER — Liquid Glass Banner with Stats & Mode Switcher
+   HERO HEADER — Liquid Glass Banner with Stats & Controls
    ========================================================================== */
 .ra-hero-header {
   display: flex;
@@ -153,14 +162,14 @@
 }
 
 @keyframes raDotPulse {
-  0%, 100% { opacity: 0.5; transform: scale(0.9); }
-  50% { opacity: 1; transform: scale(1.15); }
+  0%, 100% { opacity: 0.4; transform: scale(0.9); }
+  50% { opacity: 1; transform: scale(1.3); }
 }
 
 .ra-header-actions {
   display: flex;
   align-items: center;
-  gap: 14px;
+  gap: 12px;
   z-index: 1;
 }
 
@@ -169,33 +178,36 @@
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  padding: 8px 18px;
+  padding: 8px 16px;
   background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
   border: 1px solid rgba(255, 255, 255, 0.16);
   border-radius: 9999px;
   color: #ffffff;
   font-size: 13px;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   outline: none;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.2);
 }
 
 .ra-glass-btn:hover {
-  background: rgba(255, 255, 255, 0.15);
-  border-color: rgba(255, 255, 255, 0.3);
+  background: rgba(255, 255, 255, 0.14);
+  border-color: rgba(255, 255, 255, 0.28);
   transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.3);
 }
 
 .ra-glass-btn:active {
-  transform: translateY(1px);
+  transform: translateY(0);
 }
 
 .ra-glass-btn-primary {
   background: linear-gradient(135deg, rgba(168, 85, 247, 0.45), rgba(99, 102, 241, 0.4));
-  border-color: rgba(255, 255, 255, 0.35);
-  box-shadow: 0 6px 20px rgba(147, 51, 234, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  border-color: rgba(168, 85, 247, 0.55);
+  box-shadow: 0 6px 20px rgba(147, 51, 234, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.35);
 }
 
 .ra-glass-btn-primary:hover {
@@ -212,7 +224,7 @@
 
 .ra-search-input {
   width: 190px;
-  padding: 8px 14px 8px 34px;
+  padding: 8px 30px 8px 34px;
   background: rgba(255, 255, 255, 0.07);
   border: 1px solid rgba(255, 255, 255, 0.14);
   border-radius: 9999px;
@@ -243,46 +255,128 @@
   pointer-events: none;
 }
 
-/* View Mode Switcher Pill */
-.ra-view-switcher {
-  display: flex;
-  align-items: center;
-  background: rgba(0, 0, 0, 0.35);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 9999px;
-  padding: 3px;
-  gap: 2px;
-}
-
-.ra-view-btn {
-  display: flex;
-  align-items: center;
-  gap: 7px;
-  padding: 6px 14px;
-  border-radius: 9999px;
-  background: transparent;
+.ra-search-clear-btn {
+  position: absolute;
+  right: 10px;
+  background: none;
   border: none;
-  color: rgba(255, 255, 255, 0.6);
-  font-size: 12.5px;
-  font-weight: 600;
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 11px;
   cursor: pointer;
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-  outline: none;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.ra-view-btn:hover {
+.ra-search-clear-btn:hover {
   color: #ffffff;
-  background: rgba(255, 255, 255, 0.08);
-}
-
-.ra-view-btn.active {
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.22), rgba(255, 255, 255, 0.1));
-  color: #ffffff;
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.3);
 }
 
 /* ==========================================================================
-   VIEW 1: TRACK LIST VIEW (Estilo Faixas Nativo Refinado em Vidro)
+   HIERARCHICAL SECTIONS — Chronological Allocation by File Creation Date
+   ========================================================================== */
+.ra-hierarchical-sections-container {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+  width: 100%;
+}
+
+.ra-hierarchy-section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+}
+
+/* Glass Section Header Bar */
+.ra-hierarchy-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 18px;
+  background: rgba(28, 22, 48, 0.65);
+  backdrop-filter: blur(28px) saturate(190%);
+  -webkit-backdrop-filter: blur(28px) saturate(190%);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 16px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.18);
+  position: sticky;
+  top: 0;
+  z-index: 8;
+}
+
+.ra-hierarchy-header-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.ra-hierarchy-icon {
+  font-size: 16px;
+  line-height: 1;
+}
+
+.ra-hierarchy-header-texts {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+}
+
+.ra-hierarchy-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: #ffffff;
+  letter-spacing: -0.2px;
+}
+
+.ra-hierarchy-subtitle {
+  font-size: 12.5px;
+  color: rgba(255, 255, 255, 0.45);
+  font-weight: 400;
+}
+
+.ra-hierarchy-count-pill {
+  padding: 2px 8px;
+  background: rgba(168, 85, 247, 0.22);
+  border: 1px solid rgba(168, 85, 247, 0.45);
+  border-radius: 9999px;
+  font-size: 11px;
+  font-weight: 700;
+  color: #d8b4fe;
+}
+
+.ra-hierarchy-header-right {
+  display: flex;
+  align-items: center;
+}
+
+.ra-section-play-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 12px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 9999px;
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  outline: none;
+}
+
+.ra-section-play-btn:hover {
+  background: rgba(168, 85, 247, 0.3);
+  border-color: rgba(168, 85, 247, 0.6);
+  color: #ffffff;
+  transform: scale(1.02);
+}
+
+/* ==========================================================================
+   TRACKLIST TABLE (Ultra-Refined Glass Grid)
    ========================================================================== */
 .ra-tracklist-container {
   display: flex;
@@ -291,7 +385,7 @@
   backdrop-filter: blur(28px) saturate(180%);
   -webkit-backdrop-filter: blur(28px) saturate(180%);
   border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 20px;
+  border-radius: 18px;
   box-shadow: 0 12px 36px rgba(0, 0, 0, 0.35);
   overflow: hidden;
 }
@@ -303,92 +397,84 @@
 }
 
 .ra-tracklist-table th {
-  padding: 14px 18px;
+  padding: 12px 14px;
+  color: rgba(255, 255, 255, 0.45);
   font-size: 11px;
   font-weight: 700;
-  text-transform: uppercase;
   letter-spacing: 0.8px;
-  color: rgba(255, 255, 255, 0.45);
+  text-transform: uppercase;
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-  user-select: none;
+  background: rgba(0, 0, 0, 0.15);
 }
 
 .ra-tracklist-row {
-  cursor: pointer;
+  height: 52px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.04);
-  transition: all 0.18s ease;
+  transition: background 0.15s ease;
+  cursor: pointer;
+}
+
+.ra-tracklist-row:last-child {
+  border-bottom: none;
 }
 
 .ra-tracklist-row:hover {
-  background: rgba(255, 255, 255, 0.06);
+  background: rgba(255, 255, 255, 0.07);
 }
 
 .ra-tracklist-row.is-playing {
-  background: rgba(168, 85, 247, 0.14) !important;
-  border-left: 3px solid #c084fc;
+  background: linear-gradient(90deg, rgba(168, 85, 247, 0.22), rgba(99, 102, 241, 0.08));
 }
 
 .ra-tracklist-row td {
-  padding: 10px 18px;
-  font-size: 13.5px;
+  padding: 6px 14px;
   vertical-align: middle;
+  font-size: 13.5px;
 }
 
-/* Index & Play Cell */
 .ra-col-idx {
-  width: 44px;
   text-align: center;
   color: rgba(255, 255, 255, 0.4);
-  font-size: 12px;
+  font-size: 12.5px;
+  font-variant-numeric: tabular-nums;
   position: relative;
 }
 
 .ra-row-play-btn {
   display: none;
-  background: rgba(255, 255, 255, 0.2);
-  border: 1px solid rgba(255, 255, 255, 0.4);
-  border-radius: 50%;
-  width: 26px;
-  height: 26px;
+  background: none;
+  border: none;
+  color: #c084fc;
+  font-size: 13px;
   cursor: pointer;
-  color: #fff;
-  align-items: center;
-  justify-content: center;
-  font-size: 11px;
-  margin: 0 auto;
-  transition: all 0.15s ease;
-}
-
-.ra-row-play-btn:hover {
-  background: #ffffff;
-  color: #000000;
-  transform: scale(1.1);
+  padding: 0;
+  line-height: 1;
 }
 
 .ra-tracklist-row:hover .ra-idx-num {
   display: none;
 }
 .ra-tracklist-row:hover .ra-row-play-btn {
-  display: flex;
+  display: inline-block;
 }
 
-/* Cover & Title */
 .ra-track-cover-cell {
-  width: 48px;
+  padding-left: 0 !important;
   padding-right: 0 !important;
+  width: 44px;
 }
 
 .ra-track-thumb-box {
-  width: 42px;
-  height: 42px;
+  width: 38px;
+  height: 38px;
   border-radius: 8px;
   overflow: hidden;
-  position: relative;
-  background: rgba(255, 255, 255, 0.05);
+  background: rgba(255, 255, 255, 0.06);
   border: 1px solid rgba(255, 255, 255, 0.12);
   display: flex;
   align-items: center;
   justify-content: center;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
 }
 
 .ra-track-thumb-img {
@@ -398,21 +484,26 @@
 }
 
 .ra-track-title-cell {
-  max-width: 320px;
+  max-width: 280px;
 }
 
 .ra-track-title {
-  font-weight: 600;
   color: #ffffff;
+  font-weight: 600;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  margin-bottom: 2px;
+  line-height: 1.3;
+}
+
+.ra-tracklist-row.is-playing .ra-track-title {
+  color: #c084fc;
+  text-shadow: 0 0 12px rgba(192, 132, 252, 0.4);
 }
 
 .ra-track-artist {
-  font-size: 12px;
   color: rgba(255, 255, 255, 0.55);
+  font-size: 12px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -420,33 +511,35 @@
 
 .ra-track-album {
   color: rgba(255, 255, 255, 0.65);
-  font-size: 13px;
-  max-width: 220px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  max-width: 200px;
 }
 
-.ra-track-added-date {
-  color: #c4b5fd;
+.ra-track-creation-date {
+  display: inline-flex;
+  align-items: center;
+  color: rgba(255, 255, 255, 0.6);
   font-size: 12.5px;
   font-weight: 500;
-  white-space: nowrap;
+  letter-spacing: -0.1px;
 }
 
 .ra-track-duration {
-  color: rgba(255, 255, 255, 0.5);
-  font-size: 12.5px;
   text-align: right;
-  width: 70px;
+  color: rgba(255, 255, 255, 0.45);
+  font-variant-numeric: tabular-nums;
+  font-size: 12.5px;
 }
 
-/* Live Playing Visualizer Bars */
+/* Mini Equalizer */
 .ra-mini-equalizer {
   display: inline-flex;
   align-items: flex-end;
-  gap: 2.5px;
+  gap: 2px;
   height: 14px;
+  width: 14px;
 }
 
 .ra-mini-equalizer span {
@@ -466,501 +559,40 @@
   to { height: 100%; }
 }
 
-/* ==========================================================================
-   VIEW 2: CINEMATIC GLASS TIMELINE (A Linha do Tempo de Vidro)
-   ========================================================================== */
-.ra-timeline-container {
-  display: flex;
-  flex-direction: column;
-  position: relative;
-  width: 100%;
-  padding: 20px 0 100px 0;
-  box-sizing: border-box;
-}
-
-/* Central Illuminated Glass Spine */
-.ra-timeline-spine {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  left: 50%;
-  width: 3px;
-  transform: translateX(-50%);
-  background: linear-gradient(
-    180deg,
-    rgba(168, 85, 247, 0.8) 0%,
-    rgba(56, 189, 248, 0.65) 25%,
-    rgba(236, 72, 153, 0.6) 50%,
-    rgba(168, 85, 247, 0.7) 75%,
-    rgba(255, 255, 255, 0.2) 100%
-  );
-  box-shadow: 0 0 16px rgba(168, 85, 247, 0.6), 0 0 32px rgba(56, 189, 248, 0.3);
-  z-index: 2;
-  border-radius: 9999px;
-}
-
-/* Epoch Section Group */
-.ra-epoch-group {
-  display: flex;
-  flex-direction: column;
-  position: relative;
-  margin-bottom: 56px;
-  z-index: 3;
-}
-
-/* Epoch Floating Capsule Badge */
-.ra-epoch-capsule-wrap {
-  display: flex;
-  justify-content: center;
-  margin-bottom: 36px;
-  position: sticky;
-  top: 10px;
-  z-index: 15;
-}
-
-.ra-epoch-capsule {
-  display: inline-flex;
-  align-items: center;
-  gap: 12px;
-  padding: 8px 22px;
-  background: rgba(24, 18, 40, 0.82);
-  backdrop-filter: blur(32px) saturate(210%);
-  -webkit-backdrop-filter: blur(32px) saturate(210%);
-  border: 1px solid rgba(255, 255, 255, 0.22);
-  border-radius: 9999px;
-  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.35);
-  transition: transform 0.2s ease;
-}
-
-.ra-epoch-capsule:hover {
-  transform: scale(1.03);
-}
-
-.ra-epoch-icon {
-  font-size: 15px;
-}
-
-.ra-epoch-title {
-  font-size: 14px;
-  font-weight: 700;
-  letter-spacing: 0.3px;
-  color: #ffffff;
-  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
-}
-
-.ra-epoch-count-pill {
-  padding: 2px 8px;
-  background: rgba(168, 85, 247, 0.28);
-  border: 1px solid rgba(168, 85, 247, 0.6);
-  border-radius: 9999px;
-  font-size: 11px;
-  font-weight: 800;
-  color: #e9d5ff;
-}
-
-/* Alternating Timeline Cards Grid / Zig-Zag */
-.ra-timeline-nodes-wrap {
-  display: flex;
-  flex-direction: column;
-  gap: 28px;
-  position: relative;
-  width: 100%;
-}
-
-.ra-timeline-node {
-  display: flex;
-  align-items: center;
-  position: relative;
-  width: 100%;
-}
-
-/* Left node card: card on left (width: calc(50% - 36px)) */
-.ra-timeline-node.node-left {
-  justify-content: flex-start;
-}
-
-.ra-timeline-node.node-left .ra-timeline-card {
-  margin-left: 0;
-  margin-right: auto;
-}
-
-/* Right node card: card on right */
-.ra-timeline-node.node-right {
-  justify-content: flex-end;
-}
-
-.ra-timeline-node.node-right .ra-timeline-card {
-  margin-left: auto;
-  margin-right: 0;
-}
-
-/* Center node dot on the spine */
-.ra-timeline-dot {
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  width: 16px;
-  height: 16px;
-  transform: translate(-50%, -50%);
-  border-radius: 50%;
-  background: #ffffff;
-  border: 3px solid #a855f7;
-  box-shadow: 0 0 14px #a855f7, 0 0 24px rgba(168, 85, 247, 0.8);
-  z-index: 5;
-  transition: all 0.25s ease;
-}
-
-.ra-timeline-node:hover .ra-timeline-dot {
-  transform: translate(-50%, -50%) scale(1.35);
-  background: #c084fc;
-  box-shadow: 0 0 22px #c084fc, 0 0 38px rgba(192, 132, 252, 0.9);
-}
-
-/* Glass Connector Line connecting card to center dot */
-.ra-timeline-connector {
-  position: absolute;
-  top: 50%;
-  height: 2px;
-  background: linear-gradient(90deg, rgba(255, 255, 255, 0.25), rgba(168, 85, 247, 0.6));
-  z-index: 2;
-  transition: all 0.25s ease;
-}
-
-.node-left .ra-timeline-connector {
-  left: calc(50% - 36px);
-  width: 36px;
-  background: linear-gradient(90deg, rgba(168, 85, 247, 0.6), rgba(255, 255, 255, 0.8));
-}
-
-.node-right .ra-timeline-connector {
-  left: 50%;
-  width: 36px;
-  background: linear-gradient(90deg, rgba(255, 255, 255, 0.8), rgba(168, 85, 247, 0.6));
-}
-
-/* ==========================================================================
-   THE LIQUID GLASS TIMELINE CARD (Pod de Vidro Cinemático)
-   ========================================================================== */
-.ra-timeline-card {
-  width: calc(50% - 46px);
-  max-width: 540px;
-  min-height: 110px;
-  background: rgba(22, 18, 38, 0.62);
-  backdrop-filter: blur(36px) saturate(190%);
-  -webkit-backdrop-filter: blur(36px) saturate(190%);
-  border: 1px solid rgba(255, 255, 255, 0.16);
-  border-radius: 20px;
-  box-shadow: 0 16px 42px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.24);
-  padding: 16px 20px;
-  display: flex;
-  align-items: center;
-  gap: 18px;
-  position: relative;
-  overflow: hidden;
-  cursor: pointer;
-  box-sizing: border-box;
-  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1),
-              border-color 0.25s ease,
-              box-shadow 0.25s ease,
-              background 0.25s ease;
-}
-
-.ra-timeline-card:hover {
-  transform: translateY(-4px) scale(1.015);
-  background: rgba(30, 24, 52, 0.75);
-  border-color: rgba(255, 255, 255, 0.35);
-  box-shadow: 0 24px 56px rgba(0, 0, 0, 0.55), 
-              0 0 28px rgba(168, 85, 247, 0.25),
-              inset 0 1px 0 rgba(255, 255, 255, 0.4);
-}
-
-.ra-timeline-card.is-active-playing {
-  border-color: rgba(168, 85, 247, 0.8);
-  box-shadow: 0 20px 48px rgba(0, 0, 0, 0.5), 0 0 32px rgba(168, 85, 247, 0.45);
-  background: linear-gradient(135deg, rgba(34, 22, 60, 0.82), rgba(20, 16, 38, 0.75));
-}
-
-/* Card Chamfer Specular Glow Top */
-.ra-timeline-card::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.5) 30%, rgba(255, 255, 255, 0.8) 50%, rgba(255, 255, 255, 0.5) 70%, transparent);
-  pointer-events: none;
-}
-
-/* Album Art with Glass Frame & Ambient Aura */
-.ra-card-art-wrap {
-  width: 78px;
-  height: 78px;
-  border-radius: 14px;
-  position: relative;
-  flex-shrink: 0;
-  overflow: hidden;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
-  border: 1px solid rgba(255, 255, 255, 0.18);
-  background: rgba(0, 0, 0, 0.4);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.ra-card-art-img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  transition: transform 0.3s ease;
-}
-
-.ra-timeline-card:hover .ra-card-art-img {
-  transform: scale(1.08);
-}
-
-/* Floating Glass Play Button on Cover */
-.ra-card-play-btn {
-  position: absolute;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.45);
-  backdrop-filter: blur(8px);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  opacity: 0;
-  transition: opacity 0.2s ease, transform 0.2s ease;
-  border: none;
-  cursor: pointer;
-  color: #ffffff;
-}
-
-.ra-timeline-card:hover .ra-card-play-btn {
-  opacity: 1;
-}
-
-.ra-card-play-circle {
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.25);
-  border: 1px solid rgba(255, 255, 255, 0.5);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.4);
-  transition: all 0.18s ease;
-}
-
-.ra-card-play-btn:hover .ra-card-play-circle {
-  background: #ffffff;
-  color: #000000;
-  transform: scale(1.12);
-}
-
-/* Card Content Details */
-.ra-card-info {
-  display: flex;
-  flex-direction: column;
-  flex: 1;
-  min-width: 0;
-  gap: 4px;
-}
-
-.ra-card-meta-top {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-}
-
-.ra-card-time-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  font-size: 11px;
-  font-weight: 600;
-  color: #c4b5fd;
-  background: rgba(168, 85, 247, 0.16);
-  padding: 2px 7px;
-  border-radius: 6px;
-  border: 1px solid rgba(168, 85, 247, 0.3);
-}
-
-.ra-card-duration {
-  font-size: 11.5px;
-  color: rgba(255, 255, 255, 0.45);
-  font-variant-numeric: tabular-nums;
-}
-
-.ra-card-title {
-  font-size: 15px;
-  font-weight: 700;
-  color: #ffffff;
-  letter-spacing: -0.2px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  margin: 0;
-}
-
-.ra-card-artist {
-  font-size: 12.5px;
-  font-weight: 500;
-  color: rgba(255, 255, 255, 0.65);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  margin: 0;
-}
-
-.ra-card-album {
-  font-size: 11.5px;
-  color: rgba(255, 255, 255, 0.4);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  margin: 0;
-}
-
-/* Card Waveform on Active/Hover */
-.ra-card-waveform-bar {
-  display: flex;
-  align-items: flex-end;
-  gap: 3px;
-  height: 12px;
-  margin-top: 2px;
-}
-
-.ra-card-waveform-bar span {
-  width: 2px;
-  background: #38bdf8;
-  border-radius: 1px;
-  animation: raCardWave 0.7s infinite alternate ease-in-out;
-}
-
-.ra-card-waveform-bar span:nth-child(1) { height: 35%; animation-delay: 0.1s; }
-.ra-card-waveform-bar span:nth-child(2) { height: 85%; animation-delay: 0.3s; }
-.ra-card-waveform-bar span:nth-child(3) { height: 50%; animation-delay: 0.2s; }
-.ra-card-waveform-bar span:nth-child(4) { height: 100%; animation-delay: 0.4s; }
-.ra-card-waveform-bar span:nth-child(5) { height: 65%; animation-delay: 0.15s; }
-
-@keyframes raCardWave {
-  from { height: 20%; }
-  to { height: 100%; }
-}
-
-/* ==========================================================================
-   GLASS QUICK-JUMP TIMELINE HUD (Navegador Flutuante de Épocas)
-   ========================================================================== */
-.ra-timeline-hud {
-  position: fixed;
-  right: 20px;
-  top: 50%;
-  transform: translateY(-50%);
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  padding: 12px 10px;
-  background: rgba(18, 14, 32, 0.68);
-  backdrop-filter: blur(28px) saturate(180%);
-  -webkit-backdrop-filter: blur(28px) saturate(180%);
-  border: 1px solid rgba(255, 255, 255, 0.14);
-  border-radius: 20px;
-  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.45);
-  z-index: 50;
-  max-height: 70vh;
-  overflow-y: auto;
-}
-
-.ra-hud-item {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 6px 12px;
-  border-radius: 10px;
-  background: transparent;
-  border: none;
-  color: rgba(255, 255, 255, 0.55);
-  font-size: 11px;
-  font-weight: 700;
-  cursor: pointer;
-  transition: all 0.18s ease;
-  white-space: nowrap;
-}
-
-.ra-hud-item:hover {
-  background: rgba(255, 255, 255, 0.12);
-  color: #ffffff;
-  transform: translateX(-2px);
-}
-
-.ra-hud-dot {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.3);
-}
-
-.ra-hud-item:hover .ra-hud-dot {
-  background: #c084fc;
-  box-shadow: 0 0 8px #c084fc;
-}
-
-/* ==========================================================================
-   EMPTY STATE & LOADING SHIMMER
-   ========================================================================== */
+/* Empty State */
 .ra-empty-state {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 80px 20px;
+  padding: 60px 20px;
   text-align: center;
-  background: rgba(20, 16, 36, 0.45);
-  backdrop-filter: blur(28px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 24px;
+  background: rgba(20, 16, 35, 0.35);
+  border: 1px dashed rgba(255, 255, 255, 0.14);
+  border-radius: 20px;
 }
 
 .ra-empty-icon {
-  font-size: 48px;
-  margin-bottom: 16px;
-  filter: drop-shadow(0 4px 16px rgba(168, 85, 247, 0.4));
+  font-size: 40px;
+  margin-bottom: 12px;
 }
 
 .ra-empty-title {
-  font-size: 20px;
+  margin: 0 0 6px 0;
+  font-size: 18px;
   font-weight: 700;
-  margin: 0 0 8px 0;
   color: #ffffff;
 }
 
 .ra-empty-desc {
-  font-size: 14px;
-  color: rgba(255, 255, 255, 0.55);
-  max-width: 420px;
   margin: 0;
+  font-size: 13.5px;
+  color: rgba(255, 255, 255, 0.5);
+  max-width: 400px;
 }
 
-/* Sidebar Item Active Style */
+/* Sidebar Active State Indicator */
 #personal-os-sidebar-recently-added-item.active {
-  background: linear-gradient(135deg, rgba(168, 85, 247, 0.28), rgba(99, 102, 241, 0.18)) !important;
-  border: 1px solid rgba(255, 255, 255, 0.22) !important;
-  color: #ffffff !important;
-  box-shadow: 0 4px 18px rgba(147, 51, 234, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.3) !important;
-}
-
-.ra-sidebar-pill {
-  display: inline-flex;
-  align-items: center;
-  padding: 1px 6px;
-  background: rgba(56, 189, 248, 0.2);
-  border: 1px solid rgba(56, 189, 248, 0.45);
-  color: #38bdf8;
-  font-size: 9px;
-  font-weight: 800;
-  border-radius: 9999px;
-  letter-spacing: 0.5px;
-  margin-left: auto;
+  background: var(--mantine-color-primary-light) !important;
+  color: var(--mantine-color-primary-light-color) !important;
 }

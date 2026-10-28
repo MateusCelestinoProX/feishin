@@ -1133,12 +1133,15 @@
         if (dashContainer) {
           dashContainer.style.setProperty('display', 'none', 'important');
         }
-        // Restore visibility of other elements inside mainContainer
-        Array.from(mainContainer.children).forEach(child => {
-          if (child !== dashContainer && child.style.display === 'none') {
-            child.style.display = '';
-          }
-        });
+        // Restore visibility of other elements inside mainContainer only if no other custom view is active
+        const isOtherCustom = hash.includes('recently-added') || hash.startsWith('#/library/genres') || hash.startsWith('#/library/tags');
+        if (!isOtherCustom) {
+          Array.from(mainContainer.children).forEach(child => {
+            if (child !== dashContainer && child.id !== 'feishin-recently-added-view' && child.id !== 'fs-tags-page-mount' && child.style.display === 'none') {
+              child.style.display = '';
+            }
+          });
+        }
 
         const sidebarItem = document.getElementById('personal-os-sidebar-analytics-item');
         if (sidebarItem) sidebarItem.classList.remove('active');
@@ -1372,7 +1375,12 @@
         t.closest?.('#feishin-analytics-dashboard') ||
         t.id === 'feishin-home-tabs-bar' ||
         t.closest?.('#feishin-home-tabs-bar') ||
-        t.id === 'personal-os-sidebar-analytics-item'
+        t.id === 'feishin-recently-added-view' ||
+        t.closest?.('#feishin-recently-added-view') ||
+        t.id === 'fs-tags-page-mount' ||
+        t.closest?.('#fs-tags-page-mount') ||
+        t.id === 'personal-os-sidebar-analytics-item' ||
+        t.id === 'personal-os-sidebar-recently-added-item'
       )) {
         continue;
       }

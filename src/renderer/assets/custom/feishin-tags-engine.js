@@ -611,11 +611,14 @@
         const mountedEl = document.getElementById('fs-tags-page-mount');
         if (mountedEl) mountedEl.remove();
         if (mainBody) {
-          Array.from(mainBody.children).forEach(ch => {
-            if (ch.id !== 'fs-tags-page-mount' && ch.style.display === 'none') {
-              ch.style.display = '';
-            }
-          });
+          const isOtherCustom = hash.includes('recently-added') || hash.includes('analytics');
+          if (!isOtherCustom) {
+            Array.from(mainBody.children).forEach(ch => {
+              if (ch.id !== 'fs-tags-page-mount' && ch.id !== 'feishin-recently-added-view' && ch.id !== 'feishin-analytics-dashboard' && ch.style.display === 'none') {
+                ch.style.display = '';
+              }
+            });
+          }
         }
       }
     }
