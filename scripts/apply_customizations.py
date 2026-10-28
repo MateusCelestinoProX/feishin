@@ -82,8 +82,8 @@ def main():
             sys.exit(1)
 
         # 3. Copiar assets customizados
-        print("[*] Injetando assets (Personal OS Glass, Shaders WebGL, PT-BR, Tray Mini Panel, Tags Engine, Music Analytics, Recently Added, Alphabet Scrubber)...")
-        for asset in ["feishin-personal-os.css", "feishin-personal-os.js", "feishin-tags-engine.js", "feishin-alphabet-scrubber.js", "music-analytics.js", "music-analytics.css", "feishin-recently-added.js", "feishin-recently-added.css", "webgl-backgrounds.js", "ogl.js", "pt-br-full.js", "three.min.js"]:
+        print("[*] Injetando assets (Personal OS Glass, Shaders WebGL, PT-BR, Tray Mini Panel, Tags Engine, Music Analytics, Recently Added, Alphabet Scrubber, Samsung Music Chronology)...")
+        for asset in ["feishin-personal-os.css", "feishin-personal-os.js", "feishin-tags-engine.js", "feishin-alphabet-scrubber.js", "music-analytics.js", "music-analytics.css", "feishin-recently-added.js", "feishin-recently-added.css", "samsung-music-chronology.js", "webgl-backgrounds.js", "ogl.js", "pt-br-full.js", "three.min.js"]:
             src = ASSETS_DIR / asset
             if src.exists():
                 shutil.copy2(src, assets_dest / asset)

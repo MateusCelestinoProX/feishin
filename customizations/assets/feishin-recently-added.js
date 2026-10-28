@@ -1,12 +1,12 @@
 // ==========================================================================
 // FEISHIN ULTRA-PREMIUM APPLE GLASS — RECENTLY ADDED (HIERARQUIA CRONOLÓGICA)
-// Alocação Hierárquica Estrita por Data de Criação do Arquivo (birthTime)
+// Alocação Hierárquica Estrita por Samsung Music / MediaStore Android (date_modified DESC)
 // ==========================================================================
 
 (function() {
-  console.log('[Recently Added Engine] Inicializando Adicionadas Recentemente (Hierarquia por Data de Criação)...');
+  console.log('[Recently Added Engine] Inicializando Adicionadas Recentemente (Samsung Music MediaStore Chronology)...');
 
-  const STORAGE_CACHE_KEY = 'feishin_recently_added_cache_v3';
+  const STORAGE_CACHE_KEY = 'feishin_recently_added_cache_v5_samsung';
 
   let cachedSongs = [];
   let totalRecordCount = 0;
@@ -67,7 +67,31 @@
   function normalizeSong(s, serverId) {
     const durSec = s.duration || 0;
     const durMs = durSec > 10000 ? durSec : Math.round(durSec * 1000);
-    const creationTime = s.birthTime || s.createdAt || s.updatedAt || new Date().toISOString();
+    const chrono = window.__SAMSUNG_MUSIC_CHRONOLOGY__?.[s.id];
+
+    let rank = 999999;
+    let creationTime = s.birthTime || s.createdAt || s.updatedAt || new Date().toISOString();
+    let formattedDate = null;
+    let isSamsungOrder = false;
+
+    if (chrono) {
+      rank = typeof chrono.rank === 'number' ? chrono.rank : 999999;
+      if (chrono.isoDate) {
+        creationTime = chrono.isoDate;
+      }
+      if (chrono.formatted) {
+        formattedDate = chrono.formatted;
+      } else if (chrono.date_modified) {
+        const cd = new Date(chrono.date_modified * 1000);
+        const day = String(cd.getDate()).padStart(2, '0');
+        const mo = String(cd.getMonth() + 1).padStart(2, '0');
+        const yr = cd.getFullYear();
+        const hr = String(cd.getHours()).padStart(2, '0');
+        const min = String(cd.getMinutes()).padStart(2, '0');
+        formattedDate = `${day}/${mo}/${yr} às ${hr}:${min}`;
+      }
+      isSamsungOrder = true;
+    }
 
     return {
       id: s.id,
@@ -82,6 +106,9 @@
       birthTime: s.birthTime || null,
       createdAt: s.createdAt || null,
       creationTime: creationTime,
+      rank: rank,
+      formattedDate: formattedDate,
+      isSamsungOrder: isSamsungOrder,
       year: s.year || (s.releaseDate ? new Date(s.releaseDate).getFullYear() : null),
       _serverId: s._serverId || serverId,
       _serverType: 'navidrome',
@@ -90,7 +117,7 @@
     };
   }
 
-  // 2. High-Performance Full Library Ingestion Sorted by birthTime (Creation Date)
+  // 2. High-Performance Full Library Ingestion Sorted by Samsung Music MediaStore Order
   async function loadInitialSongs() {
     if (isFetching) return;
     isFetching = true;
@@ -115,49 +142,27 @@
     }
 
     try {
-      // Step 1: Fetch first batch (0..100) sorted strictly by birthTime (file creation date)
-      const r0 = await fetch(`${url}/api/song?_start=0&_end=100&_order=DESC&_sort=birthTime`, {
+      // Ingest entire library in a fast, single query
+      const r = await fetch(`${url}/api/song?_start=0&_end=3500`, {
         headers: { 'x-nd-authorization': `Bearer ${token}` }
       });
-      const totalHeader = r0.headers.get('x-total-count');
-      const total = totalHeader ? Number(totalHeader) : 1738;
-      totalRecordCount = total;
+      const data = await r.json();
 
-      const page0 = await r0.json();
-      if (Array.isArray(page0)) {
-        cachedSongs = page0.map(s => normalizeSong(s, serverId));
-        renderViewContent();
+      if (Array.isArray(data) && data.length > 0) {
+        cachedSongs = data.map(s => normalizeSong(s, serverId));
+
+        // Sort strictly by Samsung Music chronological rank, then creationTime DESC
+        cachedSongs.sort((a, b) => {
+          if (a.rank !== b.rank) return a.rank - b.rank;
+          return new Date(b.creationTime) - new Date(a.creationTime);
+        });
+
+        totalRecordCount = cachedSongs.length;
+
+        try {
+          localStorage.setItem(STORAGE_CACHE_KEY, JSON.stringify(cachedSongs.slice(0, 1500)));
+        } catch (e) {}
       }
-
-      // Step 2: Parallel fetch of remaining pages in chunks of 200
-      const fetchPromises = [];
-      for (let start = 100; start < total; start += 200) {
-        const end = Math.min(start + 200, total);
-        fetchPromises.push(
-          fetch(`${url}/api/song?_start=${start}&_end=${end}&_order=DESC&_sort=birthTime`, {
-            headers: { 'x-nd-authorization': `Bearer ${token}` }
-          })
-          .then(res => res.json())
-          .catch(() => [])
-        );
-      }
-
-      const allRemainingPages = await Promise.all(fetchPromises);
-      const remainingSongs = allRemainingPages.flat().map(s => normalizeSong(s, serverId));
-
-      // Deduplicate and combine
-      const seenIds = new Set(cachedSongs.map(s => s.id));
-      const freshAdditions = remainingSongs.filter(s => !seenIds.has(s.id));
-      cachedSongs = cachedSongs.concat(freshAdditions);
-      
-      // Ensure sorted strictly by creationTime descending
-      cachedSongs.sort((a, b) => new Date(b.creationTime) - new Date(a.creationTime));
-      totalRecordCount = cachedSongs.length;
-
-      // Save top 1200 tracks to cache
-      try {
-        localStorage.setItem(STORAGE_CACHE_KEY, JSON.stringify(cachedSongs.slice(0, 1200)));
-      } catch (e) {}
 
       renderViewContent();
     } catch (e) {
@@ -223,8 +228,11 @@
     }
   }
 
-  // 4. Date Utilities & Hierarchical Clustering
-  function formatCreationDate(dateStr) {
+  // 4. Date Utilities & Hierarchical Clustering (Samsung Music Authentic Hierarchy)
+  function formatCreationDate(dateStr, song = null) {
+    if (song?.formattedDate) {
+      return song.formattedDate;
+    }
     if (!dateStr) return '—';
     const d = new Date(dateStr);
     if (isNaN(d.getTime())) return '—';
@@ -244,7 +252,7 @@
     const day = String(d.getDate()).padStart(2, '0');
     const month = String(d.getMonth() + 1).padStart(2, '0');
     const year = d.getFullYear();
-    return `${day}/${month}/${year} ${hours}:${mins}`;
+    return `${day}/${month}/${year} às ${hours}:${mins}`;
   }
 
   function formatDuration(durMs) {
@@ -257,61 +265,62 @@
 
   function groupSongsByCreationHierarchy(songs) {
     const groups = new Map();
-    const now = new Date();
-    const todayStr = now.toDateString();
-
-    const yesterday = new Date(now);
-    yesterday.setDate(now.getDate() - 1);
-    const yesterdayStr = yesterday.toDateString();
-
-    const sevenDaysAgo = new Date(now);
-    sevenDaysAgo.setDate(now.getDate() - 7);
-
-    const fourteenDaysAgo = new Date(now);
-    fourteenDaysAgo.setDate(now.getDate() - 14);
-
     const monthNames = [
       'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
       'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
     ];
+    const dayNames = [
+      'Domingo', 'Segunda-feira', 'Terça-feira', 'Quarta-feira',
+      'Quinta-feira', 'Sexta-feira', 'Sábado'
+    ];
 
     songs.forEach(song => {
-      const d = new Date(song.creationTime);
-      const isInvalid = isNaN(d.getTime());
-      const songDate = isInvalid ? new Date() : d;
-
       let key = '';
       let title = '';
       let subtitle = '';
-      let icon = '📅';
+      let icon = '📁';
 
-      if (songDate.toDateString() === todayStr) {
-        key = 'group-today';
-        title = 'Hoje';
-        subtitle = `${songDate.getDate()} de ${monthNames[songDate.getMonth()]}`;
-        icon = '⚡';
-      } else if (songDate.toDateString() === yesterdayStr) {
-        key = 'group-yesterday';
-        title = 'Ontem';
-        subtitle = `${songDate.getDate()} de ${monthNames[songDate.getMonth()]}`;
-        icon = '✨';
-      } else if (songDate >= sevenDaysAgo) {
-        key = 'group-this-week';
-        title = 'Esta Semana';
-        subtitle = 'Últimos 7 dias';
-        icon = '🔥';
-      } else if (songDate >= fourteenDaysAgo) {
-        key = 'group-last-week';
-        title = 'Semana Passada';
-        subtitle = 'Entre 7 e 14 dias atrás';
-        icon = '🗓️';
+      if (song.rank === 999999) {
+        key = 'group-server-sync';
+        title = 'Outras Faixas Sincronizadas';
+        subtitle = 'Arquivos adicionados diretamente no servidor';
+        icon = '☁️';
       } else {
-        const m = songDate.getMonth();
-        const y = songDate.getFullYear();
-        key = `group-${y}-${m}`;
-        title = `${monthNames[m]} de ${y}`;
-        subtitle = `Arquivos criados em ${monthNames[m]}`;
-        icon = '📁';
+        const d = new Date(song.creationTime);
+        const isInvalid = isNaN(d.getTime());
+        const songDate = isInvalid ? new Date() : d;
+        const year = songDate.getFullYear();
+        const month = songDate.getMonth();
+        const day = songDate.getDate();
+
+        // High-fidelity hierarchy matching Samsung Music:
+        // Recent days in October 2026: cluster by exact day
+        if (year === 2026 && month === 9) { // 9 is October (0-indexed)
+          key = `group-day-${year}-${month + 1}-${day}`;
+          title = `${day} de Outubro de 2026`;
+          const dow = dayNames[songDate.getDay()];
+          if (day >= 20) {
+            subtitle = `${dow} • Adicionadas recentemente no dispositivo`;
+            icon = '⚡';
+          } else if (day >= 10) {
+            subtitle = `${dow} • Adições recentes do mês`;
+            icon = '✨';
+          } else {
+            subtitle = `${dow} • Início do mês`;
+            icon = '🔥';
+          }
+        } else if (year === 2025) {
+          key = 'group-year-2025';
+          title = 'Ano de 2025';
+          subtitle = 'Arquivos criados em 2025';
+          icon = '📁';
+        } else {
+          // Month grouping for 2026 earlier months and 2024
+          key = `group-month-${year}-${month + 1}`;
+          title = `${monthNames[month]} de ${year}`;
+          subtitle = `Arquivos criados em ${monthNames[month]}`;
+          icon = (year === 2026 && month === 8) ? '🗓️' : '📁';
+        }
       }
 
       if (!groups.has(key)) {
@@ -474,7 +483,7 @@
                       const isPlaying = song.id === currentId;
                       const coverUrl = getCoverUrl(song.imageId || song.id);
                       const dur = formatDuration(song.duration);
-                      const creationStr = formatCreationDate(song.creationTime);
+                      const creationStr = formatCreationDate(song.creationTime, song);
 
                       return `
                         <tr class="ra-tracklist-row ${isPlaying ? 'is-playing' : ''}" data-id="${song.id}" data-index="${idx}">

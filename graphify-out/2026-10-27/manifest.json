@@ -6,9 +6,9 @@
     "semantic_hash": ""
   },
   "customizations/assets/feishin-personal-os.js": {
-    "mtime": 1793144493.3194907,
-    "seen": 1793144848.3582919,
-    "ast_hash": "1c0ee587658ae595181fa20853c7bd13",
+    "mtime": 1793145128.616321,
+    "seen": 1793145592.736727,
+    "ast_hash": "36b0b0cbeb1aad241a820bc594891ace",
     "semantic_hash": ""
   },
   "customizations/assets/ogl.js": {
@@ -42,9 +42,9 @@
     "semantic_hash": ""
   },
   "scripts/apply_customizations.py": {
-    "mtime": 1793144536.8427215,
-    "seen": 1793144848.358324,
-    "ast_hash": "54625233df347a90f767887c997f7ebb",
+    "mtime": 1793145181.1956463,
+    "seen": 1793145592.736746,
+    "ast_hash": "acc0ab3ee506125ec9f553175589ac7e",
     "semantic_hash": ""
   },
   "scripts/build_full_pt_br.py": {
@@ -72,9 +72,9 @@
     "semantic_hash": ""
   },
   "customizations/index.html": {
-    "mtime": 1793144519.6076672,
-    "seen": 1793144848.3599591,
-    "ast_hash": "0639c7e45125abd850b11da53fae7b42",
+    "mtime": 1793145271.0429115,
+    "seen": 1793145592.7377741,
+    "ast_hash": "c225352d975205212d776a3ab2016e25",
     "semantic_hash": ""
   },
   "customizations/patches/patch_main.py": {
@@ -96,15 +96,15 @@
     "semantic_hash": ""
   },
   "customizations/assets/music-analytics.js": {
-    "mtime": 1793141440.5280588,
-    "seen": 1793141871.236537,
-    "ast_hash": "fcb5e494feb6eafbb22048801aedb72a",
+    "mtime": 1793147508.873591,
+    "seen": 1793147699.076372,
+    "ast_hash": "90238c92d0b3aa2c47f1a6c1a627fb50",
     "semantic_hash": ""
   },
   "customizations/assets/feishin-tags-engine.js": {
-    "mtime": 1793143084.7508056,
-    "seen": 1793143275.45787,
-    "ast_hash": "ed20521056e15ff102432b4952d2db87",
+    "mtime": 1793147476.7464151,
+    "seen": 1793147699.076371,
+    "ast_hash": "d0dfaaac3467d71e725233304d2e21df",
     "semantic_hash": ""
   },
   "scripts/test_tags_system.mjs": {
@@ -1134,21 +1134,21 @@
     "semantic_hash": ""
   },
   "src/renderer/assets/custom/feishin-personal-os.js": {
-    "mtime": 1793144546.5990694,
-    "seen": 1793144848.3585742,
-    "ast_hash": "1c0ee587658ae595181fa20853c7bd13",
+    "mtime": 1793145140.1408503,
+    "seen": 1793145592.736911,
+    "ast_hash": "36b0b0cbeb1aad241a820bc594891ace",
     "semantic_hash": ""
   },
   "src/renderer/assets/custom/feishin-tags-engine.js": {
-    "mtime": 1793143091.190683,
-    "seen": 1793143275.458345,
-    "ast_hash": "ed20521056e15ff102432b4952d2db87",
+    "mtime": 1793147521.8228161,
+    "seen": 1793147699.076614,
+    "ast_hash": "d0dfaaac3467d71e725233304d2e21df",
     "semantic_hash": ""
   },
   "src/renderer/assets/custom/music-analytics.js": {
-    "mtime": 1793141475.5730016,
-    "seen": 1793141871.2368262,
-    "ast_hash": "fcb5e494feb6eafbb22048801aedb72a",
+    "mtime": 1793147521.8254337,
+    "seen": 1793147699.0766149,
+    "ast_hash": "90238c92d0b3aa2c47f1a6c1a627fb50",
     "semantic_hash": ""
   },
   "src/renderer/assets/custom/ogl.js": {
@@ -7218,9 +7218,9 @@
     "semantic_hash": ""
   },
   "customizations/assets/feishin-recently-added.js": {
-    "mtime": 1793144840.3633695,
-    "seen": 1793144848.358295,
-    "ast_hash": "319ec8dbd8b90775609b31cb0b1c5f5c",
+    "mtime": 1793147417.3029137,
+    "seen": 1793147699.0763688,
+    "ast_hash": "5b1ab704760f43021a825ffd1b842054",
     "semantic_hash": ""
   },
   "scripts/analyze_tracks.py": {
@@ -7314,57 +7314,75 @@
     "semantic_hash": ""
   },
   "src/renderer/assets/custom/feishin-recently-added.js": {
-    "mtime": 1793144546.592757,
-    "seen": 1793144848.358576,
-    "ast_hash": "2a64e7ffc37d6490c7a1f5dda27437f1",
+    "mtime": 1793147521.815864,
+    "seen": 1793147699.0766132,
+    "ast_hash": "5b1ab704760f43021a825ffd1b842054",
     "semantic_hash": ""
   },
-  "current_songs_view.png": {
-    "mtime": 1793144513.259559,
-    "seen": 1793144848.3600168,
-    "ast_hash": "3b70a34adbf9a738bd931b4d94c6cee0",
+  "customizations/assets/feishin-alphabet-scrubber.js": {
+    "mtime": 1793145244.7135763,
+    "seen": 1793145592.736724,
+    "ast_hash": "c0eb71a17a077400a9d6869ce512bb00",
     "semantic_hash": ""
   },
-  "current_view.png": {
-    "mtime": 1793144491.1630743,
-    "seen": 1793144848.360019,
-    "ast_hash": "808fafeb6ce9619c02a7b606c4c5aceb",
+  "scripts/inspect_viewport.py": {
+    "mtime": 1793144905.415192,
+    "seen": 1793145592.736757,
+    "ast_hash": "63537d12be8379caee950548addceb21",
     "semantic_hash": ""
   },
-  "recently_added_timeline.png": {
-    "mtime": 1793144599.4541936,
-    "seen": 1793144848.360037,
-    "ast_hash": "d919713fa9915a94dbaf6e2a065681eb",
+  "scripts/test_all_letters.py": {
+    "mtime": 1793145434.0171065,
+    "seen": 1793145592.736759,
+    "ast_hash": "034fe02e8e892d1853c1d088a5610d73",
     "semantic_hash": ""
   },
-  "scrubber_prototype_1.png": {
-    "mtime": 1793144709.6614234,
-    "seen": 1793144848.36004,
-    "ast_hash": "a5f2d8057cfab619bfd35e890018fe52",
+  "scripts/test_drag_scrubbing.py": {
+    "mtime": 1793145458.2405803,
+    "seen": 1793145592.736762,
+    "ast_hash": "be9ac6ca208bfd293e78e6fe9663eee3",
     "semantic_hash": ""
   },
-  "scrubber_scrolled_to_foreign.png": {
-    "mtime": 1793144737.7909272,
-    "seen": 1793144848.360041,
-    "ast_hash": "39ee83e23b1a3264ab374839d6db166c",
+  "scripts/test_live_interaction.py": {
+    "mtime": 1793145364.4197133,
+    "seen": 1793145592.736767,
+    "ast_hash": "69629752e51f966a0b155ac42c0f78bf",
     "semantic_hash": ""
   },
-  "scrubber_scrolled_to_hash.png": {
-    "mtime": 1793144740.2121491,
-    "seen": 1793144848.360043,
-    "ast_hash": "6690505e616229b087293d2bf565acf4",
+  "scripts/test_route_lifecycle.py": {
+    "mtime": 1793145510.3715518,
+    "seen": 1793145592.7367702,
+    "ast_hash": "6865d1feea1b809c0ce9f8e799f95d38",
     "semantic_hash": ""
   },
-  "scrubber_scrolled_to_s.png": {
-    "mtime": 1793144734.6440253,
-    "seen": 1793144848.360044,
-    "ast_hash": "b24526290a3d69a13e9d43f5b05c4e62",
+  "scripts/test_scroll_sync.py": {
+    "mtime": 1793145487.5538692,
+    "seen": 1793145592.736771,
+    "ast_hash": "c5f2c6b23498af41c1ee2b3bbc50cdf4",
     "semantic_hash": ""
   },
-  "songs_screen_test.png": {
-    "mtime": 1793143523.508275,
-    "seen": 1793144848.360045,
-    "ast_hash": "b1ece0e5f3b428e904585801539af6f6",
+  "scripts/verify_fetch_on_jump.py": {
+    "mtime": 1793144881.366753,
+    "seen": 1793145592.736774,
+    "ast_hash": "5252f5d89b0e5fcbb8daeae58726707d",
+    "semantic_hash": ""
+  },
+  "src/renderer/assets/custom/feishin-alphabet-scrubber.js": {
+    "mtime": 1793145256.869772,
+    "seen": 1793145592.73691,
+    "ast_hash": "c0eb71a17a077400a9d6869ce512bb00",
+    "semantic_hash": ""
+  },
+  "recently_added_timeline_final.png": {
+    "mtime": 1793146283.780816,
+    "seen": 1793147160.334285,
+    "ast_hash": "4c525a1075c3fac37272ecfcb538e39c",
+    "semantic_hash": ""
+  },
+  "recently_added_tracklist_final.png": {
+    "mtime": 1793146284.921566,
+    "seen": 1793147160.334286,
+    "ast_hash": "1df7b7da9ccf6c76c62f0bc00177d873",
     "semantic_hash": ""
   }
 }
