@@ -281,6 +281,8 @@ if (typeof window !== 'undefined') {
 
     // Modal / Popover (Box Quadrado Personal OS)
     let modal = document.getElementById('personal-os-shader-modal');
+    let setGlassBlur = null;
+    let setShaderDim = null;
     if (!modal) {
       modal = document.createElement('div');
       modal.id = 'personal-os-shader-modal';
@@ -288,6 +290,9 @@ if (typeof window !== 'undefined') {
       modal.style.webkitAppRegion = 'no-drag';
 
       modal.innerHTML = `
+        <!-- Puxador de Arraste Mobile (Sheet Handle) -->
+        <div class="shader-modal-sheet-handle" id="shader-modal-sheet-handle"></div>
+
         <div class="shader-modal-header">
           <div class="shader-modal-title-group">
             <span class="shader-modal-icon">🎨</span>
@@ -320,29 +325,33 @@ if (typeof window !== 'undefined') {
             <div class="shader-slider-wrapper">
               <input type="range" class="shader-range-slider" id="slider-glass-blur" min="0" max="60" value="${glassBlur}" step="1" title="Ajuste o desfoque do vidro translúcido">
             </div>
-            <div class="shader-slider-scale">
-              <span>0px (Límpido)</span>
-              <span>28px (Padrão)</span>
-              <span>60px (Fosco)</span>
+            <div class="shader-slider-presets" id="presets-glass-blur">
+              <button type="button" class="shader-preset-chip ${glassBlur === 0 ? 'active' : ''}" data-val="0">0px Límpido</button>
+              <button type="button" class="shader-preset-chip ${glassBlur === 16 ? 'active' : ''}" data-val="16">16px Suave</button>
+              <button type="button" class="shader-preset-chip ${glassBlur === 28 ? 'active' : ''}" data-val="28">28px Padrão</button>
+              <button type="button" class="shader-preset-chip ${glassBlur === 44 ? 'active' : ''}" data-val="44">44px Intenso</button>
+              <button type="button" class="shader-preset-chip ${glassBlur === 60 ? 'active' : ''}" data-val="60">60px Fosco</button>
             </div>
           </div>
 
-          <!-- Controle Deslizante 2: Escurecimento do Shader -->
+          <!-- Controle Deslizante 2: Escurecimento do Shader / Sombra de Fundo -->
           <div class="shader-slider-box">
             <div class="shader-slider-header">
               <div class="shader-slider-label">
                 <span class="slider-icon">🌘</span>
-                <span>Escurecimento do Fundo</span>
+                <span>Escurecimento & Sombra</span>
               </div>
               <span class="shader-slider-badge" id="val-shader-dim">${shaderDim}%</span>
             </div>
             <div class="shader-slider-wrapper">
-              <input type="range" class="shader-range-slider" id="slider-shader-dim" min="0" max="90" value="${shaderDim}" step="1" title="Ajuste o escurecimento do shader">
+              <input type="range" class="shader-range-slider" id="slider-shader-dim" min="0" max="90" value="${shaderDim}" step="1" title="Ajuste a sombra e escurecimento do fundo">
             </div>
-            <div class="shader-slider-scale">
-              <span>0% (Brilhante)</span>
-              <span>25% (Equilibrado)</span>
-              <span>90% (Ultra Dark)</span>
+            <div class="shader-slider-presets" id="presets-shader-dim">
+              <button type="button" class="shader-preset-chip ${shaderDim === 0 ? 'active' : ''}" data-val="0">0% Puro</button>
+              <button type="button" class="shader-preset-chip ${shaderDim === 25 ? 'active' : ''}" data-val="25">25% Padrão</button>
+              <button type="button" class="shader-preset-chip ${shaderDim === 50 ? 'active' : ''}" data-val="50">50% Noturno</button>
+              <button type="button" class="shader-preset-chip ${shaderDim === 75 ? 'active' : ''}" data-val="75">75% Profundo</button>
+              <button type="button" class="shader-preset-chip ${shaderDim === 90 ? 'active' : ''}" data-val="90">90% Ultra</button>
             </div>
           </div>
         </div>
@@ -393,29 +402,106 @@ if (typeof window !== 'undefined') {
         });
       });
 
-      // Dual Sliders Logic
-      const sliderBlur = modal.querySelector('#slider-glass-blur');
-      const badgeBlur = modal.querySelector('#val-glass-blur');
-      if (sliderBlur) {
-        sliderBlur.addEventListener('input', (e) => {
-          glassBlur = parseInt(e.target.value, 10);
-          document.documentElement.style.setProperty('--personal-os-glass-blur', glassBlur + 'px');
-          localStorage.setItem('personal_os_glass_blur', glassBlur.toString());
-          if (badgeBlur) badgeBlur.textContent = `${glassBlur}px`;
+      // Dual Sliders & Preset Control Functions
+      setGlassBlur = function(val) {
+        glassBlur = Math.max(0, Math.min(60, parseInt(val, 10) || 0));
+        document.documentElement.style.setProperty('--personal-os-glass-blur', glassBlur + 'px');
+        localStorage.setItem('personal_os_glass_blur', glassBlur.toString());
+        const slider = modal.querySelector('#slider-glass-blur');
+        const badge = modal.querySelector('#val-glass-blur');
+        if (slider && parseInt(slider.value, 10) !== glassBlur) slider.value = glassBlur;
+        if (badge) badge.textContent = `${glassBlur}px`;
+        modal.querySelectorAll('#presets-glass-blur .shader-preset-chip').forEach(chip => {
+          chip.classList.toggle('active', parseInt(chip.getAttribute('data-val'), 10) === glassBlur);
         });
+      };
+
+      setShaderDim = function(val) {
+        shaderDim = Math.max(0, Math.min(90, parseInt(val, 10) || 0));
+        const alpha = (shaderDim / 100).toFixed(2);
+        document.documentElement.style.setProperty('--personal-os-shader-dim', alpha);
+        localStorage.setItem('personal_os_shader_dim', shaderDim.toString());
+        const slider = modal.querySelector('#slider-shader-dim');
+        const badge = modal.querySelector('#val-shader-dim');
+        if (slider && parseInt(slider.value, 10) !== shaderDim) slider.value = shaderDim;
+        if (badge) badge.textContent = `${shaderDim}%`;
+        modal.querySelectorAll('#presets-shader-dim .shader-preset-chip').forEach(chip => {
+          chip.classList.toggle('active', parseInt(chip.getAttribute('data-val'), 10) === shaderDim);
+        });
+        const dimEl = document.getElementById('bg-webgl-dim');
+        if (dimEl) {
+          dimEl.style.backgroundColor = `rgba(0, 0, 0, ${alpha})`;
+        }
+      };
+
+      const sliderBlur = modal.querySelector('#slider-glass-blur');
+      if (sliderBlur) {
+        sliderBlur.addEventListener('input', (e) => setGlassBlur(e.target.value));
       }
 
       const sliderDim = modal.querySelector('#slider-shader-dim');
-      const badgeDim = modal.querySelector('#val-shader-dim');
       if (sliderDim) {
-        sliderDim.addEventListener('input', (e) => {
-          shaderDim = parseInt(e.target.value, 10);
-          const alpha = (shaderDim / 100).toFixed(2);
-          document.documentElement.style.setProperty('--personal-os-shader-dim', alpha);
-          localStorage.setItem('personal_os_shader_dim', shaderDim.toString());
-          if (badgeDim) badgeDim.textContent = `${shaderDim}%`;
-        });
+        sliderDim.addEventListener('input', (e) => setShaderDim(e.target.value));
       }
+
+      // Presets rápidos para Blur do Vidro
+      modal.querySelectorAll('#presets-glass-blur .shader-preset-chip').forEach(chip => {
+        chip.addEventListener('click', (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          setGlassBlur(chip.getAttribute('data-val'));
+        });
+      });
+
+      // Presets rápidos para Escurecimento / Sombra
+      modal.querySelectorAll('#presets-shader-dim .shader-preset-chip').forEach(chip => {
+        chip.addEventListener('click', (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          setShaderDim(chip.getAttribute('data-val'));
+        });
+      });
+
+      // Gesto Touch de arrastar para baixo para fechar (Mobile Bottom Sheet)
+      let startY = 0;
+      let currentY = 0;
+      let isDragging = false;
+      const handle = modal.querySelector('#shader-modal-sheet-handle');
+      const header = modal.querySelector('.shader-modal-header');
+      [handle, header].forEach(el => {
+        if (!el) return;
+        el.addEventListener('touchstart', (e) => {
+          startY = e.touches[0].clientY;
+          currentY = startY;
+          isDragging = true;
+          modal.style.transition = 'none';
+        }, { passive: true });
+        el.addEventListener('touchmove', (e) => {
+          if (!isDragging) return;
+          currentY = e.touches[0].clientY;
+          const diff = currentY - startY;
+          if (diff > 0) {
+            modal.style.transform = `translateY(${diff}px)`;
+          }
+        }, { passive: true });
+        el.addEventListener('touchend', () => {
+          if (!isDragging) return;
+          isDragging = false;
+          modal.style.transition = 'transform 0.28s cubic-bezier(0.16, 1, 0.3, 1)';
+          const diff = currentY - startY;
+          if (diff > 80) {
+            closeModal();
+          } else {
+            modal.style.transform = 'translateY(0)';
+          }
+        }, { passive: true });
+      });
+
+      // Fechar ao clicar no backdrop escuro
+      backdrop.onclick = (e) => {
+        e.preventDefault();
+        closeModal();
+      };
 
       // Filter pills logic
       const pillButtons = modal.querySelectorAll('.shader-pill-btn');
@@ -480,19 +566,13 @@ if (typeof window !== 'undefined') {
     function openModal() {
       backdrop.style.setProperty('display', 'block', 'important');
       modal.style.setProperty('display', 'flex', 'important');
+      modal.style.removeProperty('transform');
       const item = document.getElementById('personal-os-sidebar-backgrounds-item');
       if (item) item.classList.add('active');
 
-      // Sync sliders and badges
-      const sliderBlur = modal.querySelector('#slider-glass-blur');
-      const badgeBlur = modal.querySelector('#val-glass-blur');
-      if (sliderBlur) sliderBlur.value = glassBlur;
-      if (badgeBlur) badgeBlur.textContent = `${glassBlur}px`;
-
-      const sliderDim = modal.querySelector('#slider-shader-dim');
-      const badgeDim = modal.querySelector('#val-shader-dim');
-      if (sliderDim) sliderDim.value = shaderDim;
-      if (badgeDim) badgeDim.textContent = `${shaderDim}%`;
+      // Sync sliders, chips and badges
+      if (typeof setGlassBlur === 'function') setGlassBlur(glassBlur);
+      if (typeof setShaderDim === 'function') setShaderDim(shaderDim);
 
       updateModalUI();
     }
@@ -502,6 +582,9 @@ if (typeof window !== 'undefined') {
       modal.style.setProperty('display', 'none', 'important');
       const item = document.getElementById('personal-os-sidebar-backgrounds-item');
       if (item) item.classList.remove('active');
+      if (typeof window.__feishinSyncActiveTabs === 'function') {
+        window.__feishinSyncActiveTabs();
+      }
     }
 
     function toggleModal() {

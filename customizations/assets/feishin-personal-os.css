@@ -80,7 +80,7 @@ div, span, p, a, h1, h2, h3, h4, h5, h6 {
 }
 
 /* --- 3. PERSONAL OS FLOATING ISLAND LAYOUT --- */
-#default-layout {
+#default-layout, #mobile-layout {
     display: flex !important;
     flex-direction: column !important;
     height: 100vh !important;
@@ -1057,6 +1057,49 @@ button.fs-player-button-module-main svg {
     font-size: 8.5px !important;
     color: rgba(255, 255, 255, 0.35) !important;
     font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, monospace !important;
+}
+
+/* PRESET CHIPS RÁPIDOS */
+.shader-slider-presets {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 4px !important;
+    margin-top: 2px !important;
+}
+
+.shader-preset-chip {
+    flex: 1 !important;
+    padding: 3.5px 4px !important;
+    border-radius: 6px !important;
+    font-size: 9px !important;
+    font-weight: 600 !important;
+    text-align: center !important;
+    white-space: nowrap !important;
+    background: rgba(255, 255, 255, 0.05) !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    color: rgba(255, 255, 255, 0.70) !important;
+    cursor: pointer !important;
+    transition: all 0.15s ease !important;
+    outline: none !important;
+    user-select: none !important;
+}
+
+.shader-preset-chip:hover {
+    background: rgba(255, 255, 255, 0.12) !important;
+    color: #FFFFFF !important;
+}
+
+.shader-preset-chip.active {
+    background: rgba(96, 165, 250, 0.22) !important;
+    border-color: rgba(147, 197, 253, 0.5) !important;
+    color: #FFFFFF !important;
+    font-weight: 700 !important;
+    box-shadow: 0 0 8px rgba(96, 165, 250, 0.3) !important;
+}
+
+.shader-modal-sheet-handle {
+    display: none;
 }
 
 /* CATEGORY FILTER PILLS */

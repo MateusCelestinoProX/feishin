@@ -1,7 +1,7 @@
 # Graph Report - feishin  (2026-10-28)
 
 ## Corpus Check
-- 1146 files · ~1,339,559 words
+- 1146 files · ~1,343,900 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
@@ -566,8 +566,8 @@
   src/renderer/assets/custom/three.min.js → customizations/assets/index-C3w9ueFE.js
 
 ## Import Cycles
-- 4-file cycle: `src/main/features/core/index.ts -> src/main/features/core/player/index.ts -> src/main/index.ts -> src/main/features/index.ts -> src/main/features/core/index.ts`
 - 4-file cycle: `src/main/features/core/dlna/index.ts -> src/main/index.ts -> src/main/features/index.ts -> src/main/features/core/index.ts -> src/main/features/core/dlna/index.ts`
+- 4-file cycle: `src/main/features/core/index.ts -> src/main/features/core/player/index.ts -> src/main/index.ts -> src/main/features/index.ts -> src/main/features/core/index.ts`
 
 ## Communities (575 total, 125 thin omitted)
 

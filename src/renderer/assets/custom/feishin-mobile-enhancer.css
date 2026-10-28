@@ -53,9 +53,11 @@ html, body, #root {
     left: 0 !important;
     width: 100vw !important;
     height: 100dvh !important;
-    background: radial-gradient(circle at center, rgba(8, 4, 16, 0.30) 0%, rgba(4, 2, 10, 0.72) 100%) !important;
+    background-color: rgba(0, 0, 0, var(--personal-os-shader-dim, 0.25)) !important;
+    background-image: radial-gradient(circle at center, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, calc(var(--personal-os-shader-dim, 0.25) * 0.85)) 100%) !important;
     z-index: -1 !important;
     pointer-events: none !important;
+    transition: background-color 0.12s ease !important;
 }
 
 #bg-webgl-vignette {
@@ -433,8 +435,8 @@ thead {
     right: 10px !important;
     height: 64px !important;
     background: rgba(14, 10, 26, 0.88) !important;
-    backdrop-filter: blur(28px) saturate(190%) !important;
-    -webkit-backdrop-filter: blur(28px) saturate(190%) !important;
+    backdrop-filter: blur(var(--personal-os-glass-blur, 28px)) saturate(190%) !important;
+    -webkit-backdrop-filter: blur(var(--personal-os-glass-blur, 28px)) saturate(190%) !important;
     border-radius: 18px !important;
     border: 1px solid rgba(255, 255, 255, 0.12) !important;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.65), 0 0 18px rgba(139, 92, 246, 0.22) !important;
@@ -555,8 +557,8 @@ thead {
     height: calc(56px + var(--sab)) !important;
     padding-bottom: var(--sab) !important;
     background: rgba(8, 6, 16, 0.94) !important;
-    backdrop-filter: blur(32px) saturate(200%) !important;
-    -webkit-backdrop-filter: blur(32px) saturate(200%) !important;
+    backdrop-filter: blur(var(--personal-os-glass-blur, 32px)) saturate(200%) !important;
+    -webkit-backdrop-filter: blur(var(--personal-os-glass-blur, 32px)) saturate(200%) !important;
     border-top: 1px solid rgba(255, 255, 255, 0.09) !important;
     z-index: 190 !important;
     display: flex !important;
@@ -637,8 +639,8 @@ thead {
     max-width: 440px !important;
     margin: 0 auto !important;
     background: linear-gradient(145deg, rgba(20, 15, 34, 0.94), rgba(10, 8, 20, 0.97)) !important;
-    backdrop-filter: blur(36px) saturate(210%) !important;
-    -webkit-backdrop-filter: blur(36px) saturate(210%) !important;
+    backdrop-filter: blur(calc(var(--personal-os-glass-blur, 28px) * 1.25)) saturate(210%) !important;
+    -webkit-backdrop-filter: blur(calc(var(--personal-os-glass-blur, 28px) * 1.25)) saturate(210%) !important;
     border: 1px solid rgba(255, 255, 255, 0.14) !important;
     border-radius: 24px !important;
     padding: 14px 14px 16px 14px !important;
@@ -955,8 +957,8 @@ thead {
     flex-direction: column !important;
     overflow: hidden !important;
     background: rgba(12, 10, 24, 0.78) !important;
-    backdrop-filter: blur(48px) saturate(210%) !important;
-    -webkit-backdrop-filter: blur(48px) saturate(210%) !important;
+    backdrop-filter: blur(calc(var(--personal-os-glass-blur, 28px) * 1.5)) saturate(210%) !important;
+    -webkit-backdrop-filter: blur(calc(var(--personal-os-glass-blur, 28px) * 1.5)) saturate(210%) !important;
     transition: transform 0.38s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.28s ease !important;
     will-change: transform, opacity !important;
     box-sizing: border-box !important;
@@ -1701,5 +1703,410 @@ thead {
 
     .feishin-tp-controls-row {
         padding: 6px 4px !important;
+    }
+}
+
+/* ==========================================================================
+   FEISHIN MOBILE — BACKGROUNDS, BLUR & SHADOW CONTROL (LIQUID GLASS SHEET)
+   Substituição do modal quadrado de desktop por Bottom-Sheet responsiva nativa
+   ========================================================================== */
+
+#personal-os-shader-backdrop {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100vw !important;
+    height: 100dvh !important;
+    background: rgba(0, 0, 0, 0.65) !important;
+    backdrop-filter: blur(14px) !important;
+    -webkit-backdrop-filter: blur(14px) !important;
+    z-index: 100000 !important;
+    transition: opacity 0.25s ease !important;
+}
+
+#personal-os-shader-modal {
+    position: fixed !important;
+    bottom: 0 !important;
+    top: auto !important;
+    left: 0 !important;
+    right: 0 !important;
+    transform: translateY(0) !important;
+    width: 100vw !important;
+    max-width: 100vw !important;
+    height: 88dvh !important;
+    max-height: 92dvh !important;
+    aspect-ratio: unset !important;
+    border-radius: 32px 32px 0 0 !important;
+    border: 1px solid rgba(255, 255, 255, 0.16) !important;
+    border-bottom: none !important;
+    background: linear-gradient(180deg, rgba(16, 14, 28, 0.96) 0%, rgba(8, 6, 16, 0.98) 100%) !important;
+    backdrop-filter: blur(var(--personal-os-glass-blur, 36px)) saturate(210%) !important;
+    -webkit-backdrop-filter: blur(var(--personal-os-glass-blur, 36px)) saturate(210%) !important;
+    box-shadow: 0 -20px 60px rgba(0, 0, 0, 0.85), inset 0 1px 1px rgba(255, 255, 255, 0.3) !important;
+    padding: 10px 16px max(24px, env(safe-area-inset-bottom, 24px)) 16px !important;
+    display: none;
+    flex-direction: column !important;
+    gap: 12px !important;
+    z-index: 100001 !important;
+    overflow: hidden !important;
+    box-sizing: border-box !important;
+    animation: shaderSheetSlideUp 0.32s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+@keyframes shaderSheetSlideUp {
+    from {
+        transform: translateY(100%);
+        opacity: 0.5;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.shader-modal-sheet-handle {
+    display: block !important;
+    width: 44px !important;
+    height: 4.5px !important;
+    background: rgba(255, 255, 255, 0.32) !important;
+    border-radius: 9999px !important;
+    margin: 2px auto 6px auto !important;
+    flex-shrink: 0 !important;
+    cursor: grab !important;
+    touch-action: none !important;
+}
+
+.shader-modal-header {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 10px !important;
+    padding: 0 4px !important;
+    flex-shrink: 0 !important;
+}
+
+.shader-modal-title-group {
+    display: flex !important;
+    align-items: center !important;
+    gap: 10px !important;
+}
+
+.shader-modal-icon {
+    font-size: 24px !important;
+    line-height: 1 !important;
+}
+
+.shader-modal-title {
+    font-size: 16.5px !important;
+    font-weight: 700 !important;
+    color: #FFFFFF !important;
+    margin: 0 !important;
+    letter-spacing: -0.3px !important;
+}
+
+.shader-modal-subtitle {
+    font-size: 11px !important;
+    color: rgba(255, 255, 255, 0.5) !important;
+    letter-spacing: 0.2px !important;
+}
+
+.shader-header-actions {
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+}
+
+.shader-ctrl-btn {
+    padding: 7px 11px !important;
+    border-radius: 12px !important;
+    background: rgba(255, 255, 255, 0.07) !important;
+    border: 1px solid rgba(255, 255, 255, 0.12) !important;
+    color: rgba(255, 255, 255, 0.9) !important;
+    font-size: 11.5px !important;
+    font-weight: 600 !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+    cursor: pointer !important;
+    transition: all 0.15s ease !important;
+}
+
+.shader-ctrl-btn.active {
+    background: rgba(96, 165, 250, 0.22) !important;
+    border-color: rgba(147, 197, 253, 0.45) !important;
+    color: #FFFFFF !important;
+    box-shadow: 0 0 12px rgba(96, 165, 250, 0.3) !important;
+}
+
+.shader-modal-close {
+    width: 32px !important;
+    height: 32px !important;
+    border-radius: 50% !important;
+    background: rgba(255, 255, 255, 0.10) !important;
+    border: 1px solid rgba(255, 255, 255, 0.14) !important;
+    color: #FFFFFF !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    font-size: 14px !important;
+    cursor: pointer !important;
+    transition: all 0.15s ease !important;
+}
+
+.shader-modal-close:active {
+    background: rgba(255, 255, 255, 0.22) !important;
+    transform: scale(0.92) !important;
+}
+
+/* PAINEL DE CONTROLES: BLUR & SHADOW EM CARDS ERGONÔMICOS */
+.shader-controls-panel {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 10px !important;
+    background: rgba(255, 255, 255, 0.04) !important;
+    border: 1px solid rgba(255, 255, 255, 0.09) !important;
+    border-radius: 20px !important;
+    padding: 12px 14px !important;
+    flex-shrink: 0 !important;
+}
+
+.shader-slider-box {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 6px !important;
+}
+
+.shader-slider-header {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    font-size: 12.5px !important;
+    font-weight: 600 !important;
+    color: #F8FAFC !important;
+}
+
+.shader-slider-label {
+    display: flex !important;
+    align-items: center !important;
+    gap: 7px !important;
+}
+
+.shader-slider-badge {
+    font-size: 11.5px !important;
+    font-weight: 700 !important;
+    font-family: ui-monospace, SFMono-Regular, monospace !important;
+    color: #93C5FD !important;
+    background: rgba(59, 130, 246, 0.18) !important;
+    border: 1px solid rgba(96, 165, 250, 0.35) !important;
+    padding: 2px 8px !important;
+    border-radius: 8px !important;
+}
+
+.shader-slider-wrapper {
+    height: 26px !important;
+    display: flex !important;
+    align-items: center !important;
+}
+
+.shader-range-slider {
+    -webkit-appearance: none !important;
+    appearance: none !important;
+    width: 100% !important;
+    height: 7px !important;
+    border-radius: 9999px !important;
+    background: rgba(255, 255, 255, 0.16) !important;
+    outline: none !important;
+    cursor: pointer !important;
+}
+
+.shader-range-slider::-webkit-slider-thumb {
+    -webkit-appearance: none !important;
+    appearance: none !important;
+    width: 24px !important;
+    height: 24px !important;
+    border-radius: 50% !important;
+    background: #FFFFFF !important;
+    border: 2px solid #60A5FA !important;
+    box-shadow: 0 0 12px rgba(96, 165, 250, 0.8), 0 3px 8px rgba(0, 0, 0, 0.5) !important;
+    cursor: pointer !important;
+    transition: transform 0.12s ease !important;
+}
+
+.shader-range-slider::-webkit-slider-thumb:active {
+    transform: scale(1.22) !important;
+    background: #93C5FD !important;
+}
+
+/* CHIPS DE PRESET RÁPIDO */
+.shader-slider-presets {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 5px !important;
+}
+
+.shader-preset-chip {
+    flex: 1 !important;
+    padding: 5px 4px !important;
+    border-radius: 9px !important;
+    font-size: 10px !important;
+    font-weight: 600 !important;
+    text-align: center !important;
+    white-space: nowrap !important;
+    background: rgba(255, 255, 255, 0.05) !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    color: rgba(255, 255, 255, 0.72) !important;
+    cursor: pointer !important;
+    transition: all 0.15s ease !important;
+    outline: none !important;
+}
+
+.shader-preset-chip:active {
+    transform: scale(0.95) !important;
+}
+
+.shader-preset-chip.active {
+    background: rgba(96, 165, 250, 0.22) !important;
+    border-color: rgba(147, 197, 253, 0.5) !important;
+    color: #FFFFFF !important;
+    font-weight: 700 !important;
+    box-shadow: 0 0 10px rgba(96, 165, 250, 0.3) !important;
+}
+
+/* PILLS DE CATEGORIAS COM SCROLL HORIZONTAL */
+.shader-category-pills {
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    overflow-x: auto !important;
+    padding: 2px 2px 6px 2px !important;
+    flex-shrink: 0 !important;
+    -webkit-overflow-scrolling: touch !important;
+    scrollbar-width: none !important;
+}
+
+.shader-category-pills::-webkit-scrollbar {
+    display: none !important;
+}
+
+.shader-pill-btn {
+    padding: 7px 15px !important;
+    border-radius: 20px !important;
+    background: rgba(255, 255, 255, 0.06) !important;
+    border: 1px solid rgba(255, 255, 255, 0.09) !important;
+    color: rgba(255, 255, 255, 0.75) !important;
+    font-size: 12px !important;
+    font-weight: 600 !important;
+    cursor: pointer !important;
+    white-space: nowrap !important;
+    transition: all 0.15s ease !important;
+    flex-shrink: 0 !important;
+}
+
+.shader-pill-btn.active {
+    background: rgba(96, 165, 250, 0.22) !important;
+    border-color: rgba(147, 197, 253, 0.45) !important;
+    color: #FFFFFF !important;
+    box-shadow: 0 0 12px rgba(96, 165, 250, 0.25) !important;
+}
+
+/* GRID RESPONSIVO DE SHADERS (2 COLUNAS TOUCH NO MOBILE) */
+.shader-grid-wrapper {
+    flex: 1 !important;
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    padding-right: 4px !important;
+    padding-bottom: max(32px, env(safe-area-inset-bottom, 24px)) !important;
+    min-height: 0 !important;
+}
+
+.shader-grid-wrapper::-webkit-scrollbar {
+    width: 4px !important;
+}
+
+.shader-grid-wrapper::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.2) !important;
+    border-radius: 9999px !important;
+}
+
+.shader-grid-4col {
+    display: grid !important;
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 10px !important;
+}
+
+.shader-item-card {
+    padding: 14px 10px !important;
+    border-radius: 16px !important;
+    background: rgba(255, 255, 255, 0.045) !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    color: rgba(255, 255, 255, 0.85) !important;
+    font-size: 12px !important;
+    font-weight: 500 !important;
+    cursor: pointer !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    text-align: center !important;
+    gap: 6px !important;
+    min-height: 84px !important;
+    transition: all 0.16s ease !important;
+    position: relative !important;
+    user-select: none !important;
+}
+
+.shader-item-card:active {
+    transform: scale(0.95) !important;
+    background: rgba(255, 255, 255, 0.10) !important;
+}
+
+.shader-item-card.active {
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.28) 0%, rgba(30, 58, 138, 0.20) 100%) !important;
+    border: 1.5px solid rgba(147, 197, 253, 0.70) !important;
+    box-shadow: 0 0 20px rgba(96, 165, 250, 0.35), 0 8px 24px rgba(0, 0, 0, 0.45), inset 0 1px 1px rgba(255, 255, 255, 0.4) !important;
+    color: #FFFFFF !important;
+    font-weight: 700 !important;
+}
+
+.shader-card-icon {
+    font-size: 26px !important;
+    line-height: 1 !important;
+}
+
+.shader-card-title {
+    font-size: 12.5px !important;
+    font-weight: 600 !important;
+    color: #FFFFFF !important;
+}
+
+.shader-card-badge {
+    font-size: 9.5px !important;
+    color: rgba(255, 255, 255, 0.45) !important;
+    font-family: ui-monospace, SFMono-Regular, monospace !important;
+}
+
+/* SUPORTE A ORIENTAÇÃO LANDSCAPE NO MOBILE */
+@media (orientation: landscape) and (max-height: 520px) {
+    #personal-os-shader-modal {
+        height: 94dvh !important;
+        max-height: 96dvh !important;
+        border-radius: 20px !important;
+        top: 3dvh !important;
+        bottom: 3dvh !important;
+        left: 4vw !important;
+        right: 4vw !important;
+        width: 92vw !important;
+        padding: 10px 16px !important;
+    }
+
+    .shader-controls-panel {
+        display: grid !important;
+        grid-template-columns: 1fr 1fr !important;
+        gap: 12px !important;
+    }
+
+    .shader-grid-4col {
+        grid-template-columns: repeat(4, 1fr) !important;
     }
 }

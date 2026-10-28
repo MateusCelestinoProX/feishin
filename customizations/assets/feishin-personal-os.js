@@ -7,6 +7,7 @@ import './webgl-backgrounds.js';
 import './music-analytics.js';
 import './feishin-recently-added.js';
 import './feishin-alphabet-scrubber.js';
+import './feishin-delete-engine.js';
 
 // ==========================================================================
 // RESILIENCE & CRASH IMMUNITY SAFEGUARDS
@@ -281,6 +282,8 @@ if (typeof window !== 'undefined') {
 
     // Modal / Popover (Box Quadrado Personal OS)
     let modal = document.getElementById('personal-os-shader-modal');
+    let setGlassBlur = null;
+    let setShaderDim = null;
     if (!modal) {
       modal = document.createElement('div');
       modal.id = 'personal-os-shader-modal';
@@ -288,6 +291,9 @@ if (typeof window !== 'undefined') {
       modal.style.webkitAppRegion = 'no-drag';
 
       modal.innerHTML = `
+        <!-- Puxador de Arraste Mobile (Sheet Handle) -->
+        <div class="shader-modal-sheet-handle" id="shader-modal-sheet-handle"></div>
+
         <div class="shader-modal-header">
           <div class="shader-modal-title-group">
             <span class="shader-modal-icon">🎨</span>
@@ -320,29 +326,33 @@ if (typeof window !== 'undefined') {
             <div class="shader-slider-wrapper">
               <input type="range" class="shader-range-slider" id="slider-glass-blur" min="0" max="60" value="${glassBlur}" step="1" title="Ajuste o desfoque do vidro translúcido">
             </div>
-            <div class="shader-slider-scale">
-              <span>0px (Límpido)</span>
-              <span>28px (Padrão)</span>
-              <span>60px (Fosco)</span>
+            <div class="shader-slider-presets" id="presets-glass-blur">
+              <button type="button" class="shader-preset-chip ${glassBlur === 0 ? 'active' : ''}" data-val="0">0px Límpido</button>
+              <button type="button" class="shader-preset-chip ${glassBlur === 16 ? 'active' : ''}" data-val="16">16px Suave</button>
+              <button type="button" class="shader-preset-chip ${glassBlur === 28 ? 'active' : ''}" data-val="28">28px Padrão</button>
+              <button type="button" class="shader-preset-chip ${glassBlur === 44 ? 'active' : ''}" data-val="44">44px Intenso</button>
+              <button type="button" class="shader-preset-chip ${glassBlur === 60 ? 'active' : ''}" data-val="60">60px Fosco</button>
             </div>
           </div>
 
-          <!-- Controle Deslizante 2: Escurecimento do Shader -->
+          <!-- Controle Deslizante 2: Escurecimento do Shader / Sombra de Fundo -->
           <div class="shader-slider-box">
             <div class="shader-slider-header">
               <div class="shader-slider-label">
                 <span class="slider-icon">🌘</span>
-                <span>Escurecimento do Fundo</span>
+                <span>Escurecimento & Sombra</span>
               </div>
               <span class="shader-slider-badge" id="val-shader-dim">${shaderDim}%</span>
             </div>
             <div class="shader-slider-wrapper">
-              <input type="range" class="shader-range-slider" id="slider-shader-dim" min="0" max="90" value="${shaderDim}" step="1" title="Ajuste o escurecimento do shader">
+              <input type="range" class="shader-range-slider" id="slider-shader-dim" min="0" max="90" value="${shaderDim}" step="1" title="Ajuste a sombra e escurecimento do fundo">
             </div>
-            <div class="shader-slider-scale">
-              <span>0% (Brilhante)</span>
-              <span>25% (Equilibrado)</span>
-              <span>90% (Ultra Dark)</span>
+            <div class="shader-slider-presets" id="presets-shader-dim">
+              <button type="button" class="shader-preset-chip ${shaderDim === 0 ? 'active' : ''}" data-val="0">0% Puro</button>
+              <button type="button" class="shader-preset-chip ${shaderDim === 25 ? 'active' : ''}" data-val="25">25% Padrão</button>
+              <button type="button" class="shader-preset-chip ${shaderDim === 50 ? 'active' : ''}" data-val="50">50% Noturno</button>
+              <button type="button" class="shader-preset-chip ${shaderDim === 75 ? 'active' : ''}" data-val="75">75% Profundo</button>
+              <button type="button" class="shader-preset-chip ${shaderDim === 90 ? 'active' : ''}" data-val="90">90% Ultra</button>
             </div>
           </div>
         </div>
@@ -393,29 +403,106 @@ if (typeof window !== 'undefined') {
         });
       });
 
-      // Dual Sliders Logic
-      const sliderBlur = modal.querySelector('#slider-glass-blur');
-      const badgeBlur = modal.querySelector('#val-glass-blur');
-      if (sliderBlur) {
-        sliderBlur.addEventListener('input', (e) => {
-          glassBlur = parseInt(e.target.value, 10);
-          document.documentElement.style.setProperty('--personal-os-glass-blur', glassBlur + 'px');
-          localStorage.setItem('personal_os_glass_blur', glassBlur.toString());
-          if (badgeBlur) badgeBlur.textContent = `${glassBlur}px`;
+      // Dual Sliders & Preset Control Functions
+      setGlassBlur = function(val) {
+        glassBlur = Math.max(0, Math.min(60, parseInt(val, 10) || 0));
+        document.documentElement.style.setProperty('--personal-os-glass-blur', glassBlur + 'px');
+        localStorage.setItem('personal_os_glass_blur', glassBlur.toString());
+        const slider = modal.querySelector('#slider-glass-blur');
+        const badge = modal.querySelector('#val-glass-blur');
+        if (slider && parseInt(slider.value, 10) !== glassBlur) slider.value = glassBlur;
+        if (badge) badge.textContent = `${glassBlur}px`;
+        modal.querySelectorAll('#presets-glass-blur .shader-preset-chip').forEach(chip => {
+          chip.classList.toggle('active', parseInt(chip.getAttribute('data-val'), 10) === glassBlur);
         });
+      };
+
+      setShaderDim = function(val) {
+        shaderDim = Math.max(0, Math.min(90, parseInt(val, 10) || 0));
+        const alpha = (shaderDim / 100).toFixed(2);
+        document.documentElement.style.setProperty('--personal-os-shader-dim', alpha);
+        localStorage.setItem('personal_os_shader_dim', shaderDim.toString());
+        const slider = modal.querySelector('#slider-shader-dim');
+        const badge = modal.querySelector('#val-shader-dim');
+        if (slider && parseInt(slider.value, 10) !== shaderDim) slider.value = shaderDim;
+        if (badge) badge.textContent = `${shaderDim}%`;
+        modal.querySelectorAll('#presets-shader-dim .shader-preset-chip').forEach(chip => {
+          chip.classList.toggle('active', parseInt(chip.getAttribute('data-val'), 10) === shaderDim);
+        });
+        const dimEl = document.getElementById('bg-webgl-dim');
+        if (dimEl) {
+          dimEl.style.backgroundColor = `rgba(0, 0, 0, ${alpha})`;
+        }
+      };
+
+      const sliderBlur = modal.querySelector('#slider-glass-blur');
+      if (sliderBlur) {
+        sliderBlur.addEventListener('input', (e) => setGlassBlur(e.target.value));
       }
 
       const sliderDim = modal.querySelector('#slider-shader-dim');
-      const badgeDim = modal.querySelector('#val-shader-dim');
       if (sliderDim) {
-        sliderDim.addEventListener('input', (e) => {
-          shaderDim = parseInt(e.target.value, 10);
-          const alpha = (shaderDim / 100).toFixed(2);
-          document.documentElement.style.setProperty('--personal-os-shader-dim', alpha);
-          localStorage.setItem('personal_os_shader_dim', shaderDim.toString());
-          if (badgeDim) badgeDim.textContent = `${shaderDim}%`;
-        });
+        sliderDim.addEventListener('input', (e) => setShaderDim(e.target.value));
       }
+
+      // Presets rápidos para Blur do Vidro
+      modal.querySelectorAll('#presets-glass-blur .shader-preset-chip').forEach(chip => {
+        chip.addEventListener('click', (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          setGlassBlur(chip.getAttribute('data-val'));
+        });
+      });
+
+      // Presets rápidos para Escurecimento / Sombra
+      modal.querySelectorAll('#presets-shader-dim .shader-preset-chip').forEach(chip => {
+        chip.addEventListener('click', (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          setShaderDim(chip.getAttribute('data-val'));
+        });
+      });
+
+      // Gesto Touch de arrastar para baixo para fechar (Mobile Bottom Sheet)
+      let startY = 0;
+      let currentY = 0;
+      let isDragging = false;
+      const handle = modal.querySelector('#shader-modal-sheet-handle');
+      const header = modal.querySelector('.shader-modal-header');
+      [handle, header].forEach(el => {
+        if (!el) return;
+        el.addEventListener('touchstart', (e) => {
+          startY = e.touches[0].clientY;
+          currentY = startY;
+          isDragging = true;
+          modal.style.transition = 'none';
+        }, { passive: true });
+        el.addEventListener('touchmove', (e) => {
+          if (!isDragging) return;
+          currentY = e.touches[0].clientY;
+          const diff = currentY - startY;
+          if (diff > 0) {
+            modal.style.transform = `translateY(${diff}px)`;
+          }
+        }, { passive: true });
+        el.addEventListener('touchend', () => {
+          if (!isDragging) return;
+          isDragging = false;
+          modal.style.transition = 'transform 0.28s cubic-bezier(0.16, 1, 0.3, 1)';
+          const diff = currentY - startY;
+          if (diff > 80) {
+            closeModal();
+          } else {
+            modal.style.transform = 'translateY(0)';
+          }
+        }, { passive: true });
+      });
+
+      // Fechar ao clicar no backdrop escuro
+      backdrop.onclick = (e) => {
+        e.preventDefault();
+        closeModal();
+      };
 
       // Filter pills logic
       const pillButtons = modal.querySelectorAll('.shader-pill-btn');
@@ -480,19 +567,13 @@ if (typeof window !== 'undefined') {
     function openModal() {
       backdrop.style.setProperty('display', 'block', 'important');
       modal.style.setProperty('display', 'flex', 'important');
+      modal.style.removeProperty('transform');
       const item = document.getElementById('personal-os-sidebar-backgrounds-item');
       if (item) item.classList.add('active');
 
-      // Sync sliders and badges
-      const sliderBlur = modal.querySelector('#slider-glass-blur');
-      const badgeBlur = modal.querySelector('#val-glass-blur');
-      if (sliderBlur) sliderBlur.value = glassBlur;
-      if (badgeBlur) badgeBlur.textContent = `${glassBlur}px`;
-
-      const sliderDim = modal.querySelector('#slider-shader-dim');
-      const badgeDim = modal.querySelector('#val-shader-dim');
-      if (sliderDim) sliderDim.value = shaderDim;
-      if (badgeDim) badgeDim.textContent = `${shaderDim}%`;
+      // Sync sliders, chips and badges
+      if (typeof setGlassBlur === 'function') setGlassBlur(glassBlur);
+      if (typeof setShaderDim === 'function') setShaderDim(shaderDim);
 
       updateModalUI();
     }
@@ -502,6 +583,9 @@ if (typeof window !== 'undefined') {
       modal.style.setProperty('display', 'none', 'important');
       const item = document.getElementById('personal-os-sidebar-backgrounds-item');
       if (item) item.classList.remove('active');
+      if (typeof window.__feishinSyncActiveTabs === 'function') {
+        window.__feishinSyncActiveTabs();
+      }
     }
 
     function toggleModal() {
@@ -511,6 +595,12 @@ if (typeof window !== 'undefined') {
         openModal();
       }
     }
+
+    // Expor globalmente para a Dock Android e componentes nativos
+    window.openPersonalOSBackgrounds = openModal;
+    window.closePersonalOSBackgrounds = closeModal;
+    window.togglePersonalOSBackgrounds = toggleModal;
+    window.openFeishinSettings = openFeishinSettings;
 
     function findMantineModalsContext() {
       if (window.__MANTINE_MODALS__) return window.__MANTINE_MODALS__;
@@ -867,7 +957,6 @@ if (typeof window !== 'undefined') {
 
     initPlayerSplitQueue();
     initPlayerKillSwitch();
-    initSmartTrackNavigation();
 
     const enforcePlayerCoverArt = () => {
       const sidebarImg = document.querySelector('.fs-sidebar-module-image-container');
@@ -986,27 +1075,19 @@ if (typeof window !== 'undefined') {
       if (!store) return;
       switch (action) {
         case "previous":
-          if (typeof window.__SMART_REWIND_TRACK__ === "function") {
-            window.__SMART_REWIND_TRACK__();
-          } else {
-            store.mediaPrevious?.();
-          }
+          store.mediaPrevious?.();
           break;
         case "skip-backward":
-          store.mediaSkipBackward?.(5);
+          store.mediaSkipBackward?.(3);
           break;
         case "play-pause":
           store.mediaTogglePlayPause?.();
           break;
         case "skip-forward":
-          store.mediaSkipForward?.(5);
+          store.mediaSkipForward?.(3);
           break;
         case "next":
-          if (typeof window.__SMART_ADVANCE_TRACK__ === "function") {
-            window.__SMART_ADVANCE_TRACK__();
-          } else {
-            store.mediaNext?.();
-          }
+          store.mediaNext?.();
           break;
         case "play-index":
           if (payload && typeof payload.index === "number") {
@@ -1457,289 +1538,6 @@ if (typeof window !== 'undefined') {
     } else {
       observer.observe(document.body, { childList: true, subtree: true });
     }
-  }
-
-  // ==========================================================================
-  // 13. SMART TRACK ADVANCE & REWIND ENGINE (AVANÇAR E RETROCEDER FAIXA)
-  // Garante funcionamento 100% à prova de falhas dos botões Avançar (▶|) e Retroceder (|◀),
-  // mesmo que a fila contenha apenas 1 música ou esteja na extremidade, buscando
-  // contextualmente a próxima/anterior na biblioteca de músicas.
-  // ==========================================================================
-  function initSmartTrackNavigation() {
-    console.log('[Personal OS] Ativando Smart Track Navigation Engine (Avançar/Retroceder Inteligente)...');
-
-    let lastPrevClickTime = 0;
-
-    function getQueryClient() {
-      try {
-        const root = document.querySelector("#root");
-        if (!root) return null;
-        const fiberKey = Object.keys(root).find(k => k.startsWith("__reactContainer"));
-        if (!fiberKey) return null;
-        let qc = null;
-        function findQC(f, depth) {
-          if (!f || depth > 30 || qc) return;
-          if (f.memoizedProps?.client?.getQueryCache) {
-            qc = f.memoizedProps.client;
-            return;
-          }
-          if (f.child) findQC(f.child, depth + 1);
-          if (f.sibling) findQC(f.sibling, depth + 1);
-        }
-        findQC(root[fiberKey], 0);
-        return qc;
-      } catch (e) {
-        return null;
-      }
-    }
-
-    function getInfiniteLoaderData() {
-      const qc = getQueryClient();
-      if (!qc) return null;
-      try {
-        const queries = qc.getQueryCache().getAll();
-        const loaderQuery = queries.find(q => JSON.stringify(q.queryKey).includes("item-list-infinite-loader"));
-        return loaderQuery?.state?.data || null;
-      } catch (e) {
-        return null;
-      }
-    }
-
-    function getLibrarySongsFallback() {
-      const qc = getQueryClient();
-      if (qc) {
-        try {
-          const queries = qc.getQueryCache().getAll();
-          for (const q of queries) {
-            const kStr = JSON.stringify(q.queryKey);
-            if (kStr.includes("songs") && kStr.includes("list") && q.state?.data) {
-              const d = q.state.data;
-              const items = Array.isArray(d) ? d : (d.items || (Array.isArray(d.pages) ? d.pages.flatMap(p => p.items || []) : null));
-              if (items && items.length > 0) return items;
-            }
-          }
-        } catch (e) {}
-      }
-
-      try {
-        if (window.__SAMSUNG_MUSIC_CHRONOLOGY__ && Array.isArray(window.__SAMSUNG_MUSIC_CHRONOLOGY__.songs)) {
-          return window.__SAMSUNG_MUSIC_CHRONOLOGY__.songs;
-        }
-      } catch (e) {}
-
-      return [];
-    }
-
-    function smartAdvanceTrack() {
-      const store = (window.__FEISHIN_PLAYER_STORE__ && window.__FEISHIN_PLAYER_STORE__.getState)
-        ? window.__FEISHIN_PLAYER_STORE__.getState()
-        : null;
-      if (!store) return;
-
-      const q = store.getQueue();
-      const items = Array.isArray(q) ? q : (q?.items || []);
-      const curIdx = store.player?.index ?? 0;
-
-      // Se há mais músicas na fila além da atual, navega diretamente pelo índice da fila
-      if (items.length > 1 && curIdx < items.length - 1) {
-        console.log('[Personal OS] Avançando para próxima faixa na fila (índice ' + (curIdx + 1) + ')');
-        store.mediaPlayByIndex?.(curIdx + 1);
-        return;
-      }
-
-      // Se a fila tem apenas 1 música ou chegou ao fim, busca a próxima da biblioteca
-      const current = store.getCurrentSong?.() || (items.length > 0 ? items[curIdx] : null);
-      const loaderData = getInfiniteLoaderData();
-
-      if (loaderData && loaderData.dataMap && loaderData.idToIndexMap && loaderData.dataMap.size > 0) {
-        let currentIdx = current?.id ? loaderData.idToIndexMap.get(current.id) : -1;
-        if (currentIdx === undefined || currentIdx === -1) currentIdx = 0;
-        const nextIdx = (currentIdx + 1) % loaderData.dataMap.size;
-        const nextSong = loaderData.dataMap.get(nextIdx);
-
-        if (nextSong) {
-          console.log('[Personal OS] Avançando para próxima faixa da biblioteca:', nextSong.name);
-          const start = Math.max(0, nextIdx - 10);
-          const end = Math.min(loaderData.dataMap.size, nextIdx + 40);
-          const windowSlice = [];
-          for (let i = start; i < end; i++) {
-            const s = loaderData.dataMap.get(i);
-            if (s) windowSlice.push(s);
-          }
-          const targetIndex = nextIdx - start;
-          store.setQueue(windowSlice.length > 0 ? windowSlice : [nextSong], targetIndex);
-          return;
-        }
-      }
-
-      // Fallback: busca lista de músicas gerais
-      const fallbackSongs = getLibrarySongsFallback();
-      if (fallbackSongs.length > 0) {
-        let currentLibIdx = -1;
-        if (current) {
-          currentLibIdx = fallbackSongs.findIndex(s => s.id === current.id || s.name === current.name);
-        }
-        const nextLibIdx = (currentLibIdx + 1) % fallbackSongs.length;
-        const nextSong = fallbackSongs[nextLibIdx];
-        if (nextSong) {
-          console.log('[Personal OS] Avançando para faixa fallback:', nextSong.name);
-          const start = Math.max(0, nextLibIdx - 10);
-          const end = Math.min(fallbackSongs.length, nextLibIdx + 40);
-          const windowSlice = fallbackSongs.slice(start, end);
-          store.setQueue(windowSlice.length > 0 ? windowSlice : [nextSong], nextLibIdx - start);
-          return;
-        }
-      }
-
-      // Fallback final: se tem músicas na fila, dá loop para o início
-      if (items.length > 1) {
-        store.mediaPlayByIndex?.(0);
-      } else {
-        const audio = document.querySelector("audio");
-        if (audio) audio.currentTime = 0;
-        store.mediaSeekToTimestamp?.(0);
-      }
-    }
-
-    function smartRewindTrack() {
-      const store = (window.__FEISHIN_PLAYER_STORE__ && window.__FEISHIN_PLAYER_STORE__.getState)
-        ? window.__FEISHIN_PLAYER_STORE__.getState()
-        : null;
-      if (!store) return;
-
-      const q = store.getQueue();
-      const items = Array.isArray(q) ? q : (q?.items || []);
-      const curIdx = store.player?.index ?? 0;
-
-      const audio = document.querySelector("audio");
-      const currentTime = audio ? audio.currentTime : 0;
-      const now = Date.now();
-      const isDoubleClick = (now - lastPrevClickTime < 1200);
-      lastPrevClickTime = now;
-
-      // Se a música já tocou mais de 3 segundos e não é clique duplo rápido, volta para o início dela (padrão universal)
-      if (!isDoubleClick && currentTime > 3) {
-        console.log('[Personal OS] Retrocedendo para 0:00 da faixa atual');
-        if (audio) audio.currentTime = 0;
-        store.mediaSeekToTimestamp?.(0);
-        return;
-      }
-
-      // Se é clique duplo ou início da faixa (<= 3s) e há faixa anterior na fila
-      if (items.length > 1 && curIdx > 0) {
-        console.log('[Personal OS] Retrocedendo para faixa anterior na fila (índice ' + (curIdx - 1) + ')');
-        store.mediaPlayByIndex?.(curIdx - 1);
-        return;
-      }
-
-      // Se está na 1ª faixa da fila ou fila unitária, busca anterior da biblioteca
-      const current = store.getCurrentSong?.() || (items.length > 0 ? items[curIdx] : null);
-      const loaderData = getInfiniteLoaderData();
-
-      if (loaderData && loaderData.dataMap && loaderData.idToIndexMap && loaderData.dataMap.size > 0) {
-        let currentIdx = current?.id ? loaderData.idToIndexMap.get(current.id) : -1;
-        if (currentIdx === undefined || currentIdx <= 0) currentIdx = loaderData.dataMap.size;
-        const prevIdx = currentIdx - 1;
-        const prevSong = loaderData.dataMap.get(prevIdx);
-
-        if (prevSong) {
-          console.log('[Personal OS] Retrocedendo para faixa anterior da biblioteca:', prevSong.name);
-          const start = Math.max(0, prevIdx - 20);
-          const end = Math.min(loaderData.dataMap.size, prevIdx + 30);
-          const windowSlice = [];
-          for (let i = start; i < end; i++) {
-            const s = loaderData.dataMap.get(i);
-            if (s) windowSlice.push(s);
-          }
-          const targetIndex = prevIdx - start;
-          store.setQueue(windowSlice.length > 0 ? windowSlice : [prevSong], targetIndex);
-          return;
-        }
-      }
-
-      // Fallback biblioteca geral
-      const fallbackSongs = getLibrarySongsFallback();
-      if (fallbackSongs.length > 0) {
-        let currentLibIdx = -1;
-        if (current) {
-          currentLibIdx = fallbackSongs.findIndex(s => s.id === current.id || s.name === current.name);
-        }
-        const prevLibIdx = currentLibIdx <= 0 ? fallbackSongs.length - 1 : currentLibIdx - 1;
-        const prevSong = fallbackSongs[prevLibIdx];
-        if (prevSong) {
-          console.log('[Personal OS] Retrocedendo para faixa fallback anterior:', prevSong.name);
-          const start = Math.max(0, prevLibIdx - 20);
-          const end = Math.min(fallbackSongs.length, prevLibIdx + 30);
-          const windowSlice = fallbackSongs.slice(start, end);
-          store.setQueue(windowSlice.length > 0 ? windowSlice : [prevSong], prevLibIdx - start);
-          return;
-        }
-      }
-
-      // Fallback final
-      if (audio) audio.currentTime = 0;
-      store.mediaSeekToTimestamp?.(0);
-    }
-
-    // Exposição global para uso em atalhos e mini player
-    window.__SMART_ADVANCE_TRACK__ = smartAdvanceTrack;
-    window.__SMART_REWIND_TRACK__ = smartRewindTrack;
-
-    // Interceptação de clique nos botões da barra e player
-    window.addEventListener('click', (e) => {
-      const btn = e.target.closest('button');
-      if (!btn) return;
-
-      // Verifica se é o botão de avançar (mediaNext: polygon "5 4 15 12" ou polygon com 5,4)
-      const isNextBtn = !!btn.querySelector('polygon[points*="5 4 15 12"], polygon[points*="5,4 15,12"]') || 
-                        btn.getAttribute('title')?.toLowerCase().includes('próxim') ||
-                        btn.getAttribute('aria-label')?.toLowerCase().includes('próxim') ||
-                        btn.getAttribute('title')?.toLowerCase().includes('next');
-
-      // Verifica se é o botão de retroceder (mediaPrevious: polygon "19 20 9 12" ou polygon com 19,20)
-      const isPrevBtn = !!btn.querySelector('polygon[points*="19 20 9 12"], polygon[points*="19,20 9,12"]') || 
-                        btn.getAttribute('title')?.toLowerCase().includes('anterior') ||
-                        btn.getAttribute('aria-label')?.toLowerCase().includes('anterior') ||
-                        btn.getAttribute('title')?.toLowerCase().includes('previous');
-
-      if (isNextBtn) {
-        e.preventDefault();
-        e.stopPropagation();
-        smartAdvanceTrack();
-      } else if (isPrevBtn) {
-        e.preventDefault();
-        e.stopPropagation();
-        smartRewindTrack();
-      }
-    }, true);
-
-    // Atalhos Globais de Teclado
-    window.addEventListener('keydown', (e) => {
-      if (['INPUT', 'TEXTAREA'].includes(document.activeElement?.tagName)) return;
-
-      // Shift + Seta Direita -> Próxima Faixa
-      if (e.shiftKey && e.key === 'ArrowRight') {
-        e.preventDefault();
-        smartAdvanceTrack();
-      }
-      // Shift + Seta Esquerda -> Faixa Anterior
-      else if (e.shiftKey && e.key === 'ArrowLeft') {
-        e.preventDefault();
-        smartRewindTrack();
-      }
-      // Seta Direita -> Avançar 5s na faixa
-      else if (!e.shiftKey && !e.metaKey && !e.ctrlKey && !e.altKey && e.key === 'ArrowRight') {
-        e.preventDefault();
-        const store = (window.__FEISHIN_PLAYER_STORE__ && window.__FEISHIN_PLAYER_STORE__.getState) ? window.__FEISHIN_PLAYER_STORE__.getState() : null;
-        store?.mediaSkipForward?.(5);
-      }
-      // Seta Esquerda -> Retroceder 5s na faixa
-      else if (!e.shiftKey && !e.metaKey && !e.ctrlKey && !e.altKey && e.key === 'ArrowLeft') {
-        e.preventDefault();
-        const store = (window.__FEISHIN_PLAYER_STORE__ && window.__FEISHIN_PLAYER_STORE__.getState) ? window.__FEISHIN_PLAYER_STORE__.getState() : null;
-        store?.mediaSkipBackward?.(5);
-      }
-    });
   }
 
   if (document.readyState === 'loading') {
