@@ -50,6 +50,10 @@ export const MobilePlayerbar = () => {
 
     const handleToggleFullScreenPlayer = (e?: KeyboardEvent | MouseEvent<HTMLDivElement>) => {
         e?.stopPropagation();
+        if (typeof (window as any).FeishinTrackPage?.open === 'function') {
+            (window as any).FeishinTrackPage.open();
+            return;
+        }
         // Set active tab to player when opening fullscreen player
         setStore({ activeTab: 'player' });
         setFullScreenPlayerStore({ expanded: !isFullScreenPlayerExpanded });
@@ -72,7 +76,10 @@ export const MobilePlayerbar = () => {
     const stopPropagation = (e?: MouseEvent) => e?.stopPropagation();
 
     return (
-        <div className={clsx(styles.container, PlaybackSelectors.mediaPlayer)}>
+        <div
+            className={clsx(styles.container, PlaybackSelectors.mediaPlayer)}
+            onClick={handleToggleFullScreenPlayer}
+        >
             <div className={styles.contentWrapper}>
                 <LayoutGroup>
                     <AnimatePresence initial={false} mode="popLayout">
@@ -129,18 +136,14 @@ export const MobilePlayerbar = () => {
                             />
                         ) : (
                             <>
-                                <div className={styles.lineItem} onClick={stopPropagation}>
+                                <div className={styles.lineItem} onClick={handleToggleFullScreenPlayer}>
                                     <Group align="center" gap="xs" wrap="nowrap">
                                         <Text
                                             className={PlaybackSelectors.songTitle}
-                                            component={Link}
                                             fw={500}
-                                            isLink
-                                            onClick={handleToggleFullScreenPlayer}
                                             onContextMenu={handleToggleContextMenu}
                                             overflow="hidden"
                                             size="sm"
-                                            to={AppRoute.NOW_PLAYING}
                                             truncate
                                         >
                                             {title || '—'}
@@ -166,28 +169,16 @@ export const MobilePlayerbar = () => {
                                         styles.secondary,
                                         PlaybackSelectors.songArtist,
                                     )}
-                                    onClick={stopPropagation}
+                                    onClick={handleToggleFullScreenPlayer}
                                 >
                                     {artists?.map((artist, index) => (
                                         <React.Fragment key={`bar-${artist.id}`}>
                                             {index > 0 && <Separator />}
                                             <Text
-                                                component={artist.id ? Link : undefined}
                                                 fw={500}
-                                                isLink={artist.id !== ''}
-                                                onClick={handleToggleFullScreenPlayer}
                                                 overflow="hidden"
                                                 size="xs"
-                                                to={
-                                                    artist.id
-                                                        ? generatePath(
-                                                              AppRoute.LIBRARY_ALBUM_ARTISTS_DETAIL,
-                                                              {
-                                                                  albumArtistId: artist.id,
-                                                              },
-                                                          )
-                                                        : undefined
-                                                }
+                                                truncate
                                             >
                                                 {artist.name || '—'}
                                             </Text>
@@ -200,22 +191,13 @@ export const MobilePlayerbar = () => {
                                         styles.secondary,
                                         PlaybackSelectors.songAlbum,
                                     )}
-                                    onClick={stopPropagation}
+                                    onClick={handleToggleFullScreenPlayer}
                                 >
                                     <Text
-                                        component={Link}
                                         fw={500}
-                                        isLink
-                                        onClick={handleToggleFullScreenPlayer}
                                         overflow="hidden"
                                         size="xs"
-                                        to={
-                                            currentSong?.albumId
-                                                ? generatePath(AppRoute.LIBRARY_ALBUMS_DETAIL, {
-                                                      albumId: currentSong.albumId,
-                                                  })
-                                                : ''
-                                        }
+                                        truncate
                                     >
                                         {currentSong?.album || '—'}
                                     </Text>

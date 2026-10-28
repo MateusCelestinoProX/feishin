@@ -442,11 +442,32 @@ thead {
     overflow: hidden !important;
     display: flex !important;
     align-items: center !important;
+    cursor: pointer !important;
+    -webkit-tap-highlight-color: transparent !important;
     transition: transform 0.2s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.2s ease !important;
 }
 
 #player-bar:active {
     transform: scale(0.985) !important;
+}
+
+/* Evitar navegação acidental por links dentro da barra flutuante */
+#player-bar a,
+.fs-mobile-playerbar-module-container a,
+.fs-mobile-playerbar-module-line-item a {
+    pointer-events: none !important;
+    text-decoration: none !important;
+    color: inherit !important;
+}
+
+/* Preservar interatividade plena apenas nos controles de playback */
+#player-bar button,
+#player-bar [role="button"],
+#player-bar input,
+.fs-mobile-playerbar-module-controls-wrapper button,
+.fs-mobile-playerbar-module-controls-wrapper [role="button"],
+.feishin-kill-btn {
+    pointer-events: auto !important;
 }
 
 /* Conteúdo interno do MobilePlayerbar nativo */
@@ -1619,4 +1640,66 @@ thead {
     color: rgba(255, 255, 255, 0.8) !important;
     cursor: pointer !important;
     margin-top: 6px !important;
+}
+
+/* 11. ADAPTAÇÃO RESPONSIVA PARA DISPOSITIVOS EM PAISAGEM / TABLETS */
+@media (orientation: landscape), (min-aspect-ratio: 1.2) {
+    .feishin-tp-safe-area {
+        display: grid !important;
+        grid-template-columns: 1fr 1.2fr !important;
+        grid-template-rows: 48px 1fr !important;
+        grid-template-areas:
+            "header header"
+            "cover controls" !important;
+        align-items: center !important;
+        gap: 12px 36px !important;
+        padding-left: max(var(--sal, 0px), 32px) !important;
+        padding-right: max(var(--sar, 0px), 32px) !important;
+    }
+
+    .feishin-tp-header {
+        grid-area: header !important;
+    }
+
+    .feishin-tp-art-section {
+        grid-area: cover !important;
+        justify-content: center !important;
+        padding: 0 !important;
+    }
+
+    .feishin-tp-art-card {
+        width: min(40vw, 52vh, 320px) !important;
+        height: min(40vw, 52vh, 320px) !important;
+    }
+
+    .feishin-tp-landscape-right {
+        grid-area: controls !important;
+        display: flex !important;
+        flex-direction: column !important;
+        justify-content: center !important;
+        gap: 10px !important;
+        width: 100% !important;
+        max-width: 520px !important;
+        margin: 0 auto !important;
+    }
+
+    .feishin-tp-info-section {
+        align-items: flex-start !important;
+        text-align: left !important;
+        padding: 0 4px !important;
+    }
+
+    .feishin-tp-quick-row {
+        justify-content: flex-start !important;
+        gap: 24px !important;
+        padding: 4px 4px !important;
+    }
+
+    .feishin-tp-progress-section {
+        padding: 4px 4px !important;
+    }
+
+    .feishin-tp-controls-row {
+        padding: 6px 4px !important;
+    }
 }

@@ -3282,9 +3282,9 @@
     "semantic_hash": ""
   },
   "src/renderer/features/player/components/mobile-playerbar.tsx": {
-    "mtime": 1793135336.0,
-    "seen": 1793135544.234448,
-    "ast_hash": "38d6f5a9b7e475cb2cb934cddfbc191a",
+    "mtime": 1793208786.2910519,
+    "seen": 1793210343.918953,
+    "ast_hash": "4e64f5182ccccf932f3c97065ebd39e6",
     "semantic_hash": ""
   },
   "src/renderer/features/player/components/player-button.tsx": {
@@ -7416,9 +7416,9 @@
     "semantic_hash": ""
   },
   "customizations/assets/feishin-mobile-enhancer.js": {
-    "mtime": 1793204674.699198,
-    "seen": 1793205371.4426398,
-    "ast_hash": "ff074d58a39895e8c152de75a5d62dcb",
+    "mtime": 1793209833.3284616,
+    "seen": 1793210343.918445,
+    "ast_hash": "d71a34885eb6e060ce2f3020ac383c94",
     "semantic_hash": ""
   },
   "customizations/assets/index-C3w9ueFE.js": {
@@ -7428,9 +7428,9 @@
     "semantic_hash": ""
   },
   "src/renderer/assets/custom/feishin-mobile-enhancer.js": {
-    "mtime": 1793203482.416116,
-    "seen": 1793205371.442993,
-    "ast_hash": "49c0fe61388c38d1f77a1a6aa82e8fbf",
+    "mtime": 1793209833.3306682,
+    "seen": 1793210343.9186418,
+    "ast_hash": "d71a34885eb6e060ce2f3020ac383c94",
     "semantic_hash": ""
   }
 }
