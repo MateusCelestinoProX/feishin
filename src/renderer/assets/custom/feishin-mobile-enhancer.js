@@ -840,6 +840,22 @@
             const tp = document.getElementById('feishin-track-page');
             if (!tp) return;
 
+            window.__PAUSE_WEBGL_SHADERS__ = false;
+            window.__MODAL_OPEN_PAUSE__ = false;
+            window.__FORCE_SHADER_RUNNING__ = true;
+            document.body.classList.add('feishin-tp-open');
+
+            // Garante que o WebGL Shader esteja renderizando no container de fundo
+            const bgContainer = document.getElementById('bg-webgl-container');
+            const active = localStorage.getItem('feishin_active_shader') || 'plasmawave';
+            if (bgContainer && !bgContainer.querySelector('canvas')) {
+                if (typeof window.renderWebGLBackground === 'function') {
+                    window.renderWebGLBackground(active);
+                } else if (typeof window.setWebGLBackground === 'function') {
+                    window.setWebGLBackground(active);
+                }
+            }
+
             this.sync();
             tp.classList.remove('feishin-tp-hidden');
             tp.style.transform = 'translateY(0%)';
@@ -850,6 +866,9 @@
         close: function () {
             const tp = document.getElementById('feishin-track-page');
             if (!tp) return;
+
+            window.__FORCE_SHADER_RUNNING__ = false;
+            document.body.classList.remove('feishin-tp-open');
 
             document.getElementById('feishin-tp-lyrics-sheet')?.classList.remove('open');
             document.getElementById('feishin-tp-queue-sheet')?.classList.remove('open');
@@ -968,7 +987,7 @@
                       <svg id="feishin-tp-play-icon" viewBox="0 0 24 24" fill="currentColor">
                         <polygon points="5 3 19 12 5 21 5 3"/>
                       </svg>
-                      <svg id="feishin-tp-pause-icon" class="feishin-tp-hidden" viewBox="0 0 24 24" fill="currentColor">
+                      <svg id="feishin-tp-pause-icon" class="feishin-tp-hidden" style="display: none !important;" viewBox="0 0 24 24" fill="currentColor">
                         <rect x="6" y="4" width="4" height="16" rx="1"/><rect x="14" y="4" width="4" height="16" rx="1"/>
                       </svg>
                     </button>
@@ -1051,7 +1070,25 @@
             document.getElementById('feishin-tp-btn-play')?.addEventListener('click', () => {
                 if (window.AndroidBridge?.hapticFeedback) window.AndroidBridge.hapticFeedback(0);
                 window.FeishinNative.togglePlay();
-                setTimeout(() => this.sync(), 80);
+                // Alternância visual instantânea de alta resposta
+                const playIcon = document.getElementById('feishin-tp-play-icon');
+                const pauseIcon = document.getElementById('feishin-tp-pause-icon');
+                if (playIcon && pauseIcon) {
+                    const isVisiblePlay = playIcon.style.display !== 'none' && !playIcon.classList.contains('feishin-tp-hidden');
+                    if (isVisiblePlay) {
+                        playIcon.classList.add('feishin-tp-hidden');
+                        playIcon.style.display = 'none';
+                        pauseIcon.classList.remove('feishin-tp-hidden');
+                        pauseIcon.style.display = 'block';
+                    } else {
+                        playIcon.classList.remove('feishin-tp-hidden');
+                        playIcon.style.display = 'block';
+                        pauseIcon.classList.add('feishin-tp-hidden');
+                        pauseIcon.style.display = 'none';
+                    }
+                }
+                setTimeout(() => this.sync(), 60);
+                setTimeout(() => this.sync(), 200);
             });
 
             document.getElementById('feishin-tp-btn-next')?.addEventListener('click', () => {
@@ -1253,11 +1290,15 @@
             if (playIcon && pauseIcon) {
                 if (isPlaying) {
                     playIcon.classList.add('feishin-tp-hidden');
+                    playIcon.style.display = 'none';
                     pauseIcon.classList.remove('feishin-tp-hidden');
+                    pauseIcon.style.display = 'block';
                     auraEl?.classList.remove('paused');
                 } else {
                     playIcon.classList.remove('feishin-tp-hidden');
+                    playIcon.style.display = 'block';
                     pauseIcon.classList.add('feishin-tp-hidden');
+                    pauseIcon.style.display = 'none';
                     auraEl?.classList.add('paused');
                 }
             }

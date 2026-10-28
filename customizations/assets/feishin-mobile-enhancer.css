@@ -35,6 +35,21 @@ html, body, #root {
     pointer-events: none !important;
 }
 
+/* Universal Hidden Class for Feishin Track Page and Components */
+.feishin-tp-hidden,
+svg.feishin-tp-hidden,
+button.feishin-tp-hidden,
+div.feishin-tp-hidden {
+    display: none !important;
+}
+
+/* Quando o Player Fullscreen estiver aberto, oculta #root para permitir visão cristalina do WebGL Shader */
+body.feishin-tp-open #root {
+    opacity: 0 !important;
+    pointer-events: none !important;
+    transition: opacity 0.25s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
 /* 2. Shaders WebGL no Fundo em Fullscreen */
 #bg-webgl-container {
     position: fixed !important;
@@ -53,8 +68,8 @@ html, body, #root {
     left: 0 !important;
     width: 100vw !important;
     height: 100dvh !important;
-    background-color: rgba(0, 0, 0, var(--personal-os-shader-dim, 0.25)) !important;
-    background-image: radial-gradient(circle at center, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, calc(var(--personal-os-shader-dim, 0.25) * 0.85)) 100%) !important;
+    background-color: rgba(0, 0, 0, var(--personal-os-shader-dim, 0.12)) !important;
+    background-image: radial-gradient(circle at center, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, calc(var(--personal-os-shader-dim, 0.12) * 0.85)) 100%) !important;
     z-index: -1 !important;
     pointer-events: none !important;
     transition: background-color 0.12s ease !important;
@@ -66,7 +81,7 @@ html, body, #root {
     left: 0 !important;
     width: 100vw !important;
     height: 100dvh !important;
-    box-shadow: inset 0 0 120px rgba(0, 0, 0, 0.6) !important;
+    box-shadow: inset 0 0 80px rgba(0, 0, 0, 0.35) !important;
     z-index: -1 !important;
     pointer-events: none !important;
 }
@@ -434,12 +449,13 @@ thead {
     left: 10px !important;
     right: 10px !important;
     height: 64px !important;
-    background: rgba(14, 10, 26, 0.88) !important;
-    backdrop-filter: blur(var(--personal-os-glass-blur, 28px)) saturate(190%) !important;
-    -webkit-backdrop-filter: blur(var(--personal-os-glass-blur, 28px)) saturate(190%) !important;
+    background: rgba(14, 10, 26, 0.48) !important;
+    backdrop-filter: blur(var(--personal-os-glass-blur, 28px)) saturate(190%) contrast(105%) !important;
+    -webkit-backdrop-filter: blur(var(--personal-os-glass-blur, 28px)) saturate(190%) contrast(105%) !important;
     border-radius: 18px !important;
-    border: 1px solid rgba(255, 255, 255, 0.12) !important;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.65), 0 0 18px rgba(139, 92, 246, 0.22) !important;
+    border: 1px solid rgba(255, 255, 255, 0.18) !important;
+    border-top: 1px solid rgba(255, 255, 255, 0.42) !important;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45), inset 0 1px 1px rgba(255, 255, 255, 0.3), 0 0 18px rgba(139, 92, 246, 0.22) !important;
     z-index: 180 !important;
     overflow: hidden !important;
     display: flex !important;
@@ -556,10 +572,11 @@ thead {
     right: 0 !important;
     height: calc(56px + var(--sab)) !important;
     padding-bottom: var(--sab) !important;
-    background: rgba(8, 6, 16, 0.94) !important;
-    backdrop-filter: blur(var(--personal-os-glass-blur, 32px)) saturate(200%) !important;
-    -webkit-backdrop-filter: blur(var(--personal-os-glass-blur, 32px)) saturate(200%) !important;
-    border-top: 1px solid rgba(255, 255, 255, 0.09) !important;
+    background: rgba(10, 7, 20, 0.50) !important;
+    backdrop-filter: blur(var(--personal-os-glass-blur, 32px)) saturate(200%) contrast(105%) !important;
+    -webkit-backdrop-filter: blur(var(--personal-os-glass-blur, 32px)) saturate(200%) contrast(105%) !important;
+    border-top: 1px solid rgba(255, 255, 255, 0.22) !important;
+    box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.25) !important;
     z-index: 190 !important;
     display: flex !important;
     align-items: center !important;
@@ -944,6 +961,9 @@ thead {
     visibility: hidden !important;
 }
 
+/* =========================================================================
+   8. PÁGINA DA MÚSICA SAMSUNG MUSIC LIQUID GLASS (FeishinTrackPage)
+   ========================================================================= */
 #feishin-track-page {
     position: fixed !important;
     top: 0 !important;
@@ -956,9 +976,9 @@ thead {
     display: flex !important;
     flex-direction: column !important;
     overflow: hidden !important;
-    background: rgba(12, 10, 24, 0.78) !important;
-    backdrop-filter: blur(calc(var(--personal-os-glass-blur, 28px) * 1.5)) saturate(210%) !important;
-    -webkit-backdrop-filter: blur(calc(var(--personal-os-glass-blur, 28px) * 1.5)) saturate(210%) !important;
+    background: rgba(10, 6, 20, 0.28) !important;
+    backdrop-filter: blur(20px) saturate(190%) contrast(105%) !important;
+    -webkit-backdrop-filter: blur(20px) saturate(190%) contrast(105%) !important;
     transition: transform 0.38s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.28s ease !important;
     will-change: transform, opacity !important;
     box-sizing: border-box !important;
@@ -976,24 +996,31 @@ thead {
 /* Aura fluida de luz dinâmica refletindo a capa do álbum */
 .feishin-tp-ambient-aura {
     position: absolute !important;
-    top: 12% !important;
+    top: 8% !important;
     left: 50% !important;
     transform: translateX(-50%) !important;
-    width: min(88vw, 360px) !important;
-    height: min(88vw, 360px) !important;
+    width: min(92vw, 420px) !important;
+    height: min(92vw, 420px) !important;
     border-radius: 50% !important;
-    background: radial-gradient(circle, var(--tp-glow-color, rgba(168, 85, 247, 0.65)) 0%, rgba(99, 102, 241, 0.35) 50%, transparent 80%) !important;
-    filter: blur(80px) !important;
-    opacity: 0.75 !important;
+    background: radial-gradient(circle, var(--tp-glow-color, rgba(168, 85, 247, 0.55)) 0%, rgba(99, 102, 241, 0.25) 50%, transparent 80%) !important;
+    background-size: cover !important;
+    background-position: center !important;
+    filter: blur(85px) !important;
+    opacity: 0.65 !important;
     pointer-events: none !important;
     z-index: 1 !important;
-    transition: background 0.8s ease, transform 0.6s ease !important;
+    transition: background 0.8s ease, transform 0.6s ease, opacity 0.4s ease !important;
+}
+
+.feishin-tp-ambient-aura.paused {
+    opacity: 0.35 !important;
+    filter: blur(95px) !important;
 }
 
 .feishin-tp-glass-backdrop {
     position: absolute !important;
     inset: 0 !important;
-    background: radial-gradient(circle at 50% 25%, transparent 20%, rgba(6, 4, 14, 0.82) 100%) !important;
+    background: radial-gradient(circle at 50% 25%, rgba(255, 255, 255, 0.05) 0%, rgba(10, 6, 22, 0.32) 100%) !important;
     pointer-events: none !important;
     z-index: 2 !important;
 }
@@ -1006,22 +1033,38 @@ thead {
     flex-direction: column !important;
     height: 100% !important;
     width: 100% !important;
-    padding-top: max(var(--sat, 0px), 14px) !important;
-    padding-bottom: max(var(--sab, 0px), 24px) !important;
-    padding-left: 20px !important;
-    padding-right: 20px !important;
+    padding-top: max(var(--sat, 0px), 8px) !important;
+    padding-bottom: max(var(--sab, 0px), 18px) !important;
+    padding-left: 16px !important;
+    padding-right: 16px !important;
     box-sizing: border-box !important;
     justify-content: space-between !important;
 }
 
-/* Header Topo Samsung Music (Chevron down à esq + Timer, Output, EQ, 3-dots à dir) */
+/* Header Topo Samsung Music (Chevron down à esq + Título centro + Timer, Info, 3-dots à dir) */
 .feishin-tp-header {
     display: flex !important;
     align-items: center !important;
     justify-content: space-between !important;
     width: 100% !important;
-    height: 48px !important;
+    height: 46px !important;
     flex-shrink: 0 !important;
+}
+
+.feishin-tp-header-center {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    pointer-events: none !important;
+}
+
+.feishin-tp-header-subtitle {
+    font-size: 11px !important;
+    font-weight: 700 !important;
+    letter-spacing: 2px !important;
+    text-transform: uppercase !important;
+    color: rgba(255, 255, 255, 0.6) !important;
 }
 
 .feishin-tp-header-right {
@@ -1031,11 +1074,11 @@ thead {
 }
 
 .feishin-tp-icon-btn {
-    background: rgba(255, 255, 255, 0.06) !important;
-    border: 1px solid rgba(255, 255, 255, 0.12) !important;
+    background: rgba(255, 255, 255, 0.08) !important;
+    border: 1px solid rgba(255, 255, 255, 0.14) !important;
     border-radius: 50% !important;
-    width: 42px !important;
-    height: 42px !important;
+    width: 38px !important;
+    height: 38px !important;
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
@@ -1044,32 +1087,29 @@ thead {
     transition: transform 0.12s ease, background 0.15s ease, border-color 0.15s ease !important;
     padding: 0 !important;
     outline: none !important;
+    position: relative !important;
 }
 
 .feishin-tp-icon-btn:active {
     transform: scale(0.92) !important;
-    background: rgba(255, 255, 255, 0.16) !important;
+    background: rgba(255, 255, 255, 0.18) !important;
 }
 
 .feishin-tp-icon-btn svg {
-    width: 22px !important;
-    height: 22px !important;
+    width: 20px !important;
+    height: 20px !important;
     pointer-events: none !important;
-}
-
-.feishin-tp-more-btn {
-    position: relative !important;
 }
 
 .feishin-tp-dot-badge {
     position: absolute !important;
-    top: 6px !important;
-    right: 6px !important;
+    top: 5px !important;
+    right: 5px !important;
     width: 7px !important;
     height: 7px !important;
     border-radius: 50% !important;
-    background: #F97316 !important;
-    box-shadow: 0 0 6px #F97316 !important;
+    background: #A855F7 !important;
+    box-shadow: 0 0 8px #A855F7 !important;
 }
 
 /* Capa do Álbum com formato quadrado, cantos arredondados e Pill "Letras" */
@@ -1079,59 +1119,70 @@ thead {
     justify-content: center !important;
     flex: 1 1 auto !important;
     min-height: 0 !important;
-    padding: 8px 0 !important;
+    padding: 4px 0 !important;
 }
 
 .feishin-tp-art-card {
     position: relative !important;
-    width: min(84vw, 360px, 44vh) !important;
-    height: min(84vw, 360px, 44vh) !important;
+    width: min(78vw, 320px, 38vh) !important;
+    height: min(78vw, 320px, 38vh) !important;
     border-radius: 26px !important;
     overflow: hidden !important;
-    border: 1px solid rgba(255, 255, 255, 0.20) !important;
-    border-top: 1px solid rgba(255, 255, 255, 0.40) !important;
-    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.70), 0 0 32px var(--tp-glow-color, rgba(168, 85, 247, 0.35)) !important;
-    background: rgba(20, 16, 32, 0.5) !important;
+    border: 1px solid rgba(255, 255, 255, 0.22) !important;
+    border-top: 1px solid rgba(255, 255, 255, 0.55) !important;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.55), inset 0 1px 1px rgba(255, 255, 255, 0.35), 0 0 32px var(--tp-glow-color, rgba(168, 85, 247, 0.35)) !important;
+    background: rgba(255, 255, 255, 0.04) !important;
 }
 
 .feishin-tp-cover-img {
     width: 100% !important;
     height: 100% !important;
     object-fit: cover !important;
-    display: block !important;
+    display: none;
 }
 
 .feishin-tp-cover-fallback {
     width: 100% !important;
     height: 100% !important;
-    display: none !important;
+    display: flex !important;
     align-items: center !important;
     justify-content: center !important;
-    background: radial-gradient(circle, #2E1065 0%, #0F0A1C 100%) !important;
-    color: rgba(255, 255, 255, 0.4) !important;
+    background: radial-gradient(circle, rgba(36, 20, 66, 0.5) 0%, rgba(14, 9, 27, 0.6) 100%) !important;
+    backdrop-filter: blur(20px) !important;
+    -webkit-backdrop-filter: blur(20px) !important;
+    color: rgba(255, 255, 255, 0.5) !important;
 }
 
-.feishin-tp-cover-fallback svg {
+.feishin-tp-vinyl-icon {
     width: 80px !important;
     height: 80px !important;
+    color: rgba(255, 255, 255, 0.35) !important;
+    animation: feishinVinylSpin 16s linear infinite !important;
 }
 
-/* Pill "Letras" flutuante dentro da capa (canto inferior esquerdo) */
+@keyframes feishinVinylSpin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+/* Pill "Letras" flutuante dentro da capa */
 .feishin-tp-lyrics-pill {
     position: absolute !important;
-    bottom: 14px !important;
-    left: 14px !important;
-    padding: 6px 16px !important;
+    bottom: 12px !important;
+    left: 12px !important;
+    padding: 6px 14px !important;
     border-radius: 9999px !important;
-    background: rgba(15, 11, 26, 0.62) !important;
-    backdrop-filter: blur(16px) saturate(180%) !important;
-    -webkit-backdrop-filter: blur(16px) saturate(180%) !important;
-    border: 1px solid rgba(255, 255, 255, 0.22) !important;
-    border-top: 1px solid rgba(255, 255, 255, 0.38) !important;
+    background: rgba(15, 11, 26, 0.45) !important;
+    backdrop-filter: blur(20px) saturate(200%) !important;
+    -webkit-backdrop-filter: blur(20px) saturate(200%) !important;
+    border: 1px solid rgba(255, 255, 255, 0.28) !important;
+    border-top: 1px solid rgba(255, 255, 255, 0.55) !important;
     color: #FFFFFF !important;
-    font-size: 13px !important;
+    font-size: 12px !important;
     font-weight: 600 !important;
-    letter-spacing: 0.3px !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 6px !important;
     box-shadow: 0 6px 18px rgba(0, 0, 0, 0.5) !important;
     cursor: pointer !important;
     outline: none !important;
@@ -1144,47 +1195,70 @@ thead {
     background: rgba(168, 85, 247, 0.5) !important;
 }
 
-/* Seção de Informações da Faixa (Título e Artista) */
+/* Seção de Informações da Faixa */
 .feishin-tp-info-section {
     display: flex !important;
     flex-direction: column !important;
     align-items: center !important;
     text-align: center !important;
-    padding: 4px 16px 0 16px !important;
+    padding: 4px 12px 0 12px !important;
     flex-shrink: 0 !important;
     width: 100% !important;
     box-sizing: border-box !important;
 }
 
 .feishin-tp-title {
-    font-size: 20px !important;
+    font-size: 18.5px !important;
     font-weight: 700 !important;
     color: #FFFFFF !important;
-    line-height: 1.25 !important;
+    line-height: 1.3 !important;
     width: 100% !important;
-    white-space: nowrap !important;
+    max-height: 48px !important;
     overflow: hidden !important;
     text-overflow: ellipsis !important;
+    display: -webkit-box !important;
+    -webkit-line-clamp: 2 !important;
+    -webkit-box-orient: vertical !important;
     letter-spacing: -0.2px !important;
 }
 
 .feishin-tp-artist {
-    font-size: 14.5px !important;
+    font-size: 13.5px !important;
     font-weight: 500 !important;
     color: rgba(255, 255, 255, 0.65) !important;
-    margin-top: 5px !important;
+    margin-top: 3px !important;
     width: 100% !important;
     white-space: nowrap !important;
     overflow: hidden !important;
     text-overflow: ellipsis !important;
 }
 
-/* Linha de Ações Rápidas (Fila à esq, Favorito ao centro, Mais à dir) */
+.feishin-tp-badge-wrapper {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    margin-top: 5px !important;
+}
+
+.feishin-tp-quality-badge {
+    font-size: 10.5px !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.6px !important;
+    color: rgba(255, 255, 255, 0.82) !important;
+    background: rgba(255, 255, 255, 0.08) !important;
+    border: 1px solid rgba(255, 255, 255, 0.16) !important;
+    border-radius: 9999px !important;
+    padding: 2px 10px !important;
+    text-transform: uppercase !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2) !important;
+}
+
+/* Linha de Ações Rápidas (Fila, Favorito, Playlist +, Letras, Info) */
 .feishin-tp-quick-row {
     display: flex !important;
     align-items: center !important;
-    justify-content: space-between !important;
-    padding: 10px 32px 4px 32px !important;
+    justify-content: space-around !important;
+    padding: 6px 12px 2px 12px !important;
     width: 100% !important;
     box-sizing: border-box !important;
     flex-shrink: 0 !important;
@@ -1193,12 +1267,12 @@ thead {
 .feishin-tp-action-btn {
     background: transparent !important;
     border: none !important;
-    width: 48px !important;
-    height: 48px !important;
+    width: 42px !important;
+    height: 42px !important;
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
-    color: rgba(255, 255, 255, 0.85) !important;
+    color: rgba(255, 255, 255, 0.82) !important;
     cursor: pointer !important;
     outline: none !important;
     transition: transform 0.12s ease, color 0.15s ease !important;
@@ -1210,8 +1284,8 @@ thead {
 }
 
 .feishin-tp-action-btn svg {
-    width: 25px !important;
-    height: 25px !important;
+    width: 22px !important;
+    height: 22px !important;
     pointer-events: none !important;
 }
 
@@ -1236,7 +1310,7 @@ thead {
     display: flex !important;
     flex-direction: column !important;
     width: 100% !important;
-    padding: 6px 12px 0 12px !important;
+    padding: 4px 8px 0 8px !important;
     box-sizing: border-box !important;
     flex-shrink: 0 !important;
 }
@@ -1244,7 +1318,7 @@ thead {
 .feishin-tp-slider-container {
     position: relative !important;
     width: 100% !important;
-    height: 24px !important;
+    height: 22px !important;
     display: flex !important;
     align-items: center !important;
     cursor: pointer !important;
@@ -1256,7 +1330,7 @@ thead {
     left: 0 !important;
     right: 0 !important;
     height: 4px !important;
-    background: rgba(255, 255, 255, 0.22) !important;
+    background: rgba(255, 255, 255, 0.20) !important;
     border-radius: 9999px !important;
     pointer-events: none !important;
 }
@@ -1275,12 +1349,12 @@ thead {
 .feishin-tp-slider-thumb {
     position: absolute !important;
     left: 0% !important;
-    width: 14px !important;
-    height: 14px !important;
+    width: 13px !important;
+    height: 13px !important;
     border-radius: 50% !important;
     background: #FFFFFF !important;
     transform: translate(-50%, 0) !important;
-    box-shadow: 0 0 12px rgba(255, 255, 255, 0.9), 0 2px 8px rgba(0, 0, 0, 0.5) !important;
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.9), 0 2px 6px rgba(0, 0, 0, 0.5) !important;
     border: 2px solid #8B5CF6 !important;
     pointer-events: none !important;
     transition: transform 0.08s ease !important;
@@ -1290,25 +1364,24 @@ thead {
     transform: translate(-50%, 0) scale(1.3) !important;
 }
 
-/* Timestamps abaixo da barra (Samsung Music) */
 .feishin-tp-time-row {
     display: flex !important;
     justify-content: space-between !important;
     width: 100% !important;
-    margin-top: 4px !important;
-    font-size: 12.5px !important;
+    margin-top: 3px !important;
+    font-size: 12px !important;
     font-weight: 500 !important;
-    color: rgba(255, 255, 255, 0.68) !important;
+    color: rgba(255, 255, 255, 0.65) !important;
     font-variant-numeric: tabular-nums !important;
 }
 
-/* Controles Principais de Reprodução (Aleatório, Anterior, Play/Pause, Próxima, Repetir) */
+/* Controles Principais de Reprodução: Shuffle, Prev, -10s, Play/Pause, +10s, Next, Repeat */
 .feishin-tp-controls-row {
     display: flex !important;
     align-items: center !important;
     justify-content: space-between !important;
     width: 100% !important;
-    padding: 10px 14px 18px 14px !important;
+    padding: 4px 4px 6px 4px !important;
     box-sizing: border-box !important;
     flex-shrink: 0 !important;
 }
@@ -1316,8 +1389,8 @@ thead {
 .feishin-tp-ctrl-btn {
     background: transparent !important;
     border: none !important;
-    width: 52px !important;
-    height: 52px !important;
+    width: 42px !important;
+    height: 42px !important;
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
@@ -1334,19 +1407,24 @@ thead {
 }
 
 .feishin-tp-ctrl-btn svg {
-    width: 28px !important;
-    height: 28px !important;
+    width: 25px !important;
+    height: 25px !important;
     pointer-events: none !important;
+}
+
+.feishin-tp-skip-btn svg {
+    width: 24px !important;
+    height: 24px !important;
 }
 
 /* Botão Play/Pause circular com destaque vítreo */
 .feishin-tp-play-btn {
-    width: 72px !important;
-    height: 72px !important;
+    width: 68px !important;
+    height: 68px !important;
     border-radius: 50% !important;
     background: rgba(255, 255, 255, 0.95) !important;
-    border: 1px solid rgba(255, 255, 255, 0.4) !important;
-    box-shadow: 0 12px 36px rgba(139, 92, 246, 0.55), 0 0 20px rgba(255, 255, 255, 0.35) !important;
+    border: 1px solid rgba(255, 255, 255, 0.5) !important;
+    box-shadow: 0 10px 28px rgba(0, 0, 0, 0.35), 0 0 24px rgba(168, 85, 247, 0.5), inset 0 1px 1px rgba(255, 255, 255, 0.8) !important;
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
@@ -1355,6 +1433,8 @@ thead {
     outline: none !important;
     transition: transform 0.15s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.2s ease !important;
     padding: 0 !important;
+    flex-shrink: 0 !important;
+    position: relative !important;
 }
 
 .feishin-tp-play-btn:active {
@@ -1368,6 +1448,10 @@ thead {
     pointer-events: none !important;
 }
 
+.feishin-tp-play-btn svg.feishin-tp-hidden {
+    display: none !important;
+}
+
 #feishin-tp-play-icon {
     margin-left: 3px !important;
 }
@@ -1375,7 +1459,7 @@ thead {
 /* Estados ativos de Aleatório e Repetição */
 .feishin-tp-active-dot {
     position: absolute !important;
-    bottom: 5px !important;
+    bottom: 4px !important;
     width: 4px !important;
     height: 4px !important;
     border-radius: 50% !important;
@@ -1413,7 +1497,99 @@ thead {
     opacity: 0.25 !important;
 }
 
-/* Overlays / Sheets para Letras e Fila (Liquid Glass Sheet) */
+/* Barra de Volume Vítrea */
+.feishin-tp-volume-row {
+    display: flex !important;
+    align-items: center !important;
+    gap: 12px !important;
+    width: 100% !important;
+    padding: 2px 8px 4px 8px !important;
+    box-sizing: border-box !important;
+    flex-shrink: 0 !important;
+}
+
+.feishin-tp-vol-btn {
+    background: transparent !important;
+    border: none !important;
+    width: 34px !important;
+    height: 34px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    color: rgba(255, 255, 255, 0.75) !important;
+    cursor: pointer !important;
+    padding: 0 !important;
+    outline: none !important;
+    transition: transform 0.12s ease, color 0.15s ease !important;
+}
+
+.feishin-tp-vol-btn:active {
+    transform: scale(0.9) !important;
+}
+
+.feishin-tp-vol-btn svg {
+    width: 20px !important;
+    height: 20px !important;
+    pointer-events: none !important;
+}
+
+.feishin-tp-vol-slider-box {
+    position: relative !important;
+    flex: 1 1 auto !important;
+    height: 20px !important;
+    display: flex !important;
+    align-items: center !important;
+    cursor: pointer !important;
+    touch-action: none !important;
+}
+
+.feishin-tp-vol-rail {
+    position: absolute !important;
+    left: 0 !important;
+    right: 0 !important;
+    height: 4px !important;
+    background: rgba(255, 255, 255, 0.18) !important;
+    border-radius: 9999px !important;
+    pointer-events: none !important;
+}
+
+.feishin-tp-vol-fill {
+    position: absolute !important;
+    left: 0 !important;
+    height: 4px !important;
+    width: 30% !important;
+    background: linear-gradient(90deg, #A855F7, #6366F1) !important;
+    border-radius: 9999px !important;
+    pointer-events: none !important;
+}
+
+.feishin-tp-vol-thumb {
+    position: absolute !important;
+    left: 30% !important;
+    width: 12px !important;
+    height: 12px !important;
+    border-radius: 50% !important;
+    background: #FFFFFF !important;
+    transform: translate(-50%, 0) !important;
+    box-shadow: 0 0 8px rgba(255, 255, 255, 0.8) !important;
+    pointer-events: none !important;
+    transition: transform 0.08s ease !important;
+}
+
+.feishin-tp-vol-slider-box:active .feishin-tp-vol-thumb {
+    transform: translate(-50%, 0) scale(1.3) !important;
+}
+
+.feishin-tp-vol-pct {
+    font-size: 11.5px !important;
+    font-weight: 600 !important;
+    color: rgba(255, 255, 255, 0.65) !important;
+    min-width: 32px !important;
+    text-align: right !important;
+    font-variant-numeric: tabular-nums !important;
+}
+
+/* Sheets e Modais */
 .feishin-tp-sheet {
     position: absolute !important;
     top: 0 !important;
@@ -1457,12 +1633,21 @@ thead {
     color: #FFFFFF !important;
 }
 
-.feishin-tp-sheet-badge {
-    font-size: 12.5px !important;
-    color: rgba(255, 255, 255, 0.6) !important;
-    background: rgba(255, 255, 255, 0.08) !important;
-    padding: 4px 10px !important;
+.feishin-tp-sheet-actions {
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+}
+
+.feishin-tp-sheet-btn-clear {
+    background: rgba(239, 68, 68, 0.15) !important;
+    border: 1px solid rgba(239, 68, 68, 0.3) !important;
     border-radius: 9999px !important;
+    color: #EF4444 !important;
+    font-size: 12px !important;
+    font-weight: 600 !important;
+    padding: 4px 10px !important;
+    cursor: pointer !important;
 }
 
 .feishin-tp-sheet-content {
@@ -1530,13 +1715,6 @@ thead {
     min-width: 20px !important;
 }
 
-.feishin-tp-q-cover {
-    width: 42px !important;
-    height: 42px !important;
-    border-radius: 10px !important;
-    object-fit: cover !important;
-}
-
 .feishin-tp-q-meta {
     flex: 1 1 auto !important;
     min-width: 0 !important;
@@ -1563,6 +1741,98 @@ thead {
 .feishin-tp-q-duration {
     font-size: 12px !important;
     color: rgba(255, 255, 255, 0.5) !important;
+}
+
+/* Modal Detalhes Técnicos */
+.feishin-tp-details-grid {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 10px !important;
+    padding: 10px 0 !important;
+}
+
+.feishin-tp-detail-box {
+    background: rgba(255, 255, 255, 0.05) !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    border-radius: 14px !important;
+    padding: 10px 12px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 3px !important;
+}
+
+.feishin-tp-detail-box.full {
+    grid-column: 1 / -1 !important;
+}
+
+.feishin-tp-detail-label {
+    font-size: 10.5px !important;
+    font-weight: 700 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.6px !important;
+    color: rgba(255, 255, 255, 0.5) !important;
+}
+
+.feishin-tp-detail-val {
+    font-size: 13px !important;
+    font-weight: 600 !important;
+    color: #FFFFFF !important;
+    word-break: break-all !important;
+}
+
+.feishin-tp-nav-actions {
+    display: flex !important;
+    gap: 10px !important;
+    margin-top: 12px !important;
+}
+
+.feishin-tp-nav-btn {
+    flex: 1 !important;
+    background: rgba(255, 255, 255, 0.08) !important;
+    border: 1px solid rgba(255, 255, 255, 0.14) !important;
+    border-radius: 12px !important;
+    padding: 10px !important;
+    color: #FFFFFF !important;
+    font-size: 13px !important;
+    font-weight: 600 !important;
+    cursor: pointer !important;
+    text-align: center !important;
+}
+
+.feishin-tp-nav-btn:active {
+    background: rgba(168, 85, 247, 0.3) !important;
+}
+
+/* Menu Mais Opções Sheet */
+.feishin-tp-more-list {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 8px !important;
+}
+
+.feishin-tp-more-item {
+    display: flex !important;
+    align-items: center !important;
+    gap: 14px !important;
+    background: rgba(255, 255, 255, 0.05) !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    border-radius: 14px !important;
+    padding: 14px 16px !important;
+    color: #FFFFFF !important;
+    font-size: 15px !important;
+    font-weight: 600 !important;
+    cursor: pointer !important;
+    transition: background 0.15s ease !important;
+}
+
+.feishin-tp-more-item:active {
+    background: rgba(168, 85, 247, 0.25) !important;
+}
+
+.feishin-tp-more-item svg {
+    width: 22px !important;
+    height: 22px !important;
+    color: #A855F7 !important;
 }
 
 /* Modal do Temporizador */
@@ -1644,45 +1914,53 @@ thead {
     margin-top: 6px !important;
 }
 
-/* 11. ADAPTAÇÃO RESPONSIVA PARA DISPOSITIVOS EM PAISAGEM / TABLETS */
+/* 11. ADAPTAÇÃO RESPONSIVA PARA DISPOSITIVOS EM PAISAGEM (LANDSCAPE) */
 @media (orientation: landscape), (min-aspect-ratio: 1.2) {
     .feishin-tp-safe-area {
         display: grid !important;
-        grid-template-columns: 1fr 1.2fr !important;
-        grid-template-rows: 48px 1fr !important;
+        grid-template-columns: min(40vw, 320px) 1fr !important;
+        grid-template-rows: 42px 1fr !important;
         grid-template-areas:
             "header header"
-            "cover controls" !important;
+            "cover right" !important;
         align-items: center !important;
-        gap: 12px 36px !important;
-        padding-left: max(var(--sal, 0px), 32px) !important;
-        padding-right: max(var(--sar, 0px), 32px) !important;
+        gap: 6px 28px !important;
+        padding-top: max(var(--sat, 0px), 8px) !important;
+        padding-bottom: max(var(--sab, 0px), 12px) !important;
+        padding-left: max(var(--sal, 0px), 24px) !important;
+        padding-right: max(var(--sar, 0px), 24px) !important;
     }
 
     .feishin-tp-header {
         grid-area: header !important;
+        height: 42px !important;
     }
 
     .feishin-tp-art-section {
         grid-area: cover !important;
-        justify-content: center !important;
-        padding: 0 !important;
-    }
-
-    .feishin-tp-art-card {
-        width: min(40vw, 52vh, 320px) !important;
-        height: min(40vw, 52vh, 320px) !important;
-    }
-
-    .feishin-tp-landscape-right {
-        grid-area: controls !important;
         display: flex !important;
         flex-direction: column !important;
         justify-content: center !important;
-        gap: 10px !important;
+        align-items: center !important;
+        padding: 0 !important;
+        height: 100% !important;
+    }
+
+    .feishin-tp-art-card {
+        width: min(36vw, 54vh, 280px) !important;
+        height: min(36vw, 54vh, 280px) !important;
+    }
+
+    .feishin-tp-landscape-right {
+        grid-area: right !important;
+        display: flex !important;
+        flex-direction: column !important;
+        justify-content: space-evenly !important;
+        height: 100% !important;
         width: 100% !important;
-        max-width: 520px !important;
+        max-width: 600px !important;
         margin: 0 auto !important;
+        padding: 0 !important;
     }
 
     .feishin-tp-info-section {
@@ -1691,18 +1969,27 @@ thead {
         padding: 0 4px !important;
     }
 
+    .feishin-tp-badge-wrapper {
+        justify-content: flex-start !important;
+    }
+
     .feishin-tp-quick-row {
         justify-content: flex-start !important;
-        gap: 24px !important;
-        padding: 4px 4px !important;
+        gap: 20px !important;
+        padding: 2px 4px !important;
     }
 
     .feishin-tp-progress-section {
-        padding: 4px 4px !important;
+        padding: 2px 4px !important;
     }
 
     .feishin-tp-controls-row {
-        padding: 6px 4px !important;
+        padding: 2px 4px !important;
+        justify-content: space-between !important;
+    }
+
+    .feishin-tp-volume-row {
+        padding: 2px 4px !important;
     }
 }
 

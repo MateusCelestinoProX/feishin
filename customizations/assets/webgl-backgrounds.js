@@ -45,9 +45,10 @@ const TARGET_BG_FPS = 60;
 const BG_FRAME_INTERVAL = 1000 / TARGET_BG_FPS;
 
 const isEngineSuspended = () => {
-  if (!isTabVisible) return true;
+  if (typeof window !== 'undefined' && window.__FORCE_SHADER_RUNNING__) return false;
+  if (!isTabVisible && !(typeof window !== 'undefined' && window.__FORCE_SHADER_RUNNING__)) return true;
   if (typeof window !== 'undefined') {
-    if (window.__PAUSE_WEBGL_SHADERS__) return true;
+    if (window.__PAUSE_WEBGL_SHADERS__ && !window.__FORCE_SHADER_RUNNING__) return true;
     if (window.__MODAL_OPEN_PAUSE__) return true;
   }
   return false;
@@ -2442,6 +2443,14 @@ window.renderWebGLBackground = function(type) {
   const container = document.getElementById('bg-webgl-container');
   if (!container) return;
 
+  if (!type) {
+    try {
+      type = localStorage.getItem('feishin_active_shader') || 'plasmawave';
+    } catch(e) {
+      type = 'plasmawave';
+    }
+  }
+
   // Incrementa a sessão para que qualquer frame do shader anterior aborte instantaneamente
   currentBgSession++;
 
@@ -3050,6 +3059,14 @@ window.renderWebGLBackground = function(type) {
       break;
 
     default:
+      currentCleanup = initPlasmaWave(container, {
+        colors: ["#A855F7", "#06B6D4"],
+        speed1: 0.05,
+        speed2: 0.05,
+        focalLength: 0.8,
+        bend1: 1,
+        bend2: 1
+      });
       break;
   }
 };
