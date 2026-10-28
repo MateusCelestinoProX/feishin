@@ -6,9 +6,9 @@
     "semantic_hash": ""
   },
   "customizations/assets/feishin-personal-os.js": {
-    "mtime": 1793139990.4922707,
-    "seen": 1793140200.9161222,
-    "ast_hash": "6162d9912ed64265082fb03d9e1bd58a",
+    "mtime": 1793144493.3194907,
+    "seen": 1793144848.3582919,
+    "ast_hash": "1c0ee587658ae595181fa20853c7bd13",
     "semantic_hash": ""
   },
   "customizations/assets/ogl.js": {
@@ -42,9 +42,9 @@
     "semantic_hash": ""
   },
   "scripts/apply_customizations.py": {
-    "mtime": 1793133828.0138843,
-    "seen": 1793133897.606484,
-    "ast_hash": "94446241a989f313e3a92d8300f7e69a",
+    "mtime": 1793144536.8427215,
+    "seen": 1793144848.358324,
+    "ast_hash": "54625233df347a90f767887c997f7ebb",
     "semantic_hash": ""
   },
   "scripts/build_full_pt_br.py": {
@@ -72,9 +72,9 @@
     "semantic_hash": ""
   },
   "customizations/index.html": {
-    "mtime": 1793128240.66494,
-    "seen": 1793128823.705767,
-    "ast_hash": "4d47f852b28a11252e9d522ba5a97948",
+    "mtime": 1793144519.6076672,
+    "seen": 1793144848.3599591,
+    "ast_hash": "0639c7e45125abd850b11da53fae7b42",
     "semantic_hash": ""
   },
   "customizations/patches/patch_main.py": {
@@ -1134,9 +1134,9 @@
     "semantic_hash": ""
   },
   "src/renderer/assets/custom/feishin-personal-os.js": {
-    "mtime": 1793136932.9676423,
-    "seen": 1793137002.667785,
-    "ast_hash": "65cc0069dd7afced0403cbff47410212",
+    "mtime": 1793144546.5990694,
+    "seen": 1793144848.3585742,
+    "ast_hash": "1c0ee587658ae595181fa20853c7bd13",
     "semantic_hash": ""
   },
   "src/renderer/assets/custom/feishin-tags-engine.js": {
@@ -7215,6 +7215,156 @@
     "mtime": 1793135336.0,
     "seen": 1793135544.234886,
     "ast_hash": "6bf6608dcdbf28a610fae9f9b45ddf8e",
+    "semantic_hash": ""
+  },
+  "customizations/assets/feishin-recently-added.js": {
+    "mtime": 1793144840.3633695,
+    "seen": 1793144848.358295,
+    "ast_hash": "319ec8dbd8b90775609b31cb0b1c5f5c",
+    "semantic_hash": ""
+  },
+  "scripts/analyze_tracks.py": {
+    "mtime": 1793144027.534806,
+    "seen": 1793144848.358322,
+    "ast_hash": "20403960bd31d1365a56a2702f27c918",
+    "semantic_hash": ""
+  },
+  "scripts/check_row_height.py": {
+    "mtime": 1793144094.9442291,
+    "seen": 1793144848.3583272,
+    "ast_hash": "8ed34342335144309f3f5014c483a29d",
+    "semantic_hash": ""
+  },
+  "scripts/check_sort.py": {
+    "mtime": 1793144172.2907977,
+    "seen": 1793144848.358328,
+    "ast_hash": "c9bfe8ca338d9d9c3e2628caa33cf60b",
+    "semantic_hash": ""
+  },
+  "scripts/inspect_feishin_exact_query.py": {
+    "mtime": 1793144279.4584515,
+    "seen": 1793144848.358332,
+    "ast_hash": "91f6038b03276cd01213addf273b8f26",
+    "semantic_hash": ""
+  },
+  "scripts/inspect_loader_query.py": {
+    "mtime": 1793144193.8577628,
+    "seen": 1793144848.358334,
+    "ast_hash": "61064a5363c37bea578d64f748ccd859",
+    "semantic_hash": ""
+  },
+  "scripts/inspect_page_layout.py": {
+    "mtime": 1793144355.326185,
+    "seen": 1793144848.358336,
+    "ast_hash": "f79a0ad7bff956c4d0e4da7c0c9980e5",
+    "semantic_hash": ""
+  },
+  "scripts/inspect_song_fields.py": {
+    "mtime": 1793144218.806905,
+    "seen": 1793144848.358338,
+    "ast_hash": "8afc571c06921756d04bff6feadb7ce0",
+    "semantic_hash": ""
+  },
+  "scripts/inspect_tail.py": {
+    "mtime": 1793144065.2013657,
+    "seen": 1793144848.358339,
+    "ast_hash": "38cc05cc20860d7d74ad69322ee1d6d7",
+    "semantic_hash": ""
+  },
+  "scripts/test_clean_boundaries.py": {
+    "mtime": 1793144639.83401,
+    "seen": 1793144848.3583438,
+    "ast_hash": "de2d0f39fc533b8116ff4399039afd5e",
+    "semantic_hash": ""
+  },
+  "scripts/test_fetch_all.py": {
+    "mtime": 1793144003.7840612,
+    "seen": 1793144848.358345,
+    "ast_hash": "41f26f8849792ab34db7bf8dafc2495a",
+    "semantic_hash": ""
+  },
+  "scripts/test_indexer_logic.py": {
+    "mtime": 1793144565.1438224,
+    "seen": 1793144848.358347,
+    "ast_hash": "047558f59618387084c6d3c90dc39b87",
+    "semantic_hash": ""
+  },
+  "scripts/test_interactive_jumps.py": {
+    "mtime": 1793144755.2274132,
+    "seen": 1793144848.3583481,
+    "ast_hash": "7cc802c2b45dbb68c126179115c47973",
+    "semantic_hash": ""
+  },
+  "scripts/test_navidrome_api.py": {
+    "mtime": 1793143971.909491,
+    "seen": 1793144848.358349,
+    "ast_hash": "4130dcf26b576bd553ff60c0b02252fb",
+    "semantic_hash": ""
+  },
+  "scripts/test_prototype.py": {
+    "mtime": 1793144697.6326165,
+    "seen": 1793144848.35835,
+    "ast_hash": "a8d191c3f83c95b99b0e4a1d1faf3f95",
+    "semantic_hash": ""
+  },
+  "scripts/verify_non_missing.py": {
+    "mtime": 1793144252.7356126,
+    "seen": 1793144848.358355,
+    "ast_hash": "61476933d7452600761507e1be9551ab",
+    "semantic_hash": ""
+  },
+  "src/renderer/assets/custom/feishin-recently-added.js": {
+    "mtime": 1793144546.592757,
+    "seen": 1793144848.358576,
+    "ast_hash": "2a64e7ffc37d6490c7a1f5dda27437f1",
+    "semantic_hash": ""
+  },
+  "current_songs_view.png": {
+    "mtime": 1793144513.259559,
+    "seen": 1793144848.3600168,
+    "ast_hash": "3b70a34adbf9a738bd931b4d94c6cee0",
+    "semantic_hash": ""
+  },
+  "current_view.png": {
+    "mtime": 1793144491.1630743,
+    "seen": 1793144848.360019,
+    "ast_hash": "808fafeb6ce9619c02a7b606c4c5aceb",
+    "semantic_hash": ""
+  },
+  "recently_added_timeline.png": {
+    "mtime": 1793144599.4541936,
+    "seen": 1793144848.360037,
+    "ast_hash": "d919713fa9915a94dbaf6e2a065681eb",
+    "semantic_hash": ""
+  },
+  "scrubber_prototype_1.png": {
+    "mtime": 1793144709.6614234,
+    "seen": 1793144848.36004,
+    "ast_hash": "a5f2d8057cfab619bfd35e890018fe52",
+    "semantic_hash": ""
+  },
+  "scrubber_scrolled_to_foreign.png": {
+    "mtime": 1793144737.7909272,
+    "seen": 1793144848.360041,
+    "ast_hash": "39ee83e23b1a3264ab374839d6db166c",
+    "semantic_hash": ""
+  },
+  "scrubber_scrolled_to_hash.png": {
+    "mtime": 1793144740.2121491,
+    "seen": 1793144848.360043,
+    "ast_hash": "6690505e616229b087293d2bf565acf4",
+    "semantic_hash": ""
+  },
+  "scrubber_scrolled_to_s.png": {
+    "mtime": 1793144734.6440253,
+    "seen": 1793144848.360044,
+    "ast_hash": "b24526290a3d69a13e9d43f5b05c4e62",
+    "semantic_hash": ""
+  },
+  "songs_screen_test.png": {
+    "mtime": 1793143523.508275,
+    "seen": 1793144848.360045,
+    "ast_hash": "b1ece0e5f3b428e904585801539af6f6",
     "semantic_hash": ""
   }
 }

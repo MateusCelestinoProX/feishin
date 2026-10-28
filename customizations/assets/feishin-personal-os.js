@@ -5,6 +5,8 @@
 
 import './webgl-backgrounds.js';
 import './music-analytics.js';
+import './feishin-recently-added.js';
+import './feishin-alphabet-scrubber.js';
 
 // ==========================================================================
 // RESILIENCE & CRASH IMMUNITY SAFEGUARDS
