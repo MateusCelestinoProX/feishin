@@ -1,0 +1,794 @@
+/* ==========================================================================
+   FEISHIN MOBILE PRO — NATIVE ANDROID LIQUID GLASS SYSTEM
+   Portabilidade Perfeita da Interface Desktop para Mobile Android
+   Hardware Alvo: Samsung Galaxy S22 Ultra (Edge-to-Edge & Safe-Areas)
+   ========================================================================== */
+
+:root {
+    --sat: env(safe-area-inset-top, 0px);
+    --sab: env(safe-area-inset-bottom, 0px);
+    --sal: env(safe-area-inset-left, 0px);
+    --sar: env(safe-area-inset-right, 0px);
+    --feishin-accent: #2563EB;
+    --feishin-purple-glow: rgba(139, 92, 246, 0.45);
+    --personal-os-glass-blur: 28px;
+}
+
+/* 1. Reset Global & Transparência Edge-to-Edge */
+html, body, #root {
+    width: 100vw !important;
+    height: 100dvh !important;
+    overflow: hidden !important;
+    -webkit-tap-highlight-color: transparent !important;
+    user-select: none !important;
+    -webkit-user-select: none !important;
+    touch-action: pan-y !important;
+    background: transparent !important;
+}
+
+/* Ocultar barra de janela desktop (fechar/minimizar macOS) */
+#window-bar, [class*="window-bar"], .fs-window-bar, [class*="windowBar"] {
+    display: none !important;
+    height: 0 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    pointer-events: none !important;
+}
+
+/* 2. Shaders WebGL no Fundo em Fullscreen */
+#bg-webgl-container {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100vw !important;
+    height: 100dvh !important;
+    z-index: -2 !important;
+    pointer-events: none !important;
+    background: transparent !important;
+}
+
+#bg-webgl-dim {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100vw !important;
+    height: 100dvh !important;
+    background: radial-gradient(circle at center, rgba(8, 4, 16, 0.30) 0%, rgba(4, 2, 10, 0.72) 100%) !important;
+    z-index: -1 !important;
+    pointer-events: none !important;
+}
+
+#bg-webgl-vignette {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100vw !important;
+    height: 100dvh !important;
+    box-shadow: inset 0 0 120px rgba(0, 0, 0, 0.6) !important;
+    z-index: -1 !important;
+    pointer-events: none !important;
+}
+
+/* 3. Estrutura do Layout Mobile */
+#mobile-layout {
+    display: flex !important;
+    flex-direction: column !important;
+    height: 100dvh !important;
+    width: 100vw !important;
+    box-sizing: border-box !important;
+    background: transparent !important;
+    position: relative !important;
+    overflow: hidden !important;
+}
+
+/* Conteúdo principal com rolagem suave e espaço para o Player + TabBar */
+.fs-mobile-layout-module-main-content, #mobile-layout main {
+    flex: 1 1 auto !important;
+    min-height: 0 !important;
+    padding-top: max(var(--sat), 4px) !important;
+    padding-bottom: calc(125px + var(--sab)) !important;
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    overscroll-behavior-y: contain !important;
+    scrollbar-width: none !important;
+    background: transparent !important;
+}
+
+.fs-mobile-layout-module-main-content::-webkit-scrollbar,
+#mobile-layout main::-webkit-scrollbar {
+    display: none !important;
+}
+
+/* 4. CABEÇALHO COMPACTO & REMOÇÃO DEFINITIVA DE REDUNDÂNCIA (NOMES DE PÁGINAS) */
+/* Ocultar completamente títulos h1/nomes de páginas em todos os painéis superiores */
+.fs-library-header-bar-module-header-container h1,
+.fs-library-header-bar-module-header-container [class*="title"],
+.fs-library-header-module-title,
+.fs-page-header-module-container h1,
+.fs-page-header-module-header h1,
+.fs-page-header-module-title-wrapper h1,
+.fs-text-title-module-root,
+[class*="page-header"] h1,
+[class*="library-header"] h1,
+[class*="pageHeader"] h1,
+[class*="libraryHeader"] h1,
+[class*="page-header-module-title"] {
+    display: none !important;
+    height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+}
+
+/* Ocultar botão menu redundante no topo (navegação 100% no Bottom Nav) */
+#feishin-header-menu-btn {
+    display: none !important;
+}
+
+/* Otimização cirúrgica do container de cabeçalho superior para maximizar espaço útil */
+.fs-library-header-bar-module-container,
+.fs-page-header-module-container {
+    height: auto !important;
+    min-height: 0 !important;
+    padding: 2px 14px 2px 14px !important;
+    background: transparent !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+}
+
+.fs-page-header-module-header {
+    height: auto !important;
+    min-height: 0 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+}
+
+.fs-page-header-module-title-wrapper {
+    position: relative !important;
+    height: auto !important;
+    min-height: 0 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    display: flex !important;
+    align-items: center !important;
+}
+
+.fs-library-header-bar-module-header-container {
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    height: auto !important;
+    min-height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+/* Botão Azul Play Fiel ao Desktop, otimizado e compacto */
+.fs-library-header-bar-module-play-button-container button,
+.fs-play-button-module-text-button {
+    width: 36px !important;
+    height: 36px !important;
+    min-width: 36px !important;
+    min-height: 36px !important;
+    border-radius: 50% !important;
+    background: linear-gradient(135deg, #3B82F6, #1D4ED8) !important;
+    box-shadow: 0 4px 14px rgba(37, 99, 235, 0.45) !important;
+    border: 1px solid rgba(255, 255, 255, 0.25) !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    transition: transform 0.1s ease !important;
+}
+
+.fs-library-header-bar-module-play-button-container button:active,
+.fs-play-button-module-text-button:active {
+    transform: scale(0.90) !important;
+}
+
+/* Badge sutil de contagem ao lado do Play */
+[class*="headerBadge"], [class*="HeaderBadge"], .fs-badge-module-root {
+    background: rgba(255, 255, 255, 0.08) !important;
+    border: 1px solid rgba(255, 255, 255, 0.12) !important;
+    backdrop-filter: blur(12px) !important;
+    border-radius: 8px !important;
+    padding: 2px 7px !important;
+    font-size: 11.5px !important;
+    font-weight: 600 !important;
+    color: #CBD5E1 !important;
+}
+
+/* Barra de Filtros e Ordenação Compacta */
+.fs-filter-bar-module-container,
+.fs-filter-bar-module-filter-bar,
+.fs-action-bar-module-container {
+    padding: 2px 14px 4px 14px !important;
+    margin: 0 !important;
+    background: transparent !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.04) !important;
+}
+
+.fs-animated-page-module-animated-page > .mantine-Stack-root {
+    gap: 0px !important;
+}
+
+/* 5. TABELA DE MÚSICAS (ItemTableList) — ELIMINAÇÃO DOS ERROS GROTESCOS */
+/* Container virtual da tabela */
+.fs-item-table-list-module-item-table-container,
+.fs-item-table-list-module-item-table-grid-container,
+[role="grid"] {
+    background: transparent !important;
+    padding-right: 26px !important; /* Espaço para o Alphabet Scrubber à direita */
+    width: 100% !important;
+    box-sizing: border-box !important;
+}
+
+/* Células da linha de música: Altura 100% do container virtual SEM MARGENS que quebrem o scroller! */
+.fs-item-table-list-column-module-container.fs-item-table-list-column-module-data-row {
+    height: 100% !important;
+    margin: 0 !important;
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.04) !important;
+    background: transparent !important;
+    display: flex !important;
+    align-items: center !important;
+    box-sizing: border-box !important;
+    transition: background-color 0.12s ease !important;
+}
+
+/* Efeito ao tocar na linha da música */
+.fs-item-table-list-column-module-container.fs-item-table-list-column-module-data-row:active {
+    background: rgba(139, 92, 246, 0.14) !important;
+}
+
+/* Linha da música selecionada ou em reprodução */
+.fs-item-table-list-column-module-container.fs-item-table-list-column-module-row-selected,
+.fs-item-table-list-column-module-container.fs-item-table-list-column-module-data-row[data-active="true"] {
+    background: rgba(139, 92, 246, 0.18) !important;
+}
+
+/* Número da faixa (1, 2, 3...) */
+.fs-row-index-column-module-content,
+[data-column-id="rowIndex"] .fs-item-table-list-column-module-content {
+    font-size: 12.5px !important;
+    color: #64748B !important;
+    font-weight: 500 !important;
+    text-align: center !important;
+    width: 100% !important;
+}
+
+/* Capa / Vinil do Álbum na linha */
+.fs-title-combined-column-module-image-container,
+.fs-image-module-image-container {
+    width: 44px !important;
+    height: 44px !important;
+    min-width: 44px !important;
+    min-height: 44px !important;
+    border-radius: 8px !important;
+    overflow: hidden !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.45) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    margin-right: 10px !important;
+    flex-shrink: 0 !important;
+}
+
+.fs-image-module-image {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important;
+}
+
+/* Título da Música */
+.fs-title-combined-column-module-title {
+    font-size: 14.5px !important;
+    font-weight: 600 !important;
+    color: #F8FAFC !important;
+    line-height: 1.25 !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+}
+
+/* Subtítulo Artista */
+.fs-title-combined-column-module-artists,
+.fs-title-combined-column-module-artists a {
+    font-size: 12.5px !important;
+    color: #94A3B8 !important;
+    font-weight: 400 !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    margin-top: 2px !important;
+}
+
+/* Duração (ex: 3:50) */
+.fs-duration-column-module-content,
+[data-column-id="duration"] .fs-item-table-list-column-module-content {
+    font-size: 12.5px !important;
+    color: #94A3B8 !important;
+    font-variant-numeric: tabular-nums !important;
+    text-align: right !important;
+    width: 100% !important;
+    padding-right: 6px !important;
+}
+
+/* Ocultar cabeçalhos de coluna de desktop */
+.fs-item-table-list-module-item-table-pinned-rows-grid-container,
+.fs-item-table-list-column-module-header-container,
+thead {
+    display: none !important;
+    height: 0 !important;
+    opacity: 0 !important;
+}
+
+/* Ocultar paginação desktop por botões */
+.fs-item-list-pagination-module-container,
+.fs-pagination-module-container,
+.fs-pagination-module-root,
+.mantine-Pagination-root,
+[class*="paginationContainer"],
+[class*="Pagination-root"] {
+    display: none !important;
+    height: 0 !important;
+    min-height: 0 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    border: none !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+}
+
+/* Ocultar botão flutuante antigo do menu (agora está no Bottom Nav e no Top Bar) */
+.fs-mobile-layout-module-drawer-button {
+    display: none !important;
+    pointer-events: none !important;
+}
+
+/* 6. PLAYER BAR FLUTUANTE NATIVO LIQUID GLASS (#player-bar) */
+#player-bar {
+    position: fixed !important;
+    bottom: calc(56px + var(--sab) + 8px) !important;
+    left: 10px !important;
+    right: 10px !important;
+    height: 64px !important;
+    background: rgba(14, 10, 26, 0.88) !important;
+    backdrop-filter: blur(28px) saturate(190%) !important;
+    -webkit-backdrop-filter: blur(28px) saturate(190%) !important;
+    border-radius: 18px !important;
+    border: 1px solid rgba(255, 255, 255, 0.12) !important;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.65), 0 0 18px rgba(139, 92, 246, 0.22) !important;
+    z-index: 180 !important;
+    overflow: hidden !important;
+    display: flex !important;
+    align-items: center !important;
+    transition: transform 0.2s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.2s ease !important;
+}
+
+#player-bar:active {
+    transform: scale(0.985) !important;
+}
+
+/* Conteúdo interno do MobilePlayerbar nativo */
+.fs-mobile-playerbar-module-container {
+    width: 100% !important;
+    height: 100% !important;
+    display: grid !important;
+    grid-template-columns: 1fr auto !important;
+    gap: 10px !important;
+    align-items: center !important;
+    padding: 0 12px !important;
+    background: transparent !important;
+}
+
+.fs-mobile-playerbar-module-content-wrapper {
+    display: flex !important;
+    align-items: center !important;
+    gap: 12px !important;
+    min-width: 0 !important;
+    overflow: hidden !important;
+}
+
+.fs-mobile-playerbar-module-image-wrapper {
+    width: 44px !important;
+    height: 44px !important;
+    min-width: 44px !important;
+    min-height: 44px !important;
+    border-radius: 10px !important;
+    overflow: hidden !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5) !important;
+    border: 1px solid rgba(255, 255, 255, 0.14) !important;
+}
+
+.fs-mobile-playerbar-module-image {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important;
+}
+
+.fs-mobile-playerbar-module-metadata-stack {
+    display: flex !important;
+    flex-direction: column !important;
+    min-width: 0 !important;
+    flex: 1 1 auto !important;
+    max-width: 100% !important;
+    overflow: hidden !important;
+}
+
+.fs-mobile-playerbar-module-line-item {
+    font-size: 13.5px !important;
+    font-weight: 700 !important;
+    color: #F8FAFC !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    line-height: 1.2 !important;
+}
+
+.fs-mobile-playerbar-module-line-item.fs-mobile-playerbar-module-secondary {
+    font-size: 12px !important;
+    color: #94A3B8 !important;
+    font-weight: 400 !important;
+    margin-top: 2px !important;
+}
+
+.fs-mobile-playerbar-module-controls-wrapper {
+    display: flex !important;
+    align-items: center !important;
+    gap: 4px !important;
+}
+
+/* Botão Play/Pause circular do player */
+.fs-mobile-playerbar-module-controls-wrapper button[class*="play"],
+.fs-mobile-playerbar-module-controls-wrapper button:has(svg) {
+    border-radius: 50% !important;
+    transition: transform 0.1s ease !important;
+}
+
+/* 7. BARRA DE NAVEGAÇÃO INFERIOR NATIVA (Bottom Navigation Bar - 6 Abas) */
+#feishin-mobile-bottom-nav {
+    position: fixed !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    height: calc(56px + var(--sab)) !important;
+    padding-bottom: var(--sab) !important;
+    background: rgba(8, 6, 16, 0.94) !important;
+    backdrop-filter: blur(32px) saturate(200%) !important;
+    -webkit-backdrop-filter: blur(32px) saturate(200%) !important;
+    border-top: 1px solid rgba(255, 255, 255, 0.09) !important;
+    z-index: 190 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-around !important;
+    box-sizing: border-box !important;
+    user-select: none !important;
+}
+
+.feishin-nav-tab {
+    flex: 1 !important;
+    min-width: 0 !important;
+    height: 100% !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 3px !important;
+    padding: 3px 1px !important;
+    color: #94A3B8 !important;
+    text-decoration: none !important;
+    background: transparent !important;
+    border: none !important;
+    cursor: pointer !important;
+    touch-action: manipulation !important;
+    transition: color 0.15s ease, transform 0.1s ease !important;
+}
+
+.feishin-nav-tab.active, .feishin-nav-tab:active {
+    color: #A855F7 !important;
+}
+
+.feishin-nav-tab svg {
+    width: 20px !important;
+    height: 20px !important;
+    flex-shrink: 0 !important;
+}
+
+.feishin-nav-label {
+    font-size: 10px !important;
+    font-weight: 600 !important;
+    letter-spacing: 0.1px !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    max-width: 100% !important;
+    line-height: 1.1 !important;
+}
+
+/* 7.1. POPUP BOX ELEGANTE DE VIDRO (MENU "MAIS") */
+#feishin-more-glass-backdrop {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    background: rgba(0, 0, 0, 0.52) !important;
+    backdrop-filter: blur(8px) !important;
+    -webkit-backdrop-filter: blur(8px) !important;
+    z-index: 205 !important;
+    opacity: 0 !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+    transition: opacity 0.22s ease, visibility 0.22s !important;
+}
+
+#feishin-more-glass-backdrop.open {
+    opacity: 1 !important;
+    visibility: visible !important;
+    pointer-events: auto !important;
+}
+
+#feishin-more-glass-box {
+    position: fixed !important;
+    bottom: calc(62px + var(--sab)) !important;
+    left: 12px !important;
+    right: 12px !important;
+    max-width: 440px !important;
+    margin: 0 auto !important;
+    background: linear-gradient(145deg, rgba(20, 15, 34, 0.94), rgba(10, 8, 20, 0.97)) !important;
+    backdrop-filter: blur(36px) saturate(210%) !important;
+    -webkit-backdrop-filter: blur(36px) saturate(210%) !important;
+    border: 1px solid rgba(255, 255, 255, 0.14) !important;
+    border-radius: 24px !important;
+    padding: 14px 14px 16px 14px !important;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.82),
+                0 0 0 1px rgba(255, 255, 255, 0.05),
+                inset 0 1px 1px rgba(255, 255, 255, 0.25) !important;
+    z-index: 210 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 12px !important;
+    opacity: 0 !important;
+    visibility: hidden !important;
+    transform: translateY(20px) scale(0.96) !important;
+    pointer-events: none !important;
+    transition: opacity 0.22s cubic-bezier(0.16, 1, 0.3, 1),
+                transform 0.22s cubic-bezier(0.16, 1, 0.3, 1),
+                visibility 0.22s !important;
+}
+
+#feishin-more-glass-box.open {
+    opacity: 1 !important;
+    visibility: visible !important;
+    transform: translateY(0) scale(1) !important;
+    pointer-events: auto !important;
+}
+
+.feishin-more-header {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    gap: 8px !important;
+}
+
+.feishin-more-pill-handle {
+    width: 38px !important;
+    height: 4px !important;
+    background: rgba(255, 255, 255, 0.25) !important;
+    border-radius: 999px !important;
+}
+
+.feishin-more-title-row {
+    width: 100% !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    padding: 0 4px !important;
+}
+
+.feishin-more-title {
+    font-size: 13px !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.5px !important;
+    text-transform: uppercase !important;
+    color: #C4B5FD !important;
+}
+
+.feishin-more-close-btn {
+    background: rgba(255, 255, 255, 0.08) !important;
+    border: none !important;
+    color: #94A3B8 !important;
+    width: 26px !important;
+    height: 26px !important;
+    border-radius: 50% !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    font-size: 13px !important;
+    cursor: pointer !important;
+    transition: background 0.15s, color 0.15s !important;
+}
+
+.feishin-more-close-btn:active {
+    background: rgba(255, 255, 255, 0.2) !important;
+    color: #FFFFFF !important;
+}
+
+.feishin-more-grid {
+    display: grid !important;
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 8px !important;
+}
+
+.feishin-more-item {
+    position: relative !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 10px !important;
+    padding: 10px 12px !important;
+    border-radius: 14px !important;
+    background: rgba(255, 255, 255, 0.05) !important;
+    border: 1px solid rgba(255, 255, 255, 0.07) !important;
+    color: #E2E8F0 !important;
+    text-decoration: none !important;
+    font-size: 12px !important;
+    font-weight: 600 !important;
+    cursor: pointer !important;
+    user-select: none !important;
+    touch-action: manipulation !important;
+    transition: background 0.15s ease, transform 0.1s ease, border-color 0.15s ease !important;
+}
+
+.feishin-more-item:active {
+    background: rgba(168, 85, 247, 0.22) !important;
+    transform: scale(0.97) !important;
+    border-color: rgba(168, 85, 247, 0.45) !important;
+}
+
+.feishin-more-item.active {
+    background: rgba(168, 85, 247, 0.2) !important;
+    border-color: rgba(168, 85, 247, 0.6) !important;
+    color: #F3E8FF !important;
+}
+
+.feishin-more-icon-wrap {
+    width: 28px !important;
+    height: 28px !important;
+    border-radius: 8px !important;
+    background: rgba(168, 85, 247, 0.16) !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    flex-shrink: 0 !important;
+    color: #C084FC !important;
+}
+
+.feishin-more-item.active .feishin-more-icon-wrap {
+    background: #A855F7 !important;
+    color: #FFFFFF !important;
+}
+
+.feishin-more-icon-wrap svg {
+    width: 16px !important;
+    height: 16px !important;
+}
+
+.feishin-more-item-label {
+    flex: 1 !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    text-align: left !important;
+}
+
+.feishin-more-badge-pro {
+    font-size: 9px !important;
+    font-weight: 800 !important;
+    padding: 2px 5px !important;
+    border-radius: 6px !important;
+    background: linear-gradient(135deg, #06B6D4, #8B5CF6) !important;
+    color: #FFFFFF !important;
+    letter-spacing: 0.5px !important;
+    box-shadow: 0 0 8px rgba(6, 182, 212, 0.4) !important;
+}
+
+/* 8. BARRA ALFABÉTICA LATERAL RÁPIDA (# A B C ... Z) */
+#feishin-alphabet-scrubber {
+    position: fixed !important;
+    right: 2px !important;
+    top: calc(90px + var(--sat)) !important;
+    bottom: calc(140px + var(--sab)) !important;
+    width: 22px !important;
+    z-index: 120 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    padding: 6px 0 !important;
+    background: rgba(14, 10, 24, 0.35) !important;
+    backdrop-filter: blur(12px) !important;
+    -webkit-backdrop-filter: blur(12px) !important;
+    border-radius: 12px !important;
+    border: 1px solid rgba(255, 255, 255, 0.05) !important;
+    user-select: none !important;
+    touch-action: none !important;
+}
+
+/* 9. DRAWER / SIDEBAR LATERAL LIQUID GLASS */
+.mantine-Drawer-content {
+    background: rgba(10, 8, 20, 0.94) !important;
+    backdrop-filter: blur(36px) saturate(190%) !important;
+    -webkit-backdrop-filter: blur(36px) saturate(190%) !important;
+    border-right: 1px solid rgba(255, 255, 255, 0.1) !important;
+    padding-top: var(--sat) !important;
+    padding-bottom: var(--sab) !important;
+}
+
+.mantine-Drawer-overlay {
+    background: rgba(0, 0, 0, 0.65) !important;
+    backdrop-filter: blur(8px) !important;
+    -webkit-backdrop-filter: blur(8px) !important;
+}
+
+/* Itens da Biblioteca no Drawer */
+#mobile-sidebar [class*="sidebarItem"],
+#mobile-sidebar [class*="SidebarItem"] {
+    min-height: 48px !important;
+    padding: 10px 16px !important;
+    font-size: 15px !important;
+    font-weight: 500 !important;
+    border-radius: 14px !important;
+    margin: 4px 10px !important;
+    color: #E2E8F0 !important;
+    transition: background 0.15s ease !important;
+}
+
+#mobile-sidebar [class*="sidebarItem"]:active,
+#mobile-sidebar [class*="sidebarItem"][data-active="true"] {
+    background: rgba(139, 92, 246, 0.22) !important;
+    border: 1px solid rgba(139, 92, 246, 0.4) !important;
+    color: #FFFFFF !important;
+}
+
+/* 10. REPRODUTOR EM TELA CHEIA (Fullscreen Player) LIQUID GLASS */
+.fs-mobile-layout-module-full-screen-player-overlay,
+[class*="fullScreenPlayerOverlay"],
+#full-screen-player {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100vw !important;
+    height: 100dvh !important;
+    padding-top: max(var(--sat), 16px) !important;
+    padding-bottom: max(var(--sab), 24px) !important;
+    padding-left: 20px !important;
+    padding-right: 20px !important;
+    background: rgba(6, 4, 14, 0.94) !important;
+    backdrop-filter: blur(40px) saturate(190%) !important;
+    -webkit-backdrop-filter: blur(40px) saturate(190%) !important;
+    z-index: 500 !important;
+    box-sizing: border-box !important;
+}
+
+/* Capa do Álbum no Player Fullscreen */
+[class*="albumArtContainer"], [class*="mobileFullscreenPlayerAlbumArt"] {
+    max-width: 82vw !important;
+    max-height: 42vh !important;
+    margin: 16px auto !important;
+    border-radius: 22px !important;
+    overflow: hidden !important;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.75), 0 0 30px rgba(139, 92, 246, 0.3) !important;
+    border: 1px solid rgba(255, 255, 255, 0.15) !important;
+}
+
+/* Botão Play central no Fullscreen */
+[class*="mobileFullscreenPlayerControls"] button:nth-child(3),
+[class*="fullScreenPlayer"] [class*="playButton"] {
+    min-width: 70px !important;
+    min-height: 70px !important;
+    border-radius: 50% !important;
+    background: linear-gradient(135deg, #8B5CF6, #6D28D9) !important;
+    box-shadow: 0 10px 32px rgba(139, 92, 246, 0.55) !important;
+    border: 1px solid rgba(255, 255, 255, 0.25) !important;
+}

@@ -1,12 +1,13 @@
 // ==========================================================================
 // FEISHIN ULTRA-PREMIUM APPLE GLASS — RECENTLY ADDED (HIERARQUIA CRONOLÓGICA)
 // Alocação Hierárquica Estrita por Samsung Music / MediaStore Android (date_modified DESC)
+// Suporte Nativo Responsivo para Desktop macOS e Dispositivos Mobile Android
 // ==========================================================================
 
 (function() {
   console.log('[Recently Added Engine] Inicializando Adicionadas Recentemente (Samsung Music MediaStore Chronology)...');
 
-  const STORAGE_CACHE_KEY = 'feishin_recently_added_cache_v5_samsung';
+  const STORAGE_CACHE_KEY = 'feishin_recently_added_cache_v6_mobile_samsung';
 
   let cachedSongs = [];
   let totalRecordCount = 0;
@@ -137,6 +138,7 @@
       localStorage.removeItem('feishin_recently_added_cache_v1');
       localStorage.removeItem('feishin_recently_added_cache_v2');
       localStorage.removeItem('feishin_recently_added_cache_v3');
+      localStorage.removeItem('feishin_recently_added_cache_v5_samsung');
     } catch (e) {}
 
     // Load from cache first for zero-latency instant render
@@ -145,8 +147,18 @@
       if (saved) {
         const parsed = JSON.parse(saved);
         if (Array.isArray(parsed) && parsed.length > 0) {
-          cachedSongs = parsed;
-          totalRecordCount = parsed.length;
+          // If chronology became available, re-normalize
+          if (window.__SAMSUNG_MUSIC_CHRONOLOGY__ && parsed[0]?.rank === 999999) {
+            const { serverId } = getAuthInfo();
+            cachedSongs = parsed.map(s => normalizeSong(s, serverId));
+            cachedSongs.sort((a, b) => {
+              if (a.rank !== b.rank) return a.rank - b.rank;
+              return new Date(b.creationTime) - new Date(a.creationTime);
+            });
+          } else {
+            cachedSongs = parsed;
+          }
+          totalRecordCount = cachedSongs.length;
           renderViewContent();
         }
       }
@@ -179,11 +191,11 @@
         try {
           localStorage.setItem(STORAGE_CACHE_KEY, JSON.stringify(cachedSongs.slice(0, 1500)));
         } catch (e) {}
-      }
 
-      renderViewContent();
+        renderViewContent();
+      }
     } catch (e) {
-      console.error('[Recently Added] Falha na ingestão de faixas:', e);
+      console.error('[Recently Added] Falha ao carregar catálogo:', e);
     } finally {
       isFetching = false;
     }
@@ -220,7 +232,7 @@
         const start = Math.max(0, startIndex);
         const end = Math.min(playlist.length, start + 80);
         targetList = playlist.slice(start, end);
-        targetIndex = 0;
+        targetIndex = Math.min(startIndex, targetList.length - 1);
       }
       const queueItems = targetList.map(cleanItem);
       store.setQueue(queueItems, targetIndex);
@@ -288,6 +300,10 @@
     return `${m}:${String(s).padStart(2, '0')}`;
   }
 
+  function isMobileLayout() {
+    return window.innerWidth <= 768 || !!document.getElementById('mobile-layout') || !!window.AndroidBridge;
+  }
+
   function groupSongsByCreationHierarchy(songs) {
     const groups = new Map();
     const monthNames = [
@@ -305,47 +321,42 @@
       let subtitle = '';
       let icon = '📁';
 
-      if (song.rank === 999999) {
-        key = 'group-server-sync';
-        title = 'Outras Faixas Sincronizadas';
-        subtitle = 'Arquivos adicionados diretamente no servidor';
-        icon = '☁️';
-      } else {
-        const d = new Date(song.creationTime);
-        const isInvalid = isNaN(d.getTime());
-        const songDate = isInvalid ? new Date() : d;
-        const year = songDate.getFullYear();
-        const month = songDate.getMonth();
-        const day = songDate.getDate();
+      const d = new Date(song.creationTime);
+      const isInvalid = isNaN(d.getTime());
+      const songDate = isInvalid ? new Date() : d;
+      const year = songDate.getFullYear();
+      const month = songDate.getMonth();
+      const day = songDate.getDate();
 
-        // High-fidelity hierarchy matching Samsung Music:
-        // Recent days in October 2026: cluster by exact day
-        if (year === 2026 && month === 9) { // 9 is October (0-indexed)
-          key = `group-day-${year}-${month + 1}-${day}`;
-          title = `${day} de Outubro de 2026`;
-          const dow = dayNames[songDate.getDay()];
-          if (day >= 20) {
-            subtitle = `${dow} • Adicionadas recentemente no dispositivo`;
-            icon = '⚡';
-          } else if (day >= 10) {
-            subtitle = `${dow} • Adições recentes do mês`;
-            icon = '✨';
-          } else {
-            subtitle = `${dow} • Início do mês`;
-            icon = '🔥';
-          }
-        } else if (year === 2025) {
-          key = 'group-year-2025';
-          title = 'Ano de 2025';
-          subtitle = 'Arquivos criados em 2025';
-          icon = '📁';
+      if (isInvalid) {
+        key = 'group-other';
+        title = 'Outras Faixas';
+        subtitle = 'Sem data registrada';
+        icon = '📁';
+      } else if (year >= 2026 && month >= 9) { // October 2026 or later
+        key = `group-day-${year}-${month + 1}-${day}`;
+        title = `${day} de ${monthNames[month]} de ${year}`;
+        const dow = dayNames[songDate.getDay()];
+        if (day >= 20) {
+          subtitle = `${dow} • Adicionadas recentemente no dispositivo`;
+          icon = '⚡';
+        } else if (day >= 10) {
+          subtitle = `${dow} • Adições recentes do mês`;
+          icon = '✨';
         } else {
-          // Month grouping for 2026 earlier months and 2024
-          key = `group-month-${year}-${month + 1}`;
-          title = `${monthNames[month]} de ${year}`;
-          subtitle = `Arquivos criados em ${monthNames[month]}`;
-          icon = (year === 2026 && month === 8) ? '🗓️' : '📁';
+          subtitle = `${dow} • Início do mês`;
+          icon = '🔥';
         }
+      } else if (year === 2025) {
+        key = 'group-year-2025';
+        title = 'Ano de 2025';
+        subtitle = 'Arquivos criados em 2025';
+        icon = '📁';
+      } else {
+        key = `group-month-${year}-${month + 1}`;
+        title = `${monthNames[month]} de ${year}`;
+        subtitle = `Arquivos de ${monthNames[month]}`;
+        icon = (year === 2026 && month === 8) ? '🗓️' : '📁';
       }
 
       if (!groups.has(key)) {
@@ -386,7 +397,7 @@
       .replace(/'/g, '&#039;');
   }
 
-  // 5. Renderers: Hero Header + Hierarchical Tracklist (Clean & Fast)
+  // 5. Renderers: Hero Header + Hierarchical Tracklist (Clean, Responsive & Fast)
   function renderHeroHeaderHtml(total, filteredCount) {
     const isFiltering = searchQuery && searchQuery.trim().length > 0;
     const badgeText = isFiltering
@@ -395,50 +406,54 @@
 
     return `
       <div class="ra-hero-header">
-        <div class="ra-header-left">
-          <div class="ra-header-icon-badge">
-            <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-              <circle cx="12" cy="12" r="10"/>
-              <polyline points="12 6 12 12 16 14"/>
-            </svg>
-          </div>
-          <div class="ra-header-titles">
-            <div class="ra-header-title-row">
-              <h1 class="ra-header-title">Adicionadas recentemente</h1>
-              <span class="ra-badge-count" id="ra-header-badge">${badgeText}</span>
+        <div class="ra-header-main-row">
+          <div class="ra-header-left">
+            <div class="ra-header-icon-badge">
+              <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"/>
+                <polyline points="12 6 12 12 16 14"/>
+              </svg>
             </div>
-            <p class="ra-header-subtitle">
-              <span class="pulse-dot-cyan"></span>
-              Alocação hierárquica por data de criação do arquivo • Ordem cronológica decrescente
-            </p>
+            <div class="ra-header-titles">
+              <div class="ra-header-title-row">
+                <h1 class="ra-header-title">Adicionadas recentemente</h1>
+                <span class="ra-badge-count" id="ra-header-badge">${badgeText}</span>
+              </div>
+              <p class="ra-header-subtitle">
+                <span class="pulse-dot-cyan"></span>
+                Ordem cronológica Samsung Music • Mais recentes primeiro
+              </p>
+            </div>
           </div>
         </div>
 
         <div class="ra-header-actions">
-          <button type="button" class="ra-glass-btn ra-glass-btn-primary" id="ra-btn-play-all">
-            <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
-              <polygon points="5 3 19 12 5 21 5 3"/>
-            </svg>
-            <span>Tocar Tudo</span>
-          </button>
+          <div class="ra-action-buttons-row">
+            <button type="button" class="ra-glass-btn ra-glass-btn-primary" id="ra-btn-play-all" title="Tocar todas as faixas">
+              <svg viewBox="0 0 24 24" width="15" height="15" fill="currentColor">
+                <polygon points="5 3 19 12 5 21 5 3"/>
+              </svg>
+              <span>Tocar Tudo</span>
+            </button>
 
-          <button type="button" class="ra-glass-btn" id="ra-btn-shuffle-all">
-            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-              <polyline points="16 3 21 3 21 8"/>
-              <line x1="4" y1="20" x2="21" y2="3"/>
-              <polyline points="21 16 21 21 16 21"/>
-              <line x1="15" y1="15" x2="21" y2="21"/>
-              <line x1="4" y1="4" x2="9" y2="9"/>
-            </svg>
-            <span>Aleatório</span>
-          </button>
+            <button type="button" class="ra-glass-btn" id="ra-btn-shuffle-all" title="Modo aleatório">
+              <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="16 3 21 3 21 8"/>
+                <line x1="4" y1="20" x2="21" y2="3"/>
+                <polyline points="21 16 21 21 16 21"/>
+                <line x1="15" y1="15" x2="21" y2="21"/>
+                <line x1="4" y1="4" x2="9" y2="9"/>
+              </svg>
+              <span>Aleatório</span>
+            </button>
+          </div>
 
           <div class="ra-search-wrap">
             <svg class="ra-search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <circle cx="11" cy="11" r="8"/>
               <line x1="21" y1="21" x2="16.65" y2="16.65"/>
             </svg>
-            <input type="text" class="ra-search-input" id="ra-search-field" placeholder="Buscar faixas..." value="${escapeHtml(searchQuery)}" />
+            <input type="text" class="ra-search-input" id="ra-search-field" placeholder="Buscar entre as faixas..." value="${escapeHtml(searchQuery)}" autocomplete="off" autocorrect="off" spellcheck="false" />
             ${isFiltering ? `
               <button type="button" class="ra-search-clear-btn" id="ra-search-clear" title="Limpar busca">✕</button>
             ` : ''}
@@ -462,9 +477,10 @@
     const currentId = getCurrentPlayingSongId();
     const groups = groupSongsByCreationHierarchy(songs);
     let globalIndex = 0;
+    const isMobile = isMobileLayout();
 
     return `
-      <div class="ra-hierarchical-sections-container">
+      <div class="ra-hierarchical-sections-container ${isMobile ? 'ra-is-mobile-container' : ''}">
         ${groups.map(group => {
           return `
             <div class="ra-hierarchy-section" id="${group.key}">
@@ -480,29 +496,18 @@
                 </div>
                 <div class="ra-hierarchy-header-right">
                   <button type="button" class="ra-section-play-btn" data-group-key="${group.key}" title="Tocar todas desta seção">
-                    <svg viewBox="0 0 24 24" width="13" height="13" fill="currentColor">
+                    <svg viewBox="0 0 24 24" width="12" height="12" fill="currentColor">
                       <polygon points="5 3 19 12 5 21 5 3"/>
                     </svg>
-                    <span>Tocar Seção</span>
+                    <span>Tocar</span>
                   </button>
                 </div>
               </div>
 
-              <!-- Section Tracks Table -->
-              <div class="ra-tracklist-container">
-                <table class="ra-tracklist-table">
-                  <thead>
-                    <tr>
-                      <th style="width: 44px; text-align: center;">#</th>
-                      <th style="width: 48px;"></th>
-                      <th>TÍTULO</th>
-                      <th>ÁLBUM</th>
-                      <th>DATA DE CRIAÇÃO DO ARQUIVO</th>
-                      <th style="width: 60px;">ANO</th>
-                      <th style="width: 70px; text-align: right;">DURAÇÃO</th>
-                    </tr>
-                  </thead>
-                  <tbody>
+              <!-- Section Tracks Content (Mobile Rows or Desktop Table) -->
+              <div class="ra-tracklist-container ${isMobile ? 'ra-mobile-track-container' : ''}">
+                ${isMobile ? `
+                  <div class="ra-mobile-track-list">
                     ${group.songs.map(song => {
                       const idx = globalIndex++;
                       const isPlaying = song.id === currentId;
@@ -511,8 +516,8 @@
                       const creationStr = formatCreationDate(song.creationTime, song);
 
                       return `
-                        <tr class="ra-tracklist-row ${isPlaying ? 'is-playing' : ''}" data-id="${song.id}" data-index="${idx}">
-                          <td class="ra-col-idx">
+                        <div class="ra-tracklist-row ra-mobile-track-row ${isPlaying ? 'is-playing' : ''}" data-id="${song.id}" data-index="${idx}">
+                          <div class="ra-col-idx ra-mobile-col-idx">
                             ${isPlaying ? `
                               <div class="ra-mini-equalizer">
                                 <span></span><span></span><span></span><span></span>
@@ -521,39 +526,102 @@
                               <span class="ra-idx-num">${idx + 1}</span>
                               <button type="button" class="ra-row-play-btn" data-play-id="${song.id}">▶</button>
                             `}
-                          </td>
-                          <td class="ra-track-cover-cell">
+                          </div>
+
+                          <div class="ra-track-cover-cell ra-mobile-cover-cell">
                             <div class="ra-track-thumb-box">
-                              ${coverUrl ? `<img class="ra-track-thumb-img" src="${coverUrl}" loading="lazy" />` : `<span>🎵</span>`}
+                              ${coverUrl ? `<img class="ra-track-thumb-img" src="${coverUrl}" loading="lazy" alt="" />` : `<span>🎵</span>`}
                             </div>
-                          </td>
-                          <td class="ra-track-title-cell">
+                          </div>
+
+                          <div class="ra-mobile-track-info">
                             <div class="ra-track-title">${escapeHtml(song.name || song.title || 'Faixa')}</div>
-                            <div class="ra-track-artist">${escapeHtml(song.artistName || (song.artists?.[0]?.name) || '[Unknown Artist]')}</div>
-                          </td>
-                          <td>
-                            <div class="ra-track-album">${escapeHtml(song.album || song.albumName || '—')}</div>
-                          </td>
-                          <td>
-                            <span class="ra-track-creation-date">
-                              <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" style="opacity: 0.6; vertical-align: -1px; margin-right: 4px;">
-                                <circle cx="12" cy="12" r="10"/>
-                                <polyline points="12 6 12 12 15 14"/>
-                              </svg>
-                              ${creationStr}
-                            </span>
-                          </td>
-                          <td style="color: rgba(255,255,255,0.45); font-size: 12.5px;">
-                            ${song.year || '—'}
-                          </td>
-                          <td class="ra-track-duration">
-                            ${dur}
-                          </td>
-                        </tr>
+                            <div class="ra-mobile-meta-line">
+                              <span class="ra-track-artist">${escapeHtml(song.artistName || (song.artists?.[0]?.name) || '[Unknown Artist]')}</span>
+                              <span class="ra-meta-dot">•</span>
+                              <span class="ra-track-creation-date">
+                                <svg viewBox="0 0 24 24" width="10" height="10" fill="none" stroke="currentColor" stroke-width="2">
+                                  <circle cx="12" cy="12" r="10"/>
+                                  <polyline points="12 6 12 12 15 14"/>
+                                </svg>
+                                ${creationStr}
+                              </span>
+                            </div>
+                          </div>
+
+                          <div class="ra-mobile-track-right">
+                            <span class="ra-track-duration">${dur}</span>
+                          </div>
+                        </div>
                       `;
                     }).join('')}
-                  </tbody>
-                </table>
+                  </div>
+                ` : `
+                  <table class="ra-tracklist-table">
+                    <thead>
+                      <tr>
+                        <th style="width: 44px; text-align: center;">#</th>
+                        <th style="width: 48px;"></th>
+                        <th>TÍTULO</th>
+                        <th>ÁLBUM</th>
+                        <th>DATA DE CRIAÇÃO DO ARQUIVO</th>
+                        <th style="width: 60px;">ANO</th>
+                        <th style="width: 70px; text-align: right;">DURAÇÃO</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      ${group.songs.map(song => {
+                        const idx = globalIndex++;
+                        const isPlaying = song.id === currentId;
+                        const coverUrl = getCoverUrl(song.imageId || song.id);
+                        const dur = formatDuration(song.duration);
+                        const creationStr = formatCreationDate(song.creationTime, song);
+
+                        return `
+                          <tr class="ra-tracklist-row ${isPlaying ? 'is-playing' : ''}" data-id="${song.id}" data-index="${idx}">
+                            <td class="ra-col-idx">
+                              ${isPlaying ? `
+                                <div class="ra-mini-equalizer">
+                                  <span></span><span></span><span></span><span></span>
+                                </div>
+                              ` : `
+                                <span class="ra-idx-num">${idx + 1}</span>
+                                <button type="button" class="ra-row-play-btn" data-play-id="${song.id}">▶</button>
+                              `}
+                            </td>
+                            <td class="ra-track-cover-cell">
+                              <div class="ra-track-thumb-box">
+                                ${coverUrl ? `<img class="ra-track-thumb-img" src="${coverUrl}" loading="lazy" alt="" />` : `<span>🎵</span>`}
+                              </div>
+                            </td>
+                            <td class="ra-track-title-cell">
+                              <div class="ra-track-title">${escapeHtml(song.name || song.title || 'Faixa')}</div>
+                              <div class="ra-track-artist">${escapeHtml(song.artistName || (song.artists?.[0]?.name) || '[Unknown Artist]')}</div>
+                            </td>
+                            <td>
+                              <div class="ra-track-album">${escapeHtml(song.album || song.albumName || '—')}</div>
+                            </td>
+                            <td>
+                              <span class="ra-track-creation-date">
+                                <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" style="opacity: 0.6; vertical-align: -1px; margin-right: 4px;">
+                                  <circle cx="12" cy="12" r="10"/>
+                                  <polyline points="12 6 12 15 14"/>
+                                </svg>
+                                ${creationStr}
+                              </span>
+                            </td>
+                            <td style="color: rgba(255,255,255,0.45); font-size: 12.5px;">
+                              ${song.year || '—'}
+                            </td>
+                            <td class="ra-track-duration">
+                              ${dur}
+                            </td>
+                          </tr>
+                        `;
+                      }).join('')}
+                    </tbody>
+                  </table>
+                `}
               </div>
             </div>
           `;
@@ -564,8 +632,15 @@
 
   // 6. Bind Events
   function bindViewEvents(container) {
-    container.querySelector('#ra-btn-play-all')?.addEventListener('click', () => playAll(false));
-    container.querySelector('#ra-btn-shuffle-all')?.addEventListener('click', () => playAll(true));
+    container.querySelector('#ra-btn-play-all')?.addEventListener('click', () => {
+      if (window.AndroidBridge?.vibrate) window.AndroidBridge.vibrate(15);
+      playAll(false);
+    });
+    
+    container.querySelector('#ra-btn-shuffle-all')?.addEventListener('click', () => {
+      if (window.AndroidBridge?.vibrate) window.AndroidBridge.vibrate(15);
+      playAll(true);
+    });
 
     const searchField = container.querySelector('#ra-search-field');
     if (searchField) {
@@ -584,24 +659,31 @@
     container.querySelectorAll('.ra-section-play-btn').forEach(btn => {
       btn.addEventListener('click', (e) => {
         e.stopPropagation();
+        if (window.AndroidBridge?.vibrate) window.AndroidBridge.vibrate(15);
         const groupKey = btn.getAttribute('data-group-key');
         if (groupKey) playGroup(groupKey);
       });
     });
 
-    // Track Rows Double-Click & Play Button
+    // Track Rows Single-Tap & Double-Click Playback
     container.querySelectorAll('.ra-tracklist-row').forEach(row => {
-      row.addEventListener('dblclick', () => {
+      const handlePlay = (e) => {
+        if (e.target.closest('#ra-search-clear') || e.target.closest('.ra-section-play-btn')) return;
         const id = row.getAttribute('data-id');
         const song = cachedSongs.find(s => s.id === id);
-        if (song) playTrack(song, getFilteredSongs(), Number(row.getAttribute('data-index') || 0));
-      });
+        if (song) {
+          if (window.AndroidBridge?.vibrate) window.AndroidBridge.vibrate(12);
+          playTrack(song, getFilteredSongs(), Number(row.getAttribute('data-index') || 0));
+        }
+      };
 
+      // Single click for instant touch/tap play
+      row.addEventListener('click', handlePlay);
+
+      // Dedicated play button handler
       row.querySelector('.ra-row-play-btn')?.addEventListener('click', (e) => {
         e.stopPropagation();
-        const id = row.getAttribute('data-id');
-        const song = cachedSongs.find(s => s.id === id);
-        if (song) playTrack(song, getFilteredSongs(), Number(row.getAttribute('data-index') || 0));
+        handlePlay(e);
       });
     });
   }
@@ -652,6 +734,22 @@
     document.querySelectorAll('.ra-tracklist-row').forEach(row => {
       const isCur = row.getAttribute('data-id') === currentId;
       row.classList.toggle('is-playing', isCur);
+      const idxCell = row.querySelector('.ra-col-idx');
+      if (idxCell) {
+        if (isCur) {
+          idxCell.innerHTML = `
+            <div class="ra-mini-equalizer">
+              <span></span><span></span><span></span><span></span>
+            </div>
+          `;
+        } else {
+          const originalIdx = Number(row.getAttribute('data-index') || 0) + 1;
+          idxCell.innerHTML = `
+            <span class="ra-idx-num">${originalIdx}</span>
+            <button type="button" class="ra-row-play-btn" data-play-id="${row.getAttribute('data-id')}">▶</button>
+          `;
+        }
+      }
     });
   }
 
@@ -767,7 +865,7 @@
             <div class="ra-empty-state" style="padding: 100px 20px;">
               <div class="ra-empty-icon" style="animation: raDotPulse 1.5s infinite ease-in-out;">⚡</div>
               <h3 class="ra-empty-title">Carregando Músicas Adicionadas Recentemente...</h3>
-              <p class="ra-empty-desc">Conectando ao catálogo Navidrome e organizando por data de criação do arquivo.</p>
+              <p class="ra-empty-desc">Conectando ao catálogo Navidrome e organizando por cronologia Samsung Music.</p>
             </div>
           `;
           await loadInitialSongs();
@@ -814,6 +912,18 @@
   });
   window.addEventListener('popstate', () => {
     scheduleMount();
+  });
+
+  // Window resize handler to switch smoothly between desktop table and mobile list
+  let lastResizeWidth = window.innerWidth;
+  window.addEventListener('resize', () => {
+    const w = window.innerWidth;
+    if ((lastResizeWidth > 768 && w <= 768) || (lastResizeWidth <= 768 && w > 768)) {
+      lastResizeWidth = w;
+      if (window.location.hash.includes('recently-added')) {
+        renderViewContent();
+      }
+    }
   });
 
   // Periodic lightweight sanity check (every 400ms)

@@ -322,14 +322,14 @@
     bindEvents() {
       if (!this.container) return;
 
-      // Pointer / Mouse Scrubbing com Pointer Capture
+      // Pointer & Touch Scrubbing com Pointer Capture
       const onStart = (e) => {
-        e.preventDefault();
+        if (e.cancelable) e.preventDefault();
         this.isDragging = true;
         this.container.classList.add('dragging');
         
         try {
-          if (this.container.setPointerCapture) {
+          if (e.pointerId !== undefined && this.container.setPointerCapture) {
             this.container.setPointerCapture(e.pointerId);
           }
         } catch (err) {}
@@ -339,11 +339,14 @@
         window.addEventListener('pointermove', onMove, { passive: false });
         window.addEventListener('pointerup', onEnd);
         window.addEventListener('pointercancel', onEnd);
+        window.addEventListener('touchmove', onMove, { passive: false });
+        window.addEventListener('touchend', onEnd);
+        window.addEventListener('touchcancel', onEnd);
       };
 
       const onMove = (e) => {
         if (!this.isDragging) return;
-        e.preventDefault();
+        if (e.cancelable) e.preventDefault();
         this.handlePointerMove(e);
       };
 
@@ -353,7 +356,7 @@
         this.container.classList.remove('dragging');
 
         try {
-          if (e && this.container.releasePointerCapture) {
+          if (e && e.pointerId !== undefined && this.container.releasePointerCapture) {
             this.container.releasePointerCapture(e.pointerId);
           }
         } catch (err) {}
@@ -361,6 +364,9 @@
         window.removeEventListener('pointermove', onMove);
         window.removeEventListener('pointerup', onEnd);
         window.removeEventListener('pointercancel', onEnd);
+        window.removeEventListener('touchmove', onMove);
+        window.removeEventListener('touchend', onEnd);
+        window.removeEventListener('touchcancel', onEnd);
 
         // Ocultar HUD com fade suave
         clearTimeout(this.hideHudTimer);
@@ -372,6 +378,7 @@
       };
 
       this.container.addEventListener('pointerdown', onStart);
+      this.container.addEventListener('touchstart', onStart, { passive: false });
 
       // Hover simples
       this.container.addEventListener('pointerover', (e) => {
@@ -406,8 +413,11 @@
     handlePointerMove(e) {
       if (!this.container) return;
 
+      const clientYRaw = e.clientY !== undefined ? e.clientY : (e.touches && e.touches[0] ? e.touches[0].clientY : (e.changedTouches && e.changedTouches[0] ? e.changedTouches[0].clientY : null));
+      if (clientYRaw === null) return;
+
       const rect = this.container.getBoundingClientRect();
-      const clientY = Math.max(rect.top + 2, Math.min(rect.bottom - 2, e.clientY));
+      const clientY = Math.max(rect.top + 2, Math.min(rect.bottom - 2, clientYRaw));
 
       const el = document.elementFromPoint(rect.left + rect.width / 2, clientY);
       const item = el?.closest('.fs-az-item');

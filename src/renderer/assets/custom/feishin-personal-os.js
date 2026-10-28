@@ -512,6 +512,12 @@ if (typeof window !== 'undefined') {
       }
     }
 
+    // Expor globalmente para a Dock Android e componentes nativos
+    window.openPersonalOSBackgrounds = openModal;
+    window.closePersonalOSBackgrounds = closeModal;
+    window.togglePersonalOSBackgrounds = toggleModal;
+    window.openFeishinSettings = openFeishinSettings;
+
     function findMantineModalsContext() {
       if (window.__MANTINE_MODALS__) return window.__MANTINE_MODALS__;
       try {
