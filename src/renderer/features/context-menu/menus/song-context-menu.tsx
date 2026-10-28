@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 
 import { AddToPlaylistAction } from '/@/renderer/features/context-menu/actions/add-to-playlist-action';
+import { DeleteSongAction } from '/@/renderer/features/context-menu/actions/delete-song-action';
 import { DownloadAction } from '/@/renderer/features/context-menu/actions/download-action';
 import { EditMetadataAction } from '/@/renderer/features/context-menu/actions/edit-metadata-action';
 import { GetInfoAction } from '/@/renderer/features/context-menu/actions/get-info-action';
@@ -46,6 +47,8 @@ export const SongContextMenu = ({ items, type }: SongContextMenuProps) => {
             <ContextMenu.Divider />
             <EditMetadataAction songs={items} />
             <GetInfoAction disabled={items.length === 0} items={items} />
+            <ContextMenu.Divider />
+            <DeleteSongAction items={items} />
         </ContextMenu.Content>
     );
 };

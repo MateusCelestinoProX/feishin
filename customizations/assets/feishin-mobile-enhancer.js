@@ -705,15 +705,67 @@
     // 6. Gesto de Swipe Down no Fullscreen Player para minimizar suavemente
     let touchStartY = 0;
     let touchStartX = 0;
+    let longPressTimer = null;
+    let longPressTarget = null;
+    let longPressMoved = false;
 
     document.addEventListener('touchstart', (e) => {
         if (e.touches.length === 1) {
             touchStartY = e.touches[0].clientY;
             touchStartX = e.touches[0].clientX;
+            longPressMoved = false;
+
+            const row = e.target.closest('.fs-item-table-list-column-module-data-row, [data-row-index], .ra-item-row, [role="row"]');
+            if (row && !e.target.closest('button, [role="button"], input, a')) {
+                longPressTarget = row;
+                if (longPressTimer) clearTimeout(longPressTimer);
+                longPressTimer = setTimeout(() => {
+                    if (!longPressMoved && longPressTarget) {
+                        if (window.AndroidBridge?.hapticFeedback) {
+                            window.AndroidBridge.hapticFeedback(0);
+                        } else if (window.AndroidBridge?.vibrate) {
+                            window.AndroidBridge.vibrate(35);
+                        }
+                        const ctxEvent = new MouseEvent('contextmenu', {
+                            bubbles: true,
+                            cancelable: true,
+                            view: window,
+                            clientX: touchStartX,
+                            clientY: touchStartY,
+                            button: 2
+                        });
+                        longPressTarget.dispatchEvent(ctxEvent);
+                        longPressTarget = null;
+                    }
+                }, 420);
+            }
+        } else {
+            if (longPressTimer) clearTimeout(longPressTimer);
+            longPressTarget = null;
+        }
+    }, { passive: true });
+
+    document.addEventListener('touchmove', (e) => {
+        if (e.touches.length === 1) {
+            const deltaY = Math.abs(e.touches[0].clientY - touchStartY);
+            const deltaX = Math.abs(e.touches[0].clientX - touchStartX);
+            if (deltaY > 8 || deltaX > 8) {
+                longPressMoved = true;
+                if (longPressTimer) {
+                    clearTimeout(longPressTimer);
+                    longPressTimer = null;
+                }
+            }
         }
     }, { passive: true });
 
     document.addEventListener('touchend', (e) => {
+        if (longPressTimer) {
+            clearTimeout(longPressTimer);
+            longPressTimer = null;
+        }
+        longPressTarget = null;
+
         if (e.changedTouches.length === 1) {
             const deltaY = e.changedTouches[0].clientY - touchStartY;
             const deltaX = Math.abs(e.changedTouches[0].clientX - touchStartX);
@@ -1406,6 +1458,59 @@
             window.FeishinTrackPage.open();
         }
     }, true);
+
+    // 10. Sincronizador Realtime SSE com VPS Music Engine
+    (function initRealtimeSync() {
+        const eventsUrl = '/api/engine/events';
+        let es = null;
+
+        function connectSSE() {
+            try {
+                es = new EventSource(eventsUrl);
+                es.addEventListener('track_deleted', (e) => {
+                    try {
+                        const data = JSON.parse(e.data);
+                        console.log('[FeishinMobile] Sincronização em tempo real - música deletada:', data);
+                        
+                        // Encontrar e animar remoção das linhas correspondentes na UI
+                        const titleLower = (data.title || '').toLowerCase().trim();
+                        document.querySelectorAll('[data-row-index], .ra-item-row, .fs-item-table-list-column-module-data-row').forEach(row => {
+                            const text = (row.innerText || '').toLowerCase();
+                            if (text.includes(titleLower) && titleLower.length > 2) {
+                                row.style.transition = 'all 0.3s ease-out';
+                                row.style.opacity = '0';
+                                row.style.transform = 'scaleY(0)';
+                                row.style.maxHeight = '0px';
+                                setTimeout(() => row.remove(), 320);
+                            }
+                        });
+
+                        // Se a página de detalhes da música estiver aberta para esta faixa, fechar
+                        if (window.FeishinTrackPage?.isOpen) {
+                            const currentTitle = document.getElementById('feishin-tp-title')?.innerText || '';
+                            if (currentTitle.toLowerCase().includes(titleLower)) {
+                                window.FeishinTrackPage.close();
+                            }
+                        }
+                    } catch (err) {
+                        console.error('[FeishinMobile] Erro processando evento SSE:', err);
+                    }
+                });
+
+                es.onerror = () => {
+                    if (es) {
+                        es.close();
+                        es = null;
+                    }
+                    setTimeout(connectSSE, 6000);
+                };
+            } catch (e) {
+                setTimeout(connectSSE, 10000);
+            }
+        }
+
+        setTimeout(connectSSE, 1500);
+    })();
 
     console.log('[FeishinMobile] Motor Nativo Liquid Glass Pronto e Ativo.');
 })();

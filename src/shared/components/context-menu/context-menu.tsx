@@ -51,6 +51,7 @@ interface ItemProps {
     leftIcon?: keyof typeof AppIcon;
     onSelect?: (event: Event) => void;
     rightIcon?: keyof typeof AppIcon;
+    style?: CSSProperties;
 }
 
 interface LabelProps extends React.ComponentPropsWithoutRef<'div'> {
@@ -114,7 +115,8 @@ function Divider(props: DividerProps) {
 }
 
 function Item(props: ItemProps) {
-    const { children, className, disabled, isSelected, leftIcon, onSelect, rightIcon } = props;
+    const { children, className, disabled, isSelected, leftIcon, onSelect, rightIcon, style } =
+        props;
 
     return (
         <RadixContextMenu.Item
@@ -126,6 +128,7 @@ function Item(props: ItemProps) {
             })}
             disabled={disabled}
             onSelect={onSelect}
+            style={style}
         >
             {leftIcon && <Icon className={styles.leftIcon} icon={leftIcon} />}
             {children}

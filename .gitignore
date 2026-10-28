@@ -33,3 +33,4 @@ venv/
 *.tmp
 tmp/
 .cache/
+graphify-out/cache/

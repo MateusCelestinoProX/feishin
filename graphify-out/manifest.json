@@ -7450,5 +7450,11 @@
     "seen": 1793213842.751874,
     "ast_hash": "f2d6b6754c6bf83c4bbd0e8e19b5aa3e",
     "semantic_hash": ""
+  },
+  "src/renderer/assets/custom/feishin-delete-engine.js": {
+    "mtime": 1793213829.8854065,
+    "seen": 1793214873.643849,
+    "ast_hash": "b02f42184857631f5b3c0c87a1555a60",
+    "semantic_hash": ""
   }
 }
