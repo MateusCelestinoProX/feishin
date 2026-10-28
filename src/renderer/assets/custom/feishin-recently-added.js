@@ -16,8 +16,12 @@
   let mountDebounceTimer = null;
   let lastCheckedHash = '';
 
-  // 1. Credentials & Auth Helper
+  // 1. Credentials & Auth Helper (Zero-Scan Cached)
+  let cachedAuthInfo = null;
   function getAuthInfo() {
+    if (cachedAuthInfo && cachedAuthInfo.url && (cachedAuthInfo.cred || cachedAuthInfo.token)) {
+      return cachedAuthInfo;
+    }
     let url = null;
     let cred = null;
     let serverId = null;
@@ -28,31 +32,37 @@
       const s = auth?.state?.currentServer;
       url = s?.url;
       serverId = s?.id;
-      token = s?.ndCredential;
+      cred = s?.credential;
+      token = s?.ndCredential || s?.token;
     } catch (e) {}
 
-    const root = document.querySelector('#root');
-    if (root && (!cred || !serverId)) {
-      function scan(f, d = 0) {
-        if (!f || d > 60 || cred) return;
-        if (f.memoizedState) {
-          let st = f.memoizedState;
-          while (st) {
-            if (st.memoizedState?.credential) {
-              cred = st.memoizedState.credential;
-              break;
+    if (!cred || !serverId || !url) {
+      const root = document.querySelector('#root');
+      if (root) {
+        function scan(f, d = 0) {
+          if (!f || d > 60 || cred) return;
+          if (f.memoizedState) {
+            let st = f.memoizedState;
+            while (st) {
+              if (st.memoizedState?.credential) {
+                cred = st.memoizedState.credential;
+                break;
+              }
+              st = st.next;
             }
-            st = st.next;
           }
+          if (f.child) scan(f.child, d + 1);
+          if (f.sibling) scan(f.sibling, d + 1);
         }
-        if (f.child) scan(f.child, d + 1);
-        if (f.sibling) scan(f.sibling, d + 1);
+        const fiberKey = Object.keys(root).find(k => k.startsWith('__reactContainer'));
+        if (fiberKey) scan(root[fiberKey]);
       }
-      const fiberKey = Object.keys(root).find(k => k.startsWith('__reactContainer'));
-      if (fiberKey) scan(root[fiberKey]);
     }
 
-    return { url, cred, serverId, token };
+    if (url && (cred || token)) {
+      cachedAuthInfo = { url, cred, serverId, token };
+    }
+    return cachedAuthInfo || { url, cred, serverId, token };
   }
 
   function getCoverUrl(imageId) {
@@ -121,6 +131,13 @@
   async function loadInitialSongs() {
     if (isFetching) return;
     isFetching = true;
+
+    // Purge legacy unused caches to free memory
+    try {
+      localStorage.removeItem('feishin_recently_added_cache_v1');
+      localStorage.removeItem('feishin_recently_added_cache_v2');
+      localStorage.removeItem('feishin_recently_added_cache_v3');
+    } catch (e) {}
 
     // Load from cache first for zero-latency instant render
     try {
@@ -197,8 +214,16 @@
     });
 
     if (playlist && playlist.length > 0) {
-      const queueItems = playlist.map(cleanItem);
-      store.setQueue(queueItems, startIndex);
+      let targetList = playlist;
+      let targetIndex = startIndex;
+      if (playlist.length > 100) {
+        const start = Math.max(0, startIndex);
+        const end = Math.min(playlist.length, start + 80);
+        targetList = playlist.slice(start, end);
+        targetIndex = 0;
+      }
+      const queueItems = targetList.map(cleanItem);
+      store.setQueue(queueItems, targetIndex);
     } else {
       store.addToQueueByType([cleanItem(song)], 'now');
     }
