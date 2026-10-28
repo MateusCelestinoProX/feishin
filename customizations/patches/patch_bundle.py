@@ -195,6 +195,28 @@ def patch_bundle(file_path):
         else:
             print(f"[!] Aviso: Padrão Menu de Contexto não encontrado: {old[:35]}...")
 
+    # 9. Patch de Fila Completa de Reprodução (Elimina singleSongOnly e garante que Avançar/Retroceder sempre funcionem)
+    replacements_queue_playback = [
+        # 9.1 Ao reproduzir na tabela, priorizar lista completa de faixas (e.getData())
+        ('f9t=({index:t,internalState:e,item:a,meta:n,player:r})=>{const i=(n==null?void 0:n.playType)||Gt.NOW;if((n==null?void 0:n.singleSongOnly)===!0){r.addToQueueByData([a],i,a.id);return}const s=e==null?void 0:e.getData();t!==void 0&&s&&r.addToQueueByData(s,i,a.id)}',
+         'f9t=({index:t,internalState:e,item:a,meta:n,player:r})=>{const i=(n==null?void 0:n.playType)||Gt.NOW,s=e==null?void 0:e.getData();if(s&&s.length>1&&t!==void 0){r.addToQueueByData(s,i,a.id);return}if((n==null?void 0:n.singleSongOnly)===!0){r.addToQueueByData([a],i,a.id);return}t!==void 0&&s&&r.addToQueueByData(s,i,a.id)}'),
+        # 9.2 Ao reproduzir faixa individual, sempre carregar fatia de 100 faixas ao redor em vez de apenas [g]
+        ('const R=(v==null?void 0:v.playType)||Gt.NOW,E=(v==null?void 0:v.singleSongOnly)===!0;let T;if(E||R===Gt.NEXT||R===Gt.LAST||R===Gt.NEXT_SHUFFLE||R===Gt.LAST_SHUFFLE)T=[g];',
+         'const R=(v==null?void 0:v.playType)||Gt.NOW,E=!1;let T;if(R===Gt.NEXT||R===Gt.LAST||R===Gt.NEXT_SHUFFLE||R===Gt.LAST_SHUFFLE)T=[g];'),
+        # 9.3 Substituir todas as chamadas forçadas de singleSongOnly:!0 por singleSongOnly:!1
+        ('singleSongOnly:!0', 'singleSongOnly:!1')
+    ]
+
+    for old, new in replacements_queue_playback:
+        if old in js:
+            js = js.replace(old, new)
+            modified = True
+            print(f"[✓] Patch Fila Completa de Reprodução aplicado: {old[:35]}...")
+        elif new in js:
+            print(f"[-] Patch Fila Completa de Reprodução já presente: {new[:35]}...")
+        else:
+            print(f"[!] Aviso: Padrão não encontrado: {old[:35]}...")
+
     if modified:
         with open(bundle_path, "w", encoding="utf-8") as f:
             f.write(js)
