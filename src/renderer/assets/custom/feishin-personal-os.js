@@ -39,7 +39,7 @@ if (typeof window !== 'undefined') {
 (function() {
   console.log('[Personal OS Engine] Inicializando Shaders & Liquid Glass no Feishin...');
 
-  // 0. Purgar Início e Álbuns do store_settings e garantir Faixas (/library/songs) como rota definitiva
+  // 0. Sincronizar sidebarItems e assegurar Início (/home)
   try {
     const rawSettings = localStorage.getItem('store_settings');
     if (rawSettings) {
@@ -47,22 +47,25 @@ if (typeof window !== 'undefined') {
       let changed = false;
       const cleanItems = (items) => {
         const seen = new Set();
-        return items.filter(item => {
-          if (!item || item.id === 'Albums' || item.id === 'Home') return false;
+        const filtered = items.filter(item => {
+          if (!item) return false;
+          if (item.id === 'Albums') return false;
           if (seen.has(item.id)) return false;
           seen.add(item.id);
           return true;
         });
+        if (!filtered.some(item => item && item.id === 'Home')) {
+          filtered.unshift({ disabled: false, id: 'Home', label: 'Início', route: '/home' });
+        }
+        return filtered;
       };
       if (s?.state?.general?.sidebarItems) {
-        const prevLen = s.state.general.sidebarItems.length;
         s.state.general.sidebarItems = cleanItems(s.state.general.sidebarItems);
-        if (s.state.general.sidebarItems.length !== prevLen) changed = true;
+        changed = true;
       }
       if (s?.general?.sidebarItems) {
-        const prevLen = s.general.sidebarItems.length;
         s.general.sidebarItems = cleanItems(s.general.sidebarItems);
-        if (s.general.sidebarItems.length !== prevLen) changed = true;
+        changed = true;
       }
       if (changed) {
         localStorage.setItem('store_settings', JSON.stringify(s));
@@ -72,14 +75,13 @@ if (typeof window !== 'undefined') {
     console.error('[Personal OS] Erro ao sincronizar sidebarItems:', e);
   }
 
-  const enforceDefaultSongsRoute = () => {
+  const enforceDefaultHomeRoute = () => {
     const hash = window.location.hash || '';
-    if (!hash || hash === '#' || hash === '#/' || hash === '#/home' || hash.includes('/library/albums')) {
-      window.location.hash = '#/library/songs';
+    if (!hash || hash === '#' || hash === '#/') {
+      window.location.hash = '#/home';
     }
   };
-  enforceDefaultSongsRoute();
-  window.addEventListener('hashchange', enforceDefaultSongsRoute);
+  enforceDefaultHomeRoute();
 
   // Auto-reconexão resiliente ao servidor Navidrome caso caia na tela action-required
   setInterval(() => {
@@ -942,34 +944,41 @@ if (typeof window !== 'undefined') {
         }
       }
 
-      // Purge Albums & Home from store_settings sidebarItems in localStorage
+      // Garantir Início (Home) em store_settings sidebarItems no localStorage
       const rawSettings = localStorage.getItem('store_settings');
       if (rawSettings) {
         const parsedSettings = JSON.parse(rawSettings);
-        if (parsedSettings?.general?.sidebarItems) {
-          const prevLen = parsedSettings.general.sidebarItems.length;
-          parsedSettings.general.sidebarItems = parsedSettings.general.sidebarItems.filter(item => item.id !== 'Albums' && item.id !== 'Home');
-          if (parsedSettings.general.sidebarItems.length !== prevLen) {
-            localStorage.setItem('store_settings', JSON.stringify(parsedSettings));
+        const target = parsedSettings?.state?.general?.sidebarItems || parsedSettings?.general?.sidebarItems;
+        if (Array.isArray(target)) {
+          const prevLen = target.length;
+          const filtered = target.filter(item => item && item.id !== 'Albums');
+          if (!filtered.some(item => item && item.id === 'Home')) {
+            filtered.unshift({ disabled: false, id: 'Home', label: 'Início', route: '/home' });
           }
+          if (parsedSettings?.state?.general?.sidebarItems) {
+            parsedSettings.state.general.sidebarItems = filtered;
+          }
+          if (parsedSettings?.general?.sidebarItems) {
+            parsedSettings.general.sidebarItems = filtered;
+          }
+          localStorage.setItem('store_settings', JSON.stringify(parsedSettings));
         }
       }
 
-      // Redirect away from /library/albums and /home if currently open
       if (
-        window.location.hash.includes('/library/albums') ||
-        window.location.hash === '#/home' ||
-        window.location.hash === '#/' ||
-        window.location.pathname.includes('/library/albums') ||
-        window.location.pathname === '/home'
+        window.location.hash === '' ||
+        window.location.hash === '#' ||
+        window.location.hash === '#/'
       ) {
-        window.location.replace('#/library/songs');
+        window.location.replace('#/home');
       }
     } catch (e) {}
 
     initPlayerSplitQueue();
     initPlayerKillSwitch();
     initSingleClickTrackPlayback();
+    initUnitaryQueueSystem();
+    setInterval(initUnitaryQueueSystem, 500);
 
     const enforcePlayerCoverArt = () => {
       const sidebarImg = document.querySelector('.fs-sidebar-module-image-container');
@@ -1583,48 +1592,194 @@ if (typeof window !== 'undefined') {
         );
         if (interactive) return;
 
+        const cell = e.target.closest('[data-row-index]');
         const row = e.target.closest(
           '[role="row"], .fs-track-row, [class*="trackRow"], [class*="track-row"]'
         );
-        if (!row) return;
+        if (!cell && !row) return;
 
         if (
-          row.getAttribute('aria-rowindex') === '1' ||
-          row.closest('[class*="header"]') ||
-          row.querySelector('th')
+          row &&
+          (row.getAttribute('aria-rowindex') === '1' ||
+            row.closest('[class*="header"]') ||
+            row.querySelector('th'))
         ) {
           return;
         }
 
         const isTrackRow =
-          row.classList.contains('fs-track-row') ||
-          row.className.includes('trackRow') ||
-          row.className.includes('track-row') ||
-          !!row.querySelector('[itemtype="song"], [class*="title-combined"], [class*="titleCombined"]') ||
-          !!row.innerText.match(/\d+:\d{2}/) ||
-          window.location.hash.includes('/library/songs') ||
-          window.location.hash.includes('/library/playlists/') ||
-          window.location.hash.includes('/queue') ||
-          (window.location.hash.includes('/library/albums/') &&
-            !!row.closest(
-              '.fs-item-detail-list-module-container, .fs-item-table-list-module-item-table-list-container'
-            ));
+          !!cell ||
+          (row &&
+            (row.classList.contains('fs-track-row') ||
+              row.className.includes('trackRow') ||
+              row.className.includes('track-row') ||
+              !!row.querySelector('[itemtype="song"], [class*="title-combined"], [class*="titleCombined"]') ||
+              !!row.innerText.match(/\d+:\d{2}/) ||
+              window.location.hash.includes('/library/songs') ||
+              window.location.hash.includes('/library/playlists/') ||
+              window.location.hash.includes('/queue') ||
+              (window.location.hash.includes('/library/albums/') &&
+                !!row.closest(
+                  '.fs-item-detail-list-module-container, .fs-item-table-list-module-item-table-list-container'
+                ))));
 
         if (!isTrackRow) return;
 
+        // Dispara o segundo click para satisfazer o hook useDoubleClick interno do Feishin
+        const clickTarget = cell || e.target;
         const secondClick = new MouseEvent('click', {
           bubbles: true,
           cancelable: true,
           view: window,
-          detail: 2,
           clientX: e.clientX,
           clientY: e.clientY,
         });
         secondClick.__isSyntheticSingleClickPlay = true;
-        e.target.dispatchEvent(secondClick);
+        clickTarget.dispatchEvent(secondClick);
+
+        // Dispara dblclick para componentes que escutam nativamente onDoubleClick
+        const dblEvent = new MouseEvent('dblclick', {
+          bubbles: true,
+          cancelable: true,
+          view: window,
+          clientX: e.clientX,
+          clientY: e.clientY,
+        });
+        dblEvent.__isSyntheticSingleClickPlay = true;
+        clickTarget.dispatchEvent(dblEvent);
+
+        if (row) {
+          const playBtn = row.querySelector('.fs-play-button-module-root, [class*="playButton"], button[aria-label*="Play"]');
+          if (playBtn && !playBtn.contains(e.target)) {
+            playBtn.click();
+          }
+        }
       },
       false
     );
+  }
+
+  // ==========================================================================
+  // 14. SISTEMA DE FILAS UNITÁRIO INTELIGENTE (MAC E ANDROID)
+  // A plataforma abre zerada na home. O slot da fila só conterá músicas
+  // caso o usuário esteja em uma playlist estabelecida ou tenha usado
+  // "Adicionar a seguir" (Play.NEXT) / "Adicionar à fila" (Play.LAST).
+  // Ao tocar na página de faixas, a reprodução é 100% unitária.
+  // ==========================================================================
+  function initUnitaryQueueSystem() {
+    const storeObj = window.__FEISHIN_PLAYER_STORE__;
+    if (!storeObj || window.__FEISHIN_UNITARY_QUEUE_ENGINE_READY__) return;
+    const store = storeObj.getState?.();
+    if (!store || !store.addToQueueByType) return;
+    window.__FEISHIN_UNITARY_QUEUE_ENGINE_READY__ = true;
+
+    const origAddToQueueByType = store.addToQueueByType;
+    const origSetQueue = store.setQueue;
+    const origMediaNext = store.mediaNext;
+    const origMediaPrevious = store.mediaPrevious;
+
+    const customAddToQueueByType = function (items, playType, playSongId) {
+      const hash = window.location.hash || '';
+      const isPlaylist = hash.startsWith('#/playlists/') || hash.startsWith('#/playlist/');
+      const isPlaylistItems = items && items.length > 0 && items[0]._itemType === 'playlist_song';
+      const isExplicitQueueAction =
+        playType === 'next' ||
+        playType === 'last' ||
+        playType === 'next_shuffle' ||
+        playType === 'last_shuffle';
+
+      if (isPlaylist || isPlaylistItems || isExplicitQueueAction) {
+        return origAddToQueueByType.apply(this, arguments);
+      }
+
+      if (playType === 'now' || playType === 'shuffle') {
+        const target = (playSongId && items.find((i) => i.id === playSongId)) || items[0];
+        if (target) {
+          window.__FEISHIN_ACTIVE_COLLECTION__ = {
+            items: items,
+            currentIndex: items.indexOf(target),
+            isShuffle: playType === 'shuffle',
+          };
+          return origAddToQueueByType.call(this, [target], 'now', target.id);
+        }
+      }
+
+      return origAddToQueueByType.apply(this, arguments);
+    };
+
+    const customSetQueue = function (data, index, position) {
+      const hash = window.location.hash || '';
+      const isPlaylist = hash.startsWith('#/playlists/') || hash.startsWith('#/playlist/');
+      if (!isPlaylist && data && data.length > 1) {
+        const idx = typeof index === 'number' ? index : 0;
+        const target = data[idx] || data[0];
+        window.__FEISHIN_ACTIVE_COLLECTION__ = {
+          items: data,
+          currentIndex: idx,
+        };
+        return origSetQueue.call(this, [target], 0, position);
+      }
+      return origSetQueue.apply(this, arguments);
+    };
+
+    const customMediaNext = function (toNextAlbum) {
+      const curStore = storeObj.getState();
+      const q = curStore.getQueue?.();
+      const currentIdx = curStore.player?.index ?? -1;
+      if (q && q.items && q.items.length > currentIdx + 1) {
+        return origMediaNext.call(this, toNextAlbum);
+      }
+
+      const col = window.__FEISHIN_ACTIVE_COLLECTION__;
+      if (col && col.items && col.items.length > 0) {
+        const isShuffle = curStore.player?.shuffle === 'track' || col.isShuffle;
+        let nextIdx;
+        if (isShuffle) {
+          nextIdx = Math.floor(Math.random() * col.items.length);
+        } else {
+          nextIdx = (col.currentIndex + 1) % col.items.length;
+        }
+        col.currentIndex = nextIdx;
+        const nextSong = col.items[nextIdx];
+        if (nextSong) {
+          return origAddToQueueByType.call(curStore, [nextSong], 'now', nextSong.id);
+        }
+      }
+
+      return origMediaNext.call(this, toNextAlbum);
+    };
+
+    const customMediaPrevious = function (toPrevAlbum) {
+      const curStore = storeObj.getState();
+      const currentIdx = curStore.player?.index ?? -1;
+      if (currentIdx > 0) {
+        return origMediaPrevious.call(this, toPrevAlbum);
+      }
+      const col = window.__FEISHIN_ACTIVE_COLLECTION__;
+      if (col && col.items && col.items.length > 0) {
+        const prevIdx = (col.currentIndex - 1 + col.items.length) % col.items.length;
+        col.currentIndex = prevIdx;
+        const prevSong = col.items[prevIdx];
+        if (prevSong) {
+          return origAddToQueueByType.call(curStore, [prevSong], 'now', prevSong.id);
+        }
+      }
+      return origMediaPrevious.call(this, toPrevAlbum);
+    };
+
+    store.addToQueueByType = customAddToQueueByType;
+    store.setQueue = customSetQueue;
+    store.mediaNext = customMediaNext;
+    store.mediaPrevious = customMediaPrevious;
+
+    if (typeof storeObj.setState === 'function') {
+      storeObj.setState({
+        addToQueueByType: customAddToQueueByType,
+        setQueue: customSetQueue,
+        mediaNext: customMediaNext,
+        mediaPrevious: customMediaPrevious,
+      });
+    }
   }
 
   if (document.readyState === 'loading') {

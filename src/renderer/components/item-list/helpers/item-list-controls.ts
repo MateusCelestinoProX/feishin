@@ -110,12 +110,19 @@ export const useDefaultItemListControls = (args?: UseDefaultItemListControlsArgs
                     playType === Play.LAST_SHUFFLE
                 ) {
                     songsToAdd = [item as Song];
+                } else if (itemType === LibraryItem.PLAYLIST_SONG) {
+                    // Playlists estabelecidas mantêm todas as faixas na fila
+                    songsToAdd = validSongs;
                 } else {
-                    const songsBefore = 50;
-                    const songsAfter = 50;
-                    const startIndex = Math.max(0, clickedIndex - songsBefore);
-                    const endIndex = Math.min(validSongs.length, clickedIndex + songsAfter + 1);
-                    songsToAdd = validSongs.slice(startIndex, endIndex);
+                    // Reprodução unitária padrão fora de playlists: apenas a faixa entra no slot da fila
+                    songsToAdd = [item as Song];
+                    if (typeof window !== 'undefined') {
+                        (window as any).__FEISHIN_ACTIVE_COLLECTION__ = {
+                            items: validSongs,
+                            currentIndex: clickedIndex,
+                            isShuffle: false,
+                        };
+                    }
                 }
 
                 if (songsToAdd.length === 0) {

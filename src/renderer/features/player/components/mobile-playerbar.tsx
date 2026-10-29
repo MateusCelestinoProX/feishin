@@ -41,7 +41,7 @@ export const MobilePlayerbar = () => {
     const currentSong = usePlayerSong();
     const { currentStationArt } = useRadioPlayer();
     const status = usePlayerStatus();
-    const { mediaNext, mediaPrevious, mediaTogglePlayPause } = usePlayer();
+    const { mediaNext, mediaPrevious, mediaTogglePlayPause, mediaStop } = usePlayer();
     const title = currentSong?.name;
     const artists = currentSong?.artists;
     const isRadioActive = useIsRadioActive();
@@ -236,6 +236,25 @@ export const MobilePlayerbar = () => {
                     }}
                     tooltip={{
                         label: t('player.next'),
+                        openDelay: 0,
+                    }}
+                    variant="tertiary"
+                />
+                <PlayerButton
+                    className="feishin-kill-btn"
+                    icon={<Icon fill="default" icon="x" size="md" />}
+                    onClick={(e) => {
+                        e.stopPropagation();
+                        if (typeof (window as any).FeishinNative?.closePlayer === 'function') {
+                            (window as any).FeishinNative.closePlayer();
+                        } else if (typeof (window as any).executeKillSwitch === 'function') {
+                            (window as any).executeKillSwitch();
+                        } else {
+                            mediaStop({ reset: true });
+                        }
+                    }}
+                    tooltip={{
+                        label: t('common.close') || 'Fechar',
                         openDelay: 0,
                     }}
                     variant="tertiary"

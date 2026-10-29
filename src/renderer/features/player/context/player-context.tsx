@@ -281,6 +281,24 @@ export const PlayerProvider = ({ children }: { children: React.ReactNode }) => {
                 filteredData = tagPlaylistContext(filteredData, resolvedContextId);
             }
 
+            const isPlaylist =
+                resolvedContextId !== null ||
+                (data.length > 0 && (data[0] as any)._itemType === LibraryItem.PLAYLIST_SONG);
+
+            if (!isPlaylist && type === Play.NOW && playSongId && filteredData.length > 1) {
+                const targetSong = filteredData.find((s) => s.id === playSongId) || filteredData[0];
+                if (targetSong) {
+                    if (typeof window !== 'undefined') {
+                        (window as any).__FEISHIN_ACTIVE_COLLECTION__ = {
+                            items: filteredData,
+                            currentIndex: filteredData.indexOf(targetSong),
+                            isShuffle: false,
+                        };
+                    }
+                    filteredData = [targetSong];
+                }
+            }
+
             const addToQueue = () => {
                 if (typeof type === 'object' && 'edge' in type && type.edge !== null) {
                     const edge = type.edge === 'top' ? 'top' : 'bottom';

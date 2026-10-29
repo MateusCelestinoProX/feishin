@@ -1114,6 +1114,34 @@ export const usePlayerStoreBase = createWithEqualityFn<PlayerState>()(
                     }
 
                     if (shouldStop) {
+                        const activeCollection =
+                            typeof window !== 'undefined'
+                                ? (window as any).__FEISHIN_ACTIVE_COLLECTION__
+                                : null;
+                        if (
+                            activeCollection &&
+                            activeCollection.items &&
+                            activeCollection.items.length > 0
+                        ) {
+                            const isShuffle = isShuffleEnabled(state);
+                            let nextIdx: number;
+                            if (isShuffle) {
+                                nextIdx = Math.floor(
+                                    Math.random() * activeCollection.items.length,
+                                );
+                            } else {
+                                nextIdx =
+                                    (activeCollection.currentIndex + 1) %
+                                    activeCollection.items.length;
+                            }
+                            activeCollection.currentIndex = nextIdx;
+                            const nextSong = activeCollection.items[nextIdx];
+                            if (nextSong) {
+                                get().addToQueueByType([nextSong], Play.NOW, nextSong.id);
+                                return;
+                            }
+                        }
+
                         set((state) => {
                             state.player.index = nextIndex;
                             state.player.status = PlayerStatus.STOPPED;
@@ -1257,6 +1285,28 @@ export const usePlayerStoreBase = createWithEqualityFn<PlayerState>()(
                     }
 
                     let previousIndex: number;
+
+                    if (isFirstTrack && queue.items.length <= 1) {
+                        const activeCollection =
+                            typeof window !== 'undefined'
+                                ? (window as any).__FEISHIN_ACTIVE_COLLECTION__
+                                : null;
+                        if (
+                            activeCollection &&
+                            activeCollection.items &&
+                            activeCollection.items.length > 0
+                        ) {
+                            const prevIdx =
+                                (activeCollection.currentIndex - 1 + activeCollection.items.length) %
+                                activeCollection.items.length;
+                            activeCollection.currentIndex = prevIdx;
+                            const prevSong = activeCollection.items[prevIdx];
+                            if (prevSong) {
+                                get().addToQueueByType([prevSong], Play.NOW, prevSong.id);
+                                return;
+                            }
+                        }
+                    }
 
                     if (player.repeat === PlayerRepeat.ALL && isFirstTrack) {
                         // Repeat all: wrap to last track when on first track
@@ -1762,7 +1812,8 @@ export const usePlayerStoreBase = createWithEqualityFn<PlayerState>()(
                 usePlayerStoreBase.setState({ hydrated: true });
             },
             partialize: (state) => {
-                const shouldRestorePlayQueue = useSettingsStore.getState().general.resume;
+                // A plataforma abre zerada por padrão sem lixo ou fila residual no boot
+                const shouldRestorePlayQueue = false;
 
                 // Exclude playerNum, seekToTimestamp, and status from stored player object
                 // These are not needed to be stored since they are ephemeral properties

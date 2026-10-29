@@ -545,6 +545,40 @@ thead {
     transform: scale(0.985) !important;
 }
 
+#player-bar.feishin-player-hidden {
+    display: none !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+    transform: translateY(120%) !important;
+}
+
+#feishin-mobile-close-btn,
+.feishin-mobile-close-btn {
+    width: 36px !important;
+    height: 36px !important;
+    min-width: 36px !important;
+    border-radius: 50% !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    background: rgba(255, 255, 255, 0.08) !important;
+    border: 1px solid rgba(255, 255, 255, 0.16) !important;
+    color: rgba(255, 255, 255, 0.85) !important;
+    margin-left: 3px !important;
+    cursor: pointer !important;
+    flex-shrink: 0 !important;
+    padding: 0 !important;
+    transition: transform 0.12s ease, background 0.15s ease, color 0.15s ease !important;
+}
+
+#feishin-mobile-close-btn:active,
+.feishin-mobile-close-btn:active {
+    transform: scale(0.9) !important;
+    background: rgba(239, 68, 68, 0.28) !important;
+    border-color: rgba(239, 68, 68, 0.5) !important;
+    color: #EF4444 !important;
+}
+
 /* Evitar navegação acidental por links dentro da barra flutuante */
 #player-bar a,
 .fs-mobile-playerbar-module-container a,
@@ -1220,13 +1254,17 @@ thead {
 .feishin-tp-cover-fallback {
     width: 100% !important;
     height: 100% !important;
-    display: flex !important;
+    display: flex;
     align-items: center !important;
     justify-content: center !important;
     background: radial-gradient(circle, rgba(36, 20, 66, 0.5) 0%, rgba(14, 9, 27, 0.6) 100%) !important;
     backdrop-filter: blur(20px) !important;
     -webkit-backdrop-filter: blur(20px) !important;
     color: rgba(255, 255, 255, 0.5) !important;
+}
+
+.feishin-tp-cover-fallback.feishin-hidden {
+    display: none !important;
 }
 
 .feishin-tp-vinyl-icon {
