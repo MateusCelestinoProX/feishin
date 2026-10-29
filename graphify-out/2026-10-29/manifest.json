@@ -24,9 +24,9 @@
     "semantic_hash": ""
   },
   "customizations/assets/webgl-backgrounds.js": {
-    "mtime": 1793284149.1159453,
-    "seen": 1793284232.069746,
-    "ast_hash": "90278a34771b7e3b0ebdd413cf7a8bfa",
+    "mtime": 1793284569.3500242,
+    "seen": 1793289164.295667,
+    "ast_hash": "a61fef4c4c255ebf98da74d4c010801a",
     "semantic_hash": ""
   },
   "customizations/i18n/feishin_pt_full.json": {
@@ -1170,9 +1170,9 @@
     "semantic_hash": ""
   },
   "src/renderer/assets/custom/webgl-backgrounds.js": {
-    "mtime": 1793284149.1191075,
-    "seen": 1793284232.069955,
-    "ast_hash": "90278a34771b7e3b0ebdd413cf7a8bfa",
+    "mtime": 1793284569.3535192,
+    "seen": 1793289164.295842,
+    "ast_hash": "a61fef4c4c255ebf98da74d4c010801a",
     "semantic_hash": ""
   },
   "src/renderer/components/drag-preview/drag-preview.tsx": {
