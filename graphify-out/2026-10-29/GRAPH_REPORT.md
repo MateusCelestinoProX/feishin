@@ -1,12 +1,12 @@
 # Graph Report - feishin  (2026-10-29)
 
 ## Corpus Check
-- 1150 files · ~1,356,484 words
+- 1150 files · ~1,356,482 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
 - 16711 nodes · 40524 edges · 613 communities (406 shown, 151 thin omitted)
-- Extraction: 87% EXTRACTED · 13% INFERRED · 0% AMBIGUOUS · INFERRED: 5171 edges (avg confidence: 0.85)
+- Extraction: 87% EXTRACTED · 13% INFERRED · 0% AMBIGUOUS · INFERRED: 5169 edges (avg confidence: 0.85)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness

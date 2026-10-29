@@ -454681,6 +454681,17 @@
       "weight": 1.0
     },
     {
+      "source": "customizations_assets_feishin_personal_os",
+      "target": "customizations_assets_feishin_personal_os_initengine",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "customizations/assets/feishin-personal-os.js",
+      "source_location": "L913",
+      "weight": 1.0
+    },
+    {
       "source": "customizations_assets_feishin_personal_os_initplayerkillswitch",
       "target": "customizations_assets_feishin_personal_os_initplayerkillswitch_updatekillbuttonstate",
       "relation": "contains",
@@ -513583,6 +513594,17 @@
       "confidence_score": 1.0,
       "source_file": "src/renderer/assets/custom/feishin-personal-os.js",
       "source_location": "L824",
+      "weight": 1.0
+    },
+    {
+      "source": "src_renderer_assets_custom_feishin_personal_os",
+      "target": "src_renderer_assets_custom_feishin_personal_os_initengine",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "src/renderer/assets/custom/feishin-personal-os.js",
+      "source_location": "L913",
       "weight": 1.0
     },
     {
@@ -608102,18 +608124,6 @@
       "weight": 1.0
     },
     {
-      "source": "customizations_assets_feishin_personal_os",
-      "target": "customizations_assets_feishin_personal_os_initengine",
-      "relation": "indirect_call",
-      "_origin": "ast",
-      "confidence": "INFERRED",
-      "confidence_score": 0.85,
-      "context": "argument",
-      "source_file": "customizations/assets/feishin-personal-os.js",
-      "source_location": "L1787",
-      "weight": 1.0
-    },
-    {
       "source": "customizations_assets_feishin_recently_added_playtrack",
       "target": "customizations_assets_feishin_recently_added_renderactivetrackindicator",
       "relation": "indirect_call",
@@ -638987,18 +638997,6 @@
       "context": "argument",
       "source_file": "src/renderer/assets/custom/feishin-mobile-enhancer.js",
       "source_location": "L2298",
-      "weight": 1.0
-    },
-    {
-      "source": "src_renderer_assets_custom_feishin_personal_os",
-      "target": "src_renderer_assets_custom_feishin_personal_os_initengine",
-      "relation": "indirect_call",
-      "_origin": "ast",
-      "confidence": "INFERRED",
-      "confidence_score": 0.85,
-      "context": "argument",
-      "source_file": "src/renderer/assets/custom/feishin-personal-os.js",
-      "source_location": "L1787",
       "weight": 1.0
     },
     {

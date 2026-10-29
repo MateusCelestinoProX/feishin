@@ -3102,9 +3102,9 @@
     "semantic_hash": ""
   },
   "src/renderer/features/player/audio-player/utils/player-utils.ts": {
-    "mtime": 1793135336.0,
-    "seen": 1793135544.234429,
-    "ast_hash": "6155c9c29dcf72459a7e9e5926e163b9",
+    "mtime": 1793317024.672443,
+    "seen": 1793317591.1384242,
+    "ast_hash": "b1a5bb30ced0557e8987b4cea1dea663",
     "semantic_hash": ""
   },
   "src/renderer/features/player/audio-player/web-player.tsx": {
@@ -3138,9 +3138,9 @@
     "semantic_hash": ""
   },
   "src/renderer/features/player/components/audio-players.tsx": {
-    "mtime": 1793135336.0,
-    "seen": 1793135544.234433,
-    "ast_hash": "af1f60385bd86836b173ea93de3666f5",
+    "mtime": 1793317037.727251,
+    "seen": 1793317591.138429,
+    "ast_hash": "cae5b6f330bc23072d549b5593e3b7bc",
     "semantic_hash": ""
   },
   "src/renderer/features/player/components/center-controls.tsx": {
@@ -5280,9 +5280,9 @@
     "semantic_hash": ""
   },
   "src/renderer/store/player.store.ts": {
-    "mtime": 1793312861.2789285,
-    "seen": 1793316056.051318,
-    "ast_hash": "28509ef271e82b97294b30b9646a10f7",
+    "mtime": 1793317017.6819608,
+    "seen": 1793317591.138744,
+    "ast_hash": "2bbb623bf30a399df38861832e519c5a",
     "semantic_hash": ""
   },
   "src/renderer/store/scrobble-debug.store.ts": {
@@ -7218,9 +7218,9 @@
     "semantic_hash": ""
   },
   "customizations/assets/feishin-recently-added.js": {
-    "mtime": 1793289997.9843037,
-    "seen": 1793290314.664916,
-    "ast_hash": "b731a968429a26a0fb39020e7568394d",
+    "mtime": 1793316721.868567,
+    "seen": 1793317591.1379101,
+    "ast_hash": "6fc9d4fef09b19f38727085421c328f8",
     "semantic_hash": ""
   },
   "scripts/analyze_tracks.py": {
@@ -7314,9 +7314,9 @@
     "semantic_hash": ""
   },
   "src/renderer/assets/custom/feishin-recently-added.js": {
-    "mtime": 1793290003.5536337,
-    "seen": 1793290314.665094,
-    "ast_hash": "b731a968429a26a0fb39020e7568394d",
+    "mtime": 1793316721.8711123,
+    "seen": 1793317591.1380942,
+    "ast_hash": "6fc9d4fef09b19f38727085421c328f8",
     "semantic_hash": ""
   },
   "customizations/assets/feishin-alphabet-scrubber.js": {
@@ -7428,9 +7428,9 @@
     "semantic_hash": ""
   },
   "src/renderer/assets/custom/feishin-mobile-enhancer.js": {
-    "mtime": 1793315453.899929,
-    "seen": 1793316056.0505579,
-    "ast_hash": "00782c56588e1432176449c4cea21473",
+    "mtime": 1793317010.894595,
+    "seen": 1793317591.138091,
+    "ast_hash": "9a047a06e67185fbf4e0ef0baed383af",
     "semantic_hash": ""
   },
   "customizations/assets/feishin-delete-engine.js": {

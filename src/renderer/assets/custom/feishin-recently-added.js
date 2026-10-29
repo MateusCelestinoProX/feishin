@@ -20,12 +20,13 @@
   // 1. Credentials & Auth Helper (Zero-Scan Cached)
   let cachedAuthInfo = null;
   function getAuthInfo() {
-    if (cachedAuthInfo && cachedAuthInfo.url && (cachedAuthInfo.cred || cachedAuthInfo.token)) {
+    if (cachedAuthInfo && cachedAuthInfo.url && cachedAuthInfo.cred) {
       return cachedAuthInfo;
     }
     let url = null;
     let cred = null;
     let serverId = null;
+    let serverType = 'subsonic';
     let token = null;
 
     try {
@@ -34,6 +35,7 @@
       url = s?.url;
       serverId = s?.id;
       cred = s?.credential;
+      serverType = s?.type || 'subsonic';
       token = s?.ndCredential || s?.token;
     } catch (e) {}
 
@@ -60,28 +62,32 @@
       }
     }
 
-    if (url && (cred || token)) {
-      cachedAuthInfo = { url, cred, serverId, token };
-    }
-    return cachedAuthInfo || { url, cred, serverId, token };
+    // Fallback para servidor ativo Navidrome VPS se não encontrado
+    if (!url) url = 'https://instance-20260907-0637.tail798a9b.ts.net:4533';
+    if (!cred) cred = 'u=MateusCelestinoPRO&s=1db6bd&t=d8a85b5607aa399b374a131f3b77c1dc';
+    if (!serverId) serverId = 'FsiBb_mTdwLVTb1o_94bm';
+
+    cachedAuthInfo = { url, cred, serverId, serverType, token };
+    return cachedAuthInfo;
   }
 
   function getCoverUrl(imageId) {
     if (!imageId) return '';
     const { url, cred } = getAuthInfo();
     if (url && cred) {
-      return `${url}/rest/getCoverArt.view?id=${encodeURIComponent(imageId)}&${cred}&v=1.13.0&c=Feishin&size=300`;
+      const cleanId = imageId.startsWith('mf-') ? imageId : (imageId.length === 22 ? ('mf-' + imageId) : imageId);
+      return `${url}/rest/getCoverArt.view?id=${encodeURIComponent(cleanId)}&${cred}&v=1.13.0&c=Feishin&size=300`;
     }
     return '';
   }
 
-  function normalizeSong(s, serverId) {
+  function normalizeSong(s, serverId, serverType = 'subsonic') {
     const durSec = s.duration || 0;
     const durMs = durSec > 10000 ? durSec : Math.round(durSec * 1000);
     const chrono = window.__SAMSUNG_MUSIC_CHRONOLOGY__?.[s.id];
 
     let rank = 999999;
-    let creationTime = s.birthTime || s.createdAt || s.updatedAt || new Date().toISOString();
+    let creationTime = s.created || s.birthTime || s.createdAt || s.updatedAt || new Date().toISOString();
     let formattedDate = null;
     let isSamsungOrder = false;
 
@@ -104,25 +110,27 @@
       isSamsungOrder = true;
     }
 
+    const coverId = s.coverArt || s.imageId || (s.id ? ('mf-' + s.id) : s.id);
+
     return {
       id: s.id,
       name: s.title || s.name || 'Faixa',
       title: s.title || s.name || 'Faixa',
       artistName: s.artist || s.artistName || (s.artists?.[0]?.name) || '[Unknown Artist]',
       album: s.album || s.albumName || '',
-      albumId: s.albumId || s.id,
+      albumId: s.albumId || s.parent || s.id,
       duration: durMs,
-      imageId: s.id,
+      imageId: coverId,
       thumbHash: s.thumbHash || null,
-      birthTime: s.birthTime || null,
-      createdAt: s.createdAt || null,
+      birthTime: s.birthTime || s.created || null,
+      createdAt: s.createdAt || s.created || null,
       creationTime: creationTime,
       rank: rank,
       formattedDate: formattedDate,
       isSamsungOrder: isSamsungOrder,
       year: s.year || (s.releaseDate ? new Date(s.releaseDate).getFullYear() : null),
       _serverId: s._serverId || serverId,
-      _serverType: 'navidrome',
+      _serverType: s._serverType || serverType || 'subsonic',
       _itemType: 'song',
       _uniqueId: 'ra_' + s.id + '_' + Date.now()
     };
@@ -141,44 +149,42 @@
       localStorage.removeItem('feishin_recently_added_cache_v5_samsung');
     } catch (e) {}
 
-    // Load from cache first for zero-latency instant render
+    const { url, cred, serverId, serverType } = getAuthInfo();
+
+    // 1. Load from cache first for zero-latency instant render
     try {
       const saved = localStorage.getItem(STORAGE_CACHE_KEY);
       if (saved) {
         const parsed = JSON.parse(saved);
         if (Array.isArray(parsed) && parsed.length > 0) {
-          // If chronology became available, re-normalize
-          if (window.__SAMSUNG_MUSIC_CHRONOLOGY__ && parsed[0]?.rank === 999999) {
-            const { serverId } = getAuthInfo();
-            cachedSongs = parsed.map(s => normalizeSong(s, serverId));
-            cachedSongs.sort((a, b) => {
-              if (a.rank !== b.rank) return a.rank - b.rank;
-              return new Date(b.creationTime) - new Date(a.creationTime);
-            });
-          } else {
-            cachedSongs = parsed;
-          }
+          cachedSongs = parsed.map(s => normalizeSong(s, serverId, serverType));
+          cachedSongs.sort((a, b) => {
+            if (a.rank !== b.rank) return a.rank - b.rank;
+            return new Date(b.creationTime) - new Date(a.creationTime);
+          });
           totalRecordCount = cachedSongs.length;
           renderViewContent();
         }
       }
-    } catch (e) {}
+    } catch (e) {
+      console.warn('[Recently Added] Erro ao carregar cache local:', e);
+    }
 
-    const { url, serverId, token } = getAuthInfo();
-    if (!url || !token) {
+    if (!url || !cred) {
       isFetching = false;
       return;
     }
 
     try {
-      // Ingest entire library in a fast, single query
-      const r = await fetch(`${url}/api/song?_start=0&_end=3500`, {
-        headers: { 'x-nd-authorization': `Bearer ${token}` }
+      // 2. Ingest entire library using Subsonic search3.view with empty query and large count
+      const r = await fetch(`${url}/rest/search3.view?query=&songCount=5000&songOffset=0&${cred}&v=1.13.0&c=Feishin&f=json`, {
+        signal: AbortSignal.timeout(15000)
       });
       const data = await r.json();
+      const rawSongs = data?.['subsonic-response']?.searchResult3?.song || [];
 
-      if (Array.isArray(data) && data.length > 0) {
-        cachedSongs = data.map(s => normalizeSong(s, serverId));
+      if (Array.isArray(rawSongs) && rawSongs.length > 0) {
+        cachedSongs = rawSongs.map(s => normalizeSong(s, serverId, serverType));
 
         // Sort strictly by Samsung Music chronological rank, then creationTime DESC
         cachedSongs.sort((a, b) => {
@@ -193,9 +199,59 @@
         } catch (e) {}
 
         renderViewContent();
+      } else if (cachedSongs.length === 0) {
+        // Fallback: Check if React Query Cache has songs
+        const root = document.querySelector('#root');
+        let qc = window.__FEISHIN_QC__;
+        if (!qc && root) {
+          const fiberKey = Object.keys(root).find(k => k.startsWith('__reactContainer'));
+          function scan(n, d = 0) {
+            if (!n || d > 50 || qc) return;
+            if (n.memoizedProps?.client?.getQueryCache) qc = n.memoizedProps.client;
+            if (n.child) scan(n.child, d + 1);
+            if (n.sibling) scan(n.sibling, d + 1);
+          }
+          if (root[fiberKey]) scan(root[fiberKey]);
+        }
+        if (qc) {
+          const songQueries = qc.getQueryCache().getAll().filter(q => q.queryKey[1] === 'songs' && q.queryKey[2] === 'list');
+          const qcItems = [];
+          songQueries.forEach(q => {
+            const items = q.state?.data?.items || (Array.isArray(q.state?.data) ? q.state.data : []);
+            items.forEach(s => { if (s && s.id) qcItems.push(s); });
+          });
+          if (qcItems.length > 0) {
+            cachedSongs = qcItems.map(s => normalizeSong(s, serverId, serverType));
+            cachedSongs.sort((a, b) => {
+              if (a.rank !== b.rank) return a.rank - b.rank;
+              return new Date(b.creationTime) - new Date(a.creationTime);
+            });
+            totalRecordCount = cachedSongs.length;
+            renderViewContent();
+          }
+        }
       }
     } catch (e) {
-      console.error('[Recently Added] Falha ao carregar catálogo:', e);
+      console.error('[Recently Added] Falha ao carregar catálogo via Subsonic:', e);
+      if (cachedSongs.length === 0) {
+        const viewContainer = document.getElementById('feishin-recently-added-view');
+        if (viewContainer) {
+          viewContainer.innerHTML = `
+            <div class="ra-empty-state" style="padding: 100px 20px;">
+              <div class="ra-empty-icon">⚠️</div>
+              <h3 class="ra-empty-title">Erro ao Conectar ao Navidrome</h3>
+              <p class="ra-empty-desc">${escapeHtml(e.message || 'Verifique a conexão com a VPS Tailscale.')}</p>
+              <button type="button" class="ra-glass-btn ra-glass-btn-primary" id="ra-btn-retry" style="margin-top: 16px;">
+                <span>Tentar Novamente</span>
+              </button>
+            </div>
+          `;
+          viewContainer.querySelector('#ra-btn-retry')?.addEventListener('click', () => {
+            isFetching = false;
+            loadInitialSongs();
+          });
+        }
+      }
     } finally {
       isFetching = false;
     }
@@ -209,18 +265,19 @@
       return;
     }
 
-    const { serverId } = getAuthInfo();
+    const { serverId, serverType } = getAuthInfo();
     const cleanItem = (s) => ({
       id: s.id,
       name: s.name || s.title || 'Faixa',
       title: s.name || s.title || 'Faixa',
       artistName: s.artistName || (s.artists?.[0]?.name) || '[Unknown Artist]',
       album: s.album || s.albumName || '',
+      albumId: s.albumId || s.parent || s.id,
       duration: s.duration,
-      imageId: s.imageId || s.id,
+      imageId: s.imageId || (s.id ? ('mf-' + s.id) : s.id),
       thumbHash: s.thumbHash || null,
       _serverId: s._serverId || serverId,
-      _serverType: 'navidrome',
+      _serverType: s._serverType || serverType || 'subsonic',
       _itemType: 'song',
       _uniqueId: 'ra_' + s.id + '_' + Date.now()
     });
@@ -944,7 +1001,7 @@
     } else if (!sidebarItem) {
       ensureSidebarRecentlyAddedItem();
     }
-  }, 1200);
+  }, 400);
 
   // Initial schedule
   scheduleMount();

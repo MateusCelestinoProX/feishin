@@ -283,6 +283,15 @@ const AudioPlayersContent = ({
 
         compressorNode.connect(context.destination);
 
+        (window as any).__feishinWebAudio = {
+            context,
+            dsp: { compressor: compressorNode, eqFilters, preampGain },
+            gains,
+        };
+        if ((window as any).FeishinExtraMode?.applyDSP) {
+            (window as any).FeishinExtraMode.applyDSP();
+        }
+
         setWebAudio?.({
             context,
             dsp: { compressor: compressorNode, eqFilters, preampGain },
@@ -290,6 +299,7 @@ const AudioPlayersContent = ({
         });
 
         return () => {
+            (window as any).__feishinWebAudio = undefined;
             void context.close().catch(() => {});
             setWebAudio?.(undefined);
         };

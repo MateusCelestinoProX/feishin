@@ -704,6 +704,28 @@
                     playerBar.style.removeProperty('display');
 
                     const controlsWrapper = playerBar.querySelector('.fs-mobile-playerbar-module-controls-wrapper');
+                    if (controlsWrapper) {
+                        if (!document.getElementById('feishin-bar-btn-extra-mode')) {
+                            const extraBtn = document.createElement('button');
+                            extraBtn.id = 'feishin-bar-btn-extra-mode';
+                            extraBtn.className = 'feishin-bar-extra-btn' + (window.FeishinExtraMode?.active ? ' feishin-bar-extra-active' : '');
+                            extraBtn.setAttribute('type', 'button');
+                            extraBtn.setAttribute('aria-label', 'Extra Mode');
+                            extraBtn.setAttribute('title', 'Extra Mode: Amplificação Máxima');
+                            extraBtn.innerHTML = `
+                                <svg viewBox="0 0 24 24" fill="currentColor" width="13" height="13">
+                                    <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+                                </svg>
+                                <span>${window.FeishinExtraMode?.active ? 'EXTRA ON' : 'EXTRA'}</span>
+                            `;
+                            extraBtn.onclick = (e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                if (window.FeishinExtraMode) window.FeishinExtraMode.toggle();
+                            };
+                            controlsWrapper.appendChild(extraBtn);
+                        }
+                    }
                     if (controlsWrapper && !document.getElementById('feishin-mobile-close-btn')) {
                         const closeBtn = document.createElement('button');
                         closeBtn.id = 'feishin-mobile-close-btn';
@@ -920,6 +942,263 @@
         }
     }, true);
 
+
+    // =========================================================================
+    // 7.5. MOTOR DE AMPLIFICAÇÃO MÁXIMA EXTRA MODE (SAMSUNG GALAXY S22 ULTRA)
+    // - Multistage Preamp Gain Boost (+8 dB / 2.51x linear)
+    // - Fletcher-Munson Psychoacoustic Contour (180 Hz Punch Bass + 3.2 kHz Vocal Exciter)
+    // - WaveShaper Analog Soft-Clipper (Hyperbolic Tangent Saturation com 2x Oversampling)
+    // - Brickwall Peak Limiter (-1.0 dBFS, 20:1 Ratio, 1 ms Attack, 50 ms Release)
+    // - Sincronização direta com AudioManager.STREAM_MUSIC do Galaxy Ultra no nível 15/15
+    // =========================================================================
+    window.FeishinExtraMode = {
+        active: false,
+        dspNodes: null,
+        initialized: false,
+
+        getSaturationCurve: function (k, samples) {
+            k = k || 2.4;
+            samples = samples || 4096;
+            const curve = new Float32Array(samples);
+            const norm = Math.tanh(k);
+            for (let i = 0; i < samples; ++i) {
+                const x = (i * 2) / samples - 1;
+                curve[i] = Math.tanh(k * x) / norm;
+            }
+            return curve;
+        },
+
+        init: function () {
+            if (this.initialized) return;
+            this.initialized = true;
+
+            const saved = localStorage.getItem('feishin_extra_mode');
+            this.active = (saved === 'true');
+
+            this.syncSystemMaxVolume();
+            this.attachAudioGuard();
+
+            setTimeout(() => this.applyDSP(), 300);
+            this.updateUI();
+        },
+
+        syncSystemMaxVolume: function () {
+            try {
+                if (window.AndroidBridge && typeof window.AndroidBridge.maximizeSystemVolume === 'function') {
+                    window.AndroidBridge.maximizeSystemVolume();
+                }
+            } catch (e) {}
+        },
+
+        attachAudioGuard: function () {
+            const enforceVolume = () => {
+                document.querySelectorAll('audio').forEach(a => {
+                    try {
+                        if (a.volume < 1.0) a.volume = 1.0;
+                        if (a.muted) a.muted = false;
+                    } catch (e) {}
+                });
+            };
+            setInterval(enforceVolume, 1000);
+            document.addEventListener('play', (e) => {
+                if (e.target && e.target.tagName === 'AUDIO') {
+                    try { e.target.volume = 1.0; } catch (err) {}
+                    if (this.active) {
+                        this.syncSystemMaxVolume();
+                        setTimeout(() => this.applyDSP(), 80);
+                    }
+                }
+            }, true);
+        },
+
+        toggle: function () {
+            this.set(!this.active);
+        },
+
+        set: function (enable) {
+            this.active = Boolean(enable);
+            localStorage.setItem('feishin_extra_mode', this.active ? 'true' : 'false');
+
+            if (window.AndroidBridge && typeof window.AndroidBridge.hapticFeedback === 'function') {
+                window.AndroidBridge.hapticFeedback(1);
+            } else if (window.AndroidBridge && typeof window.AndroidBridge.vibrate === 'function') {
+                window.AndroidBridge.vibrate(25);
+            }
+
+            if (this.active) {
+                this.syncSystemMaxVolume();
+                if (window.AndroidBridge && typeof window.AndroidBridge.setNativeLoudnessBoost === 'function') {
+                    window.AndroidBridge.setNativeLoudnessBoost(true, 1500);
+                }
+            } else {
+                if (window.AndroidBridge && typeof window.AndroidBridge.setNativeLoudnessBoost === 'function') {
+                    window.AndroidBridge.setNativeLoudnessBoost(false, 0);
+                }
+            }
+
+            document.querySelectorAll('audio').forEach(a => {
+                try { a.volume = 1.0; a.muted = false; } catch (e) {}
+            });
+
+            this.applyDSP();
+            this.updateUI();
+
+            if (window.AndroidBridge && typeof window.AndroidBridge.showToast === 'function') {
+                if (this.active) {
+                    window.AndroidBridge.showToast("⚡ EXTRA MODE ATIVADO: Potência Máxima Galaxy Ultra (+8dB + Soft-Clipper + Limiter)");
+                } else {
+                    window.AndroidBridge.showToast("Extra Mode Desativado: Volume Normal");
+                }
+            }
+        },
+
+        applyDSP: function () {
+            const wa = window.__feishinWebAudio;
+            if (!wa || !wa.context || !wa.dsp) return;
+
+            const ctx = wa.context;
+            const dsp = wa.dsp;
+            const comp = dsp.compressor;
+            const preamp = dsp.preampGain;
+
+            if (ctx.state !== 'running') {
+                ctx.resume().catch(() => {});
+            }
+
+            if (this.active) {
+                const targetPreamp = 2.51; // +8 dB
+                try {
+                    preamp.gain.setTargetAtTime(targetPreamp, ctx.currentTime, 0.02);
+                } catch (e) {
+                    preamp.gain.value = targetPreamp;
+                }
+
+                if (!this.dspNodes) {
+                    const shaper = ctx.createWaveShaper();
+                    shaper.curve = this.getSaturationCurve(2.4);
+                    try { shaper.oversample = '2x'; } catch (e) {}
+
+                    const bassNode = ctx.createBiquadFilter();
+                    bassNode.type = 'peaking';
+                    bassNode.frequency.value = 180;
+                    bassNode.Q.value = 1.2;
+                    bassNode.gain.value = 4.5;
+
+                    const clarityNode = ctx.createBiquadFilter();
+                    clarityNode.type = 'peaking';
+                    clarityNode.frequency.value = 3200;
+                    clarityNode.Q.value = 1.1;
+                    clarityNode.gain.value = 3.5;
+
+                    this.dspNodes = { shaper, bassNode, clarityNode };
+                }
+
+                try {
+                    comp.threshold.setValueAtTime(-1.0, ctx.currentTime);
+                    comp.knee.setValueAtTime(0, ctx.currentTime);
+                    comp.ratio.setValueAtTime(20.0, ctx.currentTime);
+                    comp.attack.setValueAtTime(0.001, ctx.currentTime);
+                    comp.release.setValueAtTime(0.05, ctx.currentTime);
+                } catch (e) {}
+
+                try {
+                    comp.disconnect();
+                    comp.connect(this.dspNodes.shaper);
+                    this.dspNodes.shaper.disconnect();
+                    this.dspNodes.shaper.connect(this.dspNodes.bassNode);
+                    this.dspNodes.bassNode.disconnect();
+                    this.dspNodes.bassNode.connect(this.dspNodes.clarityNode);
+                    this.dspNodes.clarityNode.disconnect();
+                    this.dspNodes.clarityNode.connect(ctx.destination);
+                } catch (err) {
+                    try { comp.connect(ctx.destination); } catch (e) {}
+                }
+            } else {
+                try {
+                    preamp.gain.setTargetAtTime(1.0, ctx.currentTime, 0.02);
+                } catch (e) {
+                    preamp.gain.value = 1.0;
+                }
+
+                try {
+                    comp.threshold.setValueAtTime(0, ctx.currentTime);
+                    comp.knee.setValueAtTime(0, ctx.currentTime);
+                    comp.ratio.setValueAtTime(1.0, ctx.currentTime);
+                    comp.attack.setValueAtTime(0, ctx.currentTime);
+                    comp.release.setValueAtTime(0.25, ctx.currentTime);
+                } catch (e) {}
+
+                try {
+                    comp.disconnect();
+                    if (this.dspNodes) {
+                        this.dspNodes.shaper.disconnect();
+                        this.dspNodes.bassNode.disconnect();
+                        this.dspNodes.clarityNode.disconnect();
+                    }
+                    comp.connect(ctx.destination);
+                } catch (err) {
+                    try { comp.connect(ctx.destination); } catch (e) {}
+                }
+            }
+        },
+
+        updateUI: function () {
+            const tpBtn = document.getElementById('feishin-tp-btn-extra-mode');
+            if (tpBtn) {
+                if (this.active) {
+                    tpBtn.classList.add('feishin-extra-mode-active');
+                    tpBtn.setAttribute('data-active', 'true');
+                    tpBtn.innerHTML = `
+                        <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16">
+                            <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+                        </svg>
+                        <span class="feishin-tp-extra-label">EXTRA ON</span>
+                    `;
+                } else {
+                    tpBtn.classList.remove('feishin-extra-mode-active');
+                    tpBtn.setAttribute('data-active', 'false');
+                    tpBtn.innerHTML = `
+                        <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16">
+                            <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+                        </svg>
+                        <span class="feishin-tp-extra-label">EXTRA MODE</span>
+                    `;
+                }
+            }
+
+            const barBtn = document.getElementById('feishin-bar-btn-extra-mode');
+            if (barBtn) {
+                if (this.active) {
+                    barBtn.classList.add('feishin-bar-extra-active');
+                    barBtn.setAttribute('data-active', 'true');
+                    barBtn.title = 'Extra Mode: Ativado (Amplificação Máxima)';
+                    barBtn.innerHTML = `
+                        <svg viewBox="0 0 24 24" fill="currentColor" width="13" height="13">
+                            <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+                        </svg>
+                        <span>EXTRA ON</span>
+                    `;
+                } else {
+                    barBtn.classList.remove('feishin-bar-extra-active');
+                    barBtn.setAttribute('data-active', 'false');
+                    barBtn.title = 'Extra Mode: Desativado';
+                    barBtn.innerHTML = `
+                        <svg viewBox="0 0 24 24" fill="currentColor" width="13" height="13">
+                            <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+                        </svg>
+                        <span>EXTRA</span>
+                    `;
+                }
+            }
+
+            const moreStatus = document.getElementById('feishin-tp-more-extra-mode-status');
+            if (moreStatus) {
+                moreStatus.textContent = this.active ? 'ATIVADO (MAX)' : 'DESATIVADO';
+                moreStatus.style.color = this.active ? '#FACC15' : 'rgba(255, 255, 255, 0.5)';
+                moreStatus.style.background = this.active ? 'rgba(234, 179, 8, 0.25)' : 'rgba(255, 255, 255, 0.1)';
+            }
+        }
+    };
     // =========================================================================
     // 8. PÁGINA DA MÚSICA SAMSUNG MUSIC LIQUID GLASS (FeishinTrackPage)
     // =========================================================================
@@ -1074,6 +1353,12 @@
                         <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/>
                       </svg>
                     </button>
+                    <button class="feishin-tp-action-btn feishin-tp-extra-pill" id="feishin-tp-btn-extra-mode" aria-label="Extra Mode Amplificação Máxima" title="Extra Mode: Amplificação Máxima Galaxy Ultra">
+                      <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16">
+                        <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+                      </svg>
+                      <span class="feishin-tp-extra-label">EXTRA MODE</span>
+                    </button>
                     <button class="feishin-tp-action-btn" id="feishin-tp-btn-lyrics" aria-label="Ver Letras">
                       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
@@ -1175,6 +1460,11 @@
                 </div>
                 <div class="feishin-tp-sheet-content">
                   <div class="feishin-tp-more-list">
+                    <div class="feishin-tp-more-item" id="feishin-tp-opt-extra-mode" style="border: 1px solid rgba(234, 179, 8, 0.35); background: rgba(234, 179, 8, 0.08); border-radius: 12px; margin-bottom: 6px;">
+                      <svg viewBox="0 0 24 24" fill="currentColor" style="color: #EAB308;"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+                      <span style="font-weight: 600; color: #FFFFFF;">Extra Mode (Amplificador Galaxy Ultra)</span>
+                      <span class="feishin-tp-more-badge" id="feishin-tp-more-extra-mode-status" style="margin-left: auto; font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 6px; background: rgba(255,255,255,0.1);">DESATIVADO</span>
+                    </div>
                     <div class="feishin-tp-more-item" id="feishin-tp-opt-details">
                       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
                       <span>Detalhes Técnicos da Faixa</span>
@@ -1232,6 +1522,17 @@
         bindEvents: function () {
             const tp = document.getElementById('feishin-track-page');
             if (!tp) return;
+
+            // Toggle Extra Mode
+            const handleExtraModeClick = (e) => {
+                if (e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                }
+                if (window.FeishinExtraMode) window.FeishinExtraMode.toggle();
+            };
+            document.getElementById('feishin-tp-btn-extra-mode')?.addEventListener('click', handleExtraModeClick);
+            document.getElementById('feishin-tp-opt-extra-mode')?.addEventListener('click', handleExtraModeClick);
 
             // Fechar minimizando
             document.getElementById('feishin-tp-btn-close')?.addEventListener('click', () => {
@@ -1474,6 +1775,7 @@
             const cur = (typeof store?.getCurrentSong === 'function' ? store.getCurrentSong() : null) || store?.player?.currentSong;
             const status = store?.player?.status;
             const isPlaying = status === 'playing' || status === 1;
+            if (window.FeishinExtraMode) window.FeishinExtraMode.updateUI();
 
             const titleEl = document.getElementById('feishin-tp-title');
             const artistEl = document.getElementById('feishin-tp-artist');
@@ -2416,4 +2718,10 @@
     setInterval(initUnitaryQueueSystem, 400);
 
     console.log('[FeishinMobile] Motor Nativo Liquid Glass Pronto e Ativo.');
+    // Inicializa o Motor Extra Mode
+    try {
+        if (window.FeishinExtraMode) {
+            window.FeishinExtraMode.init();
+        }
+    } catch (e) {}
 })();
