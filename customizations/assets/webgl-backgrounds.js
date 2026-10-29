@@ -4565,7 +4565,7 @@ function initAurora(container, opts = {}) {
     
     float height = snoise(vec2(uv.x * 2.0 + uTime * 0.1, uTime * 0.25)) * 0.5 * uAmplitude;
     height = exp(height);
-    height = (uv.y * 2.0 - height + 0.2);
+    height = (uv.y * 2.0 - height + 0.65);
     float intensity = 0.6 * height;
     
     float midPoint = 0.20;
@@ -4614,7 +4614,8 @@ function initAurora(container, opts = {}) {
     const w = container.clientWidth || window.innerWidth || 1;
     const h = container.clientHeight || window.innerHeight || 1;
     renderer.setSize(w, h);
-    program.uniforms.uResolution.value = [w, h];
+    // gl_FragCoord está em pixels do canvas (DPR reduzido) — usar o tamanho real do canvas evita o shader ficar preso no canto inferior (invisível)
+    program.uniforms.uResolution.value = [gl.canvas.width || w, gl.canvas.height || h];
   };
   const ro = new ResizeObserver(resize);
   ro.observe(container);
