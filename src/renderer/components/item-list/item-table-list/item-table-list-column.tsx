@@ -737,7 +737,13 @@ export const TableColumnTextContainer = (
                 return;
             }
 
-            if (isDataRow && item && props.enableSelection) {
+            const isSong =
+                props.itemType === LibraryItem.SONG ||
+                props.itemType === LibraryItem.PLAYLIST_SONG ||
+                props.itemType === LibraryItem.QUEUE_SONG ||
+                (item as { _itemType?: LibraryItem })?._itemType === LibraryItem.SONG;
+
+            if (isDataRow && item && (props.enableSelection || isSong)) {
                 const rowId = props.internalState.extractRowId(item);
                 const index = rowId ? props.internalState.findItemIndex(rowId) : -1;
                 props.controls.onClick?.({
@@ -904,7 +910,13 @@ export const TableColumnContainer = (
                 return;
             }
 
-            if (isDataRow && item && props.enableSelection) {
+            const isSong =
+                props.itemType === LibraryItem.SONG ||
+                props.itemType === LibraryItem.PLAYLIST_SONG ||
+                props.itemType === LibraryItem.QUEUE_SONG ||
+                (item as { _itemType?: LibraryItem })?._itemType === LibraryItem.SONG;
+
+            if (isDataRow && item && (props.enableSelection || isSong)) {
                 const rowId = props.internalState.extractRowId(item);
                 const index = rowId ? props.internalState.findItemIndex(rowId) : -1;
                 props.controls.onClick?.({

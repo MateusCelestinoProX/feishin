@@ -306,9 +306,10 @@ const TrackRow = memo(
                         selected.length === 1 &&
                         internalState.extractRowId(selected[0]) === song.id;
                     internalState.setSelected(onlyThisSelected ? [] : [song]);
+                    handleDoubleClick(event);
                 }
             },
-            [internalState, song],
+            [handleDoubleClick, internalState, song],
         );
 
         const handleClick = useDoubleClick({

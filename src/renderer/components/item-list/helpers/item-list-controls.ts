@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef } from 'react';
+import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { useNavigate } from 'react-router';
 
 import { getTitlePath } from '/@/renderer/components/item-list/helpers/get-title-path';
@@ -53,9 +53,92 @@ export const useDefaultItemListControls = (args?: UseDefaultItemListControlsArgs
 
     const { enableMultiSelect = true, onColumnReordered, onColumnResized, overrides } = args || {};
 
+    const handleDoubleClick = useCallback(
+        ({ internalState, item, itemType, meta }: DefaultItemControlProps) => {
+            if (!item || !internalState) {
+                return;
+            }
+
+            internalState.setSelected([item]);
+
+            if (
+                itemType === LibraryItem.ALBUM ||
+                itemType === LibraryItem.ALBUM_ARTIST ||
+                itemType === LibraryItem.ARTIST ||
+                itemType === LibraryItem.GENRE ||
+                itemType === LibraryItem.PLAYLIST
+            ) {
+                const path = getTitlePath(itemType, item.id);
+                if (path) {
+                    navigateRef.current(path, { state: { item } });
+                    return;
+                }
+            }
+
+            if (itemType === LibraryItem.SONG || itemType === LibraryItem.PLAYLIST_SONG) {
+                const data = internalState.getData();
+                const validSongs = data.filter((d): d is Song => {
+                    if (!d || typeof d !== 'object') {
+                        return false;
+                    }
+                    if (!('_itemType' in d)) {
+                        return false;
+                    }
+                    return (d as { _itemType: LibraryItem })._itemType === LibraryItem.SONG;
+                });
+
+                if (validSongs.length === 0) {
+                    return;
+                }
+
+                const clickedSongId = item.id;
+                const clickedIndex = validSongs.findIndex((song) => song.id === clickedSongId);
+
+                if (clickedIndex === -1) {
+                    return;
+                }
+
+                const playType = (meta?.playType as Play) || Play.NOW;
+                const singleSongOnly = meta?.singleSongOnly === true;
+
+                let songsToAdd: Song[];
+                if (
+                    singleSongOnly ||
+                    playType === Play.NEXT ||
+                    playType === Play.LAST ||
+                    playType === Play.NEXT_SHUFFLE ||
+                    playType === Play.LAST_SHUFFLE
+                ) {
+                    songsToAdd = [item as Song];
+                } else {
+                    const songsBefore = 50;
+                    const songsAfter = 50;
+                    const startIndex = Math.max(0, clickedIndex - songsBefore);
+                    const endIndex = Math.min(validSongs.length, clickedIndex + songsAfter + 1);
+                    songsToAdd = validSongs.slice(startIndex, endIndex);
+                }
+
+                if (songsToAdd.length === 0) {
+                    return;
+                }
+
+                playerRef.current.addToQueueByData(songsToAdd, playType, item.id);
+                return;
+            }
+
+            if (itemType === LibraryItem.QUEUE_SONG) {
+                const queueSong = item as QueueSong;
+                if (queueSong._uniqueId) {
+                    playerRef.current.mediaPlay(queueSong._uniqueId);
+                }
+            }
+        },
+        [],
+    );
+
     const controls: ItemControls = useMemo(() => {
         return {
-            onClick: ({ event, internalState, item }: DefaultItemControlProps) => {
+            onClick: ({ event, index, internalState, item, itemType }: DefaultItemControlProps) => {
                 if (!item || !internalState || !event) {
                     return;
                 }
@@ -171,19 +254,19 @@ export const useDefaultItemListControls = (args?: UseDefaultItemListControlsArgs
                         internalState.setSelected([itemListItem]);
                     }
                 } else {
-                    // Regular click - deselect all others and select only this item
-                    // If this item is already the only selected item, deselect it
-                    const selectedItems = internalState.getSelected();
-                    const isOnlySelected =
-                        selectedItems.length === 1 &&
-                        typeof selectedItems[0] === 'object' &&
-                        selectedItems[0] !== null &&
-                        internalState.extractRowId(selectedItems[0]) === rowId;
+                    // Regular click - select only this item
+                    internalState.setSelected([itemListItem]);
 
-                    if (isOnlySelected) {
-                        internalState.clearSelected();
-                    } else {
-                        internalState.setSelected([itemListItem]);
+                    // For song/track items, clicking anywhere immediately plays the track
+                    const isSongItem =
+                        itemType === LibraryItem.SONG ||
+                        itemType === LibraryItem.PLAYLIST_SONG ||
+                        itemType === LibraryItem.QUEUE_SONG ||
+                        (item as { _itemType?: LibraryItem })?._itemType === LibraryItem.SONG;
+
+                    if (isSongItem) {
+                        const playFn = overrides?.onDoubleClick || handleDoubleClick;
+                        playFn({ event, index, internalState, item, itemType });
                     }
                 }
             },
@@ -205,85 +288,7 @@ export const useDefaultItemListControls = (args?: UseDefaultItemListControlsArgs
                       onColumnResized(columnId, width)
                 : undefined,
 
-            onDoubleClick: ({ internalState, item, itemType, meta }: DefaultItemControlProps) => {
-                if (!item || !internalState) {
-                    return;
-                }
-
-                internalState.setSelected([item]);
-
-                if (
-                    itemType === LibraryItem.ALBUM ||
-                    itemType === LibraryItem.ALBUM_ARTIST ||
-                    itemType === LibraryItem.ARTIST ||
-                    itemType === LibraryItem.GENRE ||
-                    itemType === LibraryItem.PLAYLIST
-                ) {
-                    const path = getTitlePath(itemType, item.id);
-                    if (path) {
-                        navigateRef.current(path, { state: { item } });
-                        return;
-                    }
-                }
-
-                if (itemType === LibraryItem.SONG || itemType === LibraryItem.PLAYLIST_SONG) {
-                    const data = internalState.getData();
-                    const validSongs = data.filter((d): d is Song => {
-                        if (!d || typeof d !== 'object') {
-                            return false;
-                        }
-                        if (!('_itemType' in d)) {
-                            return false;
-                        }
-                        return (d as { _itemType: LibraryItem })._itemType === LibraryItem.SONG;
-                    });
-
-                    if (validSongs.length === 0) {
-                        return;
-                    }
-
-                    const clickedSongId = item.id;
-                    const clickedIndex = validSongs.findIndex((song) => song.id === clickedSongId);
-
-                    if (clickedIndex === -1) {
-                        return;
-                    }
-
-                    const playType = (meta?.playType as Play) || Play.NOW;
-                    const singleSongOnly = meta?.singleSongOnly === true;
-
-                    let songsToAdd: Song[];
-                    if (
-                        singleSongOnly ||
-                        playType === Play.NEXT ||
-                        playType === Play.LAST ||
-                        playType === Play.NEXT_SHUFFLE ||
-                        playType === Play.LAST_SHUFFLE
-                    ) {
-                        songsToAdd = [item as Song];
-                    } else {
-                        const songsBefore = 50;
-                        const songsAfter = 50;
-                        const startIndex = Math.max(0, clickedIndex - songsBefore);
-                        const endIndex = Math.min(validSongs.length, clickedIndex + songsAfter + 1);
-                        songsToAdd = validSongs.slice(startIndex, endIndex);
-                    }
-
-                    if (songsToAdd.length === 0) {
-                        return;
-                    }
-
-                    playerRef.current.addToQueueByData(songsToAdd, playType, item.id);
-                    return;
-                }
-
-                if (itemType === LibraryItem.QUEUE_SONG) {
-                    const queueSong = item as QueueSong;
-                    if (queueSong._uniqueId) {
-                        playerRef.current.mediaPlay(queueSong._uniqueId);
-                    }
-                }
-            },
+            onDoubleClick: handleDoubleClick,
 
             onExpand: ({ item, itemType }: DefaultItemControlProps) => {
                 if (!item) return;

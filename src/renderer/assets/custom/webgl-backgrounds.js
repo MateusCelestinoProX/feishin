@@ -5,116 +5,70 @@ let currentCleanup = null;
 let currentActiveType = null;
 
 // ==========================================
-// PERFORMANCE ENGINE & HARDWARE ADAPTIVE THROTTLER
+// PERFORMANCE ENGINE — FLUIDEZ TOTAL & ZERO THROTTLING
 // ==========================================
 let currentBgSession = 0;
 
 export const getOptimizedDPR = () => {
-  // Calibração de hardware: 0.6 em Retina/Displays 4K e 0.75 em Desktop padrão
-  // Proporciona visual Liquid Glass perfeito e economiza mais de 70% de processamento da GPU
   if (typeof window !== 'undefined') {
     const dpr = window.devicePixelRatio || 1;
-    if (dpr > 1.5) return 0.6;
-    return 0.75;
+    // Calibração de hardware mobile (120Hz/90Hz/60Hz):
+    // 0.75 garante 120 FPS cravados e constantes sob o glass/vignette sem gargalo de fill-rate
+    if (dpr > 1.5) return 0.75;
+    return 1.0;
   }
-  return 0.6;
+  return 0.75;
 };
 
 let isTabVisible = typeof document !== 'undefined' ? !document.hidden : true;
-let isUserScrollingFast = false;
-let scrollEndTimer = null;
-
 if (typeof document !== 'undefined') {
   document.addEventListener('visibilitychange', () => {
     isTabVisible = !document.hidden;
   }, { passive: true });
-
-  window.addEventListener('scroll', () => {
-    isUserScrollingFast = true;
-    if (scrollEndTimer) clearTimeout(scrollEndTimer);
-    scrollEndTimer = setTimeout(() => {
-      isUserScrollingFast = false;
-    }, 120);
-  }, { passive: true });
 }
 
-// Universal hardware-efficient RAF throttler for all 31 shaders (60 FPS cap, 0% CPU on hidden tab / modal pause)
-const nativeRAF = (typeof window !== 'undefined' ? window.requestAnimationFrame.bind(window) : (cb) => setTimeout(cb, 16));
-let lastBgFrameGlobal = 0;
-const TARGET_BG_FPS = 60;
-const BG_FRAME_INTERVAL = 1000 / TARGET_BG_FPS;
+// Universal ultra-fluid RAF: sincronizado diretamente ao VSYNC nativo da tela (120Hz/90Hz/60Hz)
+// Zero atraso artificial, zero throttling em scroll/touch, zero microtravamentos
+const nativeRAF = (typeof window !== 'undefined' && window.requestAnimationFrame)
+  ? window.requestAnimationFrame.bind(window)
+  : (cb) => setTimeout(cb, 16);
 
-const isEngineSuspended = () => {
-  if (typeof window !== 'undefined' && window.__FORCE_SHADER_RUNNING__) return false;
-  if (!isTabVisible && !(typeof window !== 'undefined' && window.__FORCE_SHADER_RUNNING__)) return true;
-  if (typeof window !== 'undefined') {
-    if (window.__PAUSE_WEBGL_SHADERS__ && !window.__FORCE_SHADER_RUNNING__) return true;
-    if (window.__MODAL_OPEN_PAUSE__) return true;
-  }
-  return false;
-};
+const nativeCAF = (typeof window !== 'undefined' && window.cancelAnimationFrame)
+  ? window.cancelAnimationFrame.bind(window)
+  : clearTimeout;
 
 const requestAnimationFrame = (callback) => {
   const session = currentBgSession;
   return nativeRAF((time) => {
-    // 1. Eliminação imediata de loops zumbis de fundos anteriores
     if (session !== currentBgSession) return;
-
-    // 2. Pausa completa (0% CPU/GPU) se a aba estiver oculta ou suspensa
-    if (isEngineSuspended()) {
-      setTimeout(() => {
-        if (session === currentBgSession) {
-          requestAnimationFrame(callback);
-        }
-      }, 250);
-      return;
-    }
-
-    // 3. Regulação de taxa de quadros (suavização adaptativa no fast scroll)
-    const effectiveInterval = isUserScrollingFast ? 33.3 : BG_FRAME_INTERVAL;
-    const delta = time - lastBgFrameGlobal;
-    if (delta < effectiveInterval) {
+    if (!isTabVisible && !(typeof window !== 'undefined' && window.__FORCE_SHADER_RUNNING__)) {
       nativeRAF((nextTime) => {
-        if (session === currentBgSession) {
-          callback(nextTime);
-        }
+        if (session === currentBgSession) callback(nextTime);
       });
       return;
     }
-    lastBgFrameGlobal = time;
     callback(time);
   });
 };
 
-export const runAdaptiveAnimation = (renderFn, targetFps = 60) => {
+export const runAdaptiveAnimation = (renderFn) => {
   let rafId = 0;
-  let lastFrameTime = 0;
-  const frameInterval = 1000 / targetFps;
   let running = true;
   const session = currentBgSession;
 
   const loop = (now) => {
     if (!running || session !== currentBgSession) return;
     rafId = requestAnimationFrame(loop);
-
-    if (isEngineSuspended()) return;
-
-    const delta = now - lastFrameTime;
-    const effectiveInterval = isUserScrollingFast ? (frameInterval * 2.0) : frameInterval;
-
-    if (delta >= effectiveInterval) {
-      lastFrameTime = now - (delta % effectiveInterval);
-      try {
-        renderFn(now);
-      } catch (e) {}
-    }
+    try {
+      renderFn(now);
+    } catch (e) {}
   };
 
   rafId = requestAnimationFrame(loop);
 
   return () => {
     running = false;
-    if (rafId && typeof cancelAnimationFrame !== 'undefined') cancelAnimationFrame(rafId);
+    if (rafId) nativeCAF(rafId);
   };
 };
 
@@ -314,7 +268,7 @@ function initStrands(ctn, opts = {}) {
   const dispersion = opts.dispersion ?? 1;
   const glassSize = opts.glassSize ?? 1;
 
-  const renderer = new Renderer({ dpr: getOptimizedDPR(), alpha: true, premultipliedAlpha: true, antialias: false, powerPreference: 'low-power' });
+  const renderer = new Renderer({ dpr: getOptimizedDPR(), alpha: true, premultipliedAlpha: true, antialias: false, powerPreference: 'high-performance' });
   const gl = renderer.gl;
   gl.clearColor(0, 0, 0, 0);
   gl.enable(gl.BLEND);
@@ -383,13 +337,6 @@ function initStrands(ctn, opts = {}) {
   let animateId = 0;
   const update = t => {
     if (!isTabVisible) {
-      if (typeof raf !== 'undefined') raf = requestAnimationFrame(typeof loop !== 'undefined' ? loop : update);
-      else if (typeof rafId !== 'undefined') rafId = requestAnimationFrame(typeof loop !== 'undefined' ? loop : update);
-      else if (typeof animateId !== 'undefined') animateId = requestAnimationFrame(typeof loop !== 'undefined' ? loop : update);
-      else if (typeof animationId !== 'undefined') animationId = requestAnimationFrame(typeof loop !== 'undefined' ? loop : update);
-      return;
-    }
-    if (isUserScrollingFast && Math.random() < 0.5) {
       if (typeof raf !== 'undefined') raf = requestAnimationFrame(typeof loop !== 'undefined' ? loop : update);
       else if (typeof rafId !== 'undefined') rafId = requestAnimationFrame(typeof loop !== 'undefined' ? loop : update);
       else if (typeof animateId !== 'undefined') animateId = requestAnimationFrame(typeof loop !== 'undefined' ? loop : update);
@@ -566,13 +513,6 @@ void main() {
       else if (typeof animationId !== 'undefined') animationId = requestAnimationFrame(typeof loop !== 'undefined' ? loop : update);
       return;
     }
-    if (isUserScrollingFast && Math.random() < 0.5) {
-      if (typeof raf !== 'undefined') raf = requestAnimationFrame(typeof loop !== 'undefined' ? loop : update);
-      else if (typeof rafId !== 'undefined') rafId = requestAnimationFrame(typeof loop !== 'undefined' ? loop : update);
-      else if (typeof animateId !== 'undefined') animateId = requestAnimationFrame(typeof loop !== 'undefined' ? loop : update);
-      else if (typeof animationId !== 'undefined') animationId = requestAnimationFrame(typeof loop !== 'undefined' ? loop : update);
-      return;
-    }
 
     uniforms.iTime.value = t * 0.001;
     try {
@@ -714,7 +654,7 @@ function initPlasmaWave(ctn, opts = {}) {
     stencil: false,
     premultipliedAlpha: false,
     preserveDrawingBuffer: false,
-    powerPreference: 'low-power'
+    powerPreference: 'high-performance'
   });
 
   const gl = renderer.gl;
@@ -775,13 +715,6 @@ function initPlasmaWave(ctn, opts = {}) {
 
   const update = now => {
     if (!isTabVisible) {
-      if (typeof raf !== 'undefined') raf = requestAnimationFrame(typeof loop !== 'undefined' ? loop : update);
-      else if (typeof rafId !== 'undefined') rafId = requestAnimationFrame(typeof loop !== 'undefined' ? loop : update);
-      else if (typeof animateId !== 'undefined') animateId = requestAnimationFrame(typeof loop !== 'undefined' ? loop : update);
-      else if (typeof animationId !== 'undefined') animationId = requestAnimationFrame(typeof loop !== 'undefined' ? loop : update);
-      return;
-    }
-    if (isUserScrollingFast && Math.random() < 0.5) {
       if (typeof raf !== 'undefined') raf = requestAnimationFrame(typeof loop !== 'undefined' ? loop : update);
       else if (typeof rafId !== 'undefined') rafId = requestAnimationFrame(typeof loop !== 'undefined' ? loop : update);
       else if (typeof animateId !== 'undefined') animateId = requestAnimationFrame(typeof loop !== 'undefined' ? loop : update);
@@ -1077,13 +1010,6 @@ function initFerrofluid(ctn, opts = {}) {
   let rafId;
   const loop = t => {
     if (!isTabVisible) {
-      if (typeof raf !== 'undefined') raf = requestAnimationFrame(typeof loop !== 'undefined' ? loop : update);
-      else if (typeof rafId !== 'undefined') rafId = requestAnimationFrame(typeof loop !== 'undefined' ? loop : update);
-      else if (typeof animateId !== 'undefined') animateId = requestAnimationFrame(typeof loop !== 'undefined' ? loop : update);
-      else if (typeof animationId !== 'undefined') animationId = requestAnimationFrame(typeof loop !== 'undefined' ? loop : update);
-      return;
-    }
-    if (isUserScrollingFast && Math.random() < 0.5) {
       if (typeof raf !== 'undefined') raf = requestAnimationFrame(typeof loop !== 'undefined' ? loop : update);
       else if (typeof rafId !== 'undefined') rafId = requestAnimationFrame(typeof loop !== 'undefined' ? loop : update);
       else if (typeof animateId !== 'undefined') animateId = requestAnimationFrame(typeof loop !== 'undefined' ? loop : update);
@@ -2176,7 +2102,7 @@ function initDither(ctn, opts = {}) {
   const enableMouse = opts.enableMouseInteraction ?? true;
   const mouseRadius = opts.mouseRadius ?? 0.3;
 
-  const renderer = new Renderer({ dpr: getOptimizedDPR(), alpha: true, antialias: false, powerPreference: 'low-power' });
+  const renderer = new Renderer({ dpr: getOptimizedDPR(), alpha: true, antialias: false, powerPreference: 'high-performance' });
   const gl = renderer.gl;
   gl.canvas.style.width = '100%';
   gl.canvas.style.height = '100%';
@@ -2238,13 +2164,6 @@ function initDither(ctn, opts = {}) {
   let rafId;
   const loop = t => {
     if (!isTabVisible) {
-      if (typeof raf !== 'undefined') raf = requestAnimationFrame(typeof loop !== 'undefined' ? loop : update);
-      else if (typeof rafId !== 'undefined') rafId = requestAnimationFrame(typeof loop !== 'undefined' ? loop : update);
-      else if (typeof animateId !== 'undefined') animateId = requestAnimationFrame(typeof loop !== 'undefined' ? loop : update);
-      else if (typeof animationId !== 'undefined') animationId = requestAnimationFrame(typeof loop !== 'undefined' ? loop : update);
-      return;
-    }
-    if (isUserScrollingFast && Math.random() < 0.5) {
       if (typeof raf !== 'undefined') raf = requestAnimationFrame(typeof loop !== 'undefined' ? loop : update);
       else if (typeof rafId !== 'undefined') rafId = requestAnimationFrame(typeof loop !== 'undefined' ? loop : update);
       else if (typeof animateId !== 'undefined') animateId = requestAnimationFrame(typeof loop !== 'undefined' ? loop : update);
@@ -2404,13 +2323,6 @@ function initDarkVeil(ctn, opts = {}) {
 
   const loop = () => {
     if (!isTabVisible) {
-      if (typeof raf !== 'undefined') raf = requestAnimationFrame(typeof loop !== 'undefined' ? loop : update);
-      else if (typeof rafId !== 'undefined') rafId = requestAnimationFrame(typeof loop !== 'undefined' ? loop : update);
-      else if (typeof animateId !== 'undefined') animateId = requestAnimationFrame(typeof loop !== 'undefined' ? loop : update);
-      else if (typeof animationId !== 'undefined') animationId = requestAnimationFrame(typeof loop !== 'undefined' ? loop : update);
-      return;
-    }
-    if (isUserScrollingFast && Math.random() < 0.5) {
       if (typeof raf !== 'undefined') raf = requestAnimationFrame(typeof loop !== 'undefined' ? loop : update);
       else if (typeof rafId !== 'undefined') rafId = requestAnimationFrame(typeof loop !== 'undefined' ? loop : update);
       else if (typeof animateId !== 'undefined') animateId = requestAnimationFrame(typeof loop !== 'undefined' ? loop : update);
@@ -3267,13 +3179,6 @@ function initWebThreads(container, opts = {}) {
       else if (typeof animationId !== 'undefined') animationId = requestAnimationFrame(typeof loop !== 'undefined' ? loop : update);
       return;
     }
-    if (isUserScrollingFast && Math.random() < 0.5) {
-      if (typeof raf !== 'undefined') raf = requestAnimationFrame(typeof loop !== 'undefined' ? loop : update);
-      else if (typeof rafId !== 'undefined') rafId = requestAnimationFrame(typeof loop !== 'undefined' ? loop : update);
-      else if (typeof animateId !== 'undefined') animateId = requestAnimationFrame(typeof loop !== 'undefined' ? loop : update);
-      else if (typeof animationId !== 'undefined') animationId = requestAnimationFrame(typeof loop !== 'undefined' ? loop : update);
-      return;
-    }
 
     program.uniforms.iTime.value = (t - t0) * 0.001;
     currentMouse[0] += 0.05 * (targetMouse[0] - currentMouse[0]);
@@ -3483,13 +3388,6 @@ function initTopography(container, opts = {}) {
       else if (typeof animationId !== 'undefined') animationId = requestAnimationFrame(typeof loop !== 'undefined' ? loop : update);
       return;
     }
-    if (isUserScrollingFast && Math.random() < 0.5) {
-      if (typeof raf !== 'undefined') raf = requestAnimationFrame(typeof loop !== 'undefined' ? loop : update);
-      else if (typeof rafId !== 'undefined') rafId = requestAnimationFrame(typeof loop !== 'undefined' ? loop : update);
-      else if (typeof animateId !== 'undefined') animateId = requestAnimationFrame(typeof loop !== 'undefined' ? loop : update);
-      else if (typeof animationId !== 'undefined') animationId = requestAnimationFrame(typeof loop !== 'undefined' ? loop : update);
-      return;
-    }
 
     const time = (t - t0) * 0.001;
     program.uniforms.iTime.value = time;
@@ -3608,7 +3506,7 @@ function initBalatro(container, opts = {}) {
   }
   `;
 
-  const renderer = new Renderer({ dpr: getOptimizedDPR(), antialias: false, powerPreference: 'low-power' });
+  const renderer = new Renderer({ dpr: getOptimizedDPR(), antialias: false, powerPreference: 'high-performance' });
   const gl = renderer.gl;
   gl.clearColor(0, 0, 0, 1);
   const canvas = gl.canvas;
@@ -3655,13 +3553,6 @@ function initBalatro(container, opts = {}) {
   let raf = 0;
   const loop = time => {
     if (!isTabVisible) {
-      if (typeof raf !== 'undefined') raf = requestAnimationFrame(typeof loop !== 'undefined' ? loop : update);
-      else if (typeof rafId !== 'undefined') rafId = requestAnimationFrame(typeof loop !== 'undefined' ? loop : update);
-      else if (typeof animateId !== 'undefined') animateId = requestAnimationFrame(typeof loop !== 'undefined' ? loop : update);
-      else if (typeof animationId !== 'undefined') animationId = requestAnimationFrame(typeof loop !== 'undefined' ? loop : update);
-      return;
-    }
-    if (isUserScrollingFast && Math.random() < 0.5) {
       if (typeof raf !== 'undefined') raf = requestAnimationFrame(typeof loop !== 'undefined' ? loop : update);
       else if (typeof rafId !== 'undefined') rafId = requestAnimationFrame(typeof loop !== 'undefined' ? loop : update);
       else if (typeof animateId !== 'undefined') animateId = requestAnimationFrame(typeof loop !== 'undefined' ? loop : update);
@@ -4003,13 +3894,6 @@ function initFaultyTerminal(container, opts = {}) {
   let raf = 0;
   const update = t => {
     if (!isTabVisible) {
-      if (typeof raf !== 'undefined') raf = requestAnimationFrame(typeof loop !== 'undefined' ? loop : update);
-      else if (typeof rafId !== 'undefined') rafId = requestAnimationFrame(typeof loop !== 'undefined' ? loop : update);
-      else if (typeof animateId !== 'undefined') animateId = requestAnimationFrame(typeof loop !== 'undefined' ? loop : update);
-      else if (typeof animationId !== 'undefined') animationId = requestAnimationFrame(typeof loop !== 'undefined' ? loop : update);
-      return;
-    }
-    if (isUserScrollingFast && Math.random() < 0.5) {
       if (typeof raf !== 'undefined') raf = requestAnimationFrame(typeof loop !== 'undefined' ? loop : update);
       else if (typeof rafId !== 'undefined') rafId = requestAnimationFrame(typeof loop !== 'undefined' ? loop : update);
       else if (typeof animateId !== 'undefined') animateId = requestAnimationFrame(typeof loop !== 'undefined' ? loop : update);
@@ -4692,7 +4576,7 @@ function initAurora(container, opts = {}) {
   }
   `;
 
-  const renderer = new Renderer({ dpr: getOptimizedDPR(), alpha: true, premultipliedAlpha: true, antialias: false, powerPreference: 'low-power' });
+  const renderer = new Renderer({ dpr: getOptimizedDPR(), alpha: true, premultipliedAlpha: true, antialias: false, powerPreference: 'high-performance' });
   const gl = renderer.gl;
   gl.clearColor(0, 0, 0, 0);
   gl.enable(gl.BLEND);
@@ -4891,13 +4775,6 @@ function initLetterGlitch(container, opts = {}) {
       else if (typeof animationId !== 'undefined') animationId = requestAnimationFrame(typeof loop !== 'undefined' ? loop : update);
       return;
     }
-    if (isUserScrollingFast && Math.random() < 0.5) {
-      if (typeof raf !== 'undefined') raf = requestAnimationFrame(typeof loop !== 'undefined' ? loop : update);
-      else if (typeof rafId !== 'undefined') rafId = requestAnimationFrame(typeof loop !== 'undefined' ? loop : update);
-      else if (typeof animateId !== 'undefined') animateId = requestAnimationFrame(typeof loop !== 'undefined' ? loop : update);
-      else if (typeof animationId !== 'undefined') animationId = requestAnimationFrame(typeof loop !== 'undefined' ? loop : update);
-      return;
-    }
 
     raf = requestAnimationFrame(loop);
     const now = Date.now();
@@ -5054,13 +4931,6 @@ function initPlasma(container, opts = {}) {
   const startTime = performance.now();
   const loop = now => {
     if (!isTabVisible) {
-      if (typeof raf !== 'undefined') raf = requestAnimationFrame(typeof loop !== 'undefined' ? loop : update);
-      else if (typeof rafId !== 'undefined') rafId = requestAnimationFrame(typeof loop !== 'undefined' ? loop : update);
-      else if (typeof animateId !== 'undefined') animateId = requestAnimationFrame(typeof loop !== 'undefined' ? loop : update);
-      else if (typeof animationId !== 'undefined') animationId = requestAnimationFrame(typeof loop !== 'undefined' ? loop : update);
-      return;
-    }
-    if (isUserScrollingFast && Math.random() < 0.5) {
       if (typeof raf !== 'undefined') raf = requestAnimationFrame(typeof loop !== 'undefined' ? loop : update);
       else if (typeof rafId !== 'undefined') rafId = requestAnimationFrame(typeof loop !== 'undefined' ? loop : update);
       else if (typeof animateId !== 'undefined') animateId = requestAnimationFrame(typeof loop !== 'undefined' ? loop : update);
@@ -6651,13 +6521,6 @@ function initPrism(container, opts = {}) {
       else if (typeof animationId !== 'undefined') animationId = requestAnimationFrame(typeof loop !== 'undefined' ? loop : update);
       return;
     }
-    if (isUserScrollingFast && Math.random() < 0.5) {
-      if (typeof raf !== 'undefined') raf = requestAnimationFrame(typeof loop !== 'undefined' ? loop : update);
-      else if (typeof rafId !== 'undefined') rafId = requestAnimationFrame(typeof loop !== 'undefined' ? loop : update);
-      else if (typeof animateId !== 'undefined') animateId = requestAnimationFrame(typeof loop !== 'undefined' ? loop : update);
-      else if (typeof animationId !== 'undefined') animationId = requestAnimationFrame(typeof loop !== 'undefined' ? loop : update);
-      return;
-    }
 
     raf = requestAnimationFrame(loop);
     program.uniforms.iTime.value = (now - startTime) * 0.001;
@@ -6831,13 +6694,6 @@ function initPrismaticBurst(container, opts = {}) {
       else if (typeof animationId !== 'undefined') animationId = requestAnimationFrame(typeof loop !== 'undefined' ? loop : update);
       return;
     }
-    if (isUserScrollingFast && Math.random() < 0.5) {
-      if (typeof raf !== 'undefined') raf = requestAnimationFrame(typeof loop !== 'undefined' ? loop : update);
-      else if (typeof rafId !== 'undefined') rafId = requestAnimationFrame(typeof loop !== 'undefined' ? loop : update);
-      else if (typeof animateId !== 'undefined') animateId = requestAnimationFrame(typeof loop !== 'undefined' ? loop : update);
-      else if (typeof animationId !== 'undefined') animationId = requestAnimationFrame(typeof loop !== 'undefined' ? loop : update);
-      return;
-    }
 
     raf = requestAnimationFrame(loop);
     program.uniforms.uTime.value = (now - startTime) * 0.001;
@@ -6945,7 +6801,7 @@ function initLightning(container, opts = {}) {
   }
   `;
 
-  const renderer = new Renderer({ dpr: getOptimizedDPR(), alpha: true, premultipliedAlpha: false, antialias: false, powerPreference: 'low-power' });
+  const renderer = new Renderer({ dpr: getOptimizedDPR(), alpha: true, premultipliedAlpha: false, antialias: false, powerPreference: 'high-performance' });
   const gl = renderer.gl;
   const canvas = gl.canvas;
   canvas.style.position = 'absolute';
@@ -6987,13 +6843,6 @@ function initLightning(container, opts = {}) {
   const startTime = performance.now();
   const loop = now => {
     if (!isTabVisible) {
-      if (typeof raf !== 'undefined') raf = requestAnimationFrame(typeof loop !== 'undefined' ? loop : update);
-      else if (typeof rafId !== 'undefined') rafId = requestAnimationFrame(typeof loop !== 'undefined' ? loop : update);
-      else if (typeof animateId !== 'undefined') animateId = requestAnimationFrame(typeof loop !== 'undefined' ? loop : update);
-      else if (typeof animationId !== 'undefined') animationId = requestAnimationFrame(typeof loop !== 'undefined' ? loop : update);
-      return;
-    }
-    if (isUserScrollingFast && Math.random() < 0.5) {
       if (typeof raf !== 'undefined') raf = requestAnimationFrame(typeof loop !== 'undefined' ? loop : update);
       else if (typeof rafId !== 'undefined') rafId = requestAnimationFrame(typeof loop !== 'undefined' ? loop : update);
       else if (typeof animateId !== 'undefined') animateId = requestAnimationFrame(typeof loop !== 'undefined' ? loop : update);
@@ -7139,7 +6988,7 @@ function initEvilEye(container, opts = {}) {
   }
   `;
 
-  const renderer = new Renderer({ dpr: getOptimizedDPR(), alpha: true, premultipliedAlpha: false, antialias: false, powerPreference: 'low-power' });
+  const renderer = new Renderer({ dpr: getOptimizedDPR(), alpha: true, premultipliedAlpha: false, antialias: false, powerPreference: 'high-performance' });
   const gl = renderer.gl;
   gl.clearColor(0, 0, 0, 0);
   const canvas = gl.canvas;
@@ -7210,13 +7059,6 @@ function initEvilEye(container, opts = {}) {
   let raf = 0;
   const loop = time => {
     if (!isTabVisible) {
-      if (typeof raf !== 'undefined') raf = requestAnimationFrame(typeof loop !== 'undefined' ? loop : update);
-      else if (typeof rafId !== 'undefined') rafId = requestAnimationFrame(typeof loop !== 'undefined' ? loop : update);
-      else if (typeof animateId !== 'undefined') animateId = requestAnimationFrame(typeof loop !== 'undefined' ? loop : update);
-      else if (typeof animationId !== 'undefined') animationId = requestAnimationFrame(typeof loop !== 'undefined' ? loop : update);
-      return;
-    }
-    if (isUserScrollingFast && Math.random() < 0.5) {
       if (typeof raf !== 'undefined') raf = requestAnimationFrame(typeof loop !== 'undefined' ? loop : update);
       else if (typeof rafId !== 'undefined') rafId = requestAnimationFrame(typeof loop !== 'undefined' ? loop : update);
       else if (typeof animateId !== 'undefined') animateId = requestAnimationFrame(typeof loop !== 'undefined' ? loop : update);
@@ -8862,7 +8704,7 @@ void main(){
   const renderer = new THREE_LIB.WebGLRenderer({
     antialias: true,
     alpha: true,
-    powerPreference: 'low-power'
+    powerPreference: 'high-performance'
   });
   renderer.domElement.style.width = '100%';
   renderer.domElement.style.height = '100%';

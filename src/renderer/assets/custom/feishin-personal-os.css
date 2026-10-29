@@ -54,6 +54,9 @@ div, span, p, a, h1, h2, h3, h4, h5, h6 {
     width: 100% !important;
     height: 100% !important;
     display: block !important;
+    transform: translate3d(0, 0, 0) !important;
+    backface-visibility: hidden !important;
+    pointer-events: none !important;
 }
 
 #bg-webgl-dim {
@@ -3242,4 +3245,31 @@ button.fs-player-button-module-main svg {
     overflow: hidden !important;
     text-overflow: ellipsis !important;
     max-width: 220px !important;
+}
+
+/* ==========================================================================
+   FEISHIN CONTEXT MENU CENTRALIZATION (macOS Desktop & Android Mobile)
+   ========================================================================== */
+[data-radix-popper-content-wrapper]:has(> [role="menu"]:not([aria-labelledby])),
+[data-radix-popper-content-wrapper]:has(> [data-feishin-context-menu="main"]),
+[data-feishin-menu-wrapper="main"] {
+    position: fixed !important;
+    left: 50% !important;
+    top: 50% !important;
+    transform: translate(-50%, -50%) !important;
+    z-index: 100000 !important;
+    max-height: 90vh !important;
+    max-width: 90vw !important;
+}
+
+[data-radix-popper-content-wrapper]:has(> [role="menu"]:not([aria-labelledby])) > [role="menu"],
+[data-radix-popper-content-wrapper]:has(> [data-feishin-context-menu="main"]) > [role="menu"],
+[data-feishin-menu-wrapper="main"] > [role="menu"] {
+    max-height: min(34rem, 82vh) !important;
+    width: min(20rem, 86vw) !important;
+    min-width: 16rem !important;
+    box-shadow: 0 24px 64px rgba(0, 0, 0, 0.75), 0 0 0 1px rgba(255, 255, 255, 0.12) !important;
+    border-radius: 18px !important;
+    backdrop-filter: blur(28px) saturate(190%) !important;
+    -webkit-backdrop-filter: blur(28px) saturate(190%) !important;
 }

@@ -957,6 +957,7 @@ if (typeof window !== 'undefined') {
 
     initPlayerSplitQueue();
     initPlayerKillSwitch();
+    initSingleClickTrackPlayback();
 
     const enforcePlayerCoverArt = () => {
       const sidebarImg = document.querySelector('.fs-sidebar-module-image-container');
@@ -1538,6 +1539,71 @@ if (typeof window !== 'undefined') {
     } else {
       observer.observe(document.body, { childList: true, subtree: true });
     }
+  }
+
+  // ==========================================================================
+  // 13. REPRODUÇÃO INSTANTÂNEA DE FAIXA COM UM CLIQUE (SINGLE-CLICK PLAY)
+  // Clicar em qualquer espaço livre da faixa (título, número, duração, data,
+  // ou fundo) inicia a reprodução imediatamente, tornando o Feishin muito mais
+  // rápido, intuitivo e agradável.
+  // Preserva elementos interativos: links de artista/álbum, botão de mais (3 pontos),
+  // botão de favoritos e atalhos de seleção múltipla (Cmd/Ctrl/Shift).
+  // ==========================================================================
+  function initSingleClickTrackPlayback() {
+    window.addEventListener(
+      'click',
+      (e) => {
+        if (e.__isSyntheticSingleClickPlay) return;
+        if (e.button !== 0) return;
+        if (e.ctrlKey || e.metaKey || e.shiftKey || e.altKey) return;
+
+        const interactive = e.target.closest(
+          'button, a, input, select, textarea, [role="button"], [role="menuitem"], .fs-action-icon-module-root, [data-prevent-play]'
+        );
+        if (interactive) return;
+
+        const row = e.target.closest(
+          '[role="row"], .fs-track-row, [class*="trackRow"], [class*="track-row"]'
+        );
+        if (!row) return;
+
+        if (
+          row.getAttribute('aria-rowindex') === '1' ||
+          row.closest('[class*="header"]') ||
+          row.querySelector('th')
+        ) {
+          return;
+        }
+
+        const isTrackRow =
+          row.classList.contains('fs-track-row') ||
+          row.className.includes('trackRow') ||
+          row.className.includes('track-row') ||
+          !!row.querySelector('[itemtype="song"], [class*="title-combined"], [class*="titleCombined"]') ||
+          !!row.innerText.match(/\d+:\d{2}/) ||
+          window.location.hash.includes('/library/songs') ||
+          window.location.hash.includes('/library/playlists/') ||
+          window.location.hash.includes('/queue') ||
+          (window.location.hash.includes('/library/albums/') &&
+            !!row.closest(
+              '.fs-item-detail-list-module-container, .fs-item-table-list-module-item-table-list-container'
+            ));
+
+        if (!isTrackRow) return;
+
+        const secondClick = new MouseEvent('click', {
+          bubbles: true,
+          cancelable: true,
+          view: window,
+          detail: 2,
+          clientX: e.clientX,
+          clientY: e.clientY,
+        });
+        secondClick.__isSyntheticSingleClickPlay = true;
+        e.target.dispatchEvent(secondClick);
+      },
+      false
+    );
   }
 
   if (document.readyState === 'loading') {
