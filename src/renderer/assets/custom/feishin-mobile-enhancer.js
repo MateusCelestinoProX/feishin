@@ -150,9 +150,18 @@
                 console.warn('[FeishinMobile] Erro ao sanitizar store_authentication:', err);
             }
 
-            // Credenciais Navidrome VPS (Inicialização se vazio)
+            // Credenciais Navidrome VPS (Inicialização se vazio ou sem servidor ativo)
             const authStr = localStorage.getItem('store_authentication');
-            if (!authStr || authStr === 'null' || authStr === '{}') {
+            let authNeedsInit = false;
+            try {
+                const check = JSON.parse(authStr);
+                if (!check?.state?.currentServer || !check?.state?.currentServer?.credential) {
+                    authNeedsInit = true;
+                }
+            } catch (e) {
+                authNeedsInit = true;
+            }
+            if (authNeedsInit) {
                 const defaultAuth = {
                     state: {
                         actions: {},
@@ -161,7 +170,7 @@
                             id: "FsiBb_mTdwLVTb1o_94bm",
                             isAdmin: true,
                             name: "Navidrome VPS",
-                            type: "navidrome",
+                            type: "subsonic",
                             url: "https://instance-20260907-0637.tail798a9b.ts.net:4533",
                             userId: "3xPL1BPoVa1ulwc1UkzYU6",
                             username: "MateusCelestinoPRO",
@@ -196,7 +205,7 @@
                                 id: "FsiBb_mTdwLVTb1o_94bm",
                                 isAdmin: true,
                                 name: "Navidrome VPS",
-                                type: "navidrome",
+                                type: "subsonic",
                                 url: "https://instance-20260907-0637.tail798a9b.ts.net:4533",
                                 userId: "3xPL1BPoVa1ulwc1UkzYU6",
                                 username: "MateusCelestinoPRO",
@@ -465,12 +474,7 @@
                     <span class="feishin-more-item-label">Favoritos</span>
                 </button>
 
-                <button class="feishin-more-item" data-route="#/library/recently-added" aria-label="Recentes">
-                    <div class="feishin-more-icon-wrap">
-                        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/></svg>
-                    </div>
-                    <span class="feishin-more-item-label">Recentes</span>
-                </button>
+
 
                 <button class="feishin-more-item" data-route="#/library/album-artists" aria-label="Artistas do Álbum">
                     <div class="feishin-more-icon-wrap">
@@ -539,6 +543,10 @@
                 <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/></svg>
                 <span class="feishin-nav-label">Faixas</span>
             </button>
+            <button class="feishin-nav-tab" data-route="#/library/recently-added" aria-label="Recentes">
+                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/></svg>
+                <span class="feishin-nav-label">Recentes</span>
+            </button>
             <button class="feishin-nav-tab" data-route="#/library/genres" aria-label="Tags">
                 <svg viewBox="0 0 24 24" fill="currentColor"><path d="M21.41 11.58l-9-9C12.05 2.22 11.55 2 11 2H4c-1.1 0-2 .9-2 2v7c0 .55.22 1.05.59 1.42l9 9c.36.36.86.58 1.41.58.55 0 1.05-.22 1.41-.59l7-7c.37-.36.59-.86.59-1.41 0-.55-.23-1.06-.59-1.42zM5.5 7C4.67 7 4 6.33 4 5.5S4.67 4 5.5 4 7 4.67 7 5.5 6.33 7 5.5 7z"/></svg>
                 <span class="feishin-nav-label">Tags</span>
@@ -586,6 +594,7 @@
             const isBgOpen = document.getElementById('personal-os-shader-modal')?.style?.display === 'flex' || document.getElementById('personal-os-shader-modal')?.style?.display === 'block';
 
             const tabSongs = bottomNav.querySelector('[data-route="#/library/songs"]');
+            const tabRecent = bottomNav.querySelector('[data-route="#/library/recently-added"]');
             const tabTags = bottomNav.querySelector('[data-route="#/library/genres"]');
             const tabArtists = bottomNav.querySelector('[data-route="#/library/artists"]');
             const tabBg = document.getElementById('feishin-nav-backgrounds-btn');
@@ -600,6 +609,8 @@
                 tabMore?.classList.add('active');
             } else if (hash.startsWith('#/library/songs')) {
                 tabSongs?.classList.add('active');
+            } else if (hash.startsWith('#/library/recently-added')) {
+                tabRecent?.classList.add('active');
             } else if (hash.startsWith('#/library/genres') || hash.startsWith('#/library/tags')) {
                 tabTags?.classList.add('active');
             } else if (hash.startsWith('#/library/artists')) {
@@ -693,6 +704,9 @@
                             duration
                         );
                     }
+
+                    // Pré-carregamento proativo das próximas 2 faixas da fila
+                    preloadNextTracksInQueue(store);
                 }
             }
         } catch (e) {
@@ -700,7 +714,33 @@
         }
     }
 
-    setInterval(syncPlayerState, 400);
+    // Pré-carregamento nativo acelerado (Zero Delay ao pular ou finalizar faixa)
+    const preloadedAudioIds = new Set();
+    function preloadNextTracksInQueue(store) {
+        try {
+            if (!window.AndroidBridge?.preloadAudio) return;
+            const queueObj = store?.getQueue?.();
+            const items = queueObj?.items;
+            const curIdx = store?.player?.index;
+            if (!items || curIdx === undefined || curIdx < 0) return;
+
+            const authStr = localStorage.getItem('store_authentication');
+            if (!authStr) return;
+            const auth = JSON.parse(authStr);
+            const srv = auth?.state?.currentServer;
+            if (!srv?.url) return;
+
+            for (let offset = 1; offset <= 2; offset++) {
+                const next = items[curIdx + offset];
+                if (!next?.id || preloadedAudioIds.has(next.id)) continue;
+                preloadedAudioIds.add(next.id);
+                const streamUrl = `${srv.url}/rest/stream.view?id=${next.id}&v=1.13.0&c=Feishin&${srv.credential}`;
+                window.AndroidBridge.preloadAudio(streamUrl, next.id);
+            }
+        } catch (err) {}
+    }
+
+    setInterval(syncPlayerState, 250);
 
     // 6. Gesto de Swipe Down no Fullscreen Player para minimizar suavemente
     let touchStartY = 0;
@@ -823,6 +863,15 @@
         progressTimer: null,
         currentDuration: 0,
         isDraggingSeek: false,
+        lyricsCache: {},
+        lyricsState: {
+            songId: null,
+            loading: false,
+            syncedLines: [],
+            plainText: null,
+            activeLineIndex: -1
+        },
+        sleepTimerId: null,
 
         formatTime: function (sec) {
             sec = Math.max(0, Math.floor(sec || 0));
@@ -873,6 +922,8 @@
 
             document.getElementById('feishin-tp-lyrics-sheet')?.classList.remove('open');
             document.getElementById('feishin-tp-queue-sheet')?.classList.remove('open');
+            document.getElementById('feishin-tp-more-sheet')?.classList.remove('open');
+            document.getElementById('feishin-tp-details-modal')?.classList.remove('open');
             document.getElementById('feishin-tp-timer-backdrop')?.classList.remove('open');
 
             tp.style.transform = 'translateY(100%)';
@@ -902,11 +953,15 @@
                       <path d="m6 9 6 6 6-6"/>
                     </svg>
                   </button>
+                  <div class="feishin-tp-header-center">
+                    <span class="feishin-tp-header-subtitle">TOCANDO AGORA</span>
+                  </div>
                   <div class="feishin-tp-header-right">
                     <button class="feishin-tp-icon-btn" id="feishin-tp-btn-timer" aria-label="Temporizador">
                       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
                       </svg>
+                      <span class="feishin-tp-dot-badge" id="feishin-tp-timer-dot" style="display:none;"></span>
                     </button>
                     <button class="feishin-tp-icon-btn feishin-tp-more-btn" id="feishin-tp-btn-more" aria-label="Mais opções">
                       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -921,11 +976,17 @@
                   <div class="feishin-tp-art-card">
                     <img class="feishin-tp-cover-img" id="feishin-tp-cover" src="" alt="Capa" />
                     <div class="feishin-tp-cover-fallback" id="feishin-tp-cover-fallback">
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/>
+                      <svg class="feishin-tp-vinyl-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                        <circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/>
+                        <path d="M12 2a10 10 0 0 1 10 10"/><path d="M12 6a6 6 0 0 1 6 6"/>
                       </svg>
                     </div>
-                    <button class="feishin-tp-lyrics-pill" id="feishin-tp-pill-lyrics">Letras</button>
+                    <button class="feishin-tp-lyrics-pill" id="feishin-tp-pill-lyrics">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14" style="vertical-align: middle; margin-right: 4px;">
+                        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                      </svg>
+                      Letras
+                    </button>
                   </div>
                 </div>
 
@@ -1014,11 +1075,13 @@
               <div class="feishin-tp-sheet" id="feishin-tp-queue-sheet">
                 <div class="feishin-tp-sheet-header">
                   <div class="feishin-tp-sheet-title">Fila de Reprodução</div>
-                  <button class="feishin-tp-icon-btn" id="feishin-tp-queue-close" aria-label="Fechar fila">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                      <path d="m6 9 6 6 6-6"/>
-                    </svg>
-                  </button>
+                  <div class="feishin-tp-sheet-actions">
+                    <button class="feishin-tp-icon-btn" id="feishin-tp-queue-close" aria-label="Fechar fila">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="m6 9 6 6 6-6"/>
+                      </svg>
+                    </button>
+                  </div>
                 </div>
                 <div class="feishin-tp-sheet-content" id="feishin-tp-queue-list"></div>
               </div>
@@ -1034,6 +1097,51 @@
                   </button>
                 </div>
                 <div class="feishin-tp-sheet-content" id="feishin-tp-lyrics-content"></div>
+              </div>
+
+              <!-- Sheet de Mais Opções -->
+              <div class="feishin-tp-sheet" id="feishin-tp-more-sheet">
+                <div class="feishin-tp-sheet-header">
+                  <div class="feishin-tp-sheet-title">Opções da Faixa</div>
+                  <button class="feishin-tp-icon-btn" id="feishin-tp-more-close" aria-label="Fechar opções">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="m6 9 6 6 6-6"/>
+                    </svg>
+                  </button>
+                </div>
+                <div class="feishin-tp-sheet-content">
+                  <div class="feishin-tp-more-list">
+                    <div class="feishin-tp-more-item" id="feishin-tp-opt-details">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+                      <span>Detalhes Técnicos da Faixa</span>
+                    </div>
+                    <div class="feishin-tp-more-item" id="feishin-tp-opt-album">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="12" cy="12" r="4"/></svg>
+                      <span>Ir para o Álbum</span>
+                    </div>
+                    <div class="feishin-tp-more-item" id="feishin-tp-opt-artist">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                      <span>Ir para o Artista</span>
+                    </div>
+                    <div class="feishin-tp-more-item" id="feishin-tp-opt-delete" style="color: #EF4444 !important;">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color: #EF4444 !important;"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                      <span>Excluir Faixa do Servidor</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Modal Detalhes Técnicos -->
+              <div class="feishin-tp-sheet" id="feishin-tp-details-modal">
+                <div class="feishin-tp-sheet-header">
+                  <div class="feishin-tp-sheet-title">Detalhes da Faixa</div>
+                  <button class="feishin-tp-icon-btn" id="feishin-tp-details-close" aria-label="Fechar detalhes">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="m6 9 6 6 6-6"/>
+                    </svg>
+                  </button>
+                </div>
+                <div class="feishin-tp-sheet-content" id="feishin-tp-details-content"></div>
               </div>
 
               <!-- Modal Temporizador de Desligamento -->
@@ -1061,7 +1169,7 @@
             const tp = document.getElementById('feishin-track-page');
             if (!tp) return;
 
-            // Fechar
+            // Fechar minimizando
             document.getElementById('feishin-tp-btn-close')?.addEventListener('click', () => {
                 if (window.AndroidBridge?.hapticFeedback) window.AndroidBridge.hapticFeedback(0);
                 this.close();
@@ -1071,7 +1179,6 @@
             document.getElementById('feishin-tp-btn-play')?.addEventListener('click', () => {
                 if (window.AndroidBridge?.hapticFeedback) window.AndroidBridge.hapticFeedback(0);
                 window.FeishinNative.togglePlay();
-                // Alternância visual instantânea de alta resposta
                 const playIcon = document.getElementById('feishin-tp-play-icon');
                 const pauseIcon = document.getElementById('feishin-tp-pause-icon');
                 if (playIcon && pauseIcon) {
@@ -1130,8 +1237,9 @@
                 if (!sliderBox) return 0;
                 const rect = sliderBox.getBoundingClientRect();
                 const pct = Math.max(0, Math.min(1, (clientX - rect.left) / rect.width));
-                if (fill) fill.style.width = (pct * 100) + '%';
-                if (thumb) thumb.style.left = (pct * 100) + '%';
+                const pctStr = (pct * 100) + '%';
+                if (fill) fill.style.setProperty('width', pctStr, 'important');
+                if (thumb) thumb.style.setProperty('left', pctStr, 'important');
                 if (this.currentDuration > 0 && timeCur) {
                     timeCur.innerText = this.formatTime(pct * this.currentDuration);
                 }
@@ -1170,7 +1278,7 @@
             sliderBox?.addEventListener('pointerup', (e) => finishSeek(e.clientX));
             sliderBox?.addEventListener('pointercancel', (e) => finishSeek(e.clientX));
 
-            // Sheets
+            // Sheets & Ações
             document.getElementById('feishin-tp-pill-lyrics')?.addEventListener('click', () => this.openLyrics());
             document.getElementById('feishin-tp-btn-lyrics')?.addEventListener('click', () => this.openLyrics());
             document.getElementById('feishin-tp-lyrics-close')?.addEventListener('click', () => {
@@ -1182,22 +1290,55 @@
                 document.getElementById('feishin-tp-queue-sheet')?.classList.remove('open');
             });
 
-            // Favorito
+            // Favorito Inteligente (Conectado ao Backend Navidrome + Store Feishin)
             document.getElementById('feishin-tp-btn-fav')?.addEventListener('click', () => {
-                if (window.AndroidBridge?.hapticFeedback) window.AndroidBridge.hapticFeedback(0);
-                const favBtn = document.querySelector('#player-bar button[aria-label*="Favorit"], .fs-favorite-column-module-favorite');
-                if (favBtn) favBtn.click();
-                setTimeout(() => this.sync(), 80);
+                this.toggleFavorite();
             });
 
-            // Mais opções
-            document.getElementById('feishin-tp-btn-more')?.addEventListener('click', (e) => {
-                if (window.AndroidBridge?.hapticFeedback) window.AndroidBridge.hapticFeedback(0);
-                const moreTrigger = document.querySelector('#player-bar button[aria-label*="Açõ"], #player-bar button[aria-haspopup="menu"], #player-bar [class*="more"]');
-                if (moreTrigger) {
-                    moreTrigger.click();
-                } else {
-                    window.FeishinNative.toggleMoreMenu();
+            // Mais opções Sheet
+            document.getElementById('feishin-tp-btn-more')?.addEventListener('click', () => {
+                this.openMoreSheet();
+            });
+            document.getElementById('feishin-tp-more-close')?.addEventListener('click', () => {
+                document.getElementById('feishin-tp-more-sheet')?.classList.remove('open');
+            });
+
+            // Opções do Sheet
+            document.getElementById('feishin-tp-opt-details')?.addEventListener('click', () => {
+                document.getElementById('feishin-tp-more-sheet')?.classList.remove('open');
+                this.openDetailsModal();
+            });
+            document.getElementById('feishin-tp-details-close')?.addEventListener('click', () => {
+                document.getElementById('feishin-tp-details-modal')?.classList.remove('open');
+            });
+
+            document.getElementById('feishin-tp-opt-album')?.addEventListener('click', () => {
+                const store = window.__FEISHIN_PLAYER_STORE__?.getState?.();
+                const cur = (typeof store?.getCurrentSong === 'function' ? store.getCurrentSong() : null) || store?.player?.currentSong;
+                document.getElementById('feishin-tp-more-sheet')?.classList.remove('open');
+                this.close();
+                if (cur?.albumId) {
+                    window.location.hash = '#/library/albums/' + cur.albumId;
+                }
+            });
+
+            document.getElementById('feishin-tp-opt-artist')?.addEventListener('click', () => {
+                const store = window.__FEISHIN_PLAYER_STORE__?.getState?.();
+                const cur = (typeof store?.getCurrentSong === 'function' ? store.getCurrentSong() : null) || store?.player?.currentSong;
+                const artistId = cur?.albumArtistId || cur?.artistId || (cur?.artists && cur.artists[0]?.id);
+                document.getElementById('feishin-tp-more-sheet')?.classList.remove('open');
+                this.close();
+                if (artistId) {
+                    window.location.hash = '#/library/artists/' + artistId;
+                }
+            });
+
+            document.getElementById('feishin-tp-opt-delete')?.addEventListener('click', () => {
+                const store = window.__FEISHIN_PLAYER_STORE__?.getState?.();
+                const cur = (typeof store?.getCurrentSong === 'function' ? store.getCurrentSong() : null) || store?.player?.currentSong;
+                document.getElementById('feishin-tp-more-sheet')?.classList.remove('open');
+                if (cur && window.FeishinDeleteEngine?.requestDeleteTrack) {
+                    window.FeishinDeleteEngine.requestDeleteTrack(cur);
                 }
             });
 
@@ -1240,12 +1381,22 @@
                     if (dy > 90 && dx < 60) {
                         const lyricsOpen = document.getElementById('feishin-tp-lyrics-sheet')?.classList.contains('open');
                         const queueOpen = document.getElementById('feishin-tp-queue-sheet')?.classList.contains('open');
+                        const moreOpen = document.getElementById('feishin-tp-more-sheet')?.classList.contains('open');
+                        const detailsOpen = document.getElementById('feishin-tp-details-modal')?.classList.contains('open');
                         if (lyricsOpen) {
                             document.getElementById('feishin-tp-lyrics-sheet').classList.remove('open');
                             return;
                         }
                         if (queueOpen) {
                             document.getElementById('feishin-tp-queue-sheet').classList.remove('open');
+                            return;
+                        }
+                        if (moreOpen) {
+                            document.getElementById('feishin-tp-more-sheet').classList.remove('open');
+                            return;
+                        }
+                        if (detailsOpen) {
+                            document.getElementById('feishin-tp-details-modal').classList.remove('open');
                             return;
                         }
                         this.close();
@@ -1263,6 +1414,7 @@
             const titleEl = document.getElementById('feishin-tp-title');
             const artistEl = document.getElementById('feishin-tp-artist');
             const coverEl = document.getElementById('feishin-tp-cover');
+            const fallbackEl = document.getElementById('feishin-tp-cover-fallback');
             const auraEl = document.getElementById('feishin-tp-aura');
             const playIcon = document.getElementById('feishin-tp-play-icon');
             const pauseIcon = document.getElementById('feishin-tp-pause-icon');
@@ -1278,13 +1430,20 @@
             if (titleEl) titleEl.innerText = title;
             if (artistEl) artistEl.innerText = artist;
 
-            // Capa
+            // Capa do Álbum
             const barImg = document.querySelector('#player-bar img, .fs-mobile-playerbar-module-image, img[class*="playerbarImage"]');
-            const coverSrc = barImg?.src || cur?.imageUrl || '';
-            if (coverEl && coverSrc && !coverSrc.includes('data:image/svg')) {
-                coverEl.src = coverSrc;
-                coverEl.style.display = 'block';
+            let coverSrc = cur?.imageUrl || barImg?.src || '';
+            if (coverSrc && !coverSrc.includes('data:image/svg')) {
+                if (coverEl) {
+                    coverEl.src = coverSrc;
+                    coverEl.style.display = 'block';
+                }
+                if (fallbackEl) fallbackEl.style.display = 'none';
                 if (auraEl) auraEl.style.backgroundImage = 'url("' + coverSrc + '")';
+            } else {
+                if (coverEl) coverEl.style.display = 'none';
+                if (fallbackEl) fallbackEl.style.display = 'flex';
+                if (auraEl) auraEl.style.backgroundImage = 'none';
             }
 
             // Play / Pause Icons
@@ -1312,9 +1471,9 @@
                 repeatBtn.classList.toggle('active', store.player.repeat !== 'off' && store.player.repeat !== false);
             }
 
-            // Favorito
-            if (favBtn && cur) {
-                const isFav = Boolean(cur.userFavorite);
+            // Favorito Sincronizado
+            if (favBtn) {
+                const isFav = Boolean(cur?.userFavorite);
                 favBtn.classList.toggle('feishin-tp-fav-active', isFav);
             }
 
@@ -1328,6 +1487,13 @@
             if (totalEl) totalEl.innerText = this.formatTime(dur);
 
             this.updateProgress();
+
+            // Se o sheet de letras estiver aberto e mudou de música, atualiza
+            if (cur && document.getElementById('feishin-tp-lyrics-sheet')?.classList.contains('open')) {
+                if (this.lyricsState.songId !== cur.id) {
+                    this.fetchLyrics(cur);
+                }
+            }
         },
 
         updateProgress: function () {
@@ -1337,21 +1503,46 @@
             const audio = document.querySelector('audio');
             if (audio && !isNaN(audio.currentTime)) {
                 curTime = audio.currentTime;
+            } else if (window.__FEISHIN_TIME_STORE__?.getState?.()?.timestamp !== undefined) {
+                curTime = window.__FEISHIN_TIME_STORE__.getState().timestamp || 0;
             } else {
                 const store = window.__FEISHIN_PLAYER_STORE__?.getState?.();
                 curTime = (store?.player?.playbackPosition || 0) / 1000;
             }
 
             const curEl = document.getElementById('feishin-tp-time-cur');
+            const totalEl = document.getElementById('feishin-tp-time-total');
             const fill = document.getElementById('feishin-tp-fill');
             const thumb = document.getElementById('feishin-tp-thumb');
 
             if (curEl) curEl.innerText = this.formatTime(curTime);
 
+            // Re-checar duração se ainda for 0
+            if (!this.currentDuration || this.currentDuration <= 0) {
+                if (audio && !isNaN(audio.duration) && audio.duration > 0) {
+                    this.currentDuration = audio.duration;
+                } else {
+                    const store = window.__FEISHIN_PLAYER_STORE__?.getState?.();
+                    const cur = (typeof store?.getCurrentSong === 'function' ? store.getCurrentSong() : null) || store?.player?.currentSong;
+                    let dur = cur?.duration || 0;
+                    if (dur > 1000) dur = dur / 1000;
+                    if (dur > 0) this.currentDuration = dur;
+                }
+                if (this.currentDuration > 0 && totalEl) {
+                    totalEl.innerText = this.formatTime(this.currentDuration);
+                }
+            }
+
             if (this.currentDuration > 0) {
                 const pct = Math.min(100, Math.max(0, (curTime / this.currentDuration) * 100));
-                if (fill) fill.style.width = pct + '%';
-                if (thumb) thumb.style.left = pct + '%';
+                const pctStr = pct + '%';
+                if (fill) fill.style.setProperty('width', pctStr, 'important');
+                if (thumb) thumb.style.setProperty('left', pctStr, 'important');
+            }
+
+            // Sincroniza linha da letra (Karaokê)
+            if (document.getElementById('feishin-tp-lyrics-sheet')?.classList.contains('open')) {
+                this.syncLyricsLine(curTime, false);
             }
         },
 
@@ -1371,14 +1562,75 @@
             }
         },
 
+        // =====================================================================
+        // FAVORITOS TOTALMENTE OPERACIONAL (Navidrome VPS + Store + Visual)
+        // =====================================================================
+        toggleFavorite: async function () {
+            if (window.AndroidBridge?.hapticFeedback) window.AndroidBridge.hapticFeedback(0);
+            const store = window.__FEISHIN_PLAYER_STORE__?.getState?.();
+            const cur = (typeof store?.getCurrentSong === 'function' ? store.getCurrentSong() : null) || store?.player?.currentSong;
+            if (!cur || !cur.id) return;
+
+            const newFav = !cur.userFavorite;
+            cur.userFavorite = newFav;
+
+            // Atualização visual imediata do botão
+            const favBtn = document.getElementById('feishin-tp-btn-fav');
+            if (favBtn) {
+                favBtn.classList.toggle('feishin-tp-fav-active', newFav);
+            }
+
+            // Atualiza estado no store global do Feishin
+            if (window.__FEISHIN_PLAYER_STORE__?.setState) {
+                window.__FEISHIN_PLAYER_STORE__.setState(state => {
+                    if (state.queue?.songs) {
+                        Object.values(state.queue.songs).forEach(s => {
+                            if (s.id === cur.id) s.userFavorite = newFav;
+                        });
+                    }
+                });
+            }
+
+            // Sincroniza com servidor Subsonic/Navidrome via REST
+            const auth = window.__FEISHIN_AUTH_STORE__?.getState?.();
+            const server = auth?.currentServer || (auth?.serverList ? Object.values(auth.serverList)[0] : null);
+            if (server?.url && server?.credential) {
+                const endpoint = newFav ? 'star.view' : 'unstar.view';
+                const url = `${server.url}/rest/${endpoint}?id=${cur.id}&${server.credential}&v=1.16.1&c=feishin&f=json`;
+                try {
+                    await fetch(url);
+                    if (window.AndroidBridge?.showToast) {
+                        window.AndroidBridge.showToast(newFav ? 'Adicionada aos Favoritos ❤️' : 'Removida dos Favoritos');
+                    }
+                } catch (err) {
+                    console.error('Falha ao sincronizar favorito com servidor:', err);
+                }
+            }
+
+            // Dispara evento de favorito para atualizar outras telas do Feishin
+            if (window.__FEISHIN_EMITTER__?.emit) {
+                window.__FEISHIN_EMITTER__.emit('USER_FAVORITE', {
+                    favorite: newFav,
+                    id: [cur.id],
+                    itemType: 'song',
+                    serverId: cur._serverId || server?.id
+                });
+            }
+        },
+
+        // =====================================================================
+        // FILA DE REPRODUÇÃO TOTALMENTE OPERACIONAL (Sem quebra de forEach)
+        // =====================================================================
         openQueue: function () {
             const sheet = document.getElementById('feishin-tp-queue-sheet');
             const container = document.getElementById('feishin-tp-queue-list');
             if (!sheet || !container) return;
+            if (window.AndroidBridge?.hapticFeedback) window.AndroidBridge.hapticFeedback(0);
 
             container.innerHTML = '';
             const store = window.__FEISHIN_PLAYER_STORE__?.getState?.();
-            const queue = (typeof store?.getQueue === 'function' ? store.getQueue() : null) || store?.player?.queue || store?.queue?.items || [];
+            const q = store?.getQueue?.();
+            const queue = (q?.items && Array.isArray(q.items)) ? q.items : [];
             const currentSong = (typeof store?.getCurrentSong === 'function' ? store.getCurrentSong() : null) || store?.player?.currentSong;
 
             if (queue.length === 0) {
@@ -1393,7 +1645,7 @@
                 row.className = 'feishin-tp-q-item' + (isCurrent ? ' active' : '');
 
                 const title = item.name || item.title || 'Faixa';
-                const artist = item.artistName || item.artists?.[0]?.name || 'Artista';
+                const artist = item.artistName || (item.artists && item.artists[0]?.name) || 'Artista';
                 const duration = this.formatTime(item.duration ? (item.duration > 1000 ? item.duration / 1000 : item.duration) : 0);
 
                 row.innerHTML = `
@@ -1420,34 +1672,316 @@
             sheet.classList.add('open');
             const activeEl = container.querySelector('.feishin-tp-q-item.active');
             if (activeEl) {
-                setTimeout(() => activeEl.scrollIntoView({ behavior: 'smooth', block: 'center' }), 100);
+                setTimeout(() => activeEl.scrollIntoView({ behavior: 'smooth', block: 'center' }), 120);
             }
         },
 
+        // =====================================================================
+        // MOTOR DE LETRAS SINCRONIZADAS UNIVERSAL (LRCLIB + Navidrome + Karaokê)
+        // =====================================================================
         openLyrics: function () {
             const sheet = document.getElementById('feishin-tp-lyrics-sheet');
-            const container = document.getElementById('feishin-tp-lyrics-content');
-            if (!sheet || !container) return;
-
+            if (!sheet) return;
+            if (window.AndroidBridge?.hapticFeedback) window.AndroidBridge.hapticFeedback(0);
             sheet.classList.add('open');
-            const lyricsDom = document.querySelector('.fs-lyrics-module-container, [class*="lyrics"]');
-            if (lyricsDom && lyricsDom.innerText.trim()) {
-                const lines = lyricsDom.innerText.split('\n').filter(l => l.trim().length > 0);
-                container.innerHTML = lines.map(line => `<div class="feishin-tp-lyrics-line">${line}</div>`).join('');
-            } else {
-                container.innerHTML = '<div class="feishin-tp-lyrics-empty">Nenhuma letra sincronizada disponível para esta faixa.</div>';
+
+            const store = window.__FEISHIN_PLAYER_STORE__?.getState?.();
+            const cur = (typeof store?.getCurrentSong === 'function' ? store.getCurrentSong() : null) || store?.player?.currentSong;
+            if (cur) {
+                this.fetchLyrics(cur);
             }
         },
 
-        sleepTimerId: null,
+        fetchLyrics: async function (song) {
+            if (!song || !song.id) return;
+
+            // Retorna do cache se já disponível
+            if (this.lyricsCache[song.id]) {
+                this.lyricsState = { ...this.lyricsCache[song.id], activeLineIndex: -1 };
+                this.renderLyrics();
+                return;
+            }
+
+            this.lyricsState = {
+                songId: song.id,
+                loading: true,
+                syncedLines: [],
+                plainText: null,
+                activeLineIndex: -1
+            };
+
+            const container = document.getElementById('feishin-tp-lyrics-content');
+            if (container) {
+                container.innerHTML = '<div class="feishin-tp-lyrics-empty">Buscando letras sincronizadas...</div>';
+            }
+
+            const rawTitle = song.name || song.title || '';
+            const rawArtist = song.artistName || (song.artists && song.artists[0]?.name) || '';
+            let cleanTitle = rawTitle.replace(/\s*[\(\[](official|video|audio|remaster|lyrics|ao vivo|live|feat|ft\.).*?[\)\]]/gi, '').trim();
+            let searchTitle = cleanTitle;
+            let searchArtist = rawArtist.trim();
+
+            if (cleanTitle.includes(' - ') || cleanTitle.includes(' – ') || cleanTitle.includes(' — ')) {
+                const parts = cleanTitle.split(/\s*[-–—]\s*/);
+                if (!searchArtist || searchArtist === 'Unknown' || searchArtist.includes(',')) {
+                    searchArtist = parts[0].trim();
+                }
+                searchTitle = parts.slice(1).join(' - ').trim();
+            }
+            searchTitle = searchTitle.replace(/\s*[\(\[](official|video|audio|remaster|lyrics|ao vivo|live|feat|ft\.).*?[\)\]]/gi, '').trim();
+            const primaryArtist = searchArtist.split(/[,&]/)[0].trim();
+
+            const auth = window.__FEISHIN_AUTH_STORE__?.getState?.();
+            const server = auth?.currentServer || (auth?.serverList ? Object.values(auth.serverList)[0] : null);
+
+            // 1. Tenta Navidrome Structured Lyrics
+            if (server?.url && server?.credential) {
+                try {
+                    const ndUrl = `${server.url}/rest/getLyricsBySongId.view?id=${song.id}&${server.credential}&v=1.16.1&c=feishin&f=json`;
+                    const res = await fetch(ndUrl);
+                    const data = await res.json();
+                    const list = data?.['subsonic-response']?.lyricsList?.structuredLyrics;
+                    if (Array.isArray(list) && list.length > 0) {
+                        const item = list[0];
+                        if (Array.isArray(item.line) && item.line.length > 0) {
+                            this.lyricsState.syncedLines = item.line.map(l => ({
+                                time: (l.start || 0) / 1000,
+                                text: l.value || ''
+                            }));
+                            this.lyricsState.loading = false;
+                            this.lyricsCache[song.id] = { ...this.lyricsState };
+                            this.renderLyrics();
+                            return;
+                        }
+                    }
+                } catch (e) {
+                    console.warn('Navidrome lyrics check failed:', e);
+                }
+            }
+
+            // 2. Tenta LRCLIB API Pública com busca inteligente
+            try {
+                const dur = Math.round(song.duration ? (song.duration > 1000 ? song.duration / 1000 : song.duration) : 0);
+                let res = null;
+
+                // Tentativa A: Artista primário + título limpo
+                try {
+                    let lrcurl = `https://lrclib.net/api/get?artist_name=${encodeURIComponent(primaryArtist)}&track_name=${encodeURIComponent(searchTitle)}`;
+                    if (dur > 0) lrcurl += `&duration=${dur}`;
+                    const r = await fetch(lrcurl);
+                    if (r.ok) res = r;
+                } catch (e) {}
+
+                // Tentativa B: Artista completo + título limpo
+                if (!res) {
+                    try {
+                        let lrcurl = `https://lrclib.net/api/get?artist_name=${encodeURIComponent(searchArtist)}&track_name=${encodeURIComponent(searchTitle)}`;
+                        const r = await fetch(lrcurl);
+                        if (r.ok) res = r;
+                    } catch (e) {}
+                }
+
+                // Tentativa C: Busca genérica (q = primaryArtist + title)
+                if (!res) {
+                    try {
+                        const searchUrl = `https://lrclib.net/api/search?q=${encodeURIComponent(primaryArtist + ' ' + searchTitle)}`;
+                        const sRes = await fetch(searchUrl);
+                        if (sRes.ok) {
+                            const sData = await sRes.json();
+                            if (Array.isArray(sData) && sData.length > 0) {
+                                res = { ok: true, json: async () => sData[0] };
+                            }
+                        }
+                    } catch (e) {}
+                }
+
+                if (res.ok) {
+                    const data = await res.json();
+                    if (data.syncedLyrics) {
+                        const parsed = [];
+                        const lines = data.syncedLyrics.split('\n');
+                        const regex = /\[(\d+):(\d+(?:\.\d+)?)\](.*)/;
+                        for (const line of lines) {
+                            const match = regex.exec(line);
+                            if (match) {
+                                const min = parseInt(match[1], 10);
+                                const sec = parseFloat(match[2]);
+                                const text = match[3].trim();
+                                parsed.push({ time: min * 60 + sec, text: text });
+                            }
+                        }
+                        if (parsed.length > 0) {
+                            this.lyricsState.syncedLines = parsed;
+                            this.lyricsState.loading = false;
+                            this.lyricsCache[song.id] = { ...this.lyricsState };
+                            this.renderLyrics();
+                            return;
+                        }
+                    } else if (data.plainLyrics) {
+                        this.lyricsState.plainText = data.plainLyrics;
+                        this.lyricsState.loading = false;
+                        this.lyricsCache[song.id] = { ...this.lyricsState };
+                        this.renderLyrics();
+                        return;
+                    }
+                }
+            } catch (e) {
+                console.warn('LRCLIB fetch failed:', e);
+            }
+
+            // 3. Fallback: Nenhuma letra disponível
+            this.lyricsState.loading = false;
+            this.lyricsCache[song.id] = { ...this.lyricsState };
+            this.renderLyrics();
+        },
+
+        renderLyrics: function () {
+            const container = document.getElementById('feishin-tp-lyrics-content');
+            if (!container) return;
+
+            if (this.lyricsState.loading) {
+                container.innerHTML = '<div class="feishin-tp-lyrics-empty">Buscando letras sincronizadas...</div>';
+                return;
+            }
+
+            if (this.lyricsState.syncedLines && this.lyricsState.syncedLines.length > 0) {
+                container.innerHTML = this.lyricsState.syncedLines.map((line, idx) => {
+                    const content = (line.text && line.text.trim()) ? line.text : '♪';
+                    return `<div class="feishin-tp-lyrics-line" data-idx="${idx}" data-time="${line.time}">${content}</div>`;
+                }).join('');
+
+                container.querySelectorAll('.feishin-tp-lyrics-line').forEach(el => {
+                    el.addEventListener('click', () => {
+                        const t = parseFloat(el.getAttribute('data-time'));
+                        if (!isNaN(t)) {
+                            if (window.AndroidBridge?.hapticFeedback) window.AndroidBridge.hapticFeedback(0);
+                            window.FeishinNative.seekTo(t);
+                            const audio = document.querySelector('audio');
+                            if (audio) try { audio.currentTime = t; } catch (e) {}
+                            this.syncLyricsLine(t, true);
+                        }
+                    });
+                });
+
+                const curTime = (document.querySelector('audio')?.currentTime) || 0;
+                this.syncLyricsLine(curTime, true);
+                return;
+            }
+
+            if (this.lyricsState.plainText) {
+                const lines = this.lyricsState.plainText.split('\n');
+                container.innerHTML = lines.map(line => {
+                    const clean = line.trim();
+                    return clean ? `<div class="feishin-tp-lyrics-line">${clean}</div>` : '<div class="feishin-tp-lyrics-spacer" style="height: 14px;"></div>';
+                }).join('');
+                return;
+            }
+
+            container.innerHTML = '<div class="feishin-tp-lyrics-empty">Nenhuma letra sincronizada disponível para esta faixa.</div>';
+        },
+
+        syncLyricsLine: function (currentTime, forceScroll) {
+            if (!this.lyricsState.syncedLines || this.lyricsState.syncedLines.length === 0) return;
+            const lines = this.lyricsState.syncedLines;
+
+            let activeIdx = -1;
+            for (let i = 0; i < lines.length; i++) {
+                if (currentTime >= lines[i].time) {
+                    activeIdx = i;
+                } else {
+                    break;
+                }
+            }
+
+            if (activeIdx !== this.lyricsState.activeLineIndex || forceScroll) {
+                this.lyricsState.activeLineIndex = activeIdx;
+                const container = document.getElementById('feishin-tp-lyrics-content');
+                if (!container) return;
+
+                const allEls = container.querySelectorAll('.feishin-tp-lyrics-line');
+                allEls.forEach((el, idx) => {
+                    el.classList.toggle('active', idx === activeIdx);
+                });
+
+                if (activeIdx >= 0 && allEls[activeIdx]) {
+                    allEls[activeIdx].scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+            }
+        },
+
+        // =====================================================================
+        // MAIS OPÇÕES & DETALHES
+        // =====================================================================
+        openMoreSheet: function () {
+            const sheet = document.getElementById('feishin-tp-more-sheet');
+            if (!sheet) return;
+            if (window.AndroidBridge?.hapticFeedback) window.AndroidBridge.hapticFeedback(0);
+            sheet.classList.add('open');
+        },
+
+        openDetailsModal: function () {
+            const store = window.__FEISHIN_PLAYER_STORE__?.getState?.();
+            const cur = (typeof store?.getCurrentSong === 'function' ? store.getCurrentSong() : null) || store?.player?.currentSong;
+            if (!cur) return;
+
+            const modal = document.getElementById('feishin-tp-details-modal');
+            const content = document.getElementById('feishin-tp-details-content');
+            if (!modal || !content) return;
+
+            content.innerHTML = `
+              <div class="feishin-tp-details-grid">
+                <div class="feishin-tp-detail-box full">
+                  <span class="feishin-tp-detail-label">Título</span>
+                  <span class="feishin-tp-detail-val">${cur.name || cur.title || '—'}</span>
+                </div>
+                <div class="feishin-tp-detail-box">
+                  <span class="feishin-tp-detail-label">Artista</span>
+                  <span class="feishin-tp-detail-val">${cur.artistName || '—'}</span>
+                </div>
+                <div class="feishin-tp-detail-box">
+                  <span class="feishin-tp-detail-label">Álbum</span>
+                  <span class="feishin-tp-detail-val">${cur.album || '—'}</span>
+                </div>
+                <div class="feishin-tp-detail-box">
+                  <span class="feishin-tp-detail-label">Formato / Codec</span>
+                  <span class="feishin-tp-detail-val">${cur.codec || cur.container || 'MP3'}</span>
+                </div>
+                <div class="feishin-tp-detail-box">
+                  <span class="feishin-tp-detail-label">Taxa de Bits</span>
+                  <span class="feishin-tp-detail-val">${cur.bitRate ? cur.bitRate + ' kbps' : '—'}</span>
+                </div>
+                <div class="feishin-tp-detail-box">
+                  <span class="feishin-tp-detail-label">Taxa de Amostragem</span>
+                  <span class="feishin-tp-detail-val">${cur.sampleRate ? cur.sampleRate + ' Hz' : '—'}</span>
+                </div>
+                <div class="feishin-tp-detail-box">
+                  <span class="feishin-tp-detail-label">Duração</span>
+                  <span class="feishin-tp-detail-val">${this.formatTime(cur.duration ? (cur.duration > 1000 ? cur.duration / 1000 : cur.duration) : 0)}</span>
+                </div>
+                <div class="feishin-tp-detail-box full">
+                  <span class="feishin-tp-detail-label">Caminho no Servidor</span>
+                  <span class="feishin-tp-detail-val" style="font-size: 11px; opacity: 0.85;">${cur.path || '—'}</span>
+                </div>
+              </div>
+            `;
+
+            if (window.AndroidBridge?.hapticFeedback) window.AndroidBridge.hapticFeedback(0);
+            modal.classList.add('open');
+        },
+
+        // =====================================================================
+        // TEMPORIZADOR DE SONO
+        // =====================================================================
         setSleepTimer: function (minutes) {
             if (this.sleepTimerId) {
                 clearTimeout(this.sleepTimerId);
                 this.sleepTimerId = null;
             }
             document.getElementById('feishin-tp-timer-backdrop')?.classList.remove('open');
+            const dot = document.getElementById('feishin-tp-timer-dot');
 
             if (!minutes || minutes === '0' || minutes === 0) {
+                if (dot) dot.style.display = 'none';
                 if (window.AndroidBridge?.showToast) window.AndroidBridge.showToast('Temporizador desativado');
                 return;
             }
@@ -1456,16 +1990,19 @@
                 const store = window.__FEISHIN_PLAYER_STORE__?.getState?.();
                 if (store?.setPauseOnNextSongEnd) {
                     store.setPauseOnNextSongEnd(true);
+                    if (dot) dot.style.display = 'block';
                     if (window.AndroidBridge?.showToast) window.AndroidBridge.showToast('Pausa agendada para o fim da faixa');
                     return;
                 }
             }
 
             const ms = parseInt(minutes, 10) * 60 * 1000;
+            if (dot) dot.style.display = 'block';
             if (window.AndroidBridge?.showToast) window.AndroidBridge.showToast('Temporizador ativado para ' + minutes + ' minutos');
 
             this.sleepTimerId = setTimeout(() => {
                 window.FeishinNative.pause();
+                if (dot) dot.style.display = 'none';
                 if (window.AndroidBridge?.showToast) window.AndroidBridge.showToast('Música pausada pelo temporizador');
             }, ms);
         }
@@ -1552,6 +2089,79 @@
         }
 
         setTimeout(connectSSE, 1500);
+    })();
+
+    // ═══════════════════════════════════════════════════════════════════
+    // UNIFICAÇÃO DA TOOLBAR EM UMA ÚNICA LINHA ARREDONDADA (SEM PLAY AZUL)
+    // E BUBBLE DE CONTAGEM DE MÚSICAS NO BOTÃO 'MAIS'
+    // ═══════════════════════════════════════════════════════════════════
+    (function initUnifiedSingleToolbar() {
+        let isUpdating = false;
+
+        function unifyToolbar() {
+            if (isUpdating) return;
+            isUpdating = true;
+
+            try {
+                const stack = document.querySelector('.fs-animated-page-module-animated-page > .mantine-Stack-root');
+                if (stack) {
+                    const pageHeader = stack.querySelector('.fs-page-header-module-container');
+                    const filterBar = stack.querySelector('.fs-filter-bar-module-filter-bar');
+
+                    if (pageHeader && filterBar) {
+                        // 1. Ocultar o botão azul circular de play
+                        const playBtn = pageHeader.querySelector('.fs-library-header-bar-module-play-button-container');
+                        if (playBtn) playBtn.style.setProperty('display', 'none', 'important');
+
+                        // 2. Extrair contagem de músicas e transferir para o botão 'Mais'
+                        const badge = pageHeader.querySelector('.fs-badge-module-root') || filterBar.querySelector('.fs-badge-module-root');
+                        let countText = '';
+                        if (badge) {
+                            countText = (badge.innerText || '').trim();
+                            badge.style.setProperty('display', 'none', 'important');
+                        }
+
+                        const moreBtn = document.getElementById('feishin-nav-more-btn');
+                        if (moreBtn && countText && countText.length > 0) {
+                            let bubble = moreBtn.querySelector('#feishin-more-bubble');
+                            if (!bubble) {
+                                bubble = document.createElement('span');
+                                bubble.id = 'feishin-more-bubble';
+                                bubble.className = 'feishin-nav-bubble';
+                                moreBtn.appendChild(bubble);
+                            }
+                            if (bubble.innerText !== countText) {
+                                bubble.innerText = countText;
+                            }
+                        }
+
+                        // 3. Mover lupa de busca para dentro do grupo da direita da barra de filtros
+                        const searchGroup = pageHeader.querySelector('.mantine-Group-root');
+                        const filterFlex = filterBar.querySelector('.mantine-Flex-root');
+
+                        if (filterFlex && searchGroup) {
+                            const rightGroup = filterFlex.children[1];
+                            if (rightGroup && !rightGroup.contains(searchGroup)) {
+                                rightGroup.appendChild(searchGroup);
+                            }
+                        }
+
+                        // 4. Ocultar o container antigo do header
+                        pageHeader.style.setProperty('display', 'none', 'important');
+                    }
+                }
+            } finally {
+                isUpdating = false;
+            }
+        }
+
+        // Executar imediatamente e monitorar via observer
+        unifyToolbar();
+        const observer = new MutationObserver(() => {
+            unifyToolbar();
+        });
+        observer.observe(document.body, { childList: true, subtree: true });
+        window.addEventListener('hashchange', () => setTimeout(unifyToolbar, 60));
     })();
 
     console.log('[FeishinMobile] Motor Nativo Liquid Glass Pronto e Ativo.');

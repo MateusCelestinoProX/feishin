@@ -794,16 +794,28 @@ if (typeof window !== 'undefined') {
   }
 
   // 7. Auto Lifecycle & Pause Handling
-  document.addEventListener('visibilitychange', () => {
+  let idleGcTimer = null;
+  const handleLifecycle = () => {
     if (document.hidden) {
       window.__PAUSE_WEBGL_SHADERS__ = true;
+      if (!idleGcTimer) {
+        idleGcTimer = setTimeout(() => {
+          if (document.hidden && typeof window !== 'undefined' && window.gc) {
+            try { window.gc(); } catch (e) {}
+          }
+          idleGcTimer = null;
+        }, 30000);
+      }
     } else {
       window.__PAUSE_WEBGL_SHADERS__ = false;
-      if (!isEcoMode && (window.renderWebGLBackground || window.setWebGLBackground)) {
-        applyShader(activeShader);
+      if (idleGcTimer) {
+        clearTimeout(idleGcTimer);
+        idleGcTimer = null;
       }
     }
-  });
+  };
+
+  document.addEventListener('visibilitychange', handleLifecycle, { passive: true });
 
   // 7.4. Engine de navegação por etapas (Command+[ e Command+])
   // Protegida contra conflitos no Tag Editor, campos de texto e modais
@@ -1017,7 +1029,10 @@ if (typeof window !== 'undefined') {
       return img ? img.src : null;
     }
 
-    function broadcastState() {
+    let isTrayPanelVisible = false;
+
+    function broadcastState(force = false) {
+      if (!isTrayPanelVisible && !force) return;
       const store = getPlayerStore();
       if (!store) return;
       try {
@@ -1096,15 +1111,21 @@ if (typeof window !== 'undefined') {
           }
           break;
       }
-      setTimeout(broadcastState, 150);
+      setTimeout(() => broadcastState(true), 150);
     }
 
-    // Interval to keep mini panel state sync in real time
-    setInterval(broadcastState, 1000);
+    // Interval to keep mini panel state sync in real time (apenas quando o mini painel estiver aberto)
+    setInterval(() => {
+      if (isTrayPanelVisible) broadcastState();
+    }, 1000);
 
     // Subscribe to IPC events if available
     if (window.api && window.api.ipc && typeof window.api.ipc.on === "function") {
-      window.api.ipc.on("tray-panel-request-state", () => broadcastState());
+      window.api.ipc.on("tray-panel-visibility", (_e, visible) => {
+        isTrayPanelVisible = !!visible;
+        if (isTrayPanelVisible) broadcastState(true);
+      });
+      window.api.ipc.on("tray-panel-request-state", () => broadcastState(true));
       window.api.ipc.on("tray-panel-execute-action", (_e, data) => {
         if (data && data.action) handleAction(data.action, data.payload);
       });
@@ -1528,7 +1549,7 @@ if (typeof window !== 'undefined') {
     }
 
     mountKillButton();
-    setInterval(mountKillButton, 1000);
+    setInterval(mountKillButton, 2500);
 
     const observer = new MutationObserver(() => {
       mountKillButton();
