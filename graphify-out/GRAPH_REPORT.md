@@ -1,7 +1,7 @@
 # Graph Report - feishin  (2026-10-29)
 
 ## Corpus Check
-- 1150 files · ~1,353,081 words
+- 1150 files · ~1,353,101 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
@@ -10,7 +10,7 @@
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `8cdc9edf`
+- Built from commit: `f6923553`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -565,8 +565,8 @@
   src/renderer/assets/custom/three.min.js → customizations/assets/index-C3w9ueFE.js
 
 ## Import Cycles
-- 4-file cycle: `src/main/features/core/dlna/index.ts -> src/main/index.ts -> src/main/features/index.ts -> src/main/features/core/index.ts -> src/main/features/core/dlna/index.ts`
 - 4-file cycle: `src/main/features/core/index.ts -> src/main/features/core/player/index.ts -> src/main/index.ts -> src/main/features/index.ts -> src/main/features/core/index.ts`
+- 4-file cycle: `src/main/features/core/dlna/index.ts -> src/main/index.ts -> src/main/features/index.ts -> src/main/features/core/index.ts -> src/main/features/core/dlna/index.ts`
 
 ## Communities (575 total, 118 thin omitted)
 

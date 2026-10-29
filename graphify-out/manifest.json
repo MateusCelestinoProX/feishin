@@ -78,9 +78,9 @@
     "semantic_hash": ""
   },
   "customizations/patches/patch_main.py": {
-    "mtime": 1793290141.2710416,
-    "seen": 1793290314.664928,
-    "ast_hash": "db665dadf31c109427691ab922818edc",
+    "mtime": 1793290840.769876,
+    "seen": 1793290933.420376,
+    "ast_hash": "f695b31d827aa3f6f6bdf701e9359357",
     "semantic_hash": ""
   },
   "customizations/assets/tray-panel.html": {
@@ -642,9 +642,9 @@
     "semantic_hash": ""
   },
   "src/main/index.ts": {
-    "mtime": 1793290045.9716032,
-    "seen": 1793290314.665024,
-    "ast_hash": "fdee5edb28a06846dbf4495362fd31d4",
+    "mtime": 1793290832.0764747,
+    "seen": 1793290933.420492,
+    "ast_hash": "2591a73000bd9bb5af6f5c0170c8cd1b",
     "semantic_hash": ""
   },
   "src/main/logger.ts": {

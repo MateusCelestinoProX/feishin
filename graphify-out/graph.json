@@ -7684,7 +7684,7 @@
       "file_type": "code",
       "norm_label": "bindingactions",
       "source_file": "src/main/index.ts",
-      "source_location": "L1026"
+      "source_location": "L1028"
     },
     {
       "id": "src_renderer_features_shared_utils_artistfilterkeys",
@@ -114578,7 +114578,7 @@
       "file_type": "code",
       "norm_label": "patch_preload()",
       "source_file": "customizations/patches/patch_main.py",
-      "source_location": "L290"
+      "source_location": "L291"
     },
     {
       "id": "customizations_assets_index_c3w9uefe_uze",
@@ -127226,7 +127226,7 @@
       "file_type": "code",
       "norm_label": "bytestoint()",
       "source_file": "src/main/index.ts",
-      "source_location": "L1188"
+      "source_location": "L1190"
     },
     {
       "id": "src_main_index_checkallchannelsandgetbest",
@@ -127358,7 +127358,7 @@
       "file_type": "code",
       "norm_label": "getmenuaccelerator()",
       "source_file": "src/main/index.ts",
-      "source_location": "L1048"
+      "source_location": "L1050"
     },
     {
       "id": "src_main_index_hidemainwindowtotray",
@@ -163257,7 +163257,7 @@
       "file_type": "code",
       "norm_label": "global_search",
       "source_file": "src/main/index.ts",
-      "source_location": "L1027"
+      "source_location": "L1029"
     },
     {
       "id": "src_main_index_bindingactions_local_search",
@@ -163268,7 +163268,7 @@
       "file_type": "code",
       "norm_label": "local_search",
       "source_file": "src/main/index.ts",
-      "source_location": "L1028"
+      "source_location": "L1030"
     },
     {
       "id": "src_main_index_bindingactions_mute",
@@ -163279,7 +163279,7 @@
       "file_type": "code",
       "norm_label": "mute",
       "source_file": "src/main/index.ts",
-      "source_location": "L1029"
+      "source_location": "L1031"
     },
     {
       "id": "src_main_index_bindingactions_next",
@@ -163290,7 +163290,7 @@
       "file_type": "code",
       "norm_label": "next",
       "source_file": "src/main/index.ts",
-      "source_location": "L1030"
+      "source_location": "L1032"
     },
     {
       "id": "src_main_index_bindingactions_next_album",
@@ -163301,7 +163301,7 @@
       "file_type": "code",
       "norm_label": "next_album",
       "source_file": "src/main/index.ts",
-      "source_location": "L1031"
+      "source_location": "L1033"
     },
     {
       "id": "src_main_index_bindingactions_pause",
@@ -163312,7 +163312,7 @@
       "file_type": "code",
       "norm_label": "pause",
       "source_file": "src/main/index.ts",
-      "source_location": "L1032"
+      "source_location": "L1034"
     },
     {
       "id": "src_main_index_bindingactions_play",
@@ -163323,7 +163323,7 @@
       "file_type": "code",
       "norm_label": "play",
       "source_file": "src/main/index.ts",
-      "source_location": "L1033"
+      "source_location": "L1035"
     },
     {
       "id": "src_main_index_bindingactions_play_pause",
@@ -163334,7 +163334,7 @@
       "file_type": "code",
       "norm_label": "play_pause",
       "source_file": "src/main/index.ts",
-      "source_location": "L1034"
+      "source_location": "L1036"
     },
     {
       "id": "src_main_index_bindingactions_previous",
@@ -163345,7 +163345,7 @@
       "file_type": "code",
       "norm_label": "previous",
       "source_file": "src/main/index.ts",
-      "source_location": "L1035"
+      "source_location": "L1037"
     },
     {
       "id": "src_main_index_bindingactions_previous_album",
@@ -163356,7 +163356,7 @@
       "file_type": "code",
       "norm_label": "previous_album",
       "source_file": "src/main/index.ts",
-      "source_location": "L1036"
+      "source_location": "L1038"
     },
     {
       "id": "src_main_index_bindingactions_shuffle",
@@ -163367,7 +163367,7 @@
       "file_type": "code",
       "norm_label": "shuffle",
       "source_file": "src/main/index.ts",
-      "source_location": "L1037"
+      "source_location": "L1039"
     },
     {
       "id": "src_main_index_bindingactions_skip_backward",
@@ -163378,7 +163378,7 @@
       "file_type": "code",
       "norm_label": "skip_backward",
       "source_file": "src/main/index.ts",
-      "source_location": "L1038"
+      "source_location": "L1040"
     },
     {
       "id": "src_main_index_bindingactions_skip_forward",
@@ -163389,7 +163389,7 @@
       "file_type": "code",
       "norm_label": "skip_forward",
       "source_file": "src/main/index.ts",
-      "source_location": "L1039"
+      "source_location": "L1041"
     },
     {
       "id": "src_main_index_bindingactions_stop",
@@ -163400,7 +163400,7 @@
       "file_type": "code",
       "norm_label": "stop",
       "source_file": "src/main/index.ts",
-      "source_location": "L1040"
+      "source_location": "L1042"
     },
     {
       "id": "src_main_index_bindingactions_toggle_fullscreen_player",
@@ -163411,7 +163411,7 @@
       "file_type": "code",
       "norm_label": "toggle_fullscreen_player",
       "source_file": "src/main/index.ts",
-      "source_location": "L1041"
+      "source_location": "L1043"
     },
     {
       "id": "src_main_index_bindingactions_toggle_queue",
@@ -163422,7 +163422,7 @@
       "file_type": "code",
       "norm_label": "toggle_queue",
       "source_file": "src/main/index.ts",
-      "source_location": "L1042"
+      "source_location": "L1044"
     },
     {
       "id": "src_main_index_bindingactions_toggle_repeat",
@@ -163433,7 +163433,7 @@
       "file_type": "code",
       "norm_label": "toggle_repeat",
       "source_file": "src/main/index.ts",
-      "source_location": "L1043"
+      "source_location": "L1045"
     },
     {
       "id": "src_main_index_bindingactions_volume_down",
@@ -163444,7 +163444,7 @@
       "file_type": "code",
       "norm_label": "volume_down",
       "source_file": "src/main/index.ts",
-      "source_location": "L1044"
+      "source_location": "L1046"
     },
     {
       "id": "src_main_index_bindingactions_volume_up",
@@ -163455,7 +163455,7 @@
       "file_type": "code",
       "norm_label": "volume_up",
       "source_file": "src/main/index.ts",
-      "source_location": "L1045"
+      "source_location": "L1047"
     },
     {
       "id": "src_renderer_features_shared_utils",
@@ -192525,7 +192525,7 @@
       "file_type": "code",
       "norm_label": "font_five_byte_magic_numbers",
       "source_file": "src/main/index.ts",
-      "source_location": "L1203"
+      "source_location": "L1205"
     },
     {
       "id": "src_main_index_font_four_byte_magic_numbers",
@@ -192536,7 +192536,7 @@
       "file_type": "code",
       "norm_label": "font_four_byte_magic_numbers",
       "source_file": "src/main/index.ts",
-      "source_location": "L1197"
+      "source_location": "L1199"
     },
     {
       "id": "src_main_index_font_headers",
@@ -192547,7 +192547,7 @@
       "file_type": "code",
       "norm_label": "font_headers",
       "source_file": "src/main/index.ts",
-      "source_location": "L1179"
+      "source_location": "L1181"
     },
     {
       "id": "src_main_index_github_updater_config",
@@ -192569,7 +192569,7 @@
       "file_type": "code",
       "norm_label": "hotkey_actions",
       "source_file": "src/main/index.ts",
-      "source_location": "L1059"
+      "source_location": "L1061"
     },
     {
       "id": "src_main_index_playbackmenuaccelerators",
@@ -371162,7 +371162,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/main/index.ts",
-      "source_location": "L1056",
+      "source_location": "L1058",
       "weight": 1.0
     },
     {
@@ -446472,7 +446472,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/main/index.ts",
-      "source_location": "L1027",
+      "source_location": "L1029",
       "weight": 1.0
     },
     {
@@ -446483,7 +446483,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/main/index.ts",
-      "source_location": "L1028",
+      "source_location": "L1030",
       "weight": 1.0
     },
     {
@@ -446494,7 +446494,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/main/index.ts",
-      "source_location": "L1029",
+      "source_location": "L1031",
       "weight": 1.0
     },
     {
@@ -446505,7 +446505,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/main/index.ts",
-      "source_location": "L1030",
+      "source_location": "L1032",
       "weight": 1.0
     },
     {
@@ -446516,7 +446516,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/main/index.ts",
-      "source_location": "L1031",
+      "source_location": "L1033",
       "weight": 1.0
     },
     {
@@ -446527,7 +446527,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/main/index.ts",
-      "source_location": "L1032",
+      "source_location": "L1034",
       "weight": 1.0
     },
     {
@@ -446538,7 +446538,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/main/index.ts",
-      "source_location": "L1033",
+      "source_location": "L1035",
       "weight": 1.0
     },
     {
@@ -446549,7 +446549,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/main/index.ts",
-      "source_location": "L1034",
+      "source_location": "L1036",
       "weight": 1.0
     },
     {
@@ -446560,7 +446560,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/main/index.ts",
-      "source_location": "L1035",
+      "source_location": "L1037",
       "weight": 1.0
     },
     {
@@ -446571,7 +446571,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/main/index.ts",
-      "source_location": "L1036",
+      "source_location": "L1038",
       "weight": 1.0
     },
     {
@@ -446582,7 +446582,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/main/index.ts",
-      "source_location": "L1037",
+      "source_location": "L1039",
       "weight": 1.0
     },
     {
@@ -446593,7 +446593,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/main/index.ts",
-      "source_location": "L1038",
+      "source_location": "L1040",
       "weight": 1.0
     },
     {
@@ -446604,7 +446604,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/main/index.ts",
-      "source_location": "L1039",
+      "source_location": "L1041",
       "weight": 1.0
     },
     {
@@ -446615,7 +446615,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/main/index.ts",
-      "source_location": "L1040",
+      "source_location": "L1042",
       "weight": 1.0
     },
     {
@@ -446626,7 +446626,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/main/index.ts",
-      "source_location": "L1041",
+      "source_location": "L1043",
       "weight": 1.0
     },
     {
@@ -446637,7 +446637,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/main/index.ts",
-      "source_location": "L1042",
+      "source_location": "L1044",
       "weight": 1.0
     },
     {
@@ -446648,7 +446648,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/main/index.ts",
-      "source_location": "L1043",
+      "source_location": "L1045",
       "weight": 1.0
     },
     {
@@ -446659,7 +446659,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/main/index.ts",
-      "source_location": "L1044",
+      "source_location": "L1046",
       "weight": 1.0
     },
     {
@@ -446670,7 +446670,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/main/index.ts",
-      "source_location": "L1045",
+      "source_location": "L1047",
       "weight": 1.0
     },
     {
@@ -503122,7 +503122,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "customizations/patches/patch_main.py",
-      "source_location": "L290",
+      "source_location": "L291",
       "weight": 1.0
     },
     {
@@ -509678,7 +509678,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/main/index.ts",
-      "source_location": "L1026",
+      "source_location": "L1028",
       "weight": 1.0
     },
     {
@@ -509689,7 +509689,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/main/index.ts",
-      "source_location": "L1048",
+      "source_location": "L1050",
       "weight": 1.0
     },
     {
@@ -509700,7 +509700,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/main/index.ts",
-      "source_location": "L1059",
+      "source_location": "L1061",
       "weight": 1.0
     },
     {
@@ -509711,7 +509711,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/main/index.ts",
-      "source_location": "L1179",
+      "source_location": "L1181",
       "weight": 1.0
     },
     {
@@ -509722,7 +509722,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/main/index.ts",
-      "source_location": "L1188",
+      "source_location": "L1190",
       "weight": 1.0
     },
     {
@@ -509733,7 +509733,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/main/index.ts",
-      "source_location": "L1197",
+      "source_location": "L1199",
       "weight": 1.0
     },
     {
@@ -509744,7 +509744,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/main/index.ts",
-      "source_location": "L1203",
+      "source_location": "L1205",
       "weight": 1.0
     },
     {
@@ -669931,5 +669931,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "8cdc9edfb0315105fdf6936d23edf506afdee619"
+  "built_at_commit": "f6923553cf4eea2b930e4adbcacccb22d5a5e6f3"
 }
