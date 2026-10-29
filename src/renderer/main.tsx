@@ -57,13 +57,7 @@ createRoot(document.getElementById('root')!).render(
             buster: 'feishin',
             dehydrateOptions: {
                 shouldDehydrateQuery: (query) => {
-                    const isSuccess = query.state.status === 'success';
-                    const isLyricsQueryKey =
-                        query.queryKey.includes('song') &&
-                        query.queryKey.includes('lyrics') &&
-                        query.queryKey.includes('select');
-
-                    return isSuccess && isLyricsQueryKey;
+                    return query.state.status === 'success';
                 },
             },
             hydrateOptions: {

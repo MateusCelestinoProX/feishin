@@ -24,10 +24,10 @@ const queryConfig: DefaultOptions = {
         retry: process.env.NODE_ENV === 'production' ? 3 : false,
     },
     queries: {
-        gcTime: 1000 * 20, // 20 seconds
+        gcTime: Infinity,
         refetchOnWindowFocus: false,
         retry: process.env.NODE_ENV === 'production',
-        staleTime: 1000 * 10, // 10 seconds
+        staleTime: 1000 * 60 * 60 * 24, // 24 hours
         throwOnError: (error: any) => {
             return error?.response?.status >= 500;
         },
