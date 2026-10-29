@@ -944,7 +944,7 @@
     } else if (!sidebarItem) {
       ensureSidebarRecentlyAddedItem();
     }
-  }, 400);
+  }, 1200);
 
   // Initial schedule
   scheduleMount();

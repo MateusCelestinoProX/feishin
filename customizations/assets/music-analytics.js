@@ -1364,7 +1364,7 @@
     } else if (!shouldShow && dash && dash.style.display !== 'none') {
       scheduleMount();
     }
-  }, 250);
+  }, 1200);
 
   const domObserver = new MutationObserver((mutations) => {
     let shouldSchedule = false;

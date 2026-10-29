@@ -50,7 +50,7 @@ function createTrayMiniWindow() {
     vibrancy: "popover",
     visualEffectState: "active",
     webPreferences: {
-      backgroundThrottling: false,
+      backgroundThrottling: true,
       sandbox: false,
       contextIsolation: false,
       nodeIntegration: true,
@@ -63,6 +63,9 @@ function createTrayMiniWindow() {
   trayMiniWindow.on("blur", () => {
     if (trayMiniWindow && !trayMiniWindow.isDestroyed() && trayMiniWindow.isVisible()) {
       trayMiniWindow.hide();
+      if (mainWindow && !mainWindow.isDestroyed()) {
+        mainWindow.webContents.send("tray-panel-visibility", false);
+      }
     }
   });
 
@@ -79,6 +82,9 @@ function toggleTrayMiniPanel(bounds) {
   const win = createTrayMiniWindow();
   if (win.isVisible()) {
     win.hide();
+    if (mainWindow && !mainWindow.isDestroyed()) {
+      mainWindow.webContents.send("tray-panel-visibility", false);
+    }
     return;
   }
   const tb = bounds || tray.getBounds();
@@ -91,6 +97,9 @@ function toggleTrayMiniPanel(bounds) {
   win.show();
   win.focus();
 
+  if (mainWindow && !mainWindow.isDestroyed()) {
+    mainWindow.webContents.send("tray-panel-visibility", true);
+  }
   if (lastTrayState) {
     win.webContents.send("tray-panel-update-state", lastTrayState);
   }
@@ -100,8 +109,6 @@ function toggleTrayMiniPanel(bounds) {
 }
 
 function initPersonalOsTray(tray, contextMenu) {
-  createTrayMiniWindow();
-
   tray.on("click", (_event, bounds) => {
     toggleTrayMiniPanel(bounds);
   });
@@ -205,6 +212,27 @@ if (!require$$0.ipcMain.eventNames().includes("request-open-settings")) {
       }, 300);
     }
   });
+  mainWindow.on("blur", () => {
+    mainWindow?.webContents.send("window-focus-state", false);
+  });
+  mainWindow.on("focus", () => {
+    mainWindow?.webContents.send("window-focus-state", true);
+  });
+  mainWindow.on("hide", () => {
+    mainWindow?.webContents.send("window-visibility-state", false);
+  });
+  mainWindow.on("show", () => {
+    mainWindow?.webContents.send("window-visibility-state", true);
+  });
+  mainWindow.on("minimize", () => {
+    mainWindow?.webContents.send("window-visibility-state", false);
+    if (global.gc) {
+      try { global.gc(); } catch (e) {}
+    }
+  });
+  mainWindow.on("restore", () => {
+    mainWindow?.webContents.send("window-visibility-state", true);
+  });
   mainWindow.webContents.on("unresponsive", () => {
     log.error("Renderer process unresponsive");
     setTimeout(() => {
@@ -219,6 +247,18 @@ if (!require$$0.ipcMain.eventNames().includes("request-open-settings")) {
     log.error("Child process gone", details);
   });"""
 
+    target_flags = 'require$$0.app.commandLine.appendSwitch("js-flags", "--expose-gc");'
+    replacement_flags = """require$$0.app.commandLine.appendSwitch("js-flags", "--expose-gc --max-semi-space-size=16");
+if (process.platform === "darwin") {
+  require$$0.app.commandLine.appendSwitch("enable-features", "Metal,CanvasOopRasterization,Accelerated2dCanvas");
+  require$$0.app.commandLine.appendSwitch("disable-background-networking");
+  require$$0.app.commandLine.appendSwitch("disable-component-update");
+  require$$0.app.commandLine.appendSwitch("disable-domain-reliability");
+  require$$0.app.commandLine.appendSwitch("disable-sync");
+  require$$0.app.commandLine.appendSwitch("disable-breakpad");
+  require$$0.app.commandLine.appendSwitch("disable-spell-checking");
+}"""
+
     if target in content:
         content = content.replace(target, replacement, 1)
         print("[✓] Patch aplicado em out/main/index.js com sucesso (Tray Mini Panel).")
@@ -229,11 +269,19 @@ if (!require$$0.ipcMain.eventNames().includes("request-open-settings")) {
 
     if target_watchdog in content:
         content = content.replace(target_watchdog, replacement_watchdog, 1)
-        print("[✓] Patch Watchdog Auto-Recovery aplicado em out/main/index.js com sucesso.")
+        print("[✓] Patch Watchdog Auto-Recovery e Ciclo de Vida aplicado em out/main/index.js com sucesso.")
     elif "_recoveringRenderer" in content:
         print("[-] Patch Watchdog Auto-Recovery já presente em out/main/index.js.")
     else:
         print("[!] Aviso: Target Watchdog não encontrado em out/main/index.js.")
+
+    if target_flags in content:
+        content = content.replace(target_flags, replacement_flags, 1)
+        print("[✓] Patch Performance macOS e V8 Flags aplicado em out/main/index.js com sucesso.")
+    elif "Metal,CanvasOopRasterization" in content:
+        print("[-] Patch Performance macOS já presente em out/main/index.js.")
+    else:
+        print("[!] Aviso: Target Flags não encontrado em out/main/index.js.")
 
     with open(main_js_path, "w", encoding="utf-8") as f:
         f.write(content)

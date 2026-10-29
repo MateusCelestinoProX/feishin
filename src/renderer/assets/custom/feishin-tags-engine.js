@@ -625,7 +625,7 @@
 
     window.addEventListener('hashchange', checkRoute);
     window.addEventListener('popstate', checkRoute);
-    setInterval(checkRoute, 250);
+    setInterval(checkRoute, 1200);
     checkRoute();
   }
 

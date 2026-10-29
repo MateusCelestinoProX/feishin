@@ -685,6 +685,35 @@ async function createWindow(first = true): Promise<void> {
         mainWindow?.webContents.openDevTools();
     });
 
+    mainWindow.on('blur', () => {
+        mainWindow?.webContents.send('window-focus-state', false);
+    });
+
+    mainWindow.on('focus', () => {
+        mainWindow?.webContents.send('window-focus-state', true);
+    });
+
+    mainWindow.on('hide', () => {
+        mainWindow?.webContents.send('window-visibility-state', false);
+    });
+
+    mainWindow.on('show', () => {
+        mainWindow?.webContents.send('window-visibility-state', true);
+    });
+
+    mainWindow.on('minimize', () => {
+        mainWindow?.webContents.send('window-visibility-state', false);
+        if (global.gc) {
+            try {
+                global.gc();
+            } catch (e) {}
+        }
+    });
+
+    mainWindow.on('restore', () => {
+        mainWindow?.webContents.send('window-visibility-state', true);
+    });
+
     ipcMain.on('window-dev-tools', () => {
         mainWindow?.webContents.openDevTools();
     });
@@ -978,8 +1007,20 @@ if (chromiumDisabledFeatures.length > 0) {
 // https://github.com/electron/electron/issues/46538#issuecomment-2808806722
 app.commandLine.appendSwitch('gtk-version', '3');
 
-// Enable garbage collection API
-app.commandLine.appendSwitch('js-flags', '--expose-gc');
+// Enable garbage collection API & optimize young generation heap
+app.commandLine.appendSwitch('js-flags', '--expose-gc --max-semi-space-size=16');
+
+if (isMacOS()) {
+    // Metal acceleration & Canvas out-of-process rasterization
+    app.commandLine.appendSwitch('enable-features', 'Metal,CanvasOopRasterization,Accelerated2dCanvas');
+    // Disable unnecessary Chromium background telemetry & services
+    app.commandLine.appendSwitch('disable-background-networking');
+    app.commandLine.appendSwitch('disable-component-update');
+    app.commandLine.appendSwitch('disable-domain-reliability');
+    app.commandLine.appendSwitch('disable-sync');
+    app.commandLine.appendSwitch('disable-breakpad');
+    app.commandLine.appendSwitch('disable-spell-checking');
+}
 
 // Must duplicate with the one in renderer process settings.store.ts
 enum BindingActions {
