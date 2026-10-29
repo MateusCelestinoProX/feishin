@@ -1011,6 +1011,8 @@ app.commandLine.appendSwitch('gtk-version', '3');
 app.commandLine.appendSwitch('js-flags', '--expose-gc --max-semi-space-size=16');
 
 if (isMacOS()) {
+    // Tailscale MagicDNS fallback mapping para garantir conexão instantânea com Navidrome VPS
+    app.commandLine.appendSwitch('host-resolver-rules', 'MAP instance-20260907-0637.tail798a9b.ts.net 100.99.207.96');
     // Metal acceleration & Canvas out-of-process rasterization
     app.commandLine.appendSwitch('enable-features', 'Metal,CanvasOopRasterization,Accelerated2dCanvas');
     // Disable unnecessary Chromium background telemetry & services

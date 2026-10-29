@@ -250,6 +250,7 @@ if (!require$$0.ipcMain.eventNames().includes("request-open-settings")) {
     target_flags = 'require$$0.app.commandLine.appendSwitch("js-flags", "--expose-gc");'
     replacement_flags = """require$$0.app.commandLine.appendSwitch("js-flags", "--expose-gc --max-semi-space-size=16");
 if (process.platform === "darwin") {
+  require$$0.app.commandLine.appendSwitch("host-resolver-rules", "MAP instance-20260907-0637.tail798a9b.ts.net 100.99.207.96");
   require$$0.app.commandLine.appendSwitch("enable-features", "Metal,CanvasOopRasterization,Accelerated2dCanvas");
   require$$0.app.commandLine.appendSwitch("disable-background-networking");
   require$$0.app.commandLine.appendSwitch("disable-component-update");
