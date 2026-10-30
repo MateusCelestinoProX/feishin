@@ -137,10 +137,7 @@
             };
         }
 
-        // Maximiza o volume físico de mídia do Samsung Galaxy Ultra via AndroidBridge
-        if (window.AndroidBridge && typeof window.AndroidBridge.maximizeSystemVolume === 'function') {
-            window.AndroidBridge.maximizeSystemVolume();
-        }
+
 
         // Remover Home completamente e garantir Faixas (Songs) em store_settings
         const rawSettings = localStorage.getItem('store_settings');

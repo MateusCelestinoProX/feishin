@@ -1048,7 +1048,6 @@
             const saved = localStorage.getItem('feishin_extra_mode');
             this.active = (saved === 'true');
 
-            this.syncSystemMaxVolume();
             this.attachAudioGuard();
 
             setTimeout(() => this.applyDSP(), 300);
@@ -1056,11 +1055,7 @@
         },
 
         syncSystemMaxVolume: function () {
-            try {
-                if (window.AndroidBridge && typeof window.AndroidBridge.maximizeSystemVolume === 'function') {
-                    window.AndroidBridge.maximizeSystemVolume();
-                }
-            } catch (e) {}
+            // No-op: não alterar o volume de mídia do sistema Android
         },
 
         attachAudioGuard: function () {
@@ -1077,7 +1072,6 @@
                 if (e.target && e.target.tagName === 'AUDIO') {
                     try { e.target.volume = 1.0; } catch (err) {}
                     if (this.active) {
-                        this.syncSystemMaxVolume();
                         setTimeout(() => this.applyDSP(), 80);
                     }
                 }
@@ -1099,7 +1093,6 @@
             }
 
             if (this.active) {
-                this.syncSystemMaxVolume();
                 // Desativa o LoudnessEnhancer nativo da HAL para evitar distorção de intermodulação/double clipping
                 if (window.AndroidBridge && typeof window.AndroidBridge.setNativeLoudnessBoost === 'function') {
                     window.AndroidBridge.setNativeLoudnessBoost(false, 0);
