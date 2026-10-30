@@ -5,7 +5,7 @@
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 16724 nodes · 40546 edges · 609 communities (415 shown, 139 thin omitted)
+- 16724 nodes · 40547 edges · 613 communities (413 shown, 144 thin omitted)
 - Extraction: 87% EXTRACTED · 13% INFERRED · 0% AMBIGUOUS · INFERRED: 5169 edges (avg confidence: 0.85)
 - Token cost: 0 input · 0 output
 
@@ -24,7 +24,7 @@
 - Lt
 - clsx
 - assets/three.min.js
-- en
+- o
 - Lt
 - pt
 - is-electron
@@ -48,18 +48,18 @@
 - c
 - kP
 - custom/webgl-backgrounds.js
-- .toJSON
-- e
+- vt
+- constructor
 - @tanstack/react-query
 - dependencies
-- f
+- v
 - app-router.tsx
 - package.json
 - .toJSON
 - .lt
 - navidrome-types.ts
 - .then
-- it
+- Ts
 - V
 - it
 - FeishinCDP
@@ -80,11 +80,10 @@
 - scripts
 - dlna/index.ts
 - preload/utils.ts
-- pt
-- mpv-player.ts
+- W
 - devDependencies
 - remote-types.ts
-- Cn
+- zb
 - V
 - sidebar-play-queue.tsx
 - AppTheme
@@ -95,7 +94,6 @@
 - lyrics-animation-engine.ts
 - BindingActions
 - TableColumn
-- format.tsx
 - mCe
 - ke
 - xc
@@ -109,7 +107,7 @@
 - yt
 - AppRoute
 - ks
-- taglib-service.ts
+- core/index.ts
 - ks
 - lyrics/index.ts
 - tn
@@ -122,8 +120,8 @@
 - .forEach
 - jc
 - St
-- expanded-album-list-item.tsx
-- nn
+- react-window-v2
+- jr
 - item-table-list-column.tsx
 - assets/feishin-recently-added.js
 - U
@@ -132,19 +130,19 @@
 - animation-props.ts
 - pt
 - .z
-- .constructor
+- copy
 - .toString
 - types/types.ts
 - i0t
 - assets/music-analytics.js
-- store/utils.ts
+- subsonic-controller.ts
 - player/index.ts
 - custom/music-analytics.js
 - .update
 - ._parse
 - ServerFeature
 - ar
-- vt
+- pt
 - item-list-state.ts
 - find
 - list-config-menu.tsx
@@ -161,14 +159,14 @@
 - 🚀 Arquitetura & Customizações Integradas
 - .copy
 - item-card.tsx
-- Al
+- Dr
 - lyrics-utils.ts
 - lyrics-api.ts
 - DragTarget
 - use-app-tracker.ts
 - i18next
 - icon.tsx
-- W
+- q
 - BindingActions
 - shared/utils.ts
 - app.store.ts
@@ -181,26 +179,26 @@
 - album-list-content.tsx
 - AlphabetScrubber
 - assets/feishin-personal-os.js
-- local-settings.ts
+- electron
 - remote/store/index.ts
 - renderer/app.tsx
 - TypedEventEmitterImpl
 - events.ts
 - jellyfin-normalize.ts
-- sn
-- Uc
+- be
+- Dh
 - Custom Themes
 - use-radio-player.ts
 - @mantine/hooks
 - AlphabetScrubber
-- electron
+- preload/mpris.ts
 - list-sort-by-dropdown.tsx
 - favorite-optimistic-updates.ts
 - PlayerItem
 - subsonic-normalize.ts
 - image.tsx
-- .applyMatrix4
-- Ts
+- sn
+- d2
 - album-detail-content.tsx
 - utils/logger.ts
 - navidrome-normalize.ts
@@ -209,7 +207,7 @@
 - yN
 - fa
 - U
-- gs
+- uBe
 - eq-settings.tsx
 - play-button-group.tsx
 - SidebarItem
@@ -217,7 +215,7 @@
 - kot
 - K1
 - update-app-stream.mjs
-- oo
+- context-menu-controller.tsx
 - song-list-content.tsx
 - library.ts
 - le
@@ -227,11 +225,11 @@
 - NDAlbumListSort
 - Agent skills
 - compilerOptions
-- q
+- en
 - vite.kuromoji-plugin.ts
 - shared/api/utils.ts
-- dlna-cast-button.tsx
-- client-side-song-filters.tsx
+- .constructor
+- furigana.ts
 - yo
 - playlist-query-builder.tsx
 - dropdown-menu.tsx
@@ -240,14 +238,14 @@
 - .update
 - item-detail-list.tsx
 - nct
-- shuffle-all-modal.tsx
-- iW
+- mobile-fullscreen-player.tsx
+- full-screen-player.tsx
 - .init
-- eWe
+- rWe
 - grid-carousel-v2.tsx
-- dct
+- setOptions
 - jukebox-player-engine.tsx
-- SongFilterKeys
+- eWe
 - auth.store.ts
 - query-params.ts
 - JFSongListSort
@@ -277,7 +275,7 @@
 - default-columns.ts
 - .normalize
 - en
-- .intersectMeshes
+- karaoke-lyric-line.tsx
 - use-scrobble.ts
 - playlists/utils.ts
 - components/audio-players.tsx
@@ -289,13 +287,13 @@
 - Ponytail
 - Ponytail
 - Commits
-- item-table-list.tsx
+- player-context.tsx
 - use-discord-rpc.ts
 - yit
 - wJ
-- react-window-v2
+- mW
 - src/remote/manifest.json
-- yk
+- .removeChild
 - item-list/types.ts
 - simple-item-table.tsx
 - use-artist-albums-grouped.ts
@@ -304,7 +302,7 @@
 - react-error-boundary
 - menu.ts
 - window-bar.tsx
-- subsonic-structured-lyrics.ts
+- feature-carousel.tsx
 - AlbumGroupItem
 - sleep-timer.store.ts
 - JFAlbumListSort
@@ -314,22 +312,22 @@
 - assets/feishin-delete-engine.js
 - ssdp-discovery.ts
 - action-sheet.tsx
-- action-icon.tsx
+- query-builder/index.tsx
 - renderer/assets/assets.d.ts
-- cJ
+- tb
 - item-list-infinite-loader.ts
 - item-detail-list/utils.ts
 - W
 - command-palette.tsx
 - playlist-query-editor.tsx
-- oVe
-- album-group-header.tsx
+- add-server-form.tsx
+- joined-artists.tsx
 - radio-store.ts
 - .update
 - hit
 - HomeItem
 - ShareExpirationUnit
-- subsonic-controller.ts
+- format.tsx
 - SubsonicExtensions
 - use-row-play-control.ts
 - Su
@@ -337,14 +335,14 @@
 - Play
 - left-sidebar.tsx
 - Contributing to Feishin
-- tb
+- sct
 - API
 - Architecture
 - player-filter-settings.tsx
 - date-picker.tsx
 - window-bounds.ts
 - play-row-from-list.ts
-- album-list-header.tsx
+- lyrics-actions.tsx
 - lyrics-scroll.ts
 - album-artist-detail-favorite-songs-list-route.tsx
 - sleep-timer-button.tsx
@@ -386,7 +384,7 @@
 - custom/feishin-mobile-enhancer.js
 - JFPlaylistListSort
 - item-list-paginated-loader.ts
-- navidrome-controller.ts
+- cJ
 - initPlayerKillSwitch
 - apply_customizations.py
 - zip.ts
@@ -400,14 +398,14 @@
 - favorites-content.tsx
 - app-menu.tsx
 - pill.tsx
-- settings/index.ts
+- expanded-list-item.tsx
 - split-word-cue.ts
 - use-remote-library.tsx
 - getServerTagAutocompleteName
-- 🧭 Samsung Music Chronology Engine — Arquitetura de Preservação Perpétua
+- ListDisplayType
 - isShuffleEnabled
 - use-furigana-lyrics.ts
-- library-header.tsx
+- PlayerType
 - xL
 - list-filters.tsx
 - list-sort-order-toggle-button.tsx
@@ -438,8 +436,8 @@
 - table-scroll-shadow-store.ts
 - settings-diff-visualiser.tsx
 - use-confirmed-send.ts
-- use-grid-rows.ts
-- use-queue-drag-reorder.ts
+- xct
+- use-auto-dj.ts
 - album-infinite-carousel.tsx
 - album-artist-infinite-carousel.tsx
 - folder-list-content.tsx
@@ -463,7 +461,7 @@
 - tag-filter.tsx
 - song-infinite-carousel.tsx
 - PlayerStatus
-- author
+- shared/hooks/use-long-press.ts
 - commitlint.config.mjs
 - patch_bundle.py
 - artwork-fullscreen.tsx
@@ -476,30 +474,35 @@
 - append-layout-fill-column.ts
 - get-dragged-items.ts
 - server-lock.ts
-- playlist-optimistic-updates.ts
+- AuthState
 - use-play-button-click.ts
-- radio-row.tsx
+- PlayerRepeat
 - utils-list-count.ts
 - album-list-infinite-detail.tsx
-- album-list-paginated-table.tsx
+- PlayerShuffle
 - album-artist-list-infinite-grid.tsx
 - album-artist-list-infinite-table.tsx
 - album-artist-list-paginated-grid.tsx
 - album-artist-list-paginated-table.tsx
-- artist-list-infinite-table.tsx
+- ServerType
 - artist-list-paginated-table.tsx
-- play-album-radio-action.tsx
+- album-list-infinite-grid.tsx
 - play-track-radio-action.tsx
 - genre-list-infinite-grid.tsx
-- lyrics.tsx
+- album-list-paginated-detail.tsx
 - playlist-list-infinite-grid.tsx
 - playlist-list-infinite-table.tsx
 - playlist-list-paginated-table.tsx
+- jellyfin-album-filters.tsx
 - song-list-infinite-grid.tsx
-- song-list-infinite-table.tsx
+- use-update-current-song.ts
+- playlist-list-paginated-grid.tsx
 - json-preview.tsx
 - list-display-type-toggle-button.tsx
 - more-button.tsx
+- use-playlist-track-list.ts
+- jellyfin-song-filters.tsx
+- ListPaginationType
 - GenreTarget
 - HomeFeatureStyle
 - PlayerbarSliderType
@@ -601,14 +604,14 @@
   src/renderer/assets/custom/three.min.js → customizations/assets/index-C3w9ueFE.js
 
 ## Import Cycles
-- 4-file cycle: `src/main/features/core/index.ts -> src/main/features/core/player/index.ts -> src/main/index.ts -> src/main/features/index.ts -> src/main/features/core/index.ts`
 - 4-file cycle: `src/main/features/core/dlna/index.ts -> src/main/index.ts -> src/main/features/index.ts -> src/main/features/core/index.ts -> src/main/features/core/dlna/index.ts`
+- 4-file cycle: `src/main/features/core/index.ts -> src/main/features/core/player/index.ts -> src/main/index.ts -> src/main/features/index.ts -> src/main/features/core/index.ts`
 
-## Communities (609 total, 139 thin omitted)
+## Communities (613 total, 144 thin omitted)
 
 ### Community 0 - "react"
 Cohesion: 0.01
-Nodes (99): react, /@/renderer/features/settings/components/settings-header, FadeInProps, AddToPlaylistSheetProps, TrackActionSheetProps, TrackActionSheetView, UseInfiniteScrollOptions, UseLongPressHandlers (+91 more)
+Nodes (96): react, /@/renderer/features/settings/components/settings-header, FadeInProps, AddToPlaylistSheetProps, TrackActionSheetProps, TrackActionSheetView, UseInfiniteScrollOptions, UseLongPressHandlers (+88 more)
 
 ### Community 1 - "domain-types.ts"
 Cohesion: 0.01
@@ -616,43 +619,43 @@ Nodes (247): AddToPlaylistArgs, AddToPlaylistBody, AddToPlaylistQuery, AddToPlay
 
 ### Community 2 - "@mantine/core"
 Cohesion: 0.01
-Nodes (103): @mantine/core, ThumbnailProps, WrappedProps, JellyfinQuickConnectButtonProps, @emotion/react, GREY, AccordionProps, AngleSlider (+95 more)
+Nodes (102): @mantine/core, ThumbnailProps, WrappedProps, JellyfinQuickConnectButtonProps, @emotion/react, GREY, AccordionProps, ActionIcon (+94 more)
 
 ### Community 3 - "react-i18next"
 Cohesion: 0.01
-Nodes (79): react-i18next, DragPreview, DragPreviewProps, getItemName(), controls, AddArgs, DeleteArgs, FilterGroup (+71 more)
+Nodes (64): react-i18next, DragPreview, DragPreviewProps, getItemName(), controls, AlbumListHeaderProps, AlbumArtistDetailFavoriteSongsListHeaderProps, AlbumArtistDetailTopSongsListHeaderProps (+56 more)
 
 ### Community 4 - "react-router"
 Cohesion: 0.01
-Nodes (63): react-call, react-router, Tab, TABS, CarouselItemProps, containerVariants, FeatureCarousel(), FeatureCarouselProps (+55 more)
+Nodes (51): react-router, Tab, TABS, CarouselItemProps, containerVariants, itemVariants, SingleFeatureCarouselProps, itemTypeMapping (+43 more)
 
 ### Community 5 - "custom/three.min.js"
 Cohesion: 0.02
-Nodes (89): Vr(), _allocateTargets(), ao(), _applyPMREM(), Ba, bi(), bind(), _blur() (+81 more)
+Nodes (92): Vr(), _a, Ah, _allocateTargets(), ao(), _applyPMREM(), Ba, bi() (+84 more)
 
 ### Community 6 - "Lt"
-Cohesion: 0.03
-Nodes (13): Be(), as(), copy(), ec, S(), A(), hs, ht() (+5 more)
+Cohesion: 0.02
+Nodes (12): Ea(), S(), A(), ht(), jt(), Lt, Ne, re (+4 more)
 
 ### Community 7 - "clsx"
 Cohesion: 0.01
-Nodes (68): clsx, ListRowProps, PlayerImageProps, ImageColumn, RowIndexColumn, TitleArtistColumn, TitleColumn, TitleCombinedColumn (+60 more)
+Nodes (59): clsx, react-dom, ListRowProps, PlayerImageProps, ImageColumn, RowIndexColumn, TitleArtistColumn, TitleColumn (+51 more)
 
 ### Community 8 - "assets/three.min.js"
 Cohesion: 0.02
 Nodes (88): _a, Ah, _allocateTargets(), ao(), _applyPMREM(), Ba, _blur(), br() (+80 more)
 
-### Community 9 - "en"
-Cohesion: 0.05
-Nodes (17): ca, cs, v(), en, fo(), go, jn(), mn (+9 more)
+### Community 9 - "o"
+Cohesion: 0.03
+Nodes (258): _9e(), a9(), aat(), aC(), g(), h(), ade(), aEe (+250 more)
 
 ### Community 10 - "Lt"
 Cohesion: 0.02
 Nodes (26): ri(), ze, ai, as(), copy(), Ea(), ec, S() (+18 more)
 
 ### Community 12 - "is-electron"
-Cohesion: 0.01
-Nodes (74): /@/renderer/features/settings/components/playback/mpv-settings, is-electron, DownloadActionProps, ShowInFileExplorerActionProps, SongPathProps, SERVER_ICONS, SERVER_NAMES, LYRICS_SCROLL_CONTAINER_ID (+66 more)
+Cohesion: 0.02
+Nodes (68): /@/renderer/features/settings/components/playback/mpv-settings, is-electron, DownloadActionProps, ShowInFileExplorerActionProps, SongPathProps, SERVER_ICONS, SERVER_NAMES, LYRICS_SCROLL_CONTAINER_ID (+60 more)
 
 ### Community 13 - "subsonic-types.ts"
 Cohesion: 0.02
@@ -664,7 +667,7 @@ Nodes (16): Aa, bt, clone(), ct(), es(), gs, li(), ns() (+8 more)
 
 ### Community 15 - "@mantine/modals"
 Cohesion: 0.02
-Nodes (42): @mantine/modals, DeletePlaylistActionProps, DeleteSongActionProps, EditMetadataActionProps, GetInfoActionProps, RemoveFromPlaylistActionProps, ShareActionProps, LyricSearchFormProps (+34 more)
+Nodes (43): @mantine/modals, DeletePlaylistActionProps, DeleteSongActionProps, EditMetadataActionProps, GetInfoActionProps, RemoveFromPlaylistActionProps, ShareActionProps, LyricSearchFormProps (+35 more)
 
 ### Community 16 - "settings.store.ts"
 Cohesion: 0.02
@@ -676,7 +679,7 @@ Nodes (67): ci, constructor(), d(), u(), Da, v(), dispose(), ei (+59 more)
 
 ### Community 18 - "ws"
 Cohesion: 0.04
-Nodes (94): constructor(), d(), u(), dc, dispose(), ds(), F(), G() (+86 more)
+Nodes (60): dispose(), ds(), F(), G(), k(), V(), z(), ei (+52 more)
 
 ### Community 19 - "_"
 Cohesion: 0.03
@@ -684,7 +687,7 @@ Nodes (50): _, ae(), at, bs(), bt(), ce(), ct(), dt (+42 more)
 
 ### Community 20 - "$_"
 Cohesion: 0.00
-Nodes (965): $_, $1, _3, _3e, _4e, $4t, _5e, _6e (+957 more)
+Nodes (988): $_, $1, _3, _3e, $3t(), _4e, $4t, _5e (+980 more)
 
 ### Community 21 - "jellyfin-types.ts"
 Cohesion: 0.02
@@ -700,7 +703,7 @@ Nodes (34): bindSkeletons(), cl, i(), n(), dl, hl, ic, ii (+26 more)
 
 ### Community 24 - "e"
 Cohesion: 0.01
-Nodes (348): a0t(), e(), ACe(), act, Ad, aht(), aIe(), aqe() (+340 more)
+Nodes (414): _9(), a0t(), aBe, e(), act, Ad, age(), ahe() (+406 more)
 
 ### Community 25 - "vt"
 Cohesion: 0.03
@@ -712,7 +715,7 @@ Nodes (16): aa, Ce, fa, ia, $l, la, parseObject(), _s() (+8 more)
 
 ### Community 27 - "columns/index.ts"
 Cohesion: 0.05
-Nodes (50): react-dom, ActionsColumn(), AlbumArtistColumn(), AlbumColumn(), ArtistColumn(), BitDepthColumn(), BitRateColumn(), BpmColumn() (+42 more)
+Nodes (47): ActionsColumn(), AlbumArtistColumn(), AlbumColumn(), ArtistColumn(), BitDepthColumn(), BitRateColumn(), BpmColumn(), ChannelsColumn() (+39 more)
 
 ### Community 28 - "assets/webgl-backgrounds.js"
 Cohesion: 0.06
@@ -724,35 +727,35 @@ Nodes (8): fs, Jl, kl, Kn, Ql, St, vl(), Yl
 
 ### Community 30 - "c"
 Cohesion: 0.02
-Nodes (478): _0e(), _9e(), a5t(), a9(), aat(), aC(), g(), h() (+470 more)
+Nodes (414): _0e(), a5t(), adt(), af, afe(), AK(), akt(), As() (+406 more)
 
 ### Community 31 - "kP"
-Cohesion: 0.10
-Nodes (35): c2(), Df(), ds(), FP(), Fu(), jf(), jk(), Kk() (+27 more)
+Cohesion: 0.08
+Nodes (41): Df(), ds(), $f(), Fu(), jk(), Kk(), Lk(), Ql() (+33 more)
 
 ### Community 32 - "custom/webgl-backgrounds.js"
 Cohesion: 0.06
-Nodes (62): buildStrandsPalette(), easePower2InOut(), getOptimizedDPR(), handleStateChange(), hexToRgb(), hexToRgbArr(), initAcidSquares(), initAntigravity() (+54 more)
+Nodes (63): gt, buildStrandsPalette(), easePower2InOut(), getOptimizedDPR(), handleStateChange(), hexToRgb(), hexToRgbArr(), initAcidSquares() (+55 more)
 
-### Community 33 - ".toJSON"
+### Community 33 - "vt"
 Cohesion: 0.02
-Nodes (18): ac, Al, bl, r(), clone(), n(), el, fl (+10 more)
+Nodes (19): ac, Al, bl, r(), n(), dl, el, fl (+11 more)
 
-### Community 34 - "e"
+### Community 34 - "constructor"
 Cohesion: 0.04
-Nodes (29): ze, bindSkeletons(), cl, i(), dl, hl, ii, il() (+21 more)
+Nodes (57): Be(), ze, bindSkeletons(), br(), cl, constructor(), d(), u() (+49 more)
 
 ### Community 35 - "@tanstack/react-query"
 Cohesion: 0.02
-Nodes (36): @tanstack/react-query, albumQueries, AlbumListInfiniteGridProps, AlbumListInfiniteTableProps, AlbumListPaginatedDetailProps, AlbumListPaginatedGridProps, JellyfinAlbumFiltersProps, NavidromeAlbumFiltersProps (+28 more)
+Nodes (36): @tanstack/react-query, albumQueries, AlbumListInfiniteTableProps, AlbumListPaginatedGridProps, AlbumListPaginatedTableProps, NavidromeAlbumFiltersProps, SubsonicAlbumFiltersProps, artistsQueries (+28 more)
 
 ### Community 36 - "dependencies"
 Cohesion: 0.03
 Nodes (76): dependencies, @atlaskit/pragmatic-drag-and-drop, @atlaskit/pragmatic-drag-and-drop-auto-scroll, @atlaskit/pragmatic-drag-and-drop-hitbox, audiomotion-analyzer, axios, butterchurn, butterchurn-presets (+68 more)
 
-### Community 37 - "f"
+### Community 37 - "v"
 Cohesion: 0.05
-Nodes (240): a$e, ai, N(), Au(), b0t, bbt, Bc(), BI() (+232 more)
+Nodes (197): a1(), a$e, ai, N(), Au(), b0t, Bc(), BH() (+189 more)
 
 ### Community 38 - "app-router.tsx"
 Cohesion: 0.03
@@ -760,7 +763,7 @@ Nodes (63): /@/renderer/features/action-required/routes/action-required-route, /
 
 ### Community 39 - "package.json"
 Cohesion: 0.03
-Nodes (67): bugs, url, description, homepage, stylelint-config-css-modules, stylelint-config-recess-order, stylelint-config-standard, keywords (+59 more)
+Nodes (71): author, email, name, url, bugs, url, description, homepage (+63 more)
 
 ### Community 40 - ".toJSON"
 Cohesion: 0.03
@@ -768,26 +771,26 @@ Nodes (10): ac, Al, r(), el, Ll, ml, nl, Rl (+2 more)
 
 ### Community 41 - ".lt"
 Cohesion: 0.02
-Nodes (278): _0(), a(), a3, ab(), aBe, aLe(), aM, aPe() (+270 more)
+Nodes (276): _0(), a(), a3, ab(), ACe(), aL(), aLe(), aM (+268 more)
 
 ### Community 42 - "navidrome-types.ts"
 Cohesion: 0.03
 Nodes (66): addToPlaylist, addToPlaylistParameters, album, albumArtist, albumArtistList, albumArtistListParameters, albumList, albumListParameters (+58 more)
 
 ### Community 43 - ".then"
-Cohesion: 0.02
-Nodes (176): ./collapsed-sidebar-BaaZTp3k.js, As(), Azt(), #b(), bjt(), bn(), bwt(), cancel() (+168 more)
+Cohesion: 0.04
+Nodes (66): ./collapsed-sidebar-BaaZTp3k.js, bjt(), bn(), dZt, Eht(), d(), eyt, ezt (+58 more)
 
-### Community 44 - "it"
-Cohesion: 0.03
-Nodes (71): $8t(), af, afe(), alt(), BA(), bf(), bOe, bW() (+63 more)
+### Community 44 - "Ts"
+Cohesion: 0.13
+Nodes (23): E2(), Ew(), Ko(), kP(), lu(), Rw(), SP(), Tg() (+15 more)
 
 ### Community 45 - "V"
 Cohesion: 0.05
 Nodes (16): cr, De(), Ee(), he(), ki(), Lt, nn(), or (+8 more)
 
 ### Community 46 - "it"
-Cohesion: 0.14
+Cohesion: 0.13
 Nodes (4): Ds(), it, St, ui()
 
 ### Community 47 - "FeishinCDP"
@@ -807,16 +810,16 @@ Cohesion: 0.06
 Nodes (41): /@/renderer/features/settings/components/playback/mpv-audio-filters, react-player, DlnaPlayerEngine(), DlnaPlayerEngineHandle, DlnaPlayerEngineProps, extractDlnaId(), findQueueMatchForUris(), FORMAT_MIME_MAP (+33 more)
 
 ### Community 51 - "has"
-Cohesion: 0.01
-Nodes (164): $3t(), a7e(), ait(), aJ(), e(), AN(), ant(), applyPatches() (+156 more)
+Cohesion: 0.02
+Nodes (104): a7e(), ait(), aJ(), e(), AN(), B7t(), bCe(), blt (+96 more)
 
 ### Community 52 - "se"
-Cohesion: 0.03
-Nodes (7): Da, ia, la, se, vi(), h(), yt
+Cohesion: 0.04
+Nodes (9): as(), Da, ia, is(), os(), se, vi(), h() (+1 more)
 
 ### Community 53 - "tn"
 Cohesion: 0.04
-Nodes (13): _a, bo, Do, dt(), $e(), is(), ms(), Qe() (+5 more)
+Nodes (12): bo, dt(), $e(), fo(), mo(), l(), ms(), po (+4 more)
 
 ### Community 54 - "playlist-folder-tree.tsx"
 Cohesion: 0.06
@@ -827,8 +830,8 @@ Cohesion: 0.05
 Nodes (6): At, fe, ge, ht(), setFromCartesianCoords(), setFromVector3()
 
 ### Community 56 - "main/index.ts"
-Cohesion: 0.07
-Nodes (40): electron-devtools-installer, electron-localshortcut, @electron-toolkit/utils, electron-updater, semver, disableMediaKeys(), enableMediaKeys(), canHandleVisualizerDisplayMedia() (+32 more)
+Cohesion: 0.05
+Nodes (47): electron-devtools-installer, electron-localshortcut, electron-store, @electron-toolkit/utils, electron-updater, semver, disableMediaKeys(), enableMediaKeys() (+39 more)
 
 ### Community 58 - "assets/feishin-tags-engine.js"
 Cohesion: 0.11
@@ -843,28 +846,24 @@ Cohesion: 0.12
 Nodes (12): ActiveRowStore, ItemTableListColumnResizeLiveContext, ItemTableListColumnResizeLiveContextValue, ItemTableListConfig, ItemTableListConfigContext, ItemTableListGroupHeader, ItemTableListStoreContext, ItemTableListStoreContextValue (+4 more)
 
 ### Community 61 - "axios"
-Cohesion: 0.04
-Nodes (8): axios, SidebarPlaylistFolderMoveArgs, sidebarPlaylistFolderMoveMutationKey, SidebarPlaylistFolderMoveUpdate, deleteFavoriteMutationKey, setRatingMutationKey, isNetworkError(), useServerAuthenticated()
+Cohesion: 0.03
+Nodes (17): axios, collator, EXCLUDED_ALBUM_TAGS, EXCLUDED_SONG_TAGS, EXCLUDED_TAGS, NAVIDROME_ROLES, NavidromeController, numericSortCollator (+9 more)
 
 ### Community 62 - "scripts"
 Cohesion: 0.04
 Nodes (49): scripts, build, build:electron, build:remote, build:web, dev, dev:remote, dev:validate-api (+41 more)
 
 ### Community 63 - "dlna/index.ts"
-Cohesion: 0.07
-Nodes (78): DP(), cleanupTempFiles(), consolidateDiscoveredDevices(), dlnaLog(), enrichDevicesWithTopology(), ensureEventServer(), fetchTopologyForDevice(), fetchXml() (+70 more)
+Cohesion: 0.06
+Nodes (78): cleanupTempFiles(), consolidateDiscoveredDevices(), dlnaLog(), enrichDevicesWithTopology(), ensureEventServer(), fetchTopologyForDevice(), fetchXml(), fullDisconnect() (+70 more)
 
 ### Community 64 - "preload/utils.ts"
 Cohesion: 0.05
 Nodes (15): disableAutoUpdates(), isLinux(), isMacOS(), isWindows(), ArtworkKind, ArtworkOp, BatchFileError, BatchProgress (+7 more)
 
-### Community 65 - "pt"
-Cohesion: 0.09
-Nodes (8): bi(), _i(), pn, pt, Si(), Ti(), vi(), zi()
-
-### Community 66 - "mpv-player.ts"
-Cohesion: 0.03
-Nodes (15): Browser, CustomTheme, CustomThemes, DlnaPlayer, DlnaPlayerListener, api, Window, PreloadApi (+7 more)
+### Community 65 - "W"
+Cohesion: 0.06
+Nodes (13): bi(), Fs(), _i(), on, pn, pt, Si(), Ti() (+5 more)
 
 ### Community 67 - "devDependencies"
 Cohesion: 0.04
@@ -874,9 +873,9 @@ Nodes (46): devDependencies, babel-plugin-react-compiler, @commitlint/cli, @comm
 Cohesion: 0.04
 Nodes (45): AckableClientEvent, ClientAddToPlaylist, ClientAuth, ClientClearQueue, ClientEvent, ClientFavorite, ClientPlayAlbum, ClientPlayPlaylist (+37 more)
 
-### Community 69 - "Cn"
-Cohesion: 0.06
-Nodes (52): aA(), AP(), b2(), Bd(), Cb(), Cn(), Cs(), dA() (+44 more)
+### Community 69 - "zb"
+Cohesion: 0.08
+Nodes (51): AP(), Bf(), BR(), dk(), Dw(), Ec(), Fb(), Ff() (+43 more)
 
 ### Community 70 - "V"
 Cohesion: 0.08
@@ -898,6 +897,10 @@ Nodes (12): an, cn, dn, fn, hn, ln, ls(), on (+4 more)
 Cohesion: 0.06
 Nodes (15): DlnaDevice, GroupMember, rendererCurrentTime(), rendererDlnaConnectPlayback(), rendererDlnaDiscoveryUpdate(), rendererDlnaGroupMemberVolume(), rendererDlnaGroupState(), rendererDlnaPrevTrack() (+7 more)
 
+### Community 76 - "jc"
+Cohesion: 0.04
+Nodes (8): bind(), ct(), es(), getValue(), jc, ns(), qc, Mt()
+
 ### Community 77 - "lyrics-animation-engine.ts"
 Cohesion: 0.10
 Nodes (39): animateLyricsScrollTo(), animateWordParts(), AnimEngineState, buildLyricsDataFromDom(), BuildLyricsDataOptions, cancelActiveLyricsScroll(), cancelSungAnimationCleanup(), clearElementAnimation() (+31 more)
@@ -910,13 +913,9 @@ Nodes (43): BindingActions, BROWSER_BACK, BROWSER_FORWARD, FAVORITE_CURRENT_ADD,
 Cohesion: 0.05
 Nodes (43): TableColumn, ACTIONS, ALBUM, ALBUM_ARTIST, ALBUM_COUNT, ALBUM_GROUP, ARTIST, BIOGRAPHY (+35 more)
 
-### Community 80 - "format.tsx"
-Cohesion: 0.05
-Nodes (5): formatPartialIsoDateUTC(), getDayjsLocale(), getIntlLocale(), SIZES, updateDayjsLocale()
-
 ### Community 81 - "mCe"
 Cohesion: 0.02
-Nodes (117): Bw(), cA(), Dg(), $f(), Gd(), Ib(), iS(), Lg() (+109 more)
+Nodes (117): Gd(), Hd(), jP(), m4(), Md(), Nf(), Nk(), O4() (+109 more)
 
 ### Community 82 - "ke"
 Cohesion: 0.13
@@ -924,7 +923,7 @@ Nodes (6): Ie(), ke, Ne(), xe(), ye(), zt
 
 ### Community 83 - "xc"
 Cohesion: 0.03
-Nodes (9): jo, nc, qo, uh(), wo, xc, xo, yc (+1 more)
+Nodes (8): jo, nc, qo, wo, xc, xo, yc, yo
 
 ### Community 84 - "visualizer-settings-form.tsx"
 Cohesion: 0.08
@@ -939,8 +938,8 @@ Cohesion: 0.11
 Nodes (6): Ds(), it, sr(), L(), tt(), St
 
 ### Community 87 - "Ce"
-Cohesion: 0.03
-Nodes (18): Ee(), Re(), Se(), Te(), xe(), Ce, fa, gs (+10 more)
+Cohesion: 0.04
+Nodes (18): jl, Ee(), qs(), Se(), Te(), xe(), Ce, ci (+10 more)
 
 ### Community 88 - "Lc"
 Cohesion: 0.08
@@ -952,7 +951,7 @@ Nodes (38): mpris-service, ws, authorize(), broadcast(), cache, currentQueueStat
 
 ### Community 90 - "x"
 Cohesion: 0.07
-Nodes (85): Co(), ct(), D(), D4(), dt(), $e(), eS(), gt() (+77 more)
+Nodes (77): aA(), ct(), D(), dt(), $e(), eS(), g4(), gt() (+69 more)
 
 ### Community 91 - "yt"
 Cohesion: 0.09
@@ -966,17 +965,17 @@ Nodes (34): AppRoute, ACTION_REQUIRED, EXPLORE, FAKE_LIBRARY_ALBUM_DETAILS, FAVO
 Cohesion: 0.08
 Nodes (7): k9(), mN(), ge(), ks, me(), Os(), Rt()
 
-### Community 94 - "taglib-service.ts"
-Cohesion: 0.35
-Nodes (9): canonicalizePropertyKey(), checkPathsWritable(), getTagLib(), mapWithConcurrency(), normalizeProperties(), readFilesMetadataBatch(), readLocalImageFile(), tagValuesEqual() (+1 more)
+### Community 94 - "core/index.ts"
+Cohesion: 0.17
+Nodes (12): discoverAll(), discoverJellyfin(), JellyfinResponse, canonicalizePropertyKey(), checkPathsWritable(), getTagLib(), mapWithConcurrency(), normalizeProperties() (+4 more)
 
 ### Community 95 - "ks"
 Cohesion: 0.10
 Nodes (3): ge(), ks, me()
 
 ### Community 96 - "lyrics/index.ts"
-Cohesion: 0.04
-Nodes (67): cheerio, kuroshiro, kuroshiro-analyzer-kuromoji, convertFurigana(), convertFuriganaFragment(), convertRomaji(), convertRomajiTokens(), getDictionaryPath() (+59 more)
+Cohesion: 0.05
+Nodes (57): cheerio, GeniusResponse, getLyricsBySongId(), getSearchResults(), getSongId(), Hit, Meta, PrimaryArtist (+49 more)
 
 ### Community 97 - "tn"
 Cohesion: 0.10
@@ -999,44 +998,44 @@ Cohesion: 0.08
 Nodes (26): qs, @ts-rest/core, axiosClient, c, contract, createAuthHeader(), jfApiClient(), parsePath() (+18 more)
 
 ### Community 102 - "Lc"
-Cohesion: 0.08
-Nodes (4): bc, getInput(), getOutput(), Lc
+Cohesion: 0.07
+Nodes (6): bc, getInput(), getOutput(), ic, Lc, parseMaterials()
 
 ### Community 103 - "album-artist-detail-content.tsx"
 Cohesion: 0.08
 Nodes (20): AlbumArtistActionButtonsProps, AlbumArtistDetailContentProps, AlbumArtistMetadataBiographyProps, AlbumArtistMetadataExternalLinks(), AlbumArtistMetadataExternalLinksProps, AlbumArtistMetadataFavoriteSongsProps, AlbumArtistMetadataGenresProps, AlbumArtistMetadataSimilarArtistsProps (+12 more)
 
 ### Community 104 - ".forEach"
-Cohesion: 0.02
-Nodes (115): a1(), a1t(), n(), r(), a$t(), AAe(), accessor(), i() (+107 more)
+Cohesion: 0.03
+Nodes (80): a(), a1t(), n(), r(), a$t(), AAe(), accessor(), i() (+72 more)
 
 ### Community 105 - "jc"
 Cohesion: 0.03
 Nodes (7): bind(), getValue(), jc, nc, setValue(), xc, yc
 
 ### Community 106 - "St"
+Cohesion: 0.02
+Nodes (19): Re(), fs, gs, hs, Jl, kl, Kn, y() (+11 more)
+
+### Community 107 - "react-window-v2"
 Cohesion: 0.03
-Nodes (11): jl, fs, ic, Jl, kl, Kn, parseMaterials(), Ql (+3 more)
+Nodes (46): /@/renderer/features/player/components/playerbar-waveform, format-duration, react-window-v2, AlbumRowSharedProps, PlaylistRowSharedProps, QueueRowSharedProps, RadioRowSharedProps, TrackRowSharedProps (+38 more)
 
-### Community 107 - "expanded-album-list-item.tsx"
-Cohesion: 0.05
-Nodes (28): /@/renderer/features/player/components/playerbar-waveform, format-duration, QueueRowSharedProps, DurationColumn, AlbumTracksTableProps, ExpandedAlbumData, ExpandedAlbumListItem(), ExpandedAlbumListItemContentProps (+20 more)
-
-### Community 108 - "nn"
-Cohesion: 0.06
-Nodes (77): _2(), _4(), aR(), b4(), bP(), Pe(), dR(), eR() (+69 more)
+### Community 108 - "jr"
+Cohesion: 0.08
+Nodes (56): _2(), aR(), bP(), Pe(), c2(), Cw(), Fd(), FP() (+48 more)
 
 ### Community 109 - "item-table-list-column.tsx"
-Cohesion: 0.11
-Nodes (18): ALBUM_GROUP_CELL_PADDING, ALBUM_GROUP_STACK_GAP, baseRowHeightForSize(), columnLabelMap, ColumnResizeHandleProps, getAlbumGroupClampHeight(), getAlbumGroupHeightKey(), getAlbumGroupRowCount() (+10 more)
+Cohesion: 0.05
+Nodes (41): createColumnCellComponent(), createColumnCellComponents(), TableScrollToIndexOptions, BaseItemTableList(), ALBUM_GROUP_CELL_PADDING, ALBUM_GROUP_STACK_GAP, baseRowHeightForSize(), columnLabelMap (+33 more)
 
 ### Community 110 - "assets/feishin-recently-added.js"
 Cohesion: 0.17
 Nodes (28): bindViewEvents(), ensureSidebarRecentlyAddedItem(), escapeHtml(), formatCreationDate(), formatDuration(), getAuthInfo(), scan(), getCoverUrl() (+20 more)
 
 ### Community 111 - "U"
-Cohesion: 0.05
-Nodes (15): ai(), ci(), di(), fi(), gi(), hi(), ii(), li() (+7 more)
+Cohesion: 0.06
+Nodes (14): ai(), di(), fi(), gi(), hi(), ii(), li(), mi() (+6 more)
 
 ### Community 112 - "custom/feishin-recently-added.js"
 Cohesion: 0.17
@@ -1058,29 +1057,29 @@ Nodes (9): bi(), _i(), pn, pt, Se(), Si(), Ti(), vi() (+1 more)
 Cohesion: 0.08
 Nodes (4): Gs(), Hs(), qs(), Xs()
 
-### Community 117 - ".constructor"
+### Community 117 - "copy"
 Cohesion: 0.03
-Nodes (14): qs(), Aa, Ah, bt, ct(), es(), li(), ns() (+6 more)
+Nodes (18): Ks(), ri(), Aa, ai, bt, clone(), copy(), ec (+10 more)
 
 ### Community 118 - ".toString"
 Cohesion: 0.05
-Nodes (19): u(), ett, fN(), fRe(), iQ(), itt, kpt, m3e() (+11 more)
+Nodes (18): ett, fN(), fRe(), iQ(), itt, kpt, m3e(), ptt (+10 more)
 
 ### Community 119 - "types/types.ts"
-Cohesion: 0.04
-Nodes (50): AutoDiscover, AuthState, INVALID, LOADING, VALID, CardRoute, CardRow, DiscoveredServerItem (+42 more)
+Cohesion: 0.08
+Nodes (21): AutoDiscover, CardRoute, CardRow, DiscoveredServerItem, GridCardData, ListPagination, PlayerQueueType, DEFAULT (+13 more)
 
 ### Community 120 - "i0t"
-Cohesion: 0.04
-Nodes (123): i0t(), A4(), $b(), Bb(), Bf(), bk(), BR(), bS() (+115 more)
+Cohesion: 0.03
+Nodes (149): i0t(), _4(), a2(), A4(), ac(), $b(), b2(), b4() (+141 more)
 
 ### Community 121 - "assets/music-analytics.js"
 Cohesion: 0.18
 Nodes (22): ensureSidebarAnalyticsItem(), fetchAnalyticsData(), formatDuration(), formatPlayTime(), getAnalyticsMountContainer(), getCoverUrl(), getCurrentPlayingSong(), getHomeStack() (+14 more)
 
-### Community 122 - "store/utils.ts"
-Cohesion: 0.14
-Nodes (10): idb-keyval, @tanstack/react-query-persist-client, indexedDbPersister, cleanQueueForPersistence(), idbStateStorage, migratePlayerStorePersist(), PlayerStorePersistedSlice, playerStoreStorage (+2 more)
+### Community 122 - "subsonic-controller.ts"
+Cohesion: 0.09
+Nodes (13): idb-keyval, md5, @tanstack/react-query-persist-client, ALBUM_LIST_SORT_MAPPING, SubsonicController, indexedDbPersister, cleanQueueForPersistence(), idbStateStorage (+5 more)
 
 ### Community 123 - "player/index.ts"
 Cohesion: 0.09
@@ -1106,9 +1105,9 @@ Nodes (23): ServerFeature, ALBUM_YES_NO_RATING_FILTER, ARTIST_IMAGE_UPLOAD, BFR,
 Cohesion: 0.16
 Nodes (3): ar, dr(), pr()
 
-### Community 129 - "vt"
-Cohesion: 0.02
-Nodes (4): eh, jt(), pt(), vt
+### Community 129 - "pt"
+Cohesion: 0.05
+Nodes (3): eh, Mh, pt()
 
 ### Community 131 - "item-list-state.ts"
 Cohesion: 0.14
@@ -1116,7 +1115,7 @@ Nodes (17): itemListActions, itemListSelectors, itemListUtils, initialItemListSt
 
 ### Community 132 - "find"
 Cohesion: 0.06
-Nodes (10): B1, Bm(), canRun(), find(), gze(), jMt(), kOe, oea() (+2 more)
+Nodes (11): B1, Bm(), canRun(), u(), find(), gze(), jMt(), kOe (+3 more)
 
 ### Community 133 - "list-config-menu.tsx"
 Cohesion: 0.18
@@ -1147,8 +1146,8 @@ Cohesion: 0.09
 Nodes (3): Gs(), Hs(), Xs()
 
 ### Community 140 - "oL"
-Cohesion: 0.11
-Nodes (3): kit(), oL(), rd()
+Cohesion: 0.06
+Nodes (5): kit(), oL(), oVe, rd(), rW
 
 ### Community 141 - "NDSongListSort"
 Cohesion: 0.09
@@ -1163,20 +1162,20 @@ Cohesion: 0.09
 Nodes (34): bi(), ds(), F(), G(), k(), V(), z(), fi() (+26 more)
 
 ### Community 144 - "🚀 Arquitetura & Customizações Integradas"
-Cohesion: 0.10
-Nodes (20): 10. 📊 Página & Widget de Music Analytics, 11. 🛡️ Watchdog Auto-Recovery & SafeGuard Anti-Crash, 1. 🌌 Arquitetura Personal OS (2-Pane Floating Glass Island), 1. Instalação de Dependências, 2. 🔮 33 Shaders WebGL Interativos em Tempo Real, 2. Execução em Modo de Desenvolvimento, 3. Compilação para macOS (Binário `.dmg` / `.app`), 3. 🇧🇷 Localização Integral em Português do Brasil (100% PT-BR) (+12 more)
+Cohesion: 0.07
+Nodes (28): 📌 1. Princípio Fundamental & Origem Histórica, 🏛️ 2. Preservação no Repositório (Base Imutável no Git), ⚡ 3. Algoritmo Dinâmico para Novas Músicas (Forward Compatibility), 🎨 4. Agrupamento Hierárquico Visual, 🔒 5. Garantia de Longo Prazo, Comportamento Resultante:, Marco de Corte do Snapshot Histórico (Baseline):, 🧭 Samsung Music Chronology Engine — Arquitetura de Preservação Perpétua (+20 more)
 
 ### Community 145 - ".copy"
-Cohesion: 0.05
-Nodes (27): languages, lowerCasePostProcessor, resources, sentenceCasePostProcessor, titleCasePostProcessor, upperCasePostProcessor, er, v() (+19 more)
+Cohesion: 0.04
+Nodes (29): languages, lowerCasePostProcessor, resources, sentenceCasePostProcessor, titleCasePostProcessor, upperCasePostProcessor, ci(), cr (+21 more)
 
 ### Community 146 - "item-card.tsx"
 Cohesion: 0.12
 Nodes (19): CompactItemCard(), CompactItemCardImageArea, DataRow, DefaultItemCard(), getDataRows(), getDataRowsCount(), getImageUrl(), getItemNavigationPath() (+11 more)
 
-### Community 147 - "Al"
+### Community 147 - "Dr"
 Cohesion: 0.06
-Nodes (45): _A(), ac(), c4(), eA(), g2(), iA(), Iw(), Nb() (+37 more)
+Nodes (53): _A(), Bw(), eA(), EP(), iA(), iS(), Iw(), oA() (+45 more)
 
 ### Community 148 - "lyrics-utils.ts"
 Cohesion: 0.16
@@ -1202,17 +1201,17 @@ Nodes (45): i18next, PopoverPlayQueueProps, MainPlayerListenerHookInner(), toggl
 Cohesion: 0.13
 Nodes (18): react-icons, AppIcon, AppIconSelection, Icon, IconColor, IconProps, isPredefinedSize(), LastfmLogoIcon (+10 more)
 
-### Community 154 - "W"
-Cohesion: 0.06
-Nodes (18): be(), br, gt, Ie(), K, kr, Ne(), nn() (+10 more)
+### Community 154 - "q"
+Cohesion: 0.08
+Nodes (9): As(), br, p(), gr, K, kr, nr, q (+1 more)
 
 ### Community 155 - "BindingActions"
 Cohesion: 0.10
 Nodes (20): BindingActions, GLOBAL_SEARCH, LOCAL_SEARCH, MUTE, NEXT, NEXT_ALBUM, PAUSE, PLAY (+12 more)
 
 ### Community 156 - "shared/utils.ts"
-Cohesion: 0.07
-Nodes (29): AlbumFilterKeys, ARTIST_IDS, COMPILATION, _CUSTOM, FAVORITE, GENRE_ID, HAS_RATING, MAX_YEAR (+21 more)
+Cohesion: 0.05
+Nodes (41): AlbumFilterKeys, ARTIST_IDS, COMPILATION, _CUSTOM, FAVORITE, GENRE_ID, HAS_RATING, MAX_YEAR (+33 more)
 
 ### Community 157 - "app.store.ts"
 Cohesion: 0.17
@@ -1250,9 +1249,9 @@ Nodes (13): /@/renderer/features/albums/components/album-list-infinite-detail, /
 Cohesion: 0.20
 Nodes (19): applyShader(), ensureShaderContainer(), initEngine(), initFullScreenFreeSpaceDismiss(), initNavigationShortcuts(), initPlayerSplitQueue(), initSingleClickTrackPlayback(), initUnitaryQueueSystem() (+11 more)
 
-### Community 167 - "local-settings.ts"
-Cohesion: 0.11
-Nodes (3): env, LocalSettings, SERVER_TYPE
+### Community 167 - "electron"
+Cohesion: 0.04
+Nodes (20): electron, Browser, CustomTheme, CustomThemes, DiscordRpc, DlnaPlayer, DlnaPlayerListener, api (+12 more)
 
 ### Community 168 - "remote/store/index.ts"
 Cohesion: 0.18
@@ -1274,13 +1273,13 @@ Nodes (17): AutoDJQueueAddedEventPayload, EventMap, ItemListRefreshEventPayload,
 Cohesion: 0.20
 Nodes (15): AlbumOrSong, getAlbumArtistImageId(), getAlbumImageId(), getBlurHash(), getGenreImageId(), getPlaylistImageId(), getSongImageId(), getTags() (+7 more)
 
-### Community 173 - "sn"
-Cohesion: 0.05
-Nodes (11): an, cn, dn, fn, hn, ln, on, pn (+3 more)
+### Community 173 - "be"
+Cohesion: 0.13
+Nodes (9): be(), Ie(), Ne(), or, rn, l(), h(), l() (+1 more)
 
-### Community 174 - "Uc"
-Cohesion: 0.07
-Nodes (56): A0(), aG(), ame(), BEe(), bQ(), Dh(), _Ee(), eme() (+48 more)
+### Community 174 - "Dh"
+Cohesion: 0.08
+Nodes (48): A0(), aG(), ame(), BEe(), bQ(), Dh(), _Ee(), fat() (+40 more)
 
 ### Community 175 - "Custom Themes"
 Cohesion: 0.12
@@ -1293,10 +1292,6 @@ Nodes (16): icecast-metadata-stats, CLEARED_RADIO_STATE, RadioAudioInstanceHook(
 ### Community 177 - "@mantine/hooks"
 Cohesion: 0.12
 Nodes (9): @mantine/hooks, useDebouncedCallback, useDisclosure, useInViewport, useIntersection, useLocalStorage, useMediaQuery, useSetState (+1 more)
-
-### Community 179 - "electron"
-Cohesion: 0.07
-Nodes (6): electron, discoverAll(), discoverJellyfin(), JellyfinResponse, discordRpc, Mpris
 
 ### Community 180 - "list-sort-by-dropdown.tsx"
 Cohesion: 0.12
@@ -1318,13 +1313,13 @@ Nodes (12): getArtistList(), getGenres(), getParticipants(), getReleaseType(), n
 Cohesion: 0.13
 Nodes (13): BaseImage(), FALLBACK_SVG, Image, ImageContainer, ImageContainerProps, ImageLoaderProps, ImageProps, ImageUnloaderProps (+5 more)
 
-### Community 185 - ".applyMatrix4"
-Cohesion: 0.06
-Nodes (11): Ks(), Rn(), ri(), ai, Ea(), hh, ls(), os() (+3 more)
+### Community 185 - "sn"
+Cohesion: 0.03
+Nodes (22): Rn(), an, cn, v(), dn, en, fn, Ga (+14 more)
 
-### Community 186 - "Ts"
-Cohesion: 0.05
-Nodes (74): a2(), Ao(), av(), Db(), E2(), Eb(), Ed(), Eg() (+66 more)
+### Community 186 - "d2"
+Cohesion: 0.07
+Nodes (49): Ao(), av(), Ci(), cp(), Eb(), Ed(), Eg(), eR() (+41 more)
 
 ### Community 187 - "album-detail-content.tsx"
 Cohesion: 0.14
@@ -1358,9 +1353,9 @@ Nodes (5): CUe(), fa(), PUe(), wL, Zp
 Cohesion: 0.05
 Nodes (17): ai(), ci(), di(), fi(), gi(), hi(), ii(), li() (+9 more)
 
-### Community 195 - "gs"
-Cohesion: 0.15
-Nodes (25): bA(), f4(), gs(), Ig(), IP(), p4(), Pb(), yA() (+17 more)
+### Community 195 - "uBe"
+Cohesion: 0.09
+Nodes (42): DA, Dp(), bA(), gs(), IP(), x2(), yA(), an() (+34 more)
 
 ### Community 196 - "eq-settings.tsx"
 Cohesion: 0.19
@@ -1375,8 +1370,8 @@ Cohesion: 0.13
 Nodes (15): SidebarItem, ALBUMS, ARTISTS, ARTISTS_ALL, COLLECTIONS, FAVORITES, FOLDERS, GENRES (+7 more)
 
 ### Community 200 - "kot"
-Cohesion: 0.08
-Nodes (7): $6(), kot, n1e(), o1e, qVe, rot(), vot
+Cohesion: 0.09
+Nodes (10): $6(), a1e(), iVe, kot, lVe, oT(), pot(), pW() (+2 more)
 
 ### Community 201 - "K1"
 Cohesion: 0.12
@@ -1386,9 +1381,9 @@ Nodes (3): fye, K1(), tT()
 Cohesion: 0.14
 Nodes (13): fast-xml-parser, args, builder, flags, metainfo, metainfoContent, newRelease, packageContent (+5 more)
 
-### Community 203 - "oo"
-Cohesion: 0.11
-Nodes (24): dp(), eN(), eTe(), In(), Ln(), oo(), op(), rA() (+16 more)
+### Community 203 - "context-menu-controller.tsx"
+Cohesion: 0.14
+Nodes (13): react-call, AlbumArtistContextMenuProps, AlbumContextMenuProps, ArtistContextMenuProps, ContextMenuCommand, ContextMenuController, ContextMenuControllerProps, FolderContextMenuProps (+5 more)
 
 ### Community 204 - "song-list-content.tsx"
 Cohesion: 0.14
@@ -1422,21 +1417,17 @@ Nodes (12): Agent skills, API, Architecture, Commits, Domain docs, Frontend, Gen
 Cohesion: 0.15
 Nodes (12): @electron-toolkit/tsconfig/tsconfig.node.json, compilerOptions, baseUrl, composite, esModuleInterop, paths, types, extends (+4 more)
 
-### Community 213 - "q"
-Cohesion: 0.09
-Nodes (6): As(), en, p(), gr, q, sn
-
 ### Community 214 - "vite.kuromoji-plugin.ts"
 Cohesion: 0.13
 Nodes (17): createConfig(), version, version, electron-vite, vite, vite-plugin-conditional-import, vite-plugin-dynamic-import, vite-plugin-ejs (+9 more)
 
-### Community 216 - "dlna-cast-button.tsx"
-Cohesion: 0.22
-Nodes (5): DlnaCastButton(), isSonosDevice(), Screen, DlnaDevice, GroupMember
+### Community 216 - ".constructor"
+Cohesion: 0.15
+Nodes (3): n1e(), o1e, qVe
 
-### Community 217 - "client-side-song-filters.tsx"
-Cohesion: 0.16
-Nodes (9): BooleanSegmentFilter(), BooleanSegmentFilterProps, booleanToSegmentValue(), MultiSelectFilterLabelProps, MultiSelectFilterOption, MultiSelectFilterProps, MultiSelectRowContext, segmentValueToBoolean() (+1 more)
+### Community 217 - "furigana.ts"
+Cohesion: 0.23
+Nodes (11): kuroshiro, kuroshiro-analyzer-kuromoji, convertFurigana(), convertFuriganaFragment(), convertRomaji(), convertRomajiTokens(), getDictionaryPath(), getKuroshiro() (+3 more)
 
 ### Community 218 - "yo"
 Cohesion: 0.09
@@ -1467,40 +1458,36 @@ Cohesion: 0.05
 Nodes (33): overlayscrollbars-react, colTypeToAlignMap, colTypeToJustifyContentMap, DetailListColumnResizeHandleProps, DetailListHeader, DetailListHeaderCell, DetailListHeaderCellProps, DetailListHeaderProps (+25 more)
 
 ### Community 225 - "nct"
-Cohesion: 0.32
-Nodes (3): Fp(), nct, wot()
+Cohesion: 0.27
+Nodes (4): Fp(), nct, wot(), ys()
 
-### Community 226 - "shuffle-all-modal.tsx"
-Cohesion: 0.36
-Nodes (8): GenreSelect(), PLAYED_DATA, randomFetchQuery(), shuffleAlbumListQuery(), ShuffleAllContextModal(), ShuffleAllSlice, useShuffleAllStore, useShuffleAllStoreActions()
+### Community 226 - "mobile-fullscreen-player.tsx"
+Cohesion: 0.15
+Nodes (11): BackgroundImage, BackgroundImageOverlay, BackgroundImageOverlayProps, BackgroundImageProps, backgroundImageVariants, BackgroundOverlay, BackgroundOverlayProps, mobileContainerVariants (+3 more)
 
-### Community 227 - "iW"
-Cohesion: 0.10
-Nodes (8): a1e(), iVe, iW, lVe, oT(), pot(), pW(), ys()
+### Community 227 - "full-screen-player.tsx"
+Cohesion: 0.17
+Nodes (10): BackgroundImage, BackgroundImageOverlay, BackgroundImageOverlayProps, BackgroundImageProps, backgroundImageVariants, BackgroundOverlay, BackgroundOverlayProps, containerVariants (+2 more)
 
 ### Community 228 - ".init"
 Cohesion: 0.13
 Nodes (7): bje(), e9(), EA(), gje(), TCe(), ugt, Zx()
 
-### Community 229 - "eWe"
-Cohesion: 0.09
-Nodes (10): aWe(), e(), eWe(), a(), rWe(), tWe(), e(), v$e (+2 more)
+### Community 229 - "rWe"
+Cohesion: 0.17
+Nodes (9): aWe(), e(), a(), rWe(), tWe(), e(), v$e, xge() (+1 more)
 
 ### Community 230 - "grid-carousel-v2.tsx"
 Cohesion: 0.23
 Nodes (11): BaseGridCarousel(), Card, getCardsToShow(), GridCarousel, GridCarouselProps, GridCarouselSkeleton(), GridCarouselSkeletonFallback, GridCarouselSkeletonProps (+3 more)
 
-### Community 231 - "dct"
-Cohesion: 0.08
-Nodes (22): C9e(), dct, f9e(), Gi(), gOe, hgt(), hye, iot() (+14 more)
+### Community 231 - "setOptions"
+Cohesion: 0.05
+Nodes (56): addObserver(), #b(), clearGcTimeout(), dct, destroy(), DTe(), Dy(), EK() (+48 more)
 
 ### Community 232 - "jukebox-player-engine.tsx"
 Cohesion: 0.24
 Nodes (11): buildQueueIds(), getPlaylistTrackIds(), handleJukeboxAutoNext(), JukeboxCallApi, JukeboxPlayerEngine(), JukeboxPlayerEngineHandle, JukeboxPlayerEngineProps, JukeboxQueueRefs (+3 more)
-
-### Community 233 - "SongFilterKeys"
-Cohesion: 0.17
-Nodes (12): SongFilterKeys, ALBUM_ARTIST_IDS, ALBUM_ARTIST_IDS_MODE, ARTIST_IDS, ARTIST_IDS_MODE, _CUSTOM, FAVORITE, GENRE_ID (+4 more)
 
 ### Community 234 - "auth.store.ts"
 Cohesion: 0.29
@@ -1606,9 +1593,9 @@ Nodes (9): ALBUM_ARTIST_TABLE_COLUMNS, ALBUM_TABLE_COLUMNS, DefaultTableColumn, 
 Cohesion: 0.08
 Nodes (8): er, ji(), kt(), mr, ue(), Ut(), we(), yr
 
-### Community 263 - ".intersectMeshes"
-Cohesion: 0.14
-Nodes (3): cr, Fs(), ki()
+### Community 263 - "karaoke-lyric-line.tsx"
+Cohesion: 0.36
+Nodes (9): getWordSpanClasses(), getWordSpanIdPrefix(), hasFuriganaHtml(), hasSyncedOverlayCueLines(), KaraokeLyricLine, KaraokeLyricLineProps, renderOverlayCueLineRow(), renderWordSpans() (+1 more)
 
 ### Community 264 - "use-scrobble.ts"
 Cohesion: 0.31
@@ -1654,33 +1641,29 @@ Nodes (8): Boundaries, Intensity, Output, Persistence, Ponytail, Rules, The ladd
 Cohesion: 0.22
 Nodes (8): Commits, Format, Local check, Meta, Product, Scopes, Subject, Types
 
-### Community 275 - "item-table-list.tsx"
-Cohesion: 0.10
-Nodes (19): TableScrollToIndexOptions, BaseItemTableList(), hasRequiredItemProperties(), hasRequiredStateItemProperties(), ItemTableList, ItemTableListProps, ItemTableListStickyUI, ItemTableScrollShadowLeft (+11 more)
+### Community 275 - "player-context.tsx"
+Cohesion: 0.31
+Nodes (7): fetchSongsByItemType(), getRootQueryKey(), inferPlaylistContextFromUrl(), isReplaceQueueType(), PlayerContext, PlayerProvider(), tagPlaylistContext()
 
 ### Community 276 - "use-discord-rpc.ts"
 Cohesion: 0.15
-Nodes (9): @xhayper/discord-rpc, DiscordRpc, ActivityState, ActivityTrigger, DiscordRpcHook(), DiscordRpcHookInner(), DiscordStatusDisplayType, truncate() (+1 more)
+Nodes (9): @xhayper/discord-rpc, discordRpc, ActivityState, ActivityTrigger, DiscordRpcHook(), DiscordRpcHookInner(), DiscordStatusDisplayType, truncate() (+1 more)
 
 ### Community 277 - "yit"
-Cohesion: 0.11
-Nodes (5): sst, tct(), wst(), xct, yit()
+Cohesion: 0.16
+Nodes (3): sst, wst(), yit()
 
 ### Community 278 - "wJ"
 Cohesion: 0.33
 Nodes (4): dge(), hqe(), p$(), wJ
 
-### Community 279 - "react-window-v2"
-Cohesion: 0.11
-Nodes (9): react-window-v2, AlbumRowSharedProps, PlaylistRowSharedProps, TrackRowSharedProps, VirtualRowListProps, createColumnCellComponent(), createColumnCellComponents(), MemoizedCellRouter (+1 more)
-
 ### Community 280 - "src/remote/manifest.json"
 Cohesion: 0.22
 Nodes (8): background_color, display, icons, name, orientation, short_name, start_url, theme_color
 
-### Community 281 - "yk"
-Cohesion: 0.11
-Nodes (21): Bu(), Ck(), Ek(), gb(), gg(), Gw(), Ok(), Rk() (+13 more)
+### Community 281 - ".removeChild"
+Cohesion: 0.08
+Nodes (31): Bu(), cA(), Ck(), Dg(), Ek(), f2(), gb(), gg() (+23 more)
 
 ### Community 282 - "item-list/types.ts"
 Cohesion: 0.28
@@ -1710,9 +1693,9 @@ Nodes (6): hasTypingSensitiveAccelerator(), isPlaybackItemEnabled(), MENU_ITEM_I
 Cohesion: 0.33
 Nodes (6): close(), maximize(), minimize(), unmaximize(), WindowBar(), WindowBarControlsProps
 
-### Community 290 - "subsonic-structured-lyrics.ts"
-Cohesion: 0.43
-Nodes (7): ApiStructuredLyric, attachCueLines(), getCueTrailingGap(), mapAgents(), mapCueLine(), mapCueWords(), mapStructuredLyric()
+### Community 290 - "feature-carousel.tsx"
+Cohesion: 0.29
+Nodes (6): CarouselItemProps, containerVariants, FeatureCarousel(), FeatureCarouselProps, getItemsPerRow(), itemVariants
 
 ### Community 291 - "AlbumGroupItem"
 Cohesion: 0.22
@@ -1743,24 +1726,24 @@ Cohesion: 0.42
 Nodes (7): attachTrackPageDeleteOption(), executeDelete(), initRealtimeSync(), connect(), openConfirmModal(), purgeSongFromUI(), showGlassToast()
 
 ### Community 298 - "ssdp-discovery.ts"
-Cohesion: 0.43
-Nodes (7): DlnaDevice, createSocketForInterface(), decodeXml(), discoverDevices(), fetchXml(), getLocalIpv4Addresses(), parseDevice()
+Cohesion: 0.52
+Nodes (6): createSocketForInterface(), decodeXml(), discoverDevices(), fetchXml(), getLocalIpv4Addresses(), parseDevice()
 
 ### Community 299 - "action-sheet.tsx"
 Cohesion: 0.25
 Nodes (3): ActionSheetHeaderProps, ActionSheetItemProps, ActionSheetProps
 
-### Community 300 - "action-icon.tsx"
-Cohesion: 0.33
-Nodes (6): ActionIcon, ActionIconGroup, ActionIconProps, ActionIconSection, COMPACT_SIZES, isCompactSize()
+### Community 300 - "query-builder/index.tsx"
+Cohesion: 0.25
+Nodes (6): AddArgs, DeleteArgs, FilterGroup, FilterItem, Filters, QueryBuilderProps
 
 ### Community 301 - "renderer/assets/assets.d.ts"
 Cohesion: 0.25
 Nodes (7): *.css, *.jpg, *.png, *.sass, *.scss, Styles, *.svg
 
-### Community 302 - "cJ"
-Cohesion: 0.14
-Nodes (5): cJ(), t(), glt(), i1e(), qlt
+### Community 302 - "tb"
+Cohesion: 0.12
+Nodes (6): glt(), i1e(), mct, qlt, tb, uct
 
 ### Community 303 - "item-list-infinite-loader.ts"
 Cohesion: 0.32
@@ -1782,17 +1765,21 @@ Nodes (3): CommandPaletteProps, CommandPaletteSearchProps, SEARCH_SECTION_IDS
 Cohesion: 0.32
 Nodes (7): AppliedJsonState, EditorMode, parseRulesJsonToSaveArgs(), PlaylistQueryEditor, PlaylistQueryEditorProps, PlaylistQueryEditorRef, serializeFiltersToRulesJson()
 
-### Community 309 - "album-group-header.tsx"
-Cohesion: 0.19
-Nodes (12): AlbumGroupControls(), AlbumGroupControlsProps, isRatingSupported(), useAlbumGroupAlbum(), AlbumGroupHeader(), AlbumGroupHeaderProps, albumGroupArtistProps, AlbumGroupMetadata (+4 more)
+### Community 308 - "add-server-form.tsx"
+Cohesion: 0.29
+Nodes (6): AddServerForm(), AddServerFormProps, ALL_SERVERS, SERVER_TYPES, ServerDetails, useAutodiscovery()
+
+### Community 309 - "joined-artists.tsx"
+Cohesion: 0.40
+Nodes (5): escapeRegex(), JOINED_ARTISTS_MUTED_PROPS, JoinedArtists, JoinedArtistsComponent(), JoinedArtistsProps
 
 ### Community 310 - "radio-store.ts"
 Cohesion: 0.39
 Nodes (7): initialState, RadioStoreSlice, RadioStoreState, useRadioStation(), useRadioStations(), useRadioStore, useRadioStoreActions()
 
 ### Community 311 - ".update"
-Cohesion: 0.14
-Nodes (8): _1e(), bct, dlt, G6(), gct(), Ox(), rit(), U6()
+Cohesion: 0.16
+Nodes (6): _1e(), bct, dlt, gct(), rit(), U6()
 
 ### Community 313 - "HomeItem"
 Cohesion: 0.25
@@ -1802,9 +1789,9 @@ Nodes (8): HomeItem, GENRES, MOST_PLAYED, PLAYLISTS, RANDOM, RECENTLY_ADDED, REC
 Cohesion: 0.25
 Nodes (8): ShareExpirationUnit, DAY, HOUR, MINUTE, MONTH, SECOND, WEEK, YEAR
 
-### Community 315 - "subsonic-controller.ts"
-Cohesion: 0.14
-Nodes (9): dayjs, md5, ALBUM_LIST_SORT_MAPPING, SubsonicController, addExpiration(), getShareExpirationDate(), ShareExpirationSettings, ShareItemContextModal() (+1 more)
+### Community 315 - "format.tsx"
+Cohesion: 0.11
+Nodes (11): dayjs, addExpiration(), getShareExpirationDate(), ShareExpirationSettings, ShareItemContextModal(), unitToDayjs, formatPartialIsoDateUTC(), getDayjsLocale() (+3 more)
 
 ### Community 316 - "SubsonicExtensions"
 Cohesion: 0.25
@@ -1834,9 +1821,9 @@ Nodes (5): /@/renderer/features/sidebar/components/collapsed-sidebar, /@/rendere
 Cohesion: 0.29
 Nodes (6): AI Disclosure, Contributing to Feishin, Development environment, IMPORTANT, Pull requests, Translations
 
-### Community 323 - "tb"
-Cohesion: 0.16
-Nodes (4): mct, sct, tb, uct
+### Community 323 - "sct"
+Cohesion: 0.31
+Nodes (3): G6(), Ox(), sct
 
 ### Community 324 - "API"
 Cohesion: 0.29
@@ -1861,6 +1848,10 @@ Nodes (5): DEFAULT_WINDOW_BOUNDS, isFiniteNumber(), isOffScreen(), resolveWindow
 ### Community 329 - "play-row-from-list.ts"
 Cohesion: 0.29
 Nodes (3): PlayableArtistItem, PlayerQueueByDataActions, PlayerQueueByFetchActions
+
+### Community 330 - "lyrics-actions.tsx"
+Cohesion: 0.40
+Nodes (5): getOverlayTooltip(), LyricsActions(), LyricsActionsProps, OVERLAY_KIND_ICONS, OverlayLayerToggle
 
 ### Community 331 - "lyrics-scroll.ts"
 Cohesion: 0.43
@@ -1955,7 +1946,7 @@ Cohesion: 0.33
 Nodes (8): FullScreenPlayerItemAlignment, FullScreenPlayerSlice, FullScreenPlayerState, FullScreenPlayerTitleDisplayType, useFullScreenPlayerOverlayState(), useFullScreenPlayerStore, useFullScreenPlayerStoreActions(), useSetFullScreenPlayerStore()
 
 ### Community 362 - "Dm"
-Cohesion: 0.13
+Cohesion: 0.14
 Nodes (5): Dm, hh(), hJ, jx(), xVe
 
 ### Community 363 - "artist-settings.tsx"
@@ -1990,10 +1981,6 @@ Nodes (6): JFPlaylistListSort, ALBUM_ARTIST, DURATION, NAME, RECENTLY_ADDED, SON
 Cohesion: 0.53
 Nodes (5): getFetchRange(), getInitialData(), getQueryKeyName(), useItemListPaginatedLoader(), UseItemListPaginatedLoaderProps
 
-### Community 372 - "navidrome-controller.ts"
-Cohesion: 0.17
-Nodes (8): collator, EXCLUDED_ALBUM_TAGS, EXCLUDED_SONG_TAGS, EXCLUDED_TAGS, NAVIDROME_ROLES, NavidromeController, numericSortCollator, VERSION_INFO
-
 ### Community 373 - "initPlayerKillSwitch"
 Cohesion: 0.80
 Nodes (5): initPlayerKillSwitch(), executeKillSwitch(), mountKillButton(), openKillSwitchGlassDialog(), updateKillButtonState()
@@ -2007,8 +1994,8 @@ Cohesion: 0.50
 Nodes (4): crc32(), CRC_TABLE, createZipBuffer(), ZipEntry
 
 ### Community 376 - "zod"
-Cohesion: 0.12
-Nodes (14): zod, SCREENS, DIFF_VISUALS, FILE_PICKER, IMPORT_COMPLETE, BaseItemImage(), getUnloaderIcon(), ItemImage (+6 more)
+Cohesion: 0.09
+Nodes (21): zod, ApiStructuredLyric, attachCueLines(), getCueTrailingGap(), mapAgents(), mapCueLine(), mapCueWords(), mapStructuredLyric() (+13 more)
 
 ### Community 378 - "service-worker.ts"
 Cohesion: 0.40
@@ -2034,10 +2021,6 @@ Nodes (8): /@/shared/components/icon/icon, BaseMenuItem, ConditionalGroupItem, C
 Cohesion: 0.33
 Nodes (4): PillGroupProps, PillLink, PillLinkProps, PillProps
 
-### Community 386 - "settings/index.ts"
-Cohesion: 0.27
-Nodes (8): electron-store, customCssPath, defaultUserDataPath, notifyCustomCssUpdate(), readCustomCss(), scheduleCustomCssUpdate(), startCustomCssWatcher(), store
-
 ### Community 387 - "split-word-cue.ts"
 Cohesion: 0.60
 Nodes (3): segment(), shouldSplit(), splitWordCue
@@ -2046,9 +2029,9 @@ Nodes (3): segment(), shouldSplit(), splitWordCue
 Cohesion: 0.36
 Nodes (9): cacheAndMapTracks(), cacheTrack(), getCachedTrack(), RemoteLibraryHook(), toRemoteAlbumItem(), toRemotePlaylistItem(), toRemoteTrackItem(), trackCache (+1 more)
 
-### Community 390 - "🧭 Samsung Music Chronology Engine — Arquitetura de Preservação Perpétua"
-Cohesion: 0.22
-Nodes (8): 📌 1. Princípio Fundamental & Origem Histórica, 🏛️ 2. Preservação no Repositório (Base Imutável no Git), ⚡ 3. Algoritmo Dinâmico para Novas Músicas (Forward Compatibility), 🎨 4. Agrupamento Hierárquico Visual, 🔒 5. Garantia de Longo Prazo, Comportamento Resultante:, Marco de Corte do Snapshot Histórico (Baseline):, 🧭 Samsung Music Chronology Engine — Arquitetura de Preservação Perpétua
+### Community 390 - "ListDisplayType"
+Cohesion: 0.40
+Nodes (5): ListDisplayType, DETAIL, GRID, LIST, TABLE
 
 ### Community 391 - "isShuffleEnabled"
 Cohesion: 0.31
@@ -2058,9 +2041,9 @@ Nodes (9): calculateNextSong(), generateShuffledIndexes(), getDualPlayerSongs(),
 Cohesion: 0.36
 Nodes (7): buildSyncedRomajiLine(), convertSyncedLyricsFurigana(), convertSyncedLyricsRomaji(), SyncedRomajiLyrics, useFuriganaLyrics(), useRomajiLyrics(), useSyncedRomajiLyrics()
 
-### Community 393 - "library-header.tsx"
-Cohesion: 0.36
-Nodes (6): calculateTitleSize(), calculateWeightedLength(), isAsianCharacter(), LibraryHeader, LibraryHeaderMenuProps, LibraryHeaderProps
+### Community 393 - "PlayerType"
+Cohesion: 0.40
+Nodes (5): PlayerType, DLNA, JUKEBOX, LOCAL, WEB
 
 ### Community 395 - "list-filters.tsx"
 Cohesion: 0.25
@@ -2146,13 +2129,9 @@ Nodes (3): diff(), DiffVisualiser(), DiffVisualiserProps
 Cohesion: 0.50
 Nodes (4): ConfirmableEvent, REPLACES_QUEUE, replacesQueue(), useConfirmedSend()
 
-### Community 425 - "use-grid-rows.ts"
+### Community 426 - "use-auto-dj.ts"
 Cohesion: 0.83
-Nodes (3): getDefaultRowsForItemType(), getRowIdFromTableColumn(), useGridRows()
-
-### Community 426 - "use-queue-drag-reorder.ts"
-Cohesion: 0.40
-Nodes (3): QueueDragReorder, QueueDropTarget, UseQueueDragReorderOptions
+Nodes (3): AutoDJHook(), AutoDJHookInner(), useAutoDJ()
 
 ### Community 427 - "album-infinite-carousel.tsx"
 Cohesion: 0.50
@@ -2222,9 +2201,25 @@ Nodes (3): BaseSongInfiniteCarousel(), SongCarouselProps, useSongListInfinite()
 Cohesion: 0.50
 Nodes (4): PlayerStatus, PAUSED, PLAYING, STOPPED
 
-### Community 450 - "author"
+### Community 465 - "AuthState"
 Cohesion: 0.50
-Nodes (4): author, email, name, url
+Nodes (4): AuthState, INVALID, LOADING, VALID
+
+### Community 467 - "PlayerRepeat"
+Cohesion: 0.50
+Nodes (4): PlayerRepeat, ALL, NONE, ONE
+
+### Community 470 - "PlayerShuffle"
+Cohesion: 0.50
+Nodes (4): PlayerShuffle, ALBUM, NONE, TRACK
+
+### Community 475 - "ServerType"
+Cohesion: 0.50
+Nodes (4): ServerType, JELLYFIN, NAVIDROME, SUBSONIC
+
+### Community 493 - "ListPaginationType"
+Cohesion: 0.67
+Nodes (3): ListPaginationType, INFINITE, PAGINATED
 
 ### Community 496 - "GenreTarget"
 Cohesion: 0.67
@@ -2268,17 +2263,17 @@ Nodes (3): SortOrder, ASC, DESC
 
 ## Knowledge Gaps
 - **3689 isolated node(s):** `stylelint-config-standard`, `stylelint-config-css-modules`, `stylelint-config-recess-order`, `block-no-empty`, `selector-type-case` (+3684 more)
-  These have ≤1 connection - possible missing edges or undocumented components. (Counts symbols only; 6869 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
-- **139 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+  These have ≤1 connection - possible missing edges or undocumented components. (Counts symbols only; 6867 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
+- **144 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `$_` connect `$_` to `find`, `xL`, `oL`, `yit`, `wJ`, `e`, `Ce`, `c`, `mje`, `f`, `.lt`, `.then`, `it`, `Uc`, `cJ`, `has`, `oVe`, `.update`, `hit`, `.applyMatrix4`, `Su`, `yN`, `fa`, `tb`, `kot`, `K1`, `mCe`, `fje`, `ks`, `lct`, `.resolve`, `cje`, `nct`, `iW`, `.init`, `eWe`, `ije`, `dct`, `.forEach`, `tn`, `Dm`, `St`, `Gy`, `vo`, `.toString`, `sJ`, `i0t`, `lye`, `iWe`, `nye`, `._parse`?**
+- **Why does `$_` connect `$_` to `find`, `o`, `xL`, `oL`, `yit`, `wJ`, `mW`, `e`, `Ce`, `c`, `mje`, `v`, `.lt`, `xct`, `.then`, `Dh`, `tb`, `has`, `.update`, `hit`, `sn`, `Su`, `yN`, `fa`, `uBe`, `sct`, `kot`, `K1`, `mCe`, `fje`, `Ce`, `.constructor`, `sJ`, `ks`, `lct`, `.resolve`, `cje`, `nct`, `tn`, `.init`, `rWe`, `ije`, `setOptions`, `.forEach`, `eWe`, `Dm`, `Gy`, `cJ`, `vo`, `.toString`, `copy`, `i0t`, `lye`, `iWe`, `nye`, `._parse`?**
   _High betweenness centrality (0.311) - this node is a cross-community bridge._
-- **Why does `react-i18next` connect `react-i18next` to `app-menu.tsx`, `featured-genres.tsx`, `center-controls.tsx`, `@mantine/core`, `react-router`, `clsx`, `library-header.tsx`, `list-filters.tsx`, `is-electron`, `release-notes-modal.tsx`, `@mantine/modals`, `.copy`, `i18next`, `use-artist-albums-grouped.ts`, `nanoid`, `use-metadata-editor.ts`, `react-error-boundary`, `window-bar.tsx`, `@tanstack/react-query`, `package.json`, `renderer/app.tsx`, `dlna-player-engine.tsx`, `playlist-query-editor.tsx`, `album-group-header.tsx`, `playlist-folder-tree.tsx`, `album-detail-content.tsx`, `subsonic-controller.ts`, `axios`, `eq-settings.tsx`, `player-filter-settings.tsx`, `sidebar-play-queue.tsx`, `album-list-header.tsx`, `sleep-timer-button.tsx`, `theme-settings.tsx`, `item-details-modal.tsx`, `song-list-header.tsx`, `visualizer-settings-form.tsx`, `dlna-cast-button.tsx`, `client-side-song-filters.tsx`, `playlist-query-builder.tsx`, `play-album-radio-action.tsx`, `play-track-radio-action.tsx`, `item-detail-list.tsx`, `lyrics.tsx`, `grid-config.tsx`, `shuffle-all-modal.tsx`, `multi-select-rows.tsx`, `album-artist-detail-content.tsx`, `expanded-album-list-item.tsx`, `sidebar-playlist-list.tsx`?**
+- **Why does `react-i18next` connect `react-i18next` to `app-menu.tsx`, `featured-genres.tsx`, `center-controls.tsx`, `@mantine/core`, `react-router`, `clsx`, `list-filters.tsx`, `is-electron`, `release-notes-modal.tsx`, `@mantine/modals`, `.copy`, `player-context.tsx`, `i18next`, `use-artist-albums-grouped.ts`, `nanoid`, `use-metadata-editor.ts`, `react-error-boundary`, `window-bar.tsx`, `@tanstack/react-query`, `package.json`, `renderer/app.tsx`, `query-builder/index.tsx`, `dlna-player-engine.tsx`, `playlist-query-editor.tsx`, `add-server-form.tsx`, `playlist-folder-tree.tsx`, `album-detail-content.tsx`, `format.tsx`, `axios`, `eq-settings.tsx`, `player-filter-settings.tsx`, `sidebar-play-queue.tsx`, `lyrics-actions.tsx`, `sleep-timer-button.tsx`, `theme-settings.tsx`, `item-details-modal.tsx`, `song-list-header.tsx`, `visualizer-settings-form.tsx`, `playlist-query-builder.tsx`, `play-track-radio-action.tsx`, `item-detail-list.tsx`, `grid-config.tsx`, `mobile-fullscreen-player.tsx`, `jellyfin-album-filters.tsx`, `album-artist-detail-content.tsx`, `react-window-v2`, `jellyfin-song-filters.tsx`, `sidebar-playlist-list.tsx`?**
   _High betweenness centrality (0.277) - this node is a cross-community bridge._
-- **Why does `i0t()` connect `i0t` to `.resolve`, `gs`, `find`, `Cn`, `x`, `oo`, `nn`, `mCe`, `has`, `$_`, `Al`, `.toString`, `vo`, `e`, `yk`, `Ts`, `c`, `kP`?**
+- **Why does `i0t()` connect `i0t` to `find`, `o`, `Dr`, `$_`, `e`, `.removeChild`, `kP`, `.lt`, `Ts`, `has`, `d2`, `uBe`, `zb`, `mCe`, `x`, `jr`, `vo`, `.toString`, `.resolve`?**
   _High betweenness centrality (0.235) - this node is a cross-community bridge._
 - **Are the 151 inferred relationships involving `$_` (e.g. with `_0e()` and `_7e()`) actually correct?**
   _`$_` has 151 INFERRED edges - model-reasoned connections that need verification._
