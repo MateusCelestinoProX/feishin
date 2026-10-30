@@ -7416,9 +7416,9 @@
     "semantic_hash": ""
   },
   "customizations/assets/feishin-mobile-enhancer.js": {
-    "mtime": 1793330463.4924138,
-    "seen": 1793376325.170743,
-    "ast_hash": "16ca613030a099b343c2ba43950d0c06",
+    "mtime": 1793393443.3750763,
+    "seen": 1793393560.9826748,
+    "ast_hash": "cdf447a7f039c4ad6e92f3ae0b3a4e3c",
     "semantic_hash": ""
   },
   "customizations/assets/index-C3w9ueFE.js": {
@@ -7428,9 +7428,9 @@
     "semantic_hash": ""
   },
   "src/renderer/assets/custom/feishin-mobile-enhancer.js": {
-    "mtime": 1793330627.849701,
-    "seen": 1793376325.170919,
-    "ast_hash": "16ca613030a099b343c2ba43950d0c06",
+    "mtime": 1793391854.534036,
+    "seen": 1793393560.9828758,
+    "ast_hash": "cdf447a7f039c4ad6e92f3ae0b3a4e3c",
     "semantic_hash": ""
   },
   "customizations/assets/feishin-delete-engine.js": {

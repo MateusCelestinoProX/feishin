@@ -463,6 +463,7 @@
                 }
                 if (queueOpen) {
                     document.getElementById('feishin-tp-queue-sheet').classList.remove('open');
+                    document.getElementById('feishin-track-page')?.classList.remove('tp-queue-open');
                     return true;
                 }
                 if (timerOpen) {
@@ -1376,6 +1377,7 @@
             document.getElementById('feishin-tp-more-sheet')?.classList.remove('open');
             document.getElementById('feishin-tp-details-modal')?.classList.remove('open');
             document.getElementById('feishin-tp-timer-backdrop')?.classList.remove('open');
+            document.getElementById('feishin-track-page')?.classList.remove('tp-queue-open');
 
             tp.style.transform = 'translateY(100%)';
             tp.style.opacity = '0';
@@ -1762,7 +1764,9 @@
 
             document.getElementById('feishin-tp-btn-queue')?.addEventListener('click', () => this.openQueue());
             document.getElementById('feishin-tp-queue-close')?.addEventListener('click', () => {
+                if (window.AndroidBridge?.hapticFeedback) window.AndroidBridge.hapticFeedback(0);
                 document.getElementById('feishin-tp-queue-sheet')?.classList.remove('open');
+                document.getElementById('feishin-track-page')?.classList.remove('tp-queue-open');
             });
 
             // Favorito Inteligente (Conectado ao Backend Navidrome + Store Feishin)
@@ -1864,6 +1868,7 @@
                         }
                         if (queueOpen) {
                             document.getElementById('feishin-tp-queue-sheet').classList.remove('open');
+                            document.getElementById('feishin-track-page')?.classList.remove('tp-queue-open');
                             return;
                         }
                         if (moreOpen) {
@@ -2009,6 +2014,7 @@
                 if (queueBtn) queueBtn.style.setProperty('display', 'none', 'important');
                 if (queuePill) queuePill.style.setProperty('display', 'none', 'important');
                 document.getElementById('feishin-tp-queue-sheet')?.classList.remove('open');
+                document.getElementById('feishin-track-page')?.classList.remove('tp-queue-open');
             }
 
             // Se o sheet de letras estiver aberto e mudou de música, atualiza
@@ -2155,6 +2161,9 @@
             if (!sheet || !container) return;
             if (window.AndroidBridge?.hapticFeedback) window.AndroidBridge.hapticFeedback(0);
 
+            const tp = document.getElementById('feishin-track-page');
+            if (tp) tp.classList.add('tp-queue-open');
+
             container.innerHTML = '';
             const store = window.__FEISHIN_PLAYER_STORE__?.getState?.();
             const q = store?.getQueue?.();
@@ -2190,8 +2199,10 @@
                     if (store?.mediaPlayByIndex) {
                         store.mediaPlayByIndex(idx);
                     }
-                    sheet.classList.remove('open');
-                    setTimeout(() => this.sync(), 200);
+                    setTimeout(() => {
+                        this.sync();
+                        this.openQueue();
+                    }, 150);
                 });
 
                 container.appendChild(row);
