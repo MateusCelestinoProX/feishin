@@ -1634,81 +1634,16 @@ if (typeof window !== 'undefined') {
       }
     }, true);
 
-    function updateKillButtonState() {
+    // Garantir que a barra de reprodução permaneça limpa e sem botão X (layout clássico original)
+    function removeKillButton() {
       const btn = document.getElementById('feishin-kill-switch-btn');
-      if (!btn) return;
-      const store = (window.__FEISHIN_PLAYER_STORE__ && window.__FEISHIN_PLAYER_STORE__.getState)
-        ? window.__FEISHIN_PLAYER_STORE__.getState()
-        : null;
-      const q = store?.getQueue?.();
-      const hasQueue = q && ((q.items && q.items.length > 0) || (Array.isArray(q) && q.length > 0));
-      const current = store?.getCurrentSong?.();
-      const isPlaying = store?.player?.status === 'playing' || store?.player?.status === 'paused';
-      const active = !!(hasQueue || current || isPlaying);
-
-      if (active) {
-        btn.removeAttribute('data-disabled');
-        btn.style.setProperty('opacity', '0.85', 'important');
-        btn.style.setProperty('cursor', 'pointer', 'important');
-        btn.style.setProperty('pointer-events', 'auto', 'important');
-      } else {
-        btn.setAttribute('data-disabled', 'true');
-        btn.style.setProperty('opacity', '0.35', 'important');
-        btn.style.setProperty('cursor', 'not-allowed', 'important');
-        btn.style.setProperty('pointer-events', 'none', 'important');
-      }
+      if (btn) btn.remove();
     }
-
-    function mountKillButton() {
-      // Alvo: extremo canto direito da barra do player (.fs-playerbar-module-right-grid-item)
-      const rightGrid = document.querySelector('.fs-playerbar-module-right-grid-item');
-      if (!rightGrid) return;
-
-      const flex = rightGrid.querySelector('[class*="mantine-Flex-root"], div');
-      if (!flex) return;
-
-      const row1 = flex.children[1] || flex;
-
-      let btn = document.getElementById('feishin-kill-switch-btn');
-      if (!btn || btn.parentElement !== row1) {
-        if (btn) btn.remove();
-
-        btn = document.createElement('button');
-        btn.id = 'feishin-kill-switch-btn';
-        btn.className = 'mantine-focus-never mantine-active fs-action-icon-module-root m_8d3f4000 mantine-ActionIcon-root m_87cf2631 mantine-UnstyledButton-root feishin-kill-btn feishin-kill-btn-right';
-        btn.setAttribute('type', 'button');
-        btn.setAttribute('title', 'Fechar música e matar fila (X) — ou pressione Esc 2x');
-        btn.innerHTML = `
-          <span class="m_8d3afb97 mantine-ActionIcon-icon">
-            <svg stroke="currentColor" fill="none" stroke-width="2.3" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" height="15" width="15" xmlns="http://www.w3.org/2000/svg">
-              <line x1="18" y1="6" x2="6" y2="18"></line>
-              <line x1="6" y1="6" x2="18" y2="18"></line>
-            </svg>
-          </span>
-        `;
-
-        btn.onclick = (e) => {
-          e.preventDefault();
-          e.stopPropagation();
-          openKillSwitchGlassDialog();
-        };
-
-        row1.appendChild(btn);
-      }
-      updateKillButtonState();
-    }
-
-    mountKillButton();
-    setInterval(mountKillButton, 2500);
-
-    const observer = new MutationObserver(() => {
-      mountKillButton();
-    });
+    removeKillButton();
+    const observer = new MutationObserver(removeKillButton);
     const playerBar = document.querySelector('#player-bar, footer');
     if (playerBar) {
       observer.observe(playerBar, { childList: true, subtree: true });
-    } else {
-      observer.observe(document.body, { childList: true, subtree: true });
     }
   }
 

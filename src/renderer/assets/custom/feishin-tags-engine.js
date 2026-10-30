@@ -182,19 +182,22 @@
       if (!songOrId || !tagId || !this.taggedTracks[tagId]) return false;
       const list = this.taggedTracks[tagId];
       if (typeof songOrId === 'string') {
-        return list.some(s => s.id === songOrId || (s.name && s.name.toLowerCase() === songOrId.toLowerCase()));
+        const q = songOrId.trim().toLowerCase();
+        return list.some(s => (s.id && String(s.id).toLowerCase() === q) || ((s.name || s.title) && (s.name || s.title).toLowerCase() === q));
       }
-      const targetId = songOrId.id ? String(songOrId.id) : null;
+      const targetId = songOrId.id ? String(songOrId.id).trim() : null;
       const targetName = (songOrId.name || songOrId.title || '').trim().toLowerCase();
       const targetArtist = (songOrId.artistName || songOrId.artist || (songOrId.artists?.[0]?.name) || '').trim().toLowerCase();
 
       return list.some(s => {
-        if (targetId && s.id && String(s.id) === targetId) return true;
-        if (targetName && (s.name || s.title)) {
+        if (targetId && s.id && String(s.id).trim() === targetId) return true;
+        if (targetName) {
           const sName = (s.name || s.title || '').trim().toLowerCase();
-          const sArtist = (s.artistName || s.artist || '').trim().toLowerCase();
-          if (sName === targetName && (!targetArtist || !sArtist || sArtist === targetArtist)) {
-            return true;
+          const sArtist = (s.artistName || s.artist || (s.artists?.[0]?.name) || '').trim().toLowerCase();
+          if (sName === targetName) {
+            if (!targetArtist || !sArtist || sArtist === targetArtist) {
+              return true;
+            }
           }
         }
         return false;
@@ -220,7 +223,7 @@
       const list = this.taggedTracks[tagId];
 
       if (!this.isSongInTag(song, tagId)) {
-        const cleanSong = {
+        const cleanSong = typeof normalizeSongObject === 'function' ? normalizeSongObject(song) : {
           id: song.id ? String(song.id) : ('trk_' + Date.now() + '_' + Math.random().toString(36).substring(2, 7)),
           name: song.name || song.title || 'Faixa sem título',
           title: song.name || song.title || 'Faixa sem título',
@@ -350,19 +353,19 @@
     }
 
     selectAllVisible() {
-      const rows = document.querySelectorAll(
-        '.fs-item-table-list-column-module-data-row, [data-row-index], .ra-tracklist-row, [role="row"]'
+      const cells = document.querySelectorAll(
+        '.fs-title-combined-column-module-title-combined, .fs-title-artist-column-module-title-artist, .fs-song-title-column-module-song-title, .ra-tracklist-row, [class*="item-detail-list-module-track-row"]'
       );
-      rows.forEach(r => {
-        const s = extractSongFromElement(r);
-        if (s) {
-          const key = s.id || `${s.name}:::${s.artistName}`;
+      cells.forEach(c => {
+        const s = extractSongFromElement(c);
+        if (s && s.id) {
+          const key = s.id;
           this.selectedSongs.set(key, s);
         }
       });
       renderMultiSelectFloatingBar();
       this.updateSelectionRowDecorations();
-      this.showToast(`${this.selectedSongs.size} faixas selecionadas!`);
+      this.showToast(`${this.selectedSongs.size} faixa(s) selecionada(s)!`);
     }
 
     clearSelection() {
@@ -372,47 +375,49 @@
     }
 
     updateSelectionRowDecorations() {
-      const rows = document.querySelectorAll(
-        '.fs-item-table-list-column-module-data-row, [data-row-index], .ra-tracklist-row'
+      const cells = document.querySelectorAll(
+        '.fs-title-combined-column-module-title-combined, .fs-title-artist-column-module-title-artist, .fs-song-title-column-module-song-title, .ra-tracklist-row, [class*="item-detail-list-module-track-row"]'
       );
-      rows.forEach(r => {
-        const song = extractSongFromElement(r);
+      cells.forEach(c => {
+        const song = extractSongFromElement(c);
         if (!song) return;
-        const key = song.id || `${song.name}:::${song.artistName}`;
+        const key = song.id;
         const isSelected = this.selectedSongs.has(key);
+        const row = c.closest('[data-row-index], .ra-tracklist-row, [class*="track-row"]') || c;
 
         if (this.isMultiSelectActive) {
-          r.classList.add('fs-multiselect-row');
+          row.classList.add('fs-multiselect-row');
           if (isSelected) {
-            r.classList.add('fs-row-is-selected');
+            row.classList.add('fs-row-is-selected');
           } else {
-            r.classList.remove('fs-row-is-selected');
+            row.classList.remove('fs-row-is-selected');
           }
 
-          let indicator = r.querySelector('.fs-multiselect-indicator');
+          let indicator = c.querySelector('.fs-multiselect-indicator');
           if (!indicator) {
             indicator = document.createElement('div');
             indicator.className = 'fs-multiselect-indicator';
             indicator.onclick = (e) => {
               e.stopPropagation();
+              e.preventDefault();
               this.toggleSongSelection(song);
             };
-            r.insertBefore(indicator, r.firstChild);
+            c.insertBefore(indicator, c.firstChild);
           }
           indicator.innerHTML = isSelected ? '✓' : '';
           indicator.className = 'fs-multiselect-indicator ' + (isSelected ? 'checked' : '');
         } else {
-          r.classList.remove('fs-multiselect-row', 'fs-row-is-selected');
-          const indicator = r.querySelector('.fs-multiselect-indicator');
+          row.classList.remove('fs-multiselect-row', 'fs-row-is-selected');
+          const indicator = c.querySelector('.fs-multiselect-indicator');
           if (indicator) indicator.remove();
         }
       });
     }
 
     updateAllVisibleTrackBadges() {
-      // 1. Virtualized Tracks Table (Faixas page / Playlists / Albums)
+      // 1. Virtualized Tracks Table (Faixas page / Playlists / Queue)
       const titleCells = document.querySelectorAll(
-        '.fs-title-combined-column-module-title-combined, .fs-title-artist-column-module-title-artist, .fs-song-title-column-module-song-title'
+        '.fs-title-combined-column-module-title-combined, .fs-title-artist-column-module-title-artist, .fs-song-title-column-module-song-title, .fs-title-column-module-name-container, [class*="title-combined"], [class*="title-artist"]'
       );
 
       titleCells.forEach(cell => {
@@ -426,9 +431,9 @@
           if (!badgeWrap) {
             badgeWrap = document.createElement('span');
             badgeWrap.className = 'fs-track-tag-badges';
-            const textWrap = cell.querySelector('.fs-title-combined-column-module-text-container') || cell;
+            const textWrap = cell.querySelector('.fs-title-combined-column-module-text-container') || cell.querySelector('[class*="text-container"]') || cell;
             const titleEl = cell.querySelector(
-              '.fs-title-combined-column-module-title, .fs-song-title-column-module-song-title, .fs-title-artist-column-module-title, .fs-title-column-module-title'
+              '.fs-title-combined-column-module-title, .fs-song-title-column-module-song-title, .fs-title-artist-column-module-title, .fs-title-column-module-title, [class*="title"]'
             );
             if (titleEl && titleEl.parentNode) {
               if (titleEl.nextSibling) {
@@ -439,6 +444,42 @@
             } else {
               textWrap.appendChild(badgeWrap);
             }
+          }
+          const badgesHtml = tags.map(t => `
+            <span class="fs-track-tag-badge" data-tag-id="${t.id}" title="Tag: ${escapeHtml(t.name)}">
+              🏷️ ${escapeHtml(t.name)}
+            </span>
+          `).join('');
+          if (badgeWrap.innerHTML !== badgesHtml) {
+            badgeWrap.innerHTML = badgesHtml;
+            badgeWrap.querySelectorAll('.fs-track-tag-badge').forEach(b => {
+              b.onclick = (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                window.location.hash = `#/library/genres?tag=${encodeURIComponent(b.getAttribute('data-tag-id'))}`;
+              };
+            });
+          }
+        } else if (badgeWrap) {
+          badgeWrap.remove();
+        }
+      });
+
+      // 2. ItemDetailList Track Rows (Album Detail / Artist Detail)
+      const detailRows = document.querySelectorAll('[class*="item-detail-list-module-track-row"], [class*="track-row"]:not([class*="skeleton"])');
+      detailRows.forEach(row => {
+        const song = extractSongFromElement(row);
+        if (!song) return;
+
+        const tags = this.getTagsForSong(song);
+        let badgeWrap = row.querySelector('.fs-track-tag-badges');
+
+        if (tags.length > 0) {
+          if (!badgeWrap) {
+            badgeWrap = document.createElement('span');
+            badgeWrap.className = 'fs-track-tag-badges';
+            const titleEl = row.querySelector('[class*="title"], [class*="text-container"], [role="gridcell"]:nth-child(2)') || row;
+            titleEl.appendChild(badgeWrap);
           }
           const badgesHtml = tags.map(t => `
             <span class="fs-track-tag-badge" data-tag-id="${t.id}" title="Tag: ${escapeHtml(t.name)}">
@@ -639,27 +680,70 @@
 
   document.addEventListener('contextmenu', (e) => {
     lastRightClickedElement = e.target;
-    lastTargetRow = e.target.closest('[data-row-index], .ra-tracklist-row, .fs-item-table-list-column-module-data-row, [role="row"], tr');
+    lastTargetRow = e.target.closest('[data-row-index], .ra-tracklist-row, .fs-item-table-list-column-module-data-row, [class*="track-row"], [role="row"], tr');
   }, true);
+
+  // Android long-press touch capture
+  document.addEventListener('touchstart', (e) => {
+    if (e.touches && e.touches[0]) {
+      const el = document.elementFromPoint(e.touches[0].clientX, e.touches[0].clientY);
+      if (el) {
+        lastRightClickedElement = el;
+        lastTargetRow = el.closest('[data-row-index], .ra-tracklist-row, .fs-item-table-list-column-module-data-row, [class*="track-row"], [role="row"], tr');
+      }
+    }
+  }, { passive: true, capture: true });
+
+  function normalizeSongObject(song) {
+    if (!song) return null;
+    return {
+      id: String(song.id || song.songId || ('trk_' + Date.now() + '_' + Math.random().toString(36).substring(2, 7))),
+      name: song.name || song.title || 'Faixa sem título',
+      title: song.name || song.title || 'Faixa sem título',
+      artistName: song.artistName || song.artist || (song.artists?.[0]?.name) || 'Artista Desconhecido',
+      album: song.album || song.albumName || 'Álbum',
+      albumId: song.albumId || song.id,
+      duration: song.duration || 0,
+      imageId: song.imageId || song.id,
+      imageUrl: song.imageUrl || null,
+      thumbHash: song.thumbHash || null,
+      _itemType: song._itemType || 'song',
+      _serverId: song._serverId || (window.__FEISHIN_SERVER_STORE__?.getState()?.currentServer?.id) || ''
+    };
+  }
 
   function findSongFromReactFiber(el) {
     if (!el) return null;
     let curr = el;
     let depth = 0;
-    while (curr && depth < 10) {
+    while (curr && depth < 12) {
       const fiberKey = Object.keys(curr).find(k => k.startsWith('__reactFiber$') || k.startsWith('__reactInternalInstance$'));
       if (fiberKey) {
         let fiber = curr[fiberKey];
         let fDepth = 0;
-        while (fiber && fDepth < 15) {
+        while (fiber && fDepth < 20) {
           const props = fiber.memoizedProps || fiber.pendingProps;
           if (props) {
+            // Feishin ItemTableListColumn (virtualized table)
+            if (typeof props.getRowItem === 'function' && typeof props.rowIndex === 'number') {
+              try {
+                const item = props.getRowItem(props.rowIndex);
+                if (item && (item.id || item.name || item.title)) return item;
+              } catch (e) {}
+            }
+            if (Array.isArray(props.data) && typeof props.rowIndex === 'number' && props.data[props.rowIndex]) {
+              const item = props.data[props.rowIndex];
+              if (item && (item.id || item.name || item.title)) return item;
+            }
             if (props.song && (props.song.id || props.song.name || props.song.title)) return props.song;
             if (props.item && (props.item.id || props.item.name || props.item.title)) return props.item;
-            if (props.row?.original && (props.row.original.id || props.row.original.name)) return props.row.original;
+            if (props.row?.original && (props.row.original.id || props.row.original.name || props.row.original.title)) return props.row.original;
             if (props.data?.items && typeof props.index === 'number') {
               const item = props.data.items[props.index];
-              if (item) return item;
+              if (item && (item.id || item.name || item.title)) return item;
+            }
+            if (Array.isArray(props.items) && props.items.length === 1 && (props.items[0].id || props.items[0].name)) {
+              return props.items[0];
             }
           }
           fiber = fiber.return;
@@ -674,27 +758,19 @@
 
   function extractSongFromElement(el) {
     if (!el) return null;
-    const row = el.closest('[data-row-index], .ra-tracklist-row, .fs-item-table-list-column-module-data-row, [role="row"], tr') || el;
+    const row = el.closest('[data-row-index], .ra-tracklist-row, .fs-item-table-list-column-module-data-row, [class*="track-row"], [role="row"], tr') || el;
 
     // 1. Recently Added cached songs
     const dataId = row.getAttribute('data-id') || row.getAttribute('data-song-id');
     if (dataId && window.FeishinRecentlyAdded?.getCachedSongs) {
       const found = window.FeishinRecentlyAdded.getCachedSongs().find(s => s.id === dataId);
-      if (found) return found;
+      if (found) return normalizeSongObject(found);
     }
 
     // 2. React fiber
-    const fiberSong = findSongFromReactFiber(row);
+    const fiberSong = findSongFromReactFiber(el) || findSongFromReactFiber(row);
     if (fiberSong) {
-      return {
-        id: String(fiberSong.id || fiberSong.songId || dataId || 'trk_' + (fiberSong.name || 'song')),
-        name: fiberSong.name || fiberSong.title || 'Música',
-        title: fiberSong.name || fiberSong.title || 'Música',
-        artistName: fiberSong.artistName || fiberSong.artist || (fiberSong.artists?.[0]?.name) || 'Artista',
-        album: fiberSong.album || fiberSong.albumName || 'Álbum',
-        duration: fiberSong.duration || 0,
-        imageUrl: fiberSong.imageUrl || fiberSong.coverArt || null
-      };
+      return normalizeSongObject(fiberSong);
     }
 
     // 3. Image tag with Subsonic ID (e.g. id="mf-5US6IrXl7jzBo7fR5lELGg_...")
@@ -702,28 +778,67 @@
     const m = img?.id?.match(/mf-([^_]+)/);
     const subsonicSongId = m ? m[1] : null;
 
-    // 4. DOM text
+    // 4. DOM text - ONLY if title element exists!
     const titleEl = row.querySelector(
-      '.fs-title-combined-column-module-title, .fs-song-title-column-module-song-title, .fs-title-artist-column-module-title, .fs-title-column-module-title, .ra-track-title'
-    ) || row.querySelector('.mantine-Text-root:not(.fs-title-combined-column-module-artists)') || row.querySelector('a');
+      '.fs-title-combined-column-module-title, .fs-song-title-column-module-song-title, .fs-title-artist-column-module-title, .fs-title-column-module-title, .ra-track-title, [class*="title"]'
+    ) || (row.classList.contains('fs-title-combined-column-module-title-combined') ? row.querySelector('a, span') : null);
+
+    if (!titleEl && !subsonicSongId && !dataId) {
+      return null;
+    }
+
     const artistEl = row.querySelector(
-      '.fs-title-combined-column-module-artists, .fs-song-artist-column-module-artist, .fs-artist-column-module-artist, .ra-track-artist'
+      '.fs-title-combined-column-module-artists, .fs-song-artist-column-module-artist, .fs-artist-column-module-artist, .ra-track-artist, [class*="artist"]'
     );
 
     const title = titleEl ? titleEl.innerText.trim() : '';
     const artist = artistEl ? artistEl.innerText.trim() : '';
 
     if (title || subsonicSongId) {
-      return {
+      return normalizeSongObject({
         id: subsonicSongId || dataId || ('track_' + encodeURIComponent(title + '_' + artist).replace(/%/g, '')),
         name: title || 'Música',
         title: title || 'Música',
         artistName: artist || 'Artista',
         album: 'Álbum',
         duration: 0
-      };
+      });
     }
 
+    return null;
+  }
+
+  function extractSongsFromContextMenu(menu) {
+    if (!menu) return null;
+    const all = [menu, ...menu.querySelectorAll('*')];
+    for (const el of all) {
+      const fiberKey = Object.keys(el).find(k => k.startsWith('__reactFiber$') || k.startsWith('__reactInternalInstance$'));
+      if (!fiberKey) continue;
+      let f = el[fiberKey];
+      let depth = 0;
+      while (f && depth < 25) {
+        const p = f.memoizedProps;
+        if (p) {
+          if (Array.isArray(p.items) && p.items.length > 0 && (p.items[0].id || p.items[0].name || p.items[0].title)) {
+            return p.items;
+          }
+          if (Array.isArray(p.songs) && p.songs.length > 0 && (p.songs[0].id || p.songs[0].name || p.songs[0].title)) {
+            return p.songs;
+          }
+          if (Array.isArray(p.cmd?.items) && p.cmd.items.length > 0 && (p.cmd.items[0].id || p.cmd.items[0].name || p.cmd.items[0].title)) {
+            return p.cmd.items;
+          }
+          if (p.song && (p.song.id || p.song.name || p.song.title)) {
+            return [p.song];
+          }
+          if (p.item && (p.item.id || p.item.name || p.item.title)) {
+            return [p.item];
+          }
+        }
+        f = f.return;
+        depth++;
+      }
+    }
     return null;
   }
 
@@ -737,40 +852,77 @@
       if (song) return song;
     }
     const cur = window.__FEISHIN_PLAYER_STORE__?.getState()?.getCurrentSong?.();
-    if (cur) return cur;
+    if (cur) return normalizeSongObject(cur);
     return null;
   }
 
-  function getActiveTargetSongs() {
-    // 1. If Multi-Select mode is active with selected songs
-    if (engine.isMultiSelectActive && engine.selectedSongs && engine.selectedSongs.size > 0) {
-      return Array.from(engine.selectedSongs.values());
-    }
-
-    // 2. Check if multiple rows are selected in the Feishin table or DOM
-    const selectedElements = document.querySelectorAll(
-      '.fs-item-table-list-column-module-row-selected, [class*="row-selected"], [data-selected="true"], .ra-row-selected, .fs-row-is-selected'
-    );
-    if (selectedElements.length > 1) {
-      const songsMap = new Map();
-      selectedElements.forEach(el => {
-        const song = extractSongFromElement(el);
-        if (song) {
-          const key = song.id || `${song.name}:::${song.artistName}`;
-          if (!songsMap.has(key)) songsMap.set(key, song);
+  function getActiveTargetSongs(menu = null) {
+    // 1. If context menu is open and contains target songs in its React tree
+    if (menu) {
+      const contextSongs = extractSongsFromContextMenu(menu);
+      if (contextSongs && contextSongs.length > 0) {
+        return contextSongs.map(normalizeSongObject);
+      }
+    } else {
+      const activeMenu = document.querySelector('[role="menu"], [data-radix-menu-content]');
+      if (activeMenu) {
+        const contextSongs = extractSongsFromContextMenu(activeMenu);
+        if (contextSongs && contextSongs.length > 0) {
+          return contextSongs.map(normalizeSongObject);
         }
-      });
-      if (songsMap.size > 0) {
-        return Array.from(songsMap.values());
       }
     }
 
-    // 3. Fallback to single targeted song
+    // 2. Custom Multi-Select mode active
+    if (engine.isMultiSelectActive && engine.selectedSongs && engine.selectedSongs.size > 0) {
+      return Array.from(engine.selectedSongs.values()).map(normalizeSongObject);
+    }
+
+    // 3. Native Feishin table selection via internalState
+    const targetEl = lastTargetRow || lastRightClickedElement;
+    if (targetEl) {
+      const fiberKey = Object.keys(targetEl).find(k => k.startsWith('__reactFiber$') || k.startsWith('__reactInternalInstance$'));
+      if (fiberKey) {
+        let f = targetEl[fiberKey];
+        while (f) {
+          if (f.memoizedProps?.internalState) {
+            const state = f.memoizedProps.internalState;
+            const selected = state.getSelected ? state.getSelected() : [];
+            const rowItem = f.memoizedProps.getRowItem && typeof f.memoizedProps.rowIndex === 'number'
+              ? f.memoizedProps.getRowItem(f.memoizedProps.rowIndex)
+              : null;
+            const rowId = rowItem ? state.extractRowId(rowItem) : null;
+
+            if (selected && selected.length > 1 && rowId && state.isSelected(rowId)) {
+              return selected.map(normalizeSongObject);
+            }
+            if (rowItem) {
+              return [normalizeSongObject(rowItem)];
+            }
+            if (selected && selected.length > 0) {
+              return selected.map(normalizeSongObject);
+            }
+            break;
+          }
+          f = f.return;
+        }
+      }
+    }
+
+    // 4. Targeted single song fallback
     const single = getActiveTargetSong();
-    return single ? [single] : [];
+    return single ? [normalizeSongObject(single)] : [];
   }
 
+  engine.extractSongFromElement = extractSongFromElement;
+  engine.findSongFromReactFiber = findSongFromReactFiber;
+  engine.getActiveTargetSongs = getActiveTargetSongs;
+  engine.normalizeSongObject = normalizeSongObject;
+
   function initContextMenuObserver() {
+    if (window.__feishinContextMenuObserver) {
+      try { window.__feishinContextMenuObserver.disconnect(); } catch (e) {}
+    }
     const observer = new MutationObserver(() => {
       const activeMenus = document.querySelectorAll('[role="menu"], [data-radix-menu-content], .fs-context-menu-module-content, .mantine-Menu-dropdown');
       if (activeMenus.length === 0) return;
@@ -779,6 +931,7 @@
         checkAndInjectTagsMenuItem(menu);
       }
     });
+    window.__feishinContextMenuObserver = observer;
 
     const start = () => {
       const target = document.body || document.documentElement;
@@ -809,7 +962,7 @@
     if (!isSongMenu) return;
     menu.dataset.tagsInjected = 'true';
 
-    const targetSongs = getActiveTargetSongs();
+    const targetSongs = getActiveTargetSongs(menu);
     if (!targetSongs || targetSongs.length === 0) return;
 
     // 1. Tag Assignment Item
@@ -1066,9 +1219,13 @@
       }
     });
 
-    modalBackdrop.querySelector('#fs-modal-close')?.addEventListener('click', closeTagModals);
+    modalBackdrop.querySelector('#fs-modal-close')?.addEventListener('click', () => {
+      closeTagModals();
+      engine.updateAllVisibleTrackBadges();
+    });
     modalBackdrop.querySelector('#fs-tag-assign-done')?.addEventListener('click', () => {
       closeTagModals();
+      engine.updateAllVisibleTrackBadges();
       engine.showToast(`Tags atualizadas com sucesso para ${targetSongs.length} faixa(s)!`);
       if (engine.isMultiSelectActive) {
         engine.setMultiSelectActive(false);
@@ -1184,6 +1341,9 @@
   }
 
   function initReactiveBadgesObserver() {
+    if (window.__feishinReactiveBadgesObserver) {
+      try { window.__feishinReactiveBadgesObserver.disconnect(); } catch (e) {}
+    }
     let timer = null;
     const debouncedUpdate = () => {
       if (timer) return;
@@ -1203,6 +1363,7 @@
       }
       if (shouldUpdate) debouncedUpdate();
     });
+    window.__feishinReactiveBadgesObserver = observer;
 
     const start = () => {
       const target = document.body || document.documentElement;

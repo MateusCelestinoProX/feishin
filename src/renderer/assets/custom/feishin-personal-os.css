@@ -2885,38 +2885,14 @@ body.feishin-tp-open #feishin-alphabet-hud,
    12. PLAYER KILL SWITCH & GLASS CONFIRMATION DIALOG (BOTÃO X)
    ========================================================================== */
 #feishin-kill-switch-btn {
-    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
-    position: relative !important;
-}
-
-#feishin-kill-switch-btn.feishin-kill-btn-right {
-    margin-left: 10px !important;
-    border-radius: 8px !important;
-    width: 30px !important;
-    height: 30px !important;
-    flex-shrink: 0 !important;
-    border: 1px solid rgba(255, 255, 255, 0.1) !important;
-    background: rgba(255, 255, 255, 0.04) !important;
-}
-
-#feishin-kill-switch-btn:hover {
-    color: #F87171 !important;
-    background: rgba(239, 68, 68, 0.18) !important;
-    border-color: rgba(239, 68, 68, 0.4) !important;
-    box-shadow: 0 0 16px rgba(239, 68, 68, 0.32) !important;
-    transform: scale(1.05) !important;
-}
-
-#feishin-kill-switch-btn:active {
-    transform: scale(0.95) !important;
-}
-
-#feishin-kill-switch-btn[data-disabled="true"] {
-    opacity: 0.32 !important;
-    cursor: not-allowed !important;
+    display: none !important;
+    opacity: 0 !important;
+    visibility: hidden !important;
     pointer-events: none !important;
-    box-shadow: none !important;
-    transform: none !important;
+    width: 0 !important;
+    height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
 }
 
 /* Glass Modal Backdrop Overlay */
