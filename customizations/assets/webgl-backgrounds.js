@@ -2425,6 +2425,16 @@ window.renderWebGLBackground = function(type) {
   const container = document.getElementById('bg-webgl-container');
   if (!container) return;
 
+  const galleryTypes = ['gym', 'flowers', 'red', 'soft', 'motivation', 'api', 'video', 'random'];
+  if (galleryTypes.includes(type) || (typeof type === 'string' && type.startsWith('gallery_'))) {
+    if (currentCleanup) {
+      try { currentCleanup(); } catch(e) {}
+      currentCleanup = null;
+    }
+    container.innerHTML = '';
+    return;
+  }
+
   if (!type) {
     try {
       type = localStorage.getItem('feishin_active_shader') || 'plasmawave';

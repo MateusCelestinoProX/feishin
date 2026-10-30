@@ -35,6 +35,72 @@ div, span, p, a, h1, h2, h3, h4, h5, h6 {
     border: none;
 }
 
+/* --- 2. SLIDESHOW DE IMAGENS & VÍDEOS CINEMÁTICOS (BINAURAL PRO GALLERIES) --- */
+.bg-slideshow, #bg-slideshow {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    z-index: -3 !important;
+    overflow: hidden !important;
+    contain: strict !important;
+    pointer-events: none !important;
+    transform: translate3d(0, 0, 0) !important;
+}
+
+.bg-layer {
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    background-size: cover !important;
+    background-position: center center !important;
+    background-repeat: no-repeat !important;
+    opacity: 0;
+    transform: scale(1.04);
+    transition: opacity 1.8s cubic-bezier(0.4, 0, 0.2, 1), transform 12s ease-out !important;
+    will-change: opacity, transform !important;
+    pointer-events: none !important;
+    display: none;
+}
+
+.bg-layer.active {
+    opacity: 1 !important;
+    transform: scale(1) !important;
+    display: block !important;
+}
+
+.bg-video-layer {
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important;
+    z-index: -2 !important;
+    opacity: 0;
+    transition: opacity 1.5s ease-in-out !important;
+    pointer-events: none !important;
+    display: none;
+}
+
+.bg-video-layer.active {
+    opacity: 1 !important;
+    display: block !important;
+}
+
+.bg-overlay {
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    background: rgba(0, 0, 0, 0.15) !important;
+    pointer-events: none !important;
+}
+
 /* --- 2. WEBGL BACKDROP & VIGNETTE --- */
 #bg-webgl-container {
     position: fixed !important;

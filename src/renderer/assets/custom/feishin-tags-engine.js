@@ -1330,19 +1330,34 @@
       document.body.appendChild(bar);
     }
 
+    const playerBar = document.getElementById('player-bar');
+    const isPlayerVisible = Boolean(playerBar && !playerBar.classList.contains('feishin-player-hidden') && (playerBar.offsetHeight > 0 || (window.__FEISHIN_PLAYER_STORE__ && window.__FEISHIN_PLAYER_STORE__.getState()?.status !== 'stopped')));
+    if (isPlayerVisible) {
+      bar.classList.add('has-player');
+    } else {
+      bar.classList.remove('has-player');
+    }
+
     bar.innerHTML = `
       <div class="fs-multiselect-bar-glass">
-        <div class="fs-multiselect-bar-info">
-          <div class="fs-multiselect-bar-count-badge">${count}</div>
-          <span class="fs-multiselect-bar-label">${count === 1 ? 'faixa selecionada' : 'faixas selecionadas'}</span>
+        <div class="fs-multiselect-bar-header">
+          <div class="fs-multiselect-bar-info">
+            <div class="fs-multiselect-bar-count-badge">${count}</div>
+            <span class="fs-multiselect-bar-label">${count === 1 ? '1 faixa selecionada' : `${count} faixas selecionadas`}</span>
+          </div>
+          <button type="button" id="fs-ms-close" class="fs-ms-btn-close" aria-label="Sair da Seleção" title="Sair da Seleção">
+            <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+          </button>
         </div>
         <div class="fs-multiselect-bar-actions">
-          <button type="button" id="fs-ms-select-all" class="fs-ms-btn fs-ms-btn-secondary">Selecionar Tudo</button>
+          <button type="button" id="fs-ms-select-all" class="fs-ms-btn fs-ms-btn-secondary">Selecionar tudo</button>
           <button type="button" id="fs-ms-clear" class="fs-ms-btn fs-ms-btn-secondary">Limpar</button>
           <button type="button" id="fs-ms-assign-tag" class="fs-ms-btn fs-ms-btn-primary" ${count === 0 ? 'disabled' : ''}>
             🏷️ Atribuir Tag
           </button>
-          <button type="button" id="fs-ms-close" class="fs-ms-btn fs-ms-btn-close" title="Sair da Seleção">✕</button>
         </div>
       </div>
     `;
@@ -1423,6 +1438,10 @@
       timer = setTimeout(() => {
         timer = null;
         engine.updateAllVisibleTrackBadges();
+        if (engine.isMultiSelectActive) {
+          engine.updateSelectionRowDecorations();
+          renderMultiSelectFloatingBar();
+        }
       }, 120);
     };
 
@@ -1660,26 +1679,69 @@
         padding: 10px 24px !important;
         border-top: 1px solid rgba(255, 255, 255, 0.06) !important;
       }
+      /* Multi-select: ocultar numeração de faixa e play/pause nativo para layout limpo sem duplicidade */
+      body.fs-multiselect-active .fs-row-index-column-module-content,
+      body.fs-multiselect-active [data-column-id="rowIndex"] .fs-item-table-list-column-module-content,
+      body.fs-multiselect-active .fs-row-play-control-popover-module-target,
+      body.fs-multiselect-active .fs-row-index-column-module-index-content {
+        opacity: 0 !important;
+        pointer-events: none !important;
+        visibility: hidden !important;
+      }
+
+      /* Multi-select: ocultar alphabet scrubber para evitar sobreposição na margem direita */
+      body.fs-multiselect-active #fs-alphabet-scrubber-container,
+      body.fs-multiselect-active .fs-alphabet-scrubber-container,
+      body.fs-multiselect-active [class*="alphabet-scrubber"] {
+        opacity: 0 !important;
+        pointer-events: none !important;
+        visibility: hidden !important;
+      }
+
+      /* Multi-select: rolagem inferior ampla para não cobrir últimas faixas */
+      body.fs-multiselect-active .fs-item-table-list-module-scroll-container,
+      body.fs-multiselect-active [class*="scroll-container"],
+      body.fs-multiselect-active .fs-main-content-module-main-content-body {
+        padding-bottom: 230px !important;
+      }
+
       .fs-multiselect-bar-container {
         position: fixed !important;
-        bottom: calc(env(safe-area-inset-bottom, 0px) + 90px) !important;
+        bottom: calc(56px + var(--sab, env(safe-area-inset-bottom, 0px)) + 12px) !important;
         left: 50% !important;
         transform: translateX(-50%) !important;
         z-index: 99990 !important;
-        max-width: 92vw !important;
+        width: calc(100vw - 24px) !important;
+        max-width: 440px !important;
+        box-sizing: border-box !important;
+        pointer-events: none !important;
         animation: feishinMenuCenterPop 0.25s cubic-bezier(0.16, 1, 0.3, 1) !important;
+        transition: bottom 0.25s cubic-bezier(0.16, 1, 0.3, 1), transform 0.2s ease !important;
+      }
+      .fs-multiselect-bar-container.has-player,
+      body:has(#player-bar:not(.feishin-player-hidden):not([style*="display: none"])) .fs-multiselect-bar-container {
+        bottom: calc(56px + var(--sab, env(safe-area-inset-bottom, 0px)) + 64px + 16px) !important;
       }
       .fs-multiselect-bar-glass {
+        pointer-events: auto !important;
         display: flex !important;
-        align-items: center !important;
-        gap: 14px !important;
-        background: rgba(18, 18, 28, 0.92) !important;
+        flex-direction: column !important;
+        gap: 10px !important;
+        background: rgba(18, 18, 28, 0.94) !important;
         border: 1px solid rgba(167, 139, 250, 0.35) !important;
         border-radius: 20px !important;
-        padding: 8px 16px !important;
-        backdrop-filter: blur(24px) saturate(190%) !important;
-        -webkit-backdrop-filter: blur(24px) saturate(190%) !important;
-        box-shadow: 0 16px 48px rgba(0, 0, 0, 0.75), 0 0 24px rgba(139, 92, 246, 0.25) !important;
+        padding: 12px 14px !important;
+        backdrop-filter: blur(28px) saturate(200%) !important;
+        -webkit-backdrop-filter: blur(28px) saturate(200%) !important;
+        box-shadow: 0 16px 48px rgba(0, 0, 0, 0.8), 0 0 24px rgba(139, 92, 246, 0.25) !important;
+        box-sizing: border-box !important;
+        width: 100% !important;
+      }
+      .fs-multiselect-bar-header {
+        display: flex !important;
+        align-items: center !important;
+        justify-content: space-between !important;
+        width: 100% !important;
       }
       .fs-multiselect-bar-info {
         display: flex !important;
@@ -1687,72 +1749,101 @@
         gap: 8px !important;
       }
       .fs-multiselect-bar-count-badge {
-        min-width: 24px !important;
-        height: 24px !important;
+        min-width: 22px !important;
+        height: 22px !important;
         padding: 0 6px !important;
         border-radius: 99px !important;
         background: #8b5cf6 !important;
         color: #ffffff !important;
         font-size: 12px !important;
         font-weight: 700 !important;
-        display: flex !important;
+        display: inline-flex !important;
         align-items: center !important;
         justify-content: center !important;
       }
       .fs-multiselect-bar-label {
-        font-size: 13px !important;
+        font-size: 13.5px !important;
         font-weight: 600 !important;
         color: #ffffff !important;
         white-space: nowrap !important;
+      }
+      .fs-ms-btn-close {
+        width: 28px !important;
+        height: 28px !important;
+        min-width: 28px !important;
+        min-height: 28px !important;
+        border-radius: 50% !important;
+        background: rgba(255, 255, 255, 0.08) !important;
+        border: 1px solid rgba(255, 255, 255, 0.12) !important;
+        color: rgba(255, 255, 255, 0.7) !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        cursor: pointer !important;
+        transition: all 0.15s ease !important;
+        padding: 0 !important;
+      }
+      .fs-ms-btn-close:hover, .fs-ms-btn-close:active {
+        background: rgba(239, 68, 68, 0.25) !important;
+        border-color: rgba(239, 68, 68, 0.5) !important;
+        color: #ffffff !important;
       }
       .fs-multiselect-bar-actions {
         display: flex !important;
         align-items: center !important;
         gap: 8px !important;
+        width: 100% !important;
       }
       .fs-ms-btn {
-        padding: 7px 12px !important;
-        border-radius: 10px !important;
-        font-size: 12px !important;
+        flex: 1 1 0 !important;
+        min-width: 0 !important;
+        height: 38px !important;
+        padding: 0 8px !important;
+        border-radius: 12px !important;
+        font-size: 12.5px !important;
         font-weight: 600 !important;
         cursor: pointer !important;
         transition: all 0.15s ease !important;
         border: 1px solid transparent !important;
         white-space: nowrap !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        box-sizing: border-box !important;
       }
       .fs-ms-btn-secondary {
         background: rgba(255, 255, 255, 0.08) !important;
         border-color: rgba(255, 255, 255, 0.12) !important;
-        color: rgba(255, 255, 255, 0.85) !important;
+        color: rgba(255, 255, 255, 0.9) !important;
       }
-      .fs-ms-btn-secondary:hover {
-        background: rgba(255, 255, 255, 0.15) !important;
+      .fs-ms-btn-secondary:hover, .fs-ms-btn-secondary:active {
+        background: rgba(255, 255, 255, 0.16) !important;
         color: #ffffff !important;
       }
       .fs-ms-btn-primary {
+        flex: 1.3 1 0 !important;
         background: linear-gradient(135deg, #8b5cf6, #6d28d9) !important;
         border-color: rgba(255, 255, 255, 0.25) !important;
         color: #ffffff !important;
         box-shadow: 0 4px 14px rgba(109, 40, 217, 0.4) !important;
       }
-      .fs-ms-btn-primary:hover {
+      .fs-ms-btn-primary:hover, .fs-ms-btn-primary:active {
         filter: brightness(1.15) !important;
         transform: translateY(-1px) !important;
       }
-      .fs-ms-btn-close {
-        background: rgba(255, 255, 255, 0.05) !important;
-        color: rgba(255, 255, 255, 0.6) !important;
-        padding: 7px 10px !important;
-      }
-      .fs-ms-btn-close:hover {
-        background: rgba(239, 68, 68, 0.2) !important;
-        color: #ffffff !important;
+      .fs-ms-btn-primary[disabled] {
+        opacity: 0.4 !important;
+        cursor: not-allowed !important;
+        box-shadow: none !important;
+        transform: none !important;
       }
       .fs-multiselect-indicator {
-        width: 20px !important;
-        height: 20px !important;
+        width: 22px !important;
+        height: 22px !important;
         border-radius: 50% !important;
-        border: 2px solid rgba(255, 255, 255, 0.3) !important;
+        border: 2px solid rgba(255, 255, 255, 0.35) !important;
         display: inline-flex !important;
         align-items: center !important;
         justify-content: center !important;
@@ -1770,8 +1861,35 @@
         box-shadow: 0 0 10px rgba(139, 92, 246, 0.5) !important;
       }
       .fs-row-is-selected {
-        background: rgba(139, 92, 246, 0.12) !important;
+        background: rgba(139, 92, 246, 0.16) !important;
         border-left: 3px solid #8b5cf6 !important;
+      }
+
+      @media (min-width: 640px) {
+        .fs-multiselect-bar-container {
+          width: auto !important;
+          max-width: 90vw !important;
+        }
+        .fs-multiselect-bar-glass {
+          flex-direction: row !important;
+          align-items: center !important;
+          justify-content: space-between !important;
+          padding: 8px 16px !important;
+          gap: 16px !important;
+        }
+        .fs-multiselect-bar-header {
+          width: auto !important;
+          gap: 12px !important;
+        }
+        .fs-multiselect-bar-actions {
+          width: auto !important;
+          gap: 8px !important;
+        }
+        .fs-ms-btn {
+          flex: none !important;
+          padding: 7px 14px !important;
+          height: auto !important;
+        }
       }
     `;
     document.head.appendChild(style);

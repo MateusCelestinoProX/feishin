@@ -27,7 +27,14 @@
     </head>
 
     <body style="background-color: transparent">
-        <div id="bg-webgl-container"></div>
+                <div id="bg-slideshow" class="bg-slideshow">
+            <div id="bg-layer-active" class="bg-layer active"></div>
+            <div id="bg-layer-next" class="bg-layer"></div>
+            <video id="bg-video-1" class="bg-video-layer" muted playsinline webkit-playsinline disablePictureInPicture disableremoteplayback x5-playsinline controlslist="nodownload noplaybackrate nofullscreen" style="pointer-events: none !important;"></video>
+            <video id="bg-video-2" class="bg-video-layer" muted playsinline webkit-playsinline disablePictureInPicture disableremoteplayback x5-playsinline controlslist="nodownload noplaybackrate nofullscreen" style="pointer-events: none !important;"></video>
+            <div id="bg-webgl-container"></div>
+            <div class="bg-overlay"></div>
+        </div>
         <div id="bg-webgl-dim"></div>
         <div id="bg-webgl-vignette"></div>
         <div id="root">
