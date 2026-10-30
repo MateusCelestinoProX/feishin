@@ -1496,6 +1496,19 @@
     `;
     document.head.appendChild(style);
   }
+
+  function getTagParamFromHash() {
+    const hash = window.location.hash || '';
+    const qIndex = hash.indexOf('?');
+    if (qIndex === -1) return null;
+    try {
+      const searchParams = new URLSearchParams(hash.slice(qIndex));
+      return searchParams.get('tag') || null;
+    } catch (e) {
+      const match = hash.match(/[?&]tag=([^&]+)/);
+      return match ? decodeURIComponent(match[1]) : null;
+    }
+  }
   // 5. TAGS PAGE VIEW RENDERER (Hero Boxes & Tag Editor + Tabs View)
   function initTagsPageRouter() {
     function checkRoute() {
