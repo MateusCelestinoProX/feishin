@@ -124,6 +124,21 @@ body.feishin-tp-open #root {
     background: transparent !important;
 }
 
+/* Supressão estrita da rota nativa inválida na aba Recentes (mobile) */
+body.feishin-route-recently-added #mobile-layout .fs-animated-page-module-animated-page,
+body.feishin-route-recently-added #mobile-layout main.fs-mobile-layout-module-main-content > main,
+body.feishin-route-recently-added .fs-mobile-layout-module-main-content > main,
+body.feishin-route-recently-added .fs-animated-page-module-animated-page,
+body.feishin-route-recently-added [class*="animated-page"] {
+    display: none !important;
+    visibility: hidden !important;
+    height: 0 !important;
+    max-height: 0 !important;
+    overflow: hidden !important;
+    pointer-events: none !important;
+    opacity: 0 !important;
+}
+
 #mobile-layout .fs-animated-page-module-animated-page {
     flex: 1 1 0% !important;
     display: flex !important;
@@ -2204,21 +2219,21 @@ thead {
     height: 88dvh !important;
     max-height: 92dvh !important;
     aspect-ratio: unset !important;
-    border-radius: 32px 32px 0 0 !important;
-    border: 1px solid rgba(255, 255, 255, 0.16) !important;
+    border-radius: 28px 28px 0 0 !important;
+    border: 1px solid rgba(255, 255, 255, 0.15) !important;
     border-bottom: none !important;
-    background: linear-gradient(180deg, rgba(16, 14, 28, 0.96) 0%, rgba(8, 6, 16, 0.98) 100%) !important;
-    backdrop-filter: blur(var(--personal-os-glass-blur, 36px)) saturate(210%) !important;
-    -webkit-backdrop-filter: blur(var(--personal-os-glass-blur, 36px)) saturate(210%) !important;
-    box-shadow: 0 -20px 60px rgba(0, 0, 0, 0.85), inset 0 1px 1px rgba(255, 255, 255, 0.3) !important;
+    background: linear-gradient(180deg, rgba(16, 15, 26, 0.97) 0%, rgba(9, 8, 16, 0.99) 100%) !important;
+    backdrop-filter: blur(var(--personal-os-glass-blur, 36px)) saturate(200%) !important;
+    -webkit-backdrop-filter: blur(var(--personal-os-glass-blur, 36px)) saturate(200%) !important;
+    box-shadow: 0 -20px 60px rgba(0, 0, 0, 0.9), inset 0 1px 0 rgba(255, 255, 255, 0.25) !important;
     padding: 10px 16px max(24px, env(safe-area-inset-bottom, 24px)) 16px !important;
     display: none;
     flex-direction: column !important;
-    gap: 12px !important;
+    gap: 10px !important;
     z-index: 100001 !important;
     overflow: hidden !important;
     box-sizing: border-box !important;
-    animation: shaderSheetSlideUp 0.32s cubic-bezier(0.16, 1, 0.3, 1) !important;
+    animation: shaderSheetSlideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1) !important;
 }
 
 @keyframes shaderSheetSlideUp {
@@ -2234,9 +2249,9 @@ thead {
 
 .shader-modal-sheet-handle {
     display: block !important;
-    width: 44px !important;
+    width: 38px !important;
     height: 4.5px !important;
-    background: rgba(255, 255, 255, 0.32) !important;
+    background: rgba(255, 255, 255, 0.35) !important;
     border-radius: 9999px !important;
     margin: 2px auto 6px auto !important;
     flex-shrink: 0 !important;
@@ -2244,11 +2259,12 @@ thead {
     touch-action: none !important;
 }
 
+/* TOP BAR: TÍTULO + FECHAR */
 .shader-modal-header {
     display: flex !important;
     align-items: center !important;
     justify-content: space-between !important;
-    gap: 10px !important;
+    gap: 12px !important;
     padding: 0 4px !important;
     flex-shrink: 0 !important;
 }
@@ -2257,98 +2273,135 @@ thead {
     display: flex !important;
     align-items: center !important;
     gap: 10px !important;
+    min-width: 0 !important;
+    flex: 1 1 auto !important;
 }
 
-.shader-modal-icon {
-    font-size: 24px !important;
-    line-height: 1 !important;
+.shader-modal-icon-badge {
+    width: 38px !important;
+    height: 38px !important;
+    border-radius: 12px !important;
+    background: linear-gradient(135deg, rgba(99, 102, 241, 0.25) 0%, rgba(168, 85, 247, 0.25) 100%) !important;
+    border: 1px solid rgba(255, 255, 255, 0.16) !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    font-size: 19px !important;
+    flex-shrink: 0 !important;
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.2) !important;
+}
+
+.shader-modal-title-col {
+    display: flex !important;
+    flex-direction: column !important;
+    min-width: 0 !important;
+    gap: 1px !important;
 }
 
 .shader-modal-title {
-    font-size: 16.5px !important;
+    font-size: 16px !important;
     font-weight: 700 !important;
     color: #FFFFFF !important;
     margin: 0 !important;
     letter-spacing: -0.3px !important;
+    line-height: 1.2 !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
 }
 
 .shader-modal-subtitle {
     font-size: 11px !important;
-    color: rgba(255, 255, 255, 0.5) !important;
-    letter-spacing: 0.2px !important;
-}
-
-.shader-header-actions {
-    display: flex !important;
-    align-items: center !important;
-    gap: 8px !important;
-}
-
-.shader-ctrl-btn {
-    padding: 7px 11px !important;
-    border-radius: 12px !important;
-    background: rgba(255, 255, 255, 0.07) !important;
-    border: 1px solid rgba(255, 255, 255, 0.12) !important;
-    color: rgba(255, 255, 255, 0.9) !important;
-    font-size: 11.5px !important;
-    font-weight: 600 !important;
-    display: flex !important;
-    align-items: center !important;
-    gap: 6px !important;
-    cursor: pointer !important;
-    transition: all 0.15s ease !important;
-}
-
-.shader-ctrl-btn.active {
-    background: rgba(96, 165, 250, 0.22) !important;
-    border-color: rgba(147, 197, 253, 0.45) !important;
-    color: #FFFFFF !important;
-    box-shadow: 0 0 12px rgba(96, 165, 250, 0.3) !important;
+    color: rgba(255, 255, 255, 0.52) !important;
+    letter-spacing: 0.1px !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
 }
 
 .shader-modal-close {
     width: 32px !important;
     height: 32px !important;
     border-radius: 50% !important;
-    background: rgba(255, 255, 255, 0.10) !important;
+    background: rgba(255, 255, 255, 0.08) !important;
     border: 1px solid rgba(255, 255, 255, 0.14) !important;
-    color: #FFFFFF !important;
+    color: rgba(255, 255, 255, 0.85) !important;
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
-    font-size: 14px !important;
+    font-size: 13px !important;
     cursor: pointer !important;
     transition: all 0.15s ease !important;
+    flex-shrink: 0 !important;
 }
 
 .shader-modal-close:active {
-    background: rgba(255, 255, 255, 0.22) !important;
+    background: rgba(255, 255, 255, 0.20) !important;
     transform: scale(0.92) !important;
 }
 
-/* PAINEL DE CONTROLES: BLUR & SHADOW EM CARDS ERGONÔMICOS */
+/* BARRA DE AÇÕES RÁPIDAS (SEGMENTADA) */
+.shader-header-actions {
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    flex-shrink: 0 !important;
+}
+
+.shader-ctrl-btn {
+    flex: 1 1 0 !important;
+    height: 38px !important;
+    padding: 0 8px !important;
+    border-radius: 12px !important;
+    background: rgba(255, 255, 255, 0.055) !important;
+    border: 1px solid rgba(255, 255, 255, 0.10) !important;
+    color: rgba(255, 255, 255, 0.85) !important;
+    font-size: 11.5px !important;
+    font-weight: 600 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 6px !important;
+    cursor: pointer !important;
+    white-space: nowrap !important;
+    transition: all 0.15s ease !important;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15) !important;
+}
+
+.shader-ctrl-btn:active {
+    transform: scale(0.96) !important;
+}
+
+.shader-ctrl-btn.active {
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.26) 0%, rgba(99, 102, 241, 0.26) 100%) !important;
+    border-color: rgba(147, 197, 253, 0.5) !important;
+    color: #FFFFFF !important;
+    box-shadow: 0 0 12px rgba(96, 165, 250, 0.3) !important;
+}
+
+/* PAINEL DE CONTROLES: BLUR & SOMBRA */
 .shader-controls-panel {
     display: flex !important;
     flex-direction: column !important;
     gap: 10px !important;
-    background: rgba(255, 255, 255, 0.04) !important;
-    border: 1px solid rgba(255, 255, 255, 0.09) !important;
-    border-radius: 20px !important;
-    padding: 12px 14px !important;
+    background: rgba(255, 255, 255, 0.035) !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    border-radius: 18px !important;
+    padding: 11px 13px !important;
     flex-shrink: 0 !important;
 }
 
 .shader-slider-box {
     display: flex !important;
     flex-direction: column !important;
-    gap: 6px !important;
+    gap: 5px !important;
 }
 
 .shader-slider-header {
     display: flex !important;
     align-items: center !important;
     justify-content: space-between !important;
-    font-size: 12.5px !important;
+    font-size: 12px !important;
     font-weight: 600 !important;
     color: #F8FAFC !important;
 }
@@ -2359,19 +2412,29 @@ thead {
     gap: 7px !important;
 }
 
+.slider-icon {
+    font-size: 13px !important;
+}
+
+.slider-name {
+    font-size: 12px !important;
+    font-weight: 600 !important;
+    color: rgba(255, 255, 255, 0.88) !important;
+}
+
 .shader-slider-badge {
-    font-size: 11.5px !important;
+    font-size: 11px !important;
     font-weight: 700 !important;
     font-family: ui-monospace, SFMono-Regular, monospace !important;
     color: #93C5FD !important;
-    background: rgba(59, 130, 246, 0.18) !important;
-    border: 1px solid rgba(96, 165, 250, 0.35) !important;
-    padding: 2px 8px !important;
-    border-radius: 8px !important;
+    background: rgba(59, 130, 246, 0.16) !important;
+    border: 1px solid rgba(96, 165, 250, 0.32) !important;
+    padding: 1.5px 8px !important;
+    border-radius: 6px !important;
 }
 
 .shader-slider-wrapper {
-    height: 26px !important;
+    height: 22px !important;
     display: flex !important;
     align-items: center !important;
 }
@@ -2380,9 +2443,9 @@ thead {
     -webkit-appearance: none !important;
     appearance: none !important;
     width: 100% !important;
-    height: 7px !important;
+    height: 6px !important;
     border-radius: 9999px !important;
-    background: rgba(255, 255, 255, 0.16) !important;
+    background: rgba(255, 255, 255, 0.14) !important;
     outline: none !important;
     cursor: pointer !important;
 }
@@ -2390,18 +2453,18 @@ thead {
 .shader-range-slider::-webkit-slider-thumb {
     -webkit-appearance: none !important;
     appearance: none !important;
-    width: 24px !important;
-    height: 24px !important;
+    width: 20px !important;
+    height: 20px !important;
     border-radius: 50% !important;
     background: #FFFFFF !important;
     border: 2px solid #60A5FA !important;
-    box-shadow: 0 0 12px rgba(96, 165, 250, 0.8), 0 3px 8px rgba(0, 0, 0, 0.5) !important;
+    box-shadow: 0 0 10px rgba(96, 165, 250, 0.7), 0 2px 5px rgba(0, 0, 0, 0.4) !important;
     cursor: pointer !important;
     transition: transform 0.12s ease !important;
 }
 
 .shader-range-slider::-webkit-slider-thumb:active {
-    transform: scale(1.22) !important;
+    transform: scale(1.2) !important;
     background: #93C5FD !important;
 }
 
@@ -2411,13 +2474,14 @@ thead {
     align-items: center !important;
     justify-content: space-between !important;
     gap: 5px !important;
+    margin-top: 2px !important;
 }
 
 .shader-preset-chip {
-    flex: 1 !important;
-    padding: 5px 4px !important;
-    border-radius: 9px !important;
-    font-size: 10px !important;
+    flex: 1 1 0 !important;
+    padding: 5px 2px !important;
+    border-radius: 8px !important;
+    font-size: 10.5px !important;
     font-weight: 600 !important;
     text-align: center !important;
     white-space: nowrap !important;
@@ -2434,8 +2498,8 @@ thead {
 }
 
 .shader-preset-chip.active {
-    background: rgba(96, 165, 250, 0.22) !important;
-    border-color: rgba(147, 197, 253, 0.5) !important;
+    background: rgba(96, 165, 250, 0.24) !important;
+    border-color: rgba(147, 197, 253, 0.55) !important;
     color: #FFFFFF !important;
     font-weight: 700 !important;
     box-shadow: 0 0 10px rgba(96, 165, 250, 0.3) !important;
@@ -2447,7 +2511,7 @@ thead {
     align-items: center !important;
     gap: 8px !important;
     overflow-x: auto !important;
-    padding: 2px 2px 6px 2px !important;
+    padding: 3px 2px 5px 2px !important;
     flex-shrink: 0 !important;
     -webkit-overflow-scrolling: touch !important;
     scrollbar-width: none !important;
@@ -2458,24 +2522,40 @@ thead {
 }
 
 .shader-pill-btn {
-    padding: 7px 15px !important;
-    border-radius: 20px !important;
-    background: rgba(255, 255, 255, 0.06) !important;
+    padding: 6px 13px !important;
+    border-radius: 9999px !important;
+    background: rgba(255, 255, 255, 0.055) !important;
     border: 1px solid rgba(255, 255, 255, 0.09) !important;
     color: rgba(255, 255, 255, 0.75) !important;
-    font-size: 12px !important;
+    font-size: 11.5px !important;
     font-weight: 600 !important;
     cursor: pointer !important;
     white-space: nowrap !important;
     transition: all 0.15s ease !important;
     flex-shrink: 0 !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+}
+
+.shader-pill-btn:active {
+    transform: scale(0.96) !important;
 }
 
 .shader-pill-btn.active {
-    background: rgba(96, 165, 250, 0.22) !important;
-    border-color: rgba(147, 197, 253, 0.45) !important;
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.28) 0%, rgba(147, 51, 234, 0.28) 100%) !important;
+    border-color: rgba(147, 197, 253, 0.55) !important;
     color: #FFFFFF !important;
-    box-shadow: 0 0 12px rgba(96, 165, 250, 0.25) !important;
+    box-shadow: 0 0 12px rgba(96, 165, 250, 0.28) !important;
+}
+
+.pill-count {
+    font-size: 9.5px !important;
+    padding: 1px 6px !important;
+    border-radius: 9999px !important;
+    background: rgba(255, 255, 255, 0.12) !important;
+    color: rgba(255, 255, 255, 0.85) !important;
+    font-weight: 700 !important;
 }
 
 /* GRID RESPONSIVO DE SHADERS (2 COLUNAS TOUCH NO MOBILE) */
@@ -2504,54 +2584,123 @@ thead {
 }
 
 .shader-item-card {
-    padding: 14px 10px !important;
-    border-radius: 16px !important;
-    background: rgba(255, 255, 255, 0.045) !important;
-    border: 1px solid rgba(255, 255, 255, 0.08) !important;
-    color: rgba(255, 255, 255, 0.85) !important;
-    font-size: 12px !important;
-    font-weight: 500 !important;
-    cursor: pointer !important;
+    position: relative !important;
+    height: 112px !important;
+    min-height: 112px !important;
+    border-radius: 18px !important;
+    overflow: hidden !important;
+    background: rgba(255, 255, 255, 0.04) !important;
+    border: 1px solid rgba(255, 255, 255, 0.10) !important;
+    border-top: 1px solid rgba(255, 255, 255, 0.20) !important;
+    color: rgba(255, 255, 255, 0.88) !important;
     display: flex !important;
     flex-direction: column !important;
-    align-items: center !important;
-    justify-content: center !important;
-    text-align: center !important;
-    gap: 6px !important;
-    min-height: 84px !important;
-    transition: all 0.16s ease !important;
-    position: relative !important;
+    justify-content: flex-end !important;
+    padding: 10px !important;
+    cursor: pointer !important;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35) !important;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
     user-select: none !important;
+    box-sizing: border-box !important;
 }
 
 .shader-item-card:active {
-    transform: scale(0.95) !important;
-    background: rgba(255, 255, 255, 0.10) !important;
+    transform: scale(0.96) !important;
 }
 
 .shader-item-card.active {
-    background: linear-gradient(135deg, rgba(59, 130, 246, 0.28) 0%, rgba(30, 58, 138, 0.20) 100%) !important;
-    border: 1.5px solid rgba(147, 197, 253, 0.70) !important;
-    box-shadow: 0 0 20px rgba(96, 165, 250, 0.35), 0 8px 24px rgba(0, 0, 0, 0.45), inset 0 1px 1px rgba(255, 255, 255, 0.4) !important;
-    color: #FFFFFF !important;
-    font-weight: 700 !important;
+    border: 2px solid #60A5FA !important;
+    box-shadow: 0 0 24px rgba(96, 165, 250, 0.45), 0 8px 24px rgba(0, 0, 0, 0.5) !important;
+    transform: scale(1.02) !important;
 }
 
-.shader-card-icon {
-    font-size: 26px !important;
-    line-height: 1 !important;
+.shader-item-card.active .shader-card-title {
+    color: #93C5FD !important;
+}
+
+.shader-card-art {
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    z-index: 1 !important;
+    background-size: cover !important;
+    background-position: center !important;
+}
+
+.shader-card-art-overlay {
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    background: linear-gradient(180deg, rgba(12, 10, 22, 0.15) 0%, rgba(12, 10, 22, 0.60) 48%, rgba(10, 9, 18, 0.94) 100%) !important;
+    z-index: 2 !important;
+}
+
+.shader-card-top-row {
+    position: absolute !important;
+    top: 8px !important;
+    left: 8px !important;
+    right: 8px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    z-index: 3 !important;
+}
+
+.shader-card-icon-pill {
+    width: 28px !important;
+    height: 28px !important;
+    border-radius: 9px !important;
+    background: rgba(10, 10, 18, 0.65) !important;
+    border: 1px solid rgba(255, 255, 255, 0.16) !important;
+    backdrop-filter: blur(8px) !important;
+    -webkit-backdrop-filter: blur(8px) !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    font-size: 15px !important;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3) !important;
+}
+
+.shader-card-active-indicator {
+    padding: 2.5px 8px !important;
+    border-radius: 9999px !important;
+    font-size: 9px !important;
+    font-weight: 800 !important;
+    letter-spacing: 0.3px !important;
+    background: linear-gradient(135deg, #3B82F6, #8B5CF6) !important;
+    color: #FFFFFF !important;
+    box-shadow: 0 0 10px rgba(96, 165, 250, 0.7) !important;
+    border: 1px solid rgba(255, 255, 255, 0.3) !important;
+}
+
+.shader-card-info {
+    position: relative !important;
+    z-index: 3 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 2px !important;
 }
 
 .shader-card-title {
     font-size: 12.5px !important;
-    font-weight: 600 !important;
+    font-weight: 700 !important;
     color: #FFFFFF !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.9) !important;
+    line-height: 1.2 !important;
 }
 
 .shader-card-badge {
     font-size: 9.5px !important;
-    color: rgba(255, 255, 255, 0.45) !important;
+    color: rgba(255, 255, 255, 0.65) !important;
     font-family: ui-monospace, SFMono-Regular, monospace !important;
+    letter-spacing: 0.1px !important;
 }
 
 /* SUPORTE A ORIENTAÇÃO LANDSCAPE NO MOBILE */

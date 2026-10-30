@@ -7218,9 +7218,9 @@
     "semantic_hash": ""
   },
   "customizations/assets/feishin-recently-added.js": {
-    "mtime": 1793378109.0529718,
-    "seen": 1793378362.988863,
-    "ast_hash": "a95ee32ac312c3ea003d8c138f96bf20",
+    "mtime": 1793399327.224099,
+    "seen": 1793399454.386848,
+    "ast_hash": "aa1dfc6e380d5c6d9ab994ac26810e52",
     "semantic_hash": ""
   },
   "scripts/analyze_tracks.py": {
@@ -7314,9 +7314,9 @@
     "semantic_hash": ""
   },
   "src/renderer/assets/custom/feishin-recently-added.js": {
-    "mtime": 1793378109.0550773,
-    "seen": 1793378362.989075,
-    "ast_hash": "a95ee32ac312c3ea003d8c138f96bf20",
+    "mtime": 1793399327.2316113,
+    "seen": 1793399454.3870358,
+    "ast_hash": "aa1dfc6e380d5c6d9ab994ac26810e52",
     "semantic_hash": ""
   },
   "customizations/assets/feishin-alphabet-scrubber.js": {

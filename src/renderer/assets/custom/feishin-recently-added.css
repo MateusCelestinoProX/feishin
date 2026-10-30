@@ -51,8 +51,19 @@ body.feishin-route-recently-added #feishin-recently-added-view {
   display: flex !important;
 }
 body.feishin-route-recently-added .fs-main-content-module-main-content-body-scroll > main,
-body.feishin-route-recently-added .fs-main-content-module-main-content-body > main {
+body.feishin-route-recently-added .fs-main-content-module-main-content-body > main,
+body.feishin-route-recently-added #mobile-layout .fs-animated-page-module-animated-page,
+body.feishin-route-recently-added #mobile-layout main.fs-mobile-layout-module-main-content > main,
+body.feishin-route-recently-added .fs-mobile-layout-module-main-content > main,
+body.feishin-route-recently-added .fs-animated-page-module-animated-page,
+body.feishin-route-recently-added [class*="animated-page"] {
   display: none !important;
+  visibility: hidden !important;
+  height: 0 !important;
+  max-height: 0 !important;
+  overflow: hidden !important;
+  pointer-events: none !important;
+  opacity: 0 !important;
 }
 
 /* ==========================================================================

@@ -907,9 +907,33 @@
 
   // 7. Mount & Navigation Management (Conflict-Free Architecture)
   function getMountContainer() {
-    return document.querySelector('.fs-main-content-module-main-content-body-scroll') ||
+    return document.querySelector('.fs-mobile-layout-module-main-content') ||
+           document.querySelector('.fs-main-content-module-main-content-body-scroll') ||
            document.querySelector('.fs-main-content-module-main-content-body') ||
+           document.querySelector('#main-content') ||
            document.querySelector('main');
+  }
+
+  let routeObserver = null;
+  function ensureRouteObserver() {
+    if (routeObserver) return;
+    try {
+      routeObserver = new MutationObserver(() => {
+        const hash = window.location.hash || '';
+        if (hash.includes('recently-added')) {
+          const view = document.getElementById('feishin-recently-added-view');
+          const errPages = document.querySelectorAll('.fs-animated-page-module-animated-page, [class*="animated-page"]');
+          errPages.forEach(p => {
+            if (p !== view && p.style.display !== 'none') {
+              p.style.setProperty('display', 'none', 'important');
+              p.style.setProperty('visibility', 'hidden', 'important');
+              p.style.setProperty('height', '0', 'important');
+            }
+          });
+        }
+      });
+      routeObserver.observe(document.body, { childList: true, subtree: true });
+    } catch (e) {}
   }
 
   function isOtherCustomPageActive(hash) {
@@ -1000,12 +1024,23 @@
           mainContainer.appendChild(viewContainer);
         }
 
-        // Hide native siblings
+        // Hide native siblings and any animated-page error instances
         Array.from(mainContainer.children).forEach(child => {
           if (child !== viewContainer) {
-            child.style.display = 'none';
+            child.style.setProperty('display', 'none', 'important');
+            child.style.setProperty('visibility', 'hidden', 'important');
           }
         });
+
+        document.querySelectorAll('.fs-animated-page-module-animated-page, [class*="animated-page"]').forEach(el => {
+          if (el !== viewContainer) {
+            el.style.setProperty('display', 'none', 'important');
+            el.style.setProperty('visibility', 'hidden', 'important');
+            el.style.setProperty('height', '0', 'important');
+          }
+        });
+
+        ensureRouteObserver();
 
         viewContainer.style.setProperty('display', 'flex', 'important');
 
@@ -1037,6 +1072,17 @@
             if (child !== viewContainer && child.id !== 'feishin-analytics-dashboard' && child.id !== 'fs-tags-page-mount') {
               if (child.style.display === 'none') {
                 child.style.display = '';
+                child.style.visibility = '';
+                child.style.height = '';
+              }
+            }
+          });
+          document.querySelectorAll('.fs-animated-page-module-animated-page, [class*="animated-page"]').forEach(el => {
+            if (el.id !== 'feishin-recently-added-view' && el.id !== 'feishin-analytics-dashboard' && el.id !== 'fs-tags-page-mount') {
+              if (el.style.display === 'none') {
+                el.style.display = '';
+                el.style.visibility = '';
+                el.style.height = '';
               }
             }
           });
@@ -1091,8 +1137,17 @@
     const view = document.getElementById('feishin-recently-added-view');
     const sidebarItem = document.getElementById('personal-os-sidebar-recently-added-item');
 
-    if (shouldShow && (!view || view.style.display === 'none')) {
-      scheduleMount();
+    if (shouldShow) {
+      if (!view || view.style.display === 'none') {
+        scheduleMount();
+      }
+      document.querySelectorAll('.fs-animated-page-module-animated-page, [class*="animated-page"]').forEach(el => {
+        if (el !== view && el.style.display !== 'none') {
+          el.style.setProperty('display', 'none', 'important');
+          el.style.setProperty('visibility', 'hidden', 'important');
+          el.style.setProperty('height', '0', 'important');
+        }
+      });
     } else if (!sidebarItem) {
       ensureSidebarRecentlyAddedItem();
     }
