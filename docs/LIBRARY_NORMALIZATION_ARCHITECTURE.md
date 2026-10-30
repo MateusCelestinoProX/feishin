@@ -107,7 +107,11 @@ Se $\Delta > 0$ com pontuação cruzada $\ge 0.70$, a inversão é confirmada e 
 
 ## 4. O Banco de Dados de Auditoria e Manifesto (`music_manifest.db`)
 
-Para garantir atomicidade total e rollback seguro a qualquer momento, todas as decisões foram gravadas em SQLite antes e durante a aplicação física:
+Para garantir atomicidade total e rollback seguro a qualquer momento, todas as decisões foram gravadas em SQLite antes e durante a aplicação física.
+
+> **Tabela Completa de Auditoria Faixa a Faixa:**  
+> O registro exato de cada uma das 1.736 transformações, com nome anterior (DE), nome canônico aplicado (PARA), fonte de validação, índice de confiança e comandos de reversão individual/em lote, está catalogado em:  
+> 🔗 **[`docs/LIBRARY_AUDIT_MANIFEST.md`](LIBRARY_AUDIT_MANIFEST.md)**
 
 ```sql
 CREATE TABLE tracks (

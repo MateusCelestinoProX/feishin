@@ -70,7 +70,7 @@ Motor gráfico em tempo real renderizado sobre OGL (`ogl.js` + `webgl-background
 - **Pipeline Automatizado de 1.736 Faixas (~17 GB)**: Resolução heurística de canais de rip, canonização online via iTunes Store e MusicBrainz APIs, sanitização de sistema de arquivos e suporte total a grafias Unicode internacionais (CJK, cirílico e acentuação).
 - **Preservação Acústica Rigorosa**: Modificadores sonoros essenciais (`(Slowed + Reverb)`, `(Sped Up)`, `(Remix)`, `(Remastered)`) foram mantidos como características legítimas de cada faixa.
 - **Sincronização Multi-Cliente**: Propagação e invalidação de cache a quente nos clientes **Feishin macOS** (purge de caches Electron) e **Feishin Android** (via protocolo CDP / ADB).
-- **Documentação de Engenharia**: Detalhes completos dos algoritmos, esquema SQLite de auditoria e procedimentos de rollback em [`docs/LIBRARY_NORMALIZATION_ARCHITECTURE.md`](docs/LIBRARY_NORMALIZATION_ARCHITECTURE.md).
+- **Documentação de Engenharia & Manifesto Faixa a Faixa**: Detalhes completos dos algoritmos, esquema SQLite de auditoria e procedimentos de rollback em [`docs/LIBRARY_NORMALIZATION_ARCHITECTURE.md`](docs/LIBRARY_NORMALIZATION_ARCHITECTURE.md) e catálogo integral com as 1.736 faixas mapeadas em [`docs/LIBRARY_AUDIT_MANIFEST.md`](docs/LIBRARY_AUDIT_MANIFEST.md).
 
 ---
 

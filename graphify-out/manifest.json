@@ -6,9 +6,9 @@
     "semantic_hash": ""
   },
   "customizations/assets/feishin-personal-os.js": {
-    "mtime": 1793381455.036912,
-    "seen": 1793381751.01807,
-    "ast_hash": "f5100a433ca35387a98e1d5f467f5f32",
+    "mtime": 1793390833.5411313,
+    "seen": 1793391087.237928,
+    "ast_hash": "42787da4f5f82752676129829b43506b",
     "semantic_hash": ""
   },
   "customizations/assets/ogl.js": {
@@ -66,9 +66,9 @@
     "semantic_hash": ""
   },
   "README.md": {
-    "mtime": 1793390641.699315,
-    "seen": 1793390698.2897868,
-    "ast_hash": "54ed9ea7adb91030d6c0fa2012d5bd18",
+    "mtime": 1793391023.1743464,
+    "seen": 1793391087.2389581,
+    "ast_hash": "717b24445ca4f70e29e8e2a37f24629d",
     "semantic_hash": ""
   },
   "customizations/index.html": {
@@ -1134,9 +1134,9 @@
     "semantic_hash": ""
   },
   "src/renderer/assets/custom/feishin-personal-os.js": {
-    "mtime": 1793381460.346973,
-    "seen": 1793381751.018718,
-    "ast_hash": "f5100a433ca35387a98e1d5f467f5f32",
+    "mtime": 1793390833.5430791,
+    "seen": 1793391087.238115,
+    "ast_hash": "42787da4f5f82752676129829b43506b",
     "semantic_hash": ""
   },
   "src/renderer/assets/custom/feishin-tags-engine.js": {
@@ -7476,9 +7476,15 @@
     "semantic_hash": ""
   },
   "docs/LIBRARY_NORMALIZATION_ARCHITECTURE.md": {
-    "mtime": 1793390604.5191677,
-    "seen": 1793390698.2897952,
-    "ast_hash": "6fc53de74c51681fdfbec8eee9ecf75a",
+    "mtime": 1793391006.555268,
+    "seen": 1793391087.238967,
+    "ast_hash": "a3fc14d21199db9da35b247484b8f9e8",
+    "semantic_hash": ""
+  },
+  "docs/LIBRARY_AUDIT_MANIFEST.md": {
+    "mtime": 1793390990.7696483,
+    "seen": 1793391087.238966,
+    "ast_hash": "55fdbc0a929a07d574efd961255f1c2d",
     "semantic_hash": ""
   }
 }

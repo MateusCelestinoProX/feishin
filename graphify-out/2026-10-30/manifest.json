@@ -66,9 +66,9 @@
     "semantic_hash": ""
   },
   "README.md": {
-    "mtime": 1793322109.4202302,
-    "seen": 1793322121.589046,
-    "ast_hash": "92a983118cf9767b0728dca08acca1f5",
+    "mtime": 1793390641.699315,
+    "seen": 1793390698.2897868,
+    "ast_hash": "54ed9ea7adb91030d6c0fa2012d5bd18",
     "semantic_hash": ""
   },
   "customizations/index.html": {
@@ -7473,6 +7473,12 @@
     "mtime": 1793381538.6929905,
     "seen": 1793381751.0182452,
     "ast_hash": "c17d43b89da4a1ce11f1821a21f48026",
+    "semantic_hash": ""
+  },
+  "docs/LIBRARY_NORMALIZATION_ARCHITECTURE.md": {
+    "mtime": 1793390604.5191677,
+    "seen": 1793390698.2897952,
+    "ast_hash": "6fc53de74c51681fdfbec8eee9ecf75a",
     "semantic_hash": ""
   }
 }

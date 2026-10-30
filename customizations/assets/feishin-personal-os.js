@@ -98,100 +98,261 @@ if (typeof window !== 'undefined') {
     }
   }, 1200);
 
-  // 1. Shaders catalog from Personal OS
-  const SHADER_CATALOG = [
+  // 1. Shaders & Background Galleries Catalog (Binaural Pro Engine)
+  const GALLERIES = {
+    gym: [
+      "https://kbqxzmyasstdvvbfymft.supabase.co/storage/v1/object/public/binaural-backgrounds/gym/012f4996731b766a5f6fce9ae5fa16a0.jpg",
+      "https://kbqxzmyasstdvvbfymft.supabase.co/storage/v1/object/public/binaural-backgrounds/gym/04747ba8c86d370f14b19aff88c73f77.jpg",
+      "https://kbqxzmyasstdvvbfymft.supabase.co/storage/v1/object/public/binaural-backgrounds/gym/1-20260505_170907.jpg",
+      "https://kbqxzmyasstdvvbfymft.supabase.co/storage/v1/object/public/binaural-backgrounds/gym/2-20260327_135337.jpg",
+      "https://kbqxzmyasstdvvbfymft.supabase.co/storage/v1/object/public/binaural-backgrounds/gym/3-20260313_123924.jpg",
+      "https://kbqxzmyasstdvvbfymft.supabase.co/storage/v1/object/public/binaural-backgrounds/gym/416bb19b1eefa7c850b4db3cb09bac12_-_co_pia.jpg",
+      "https://kbqxzmyasstdvvbfymft.supabase.co/storage/v1/object/public/binaural-backgrounds/gym/4567a6460e49dca509404aa4031c11d2.jpg",
+      "https://kbqxzmyasstdvvbfymft.supabase.co/storage/v1/object/public/binaural-backgrounds/gym/9811449c83f06fc824d7a95f235d376e_-_co_pia.jpg",
+      "https://kbqxzmyasstdvvbfymft.supabase.co/storage/v1/object/public/binaural-backgrounds/gym/b3668afb13ab00288ff06c9d72453d19.jpg",
+      "https://kbqxzmyasstdvvbfymft.supabase.co/storage/v1/object/public/binaural-backgrounds/gym/c6081876648f7ce1a6e4734daa79e7d4.jpg",
+      "https://kbqxzmyasstdvvbfymft.supabase.co/storage/v1/object/public/binaural-backgrounds/gym/e5ef0ddde9b00540cdf18e4b226e0bee.jpg",
+      "https://kbqxzmyasstdvvbfymft.supabase.co/storage/v1/object/public/binaural-backgrounds/gym/eca2c6f16007ec99ca3c5058876b2af6.jpg",
+      "https://kbqxzmyasstdvvbfymft.supabase.co/storage/v1/object/public/binaural-backgrounds/gym/f4fcf6bb7808351828fbd6ed76cba496.jpg"
+    ],
+    flowers: [
+      "https://kbqxzmyasstdvvbfymft.supabase.co/storage/v1/object/public/binaural-backgrounds/flowers/59da96db902a205e9f90e651a4bcaa72.jpg",
+      "https://kbqxzmyasstdvvbfymft.supabase.co/storage/v1/object/public/binaural-backgrounds/flowers/797d233401eae1b36818abc988af10d4.jpg",
+      "https://kbqxzmyasstdvvbfymft.supabase.co/storage/v1/object/public/binaural-backgrounds/flowers/7f15501be01e3225966e2ab7fe1b735a.jpg",
+      "https://kbqxzmyasstdvvbfymft.supabase.co/storage/v1/object/public/binaural-backgrounds/flowers/8e7943acb3073ec2e112542af9fcc2c6.jpg",
+      "https://kbqxzmyasstdvvbfymft.supabase.co/storage/v1/object/public/binaural-backgrounds/flowers/a7a3a081d906882bcf9068afc3894eee.jpg",
+      "https://kbqxzmyasstdvvbfymft.supabase.co/storage/v1/object/public/binaural-backgrounds/flowers/b268e4783280047be44e09f1fca7dec6.jpg",
+      "https://kbqxzmyasstdvvbfymft.supabase.co/storage/v1/object/public/binaural-backgrounds/flowers/beb4c6ac11f067d61799142fe1a6e27d.jpg",
+      "https://kbqxzmyasstdvvbfymft.supabase.co/storage/v1/object/public/binaural-backgrounds/flowers/e55174e6ec437489913f134318952c1e.jpg"
+    ],
+    red: [
+      "https://kbqxzmyasstdvvbfymft.supabase.co/storage/v1/object/public/binaural-backgrounds/red/08c3aa3a5c3631b23cec57233f5c365c.jpg",
+      "https://kbqxzmyasstdvvbfymft.supabase.co/storage/v1/object/public/binaural-backgrounds/red/465148a473500d0bf6c3b9c83b98ec92.jpg",
+      "https://kbqxzmyasstdvvbfymft.supabase.co/storage/v1/object/public/binaural-backgrounds/red/6c5d14bcb2f0390ee694119aa6704655.jpg",
+      "https://kbqxzmyasstdvvbfymft.supabase.co/storage/v1/object/public/binaural-backgrounds/red/7361af8ac2d01d02c9752f89b3365d47.jpg",
+      "https://kbqxzmyasstdvvbfymft.supabase.co/storage/v1/object/public/binaural-backgrounds/red/963a4bd9af77842586e2b4cdd53eb931.jpg",
+      "https://kbqxzmyasstdvvbfymft.supabase.co/storage/v1/object/public/binaural-backgrounds/red/f8247f7bffb7269d9e3b2310844b330d.jpg",
+      "https://kbqxzmyasstdvvbfymft.supabase.co/storage/v1/object/public/binaural-backgrounds/red/fb71f9cd02c7e3f7e41589d90f6fdaa8.jpg"
+    ],
+    soft: [
+      "https://kbqxzmyasstdvvbfymft.supabase.co/storage/v1/object/public/binaural-backgrounds/soft/05f22143098023a6978520a73a77637e.jpg",
+      "https://kbqxzmyasstdvvbfymft.supabase.co/storage/v1/object/public/binaural-backgrounds/soft/142622f0d35efbffebc9b8a7995168dd.jpg",
+      "https://kbqxzmyasstdvvbfymft.supabase.co/storage/v1/object/public/binaural-backgrounds/soft/37c572ab0404204cb6f367c2a9f78a54.jpg",
+      "https://kbqxzmyasstdvvbfymft.supabase.co/storage/v1/object/public/binaural-backgrounds/soft/3e3b1728d96b733b8f3bbf418021dd42.jpg",
+      "https://kbqxzmyasstdvvbfymft.supabase.co/storage/v1/object/public/binaural-backgrounds/soft/69b55c9be40f117fd5f076d27334d2cf.jpg",
+      "https://kbqxzmyasstdvvbfymft.supabase.co/storage/v1/object/public/binaural-backgrounds/soft/6e86f5937cb8ef54593b94952a59d5a1.jpg",
+      "https://kbqxzmyasstdvvbfymft.supabase.co/storage/v1/object/public/binaural-backgrounds/soft/71acf6cb2cad2c986df87d817a06c33b.jpg",
+      "https://kbqxzmyasstdvvbfymft.supabase.co/storage/v1/object/public/binaural-backgrounds/soft/72859fb9ef398cd2a69777dc26d7d1d2.jpg",
+      "https://kbqxzmyasstdvvbfymft.supabase.co/storage/v1/object/public/binaural-backgrounds/soft/73ba35d0e4557dacaeb9ffaab42cd635.jpg",
+      "https://kbqxzmyasstdvvbfymft.supabase.co/storage/v1/object/public/binaural-backgrounds/soft/747c0ca848cc44632e4c94436348fe07.jpg",
+      "https://kbqxzmyasstdvvbfymft.supabase.co/storage/v1/object/public/binaural-backgrounds/soft/7b78f45b8a8f62b1cb9c7477d0b83f63.jpg",
+      "https://kbqxzmyasstdvvbfymft.supabase.co/storage/v1/object/public/binaural-backgrounds/soft/800c456fafbe63fae067663194fe47e9.jpg",
+      "https://kbqxzmyasstdvvbfymft.supabase.co/storage/v1/object/public/binaural-backgrounds/soft/8f432d4e77f909f3abccb186f47ffff3.jpg",
+      "https://kbqxzmyasstdvvbfymft.supabase.co/storage/v1/object/public/binaural-backgrounds/soft/b1cd9d06a79b40e08ff9b945cd051aab.jpg",
+      "https://kbqxzmyasstdvvbfymft.supabase.co/storage/v1/object/public/binaural-backgrounds/soft/b26f28a14964906204ec288ddf524432.jpg",
+      "https://kbqxzmyasstdvvbfymft.supabase.co/storage/v1/object/public/binaural-backgrounds/soft/bbf00645951aa952366c3a446a07c990.jpg",
+      "https://kbqxzmyasstdvvbfymft.supabase.co/storage/v1/object/public/binaural-backgrounds/soft/c4058aae27b4310eb2c979cf9f6a817d.jpg",
+      "https://kbqxzmyasstdvvbfymft.supabase.co/storage/v1/object/public/binaural-backgrounds/soft/e82d7e3487abb787a3398210d02801c8.jpg",
+      "https://kbqxzmyasstdvvbfymft.supabase.co/storage/v1/object/public/binaural-backgrounds/soft/f24ac251210bc82b90f9c33ce2438194.jpg",
+      "https://kbqxzmyasstdvvbfymft.supabase.co/storage/v1/object/public/binaural-backgrounds/soft/f9f930471adfb299ae9ad2f9b319421b.jpg"
+    ],
+    motivation: [
+      "https://kbqxzmyasstdvvbfymft.supabase.co/storage/v1/object/public/binaural-backgrounds/motivation/1000427297.jpg",
+      "https://kbqxzmyasstdvvbfymft.supabase.co/storage/v1/object/public/binaural-backgrounds/motivation/1000427303.jpg",
+      "https://kbqxzmyasstdvvbfymft.supabase.co/storage/v1/object/public/binaural-backgrounds/motivation/1000427312.jpg",
+      "https://kbqxzmyasstdvvbfymft.supabase.co/storage/v1/object/public/binaural-backgrounds/motivation/img_8287.jpeg",
+      "https://kbqxzmyasstdvvbfymft.supabase.co/storage/v1/object/public/binaural-backgrounds/motivation/img_9915.jpeg",
+      "https://kbqxzmyasstdvvbfymft.supabase.co/storage/v1/object/public/binaural-backgrounds/motivation/projetounohome_20260613_155750_319.jpg",
+      "https://kbqxzmyasstdvvbfymft.supabase.co/storage/v1/object/public/binaural-backgrounds/motivation/projetounohome_20260613_155802_757.jpg",
+      "https://kbqxzmyasstdvvbfymft.supabase.co/storage/v1/object/public/binaural-backgrounds/motivation/projetounohome_20260613_155833_559.jpg",
+      "https://kbqxzmyasstdvvbfymft.supabase.co/storage/v1/object/public/binaural-backgrounds/motivation/projetounohome_20260613_155903_814.jpg",
+      "https://kbqxzmyasstdvvbfymft.supabase.co/storage/v1/object/public/binaural-backgrounds/motivation/projetounohome_20260613_171838_541.jpg",
+      "https://kbqxzmyasstdvvbfymft.supabase.co/storage/v1/object/public/binaural-backgrounds/motivation/vaideuno_20260613_155457_985.jpg",
+      "https://kbqxzmyasstdvvbfymft.supabase.co/storage/v1/object/public/binaural-backgrounds/motivation/vaideuno_20260613_155513_639.jpg",
+      "https://kbqxzmyasstdvvbfymft.supabase.co/storage/v1/object/public/binaural-backgrounds/motivation/vaideuno_20260613_170029_918.jpg",
+      "https://kbqxzmyasstdvvbfymft.supabase.co/storage/v1/object/public/binaural-backgrounds/motivation/vaideuno_20260613_171916_766.jpg",
+      "https://kbqxzmyasstdvvbfymft.supabase.co/storage/v1/object/public/binaural-backgrounds/motivation/welitonofc001-20260222-0004.jpg",
+      "https://kbqxzmyasstdvvbfymft.supabase.co/storage/v1/object/public/binaural-backgrounds/motivation/welitonofc001-20260222-0049.jpg",
+      "https://kbqxzmyasstdvvbfymft.supabase.co/storage/v1/object/public/binaural-backgrounds/motivation/welitonofc001-20260222-0097.jpg"
+    ]
+  };
+
+  const CINEMATIC_VIDEOS = [
+    "https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260506_031045_0e1165dd-ab48-46e3-ad3d-5fe77f217647.mp4",
+    "https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260405_171521_25968ba2-b594-4b32-aab7-f6b69398a6fa.mp4",
+    "https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260429_115139_0fc6bd3d-3631-4d26-ab9b-28293887dcc9.mp4",
+    "https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260411_104032_69319010-2458-492b-b04d-b40a5dfa4482.mp4",
+    "https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260403_050628_c4e32401-fab4-4a27-b7a8-6e9291cd5959.mp4",
+    "https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260324_151826_c7218672-6e92-402c-9e45-f1e0f454bdc4.mp4",
+    "https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260319_055001_8e16d972-3b2b-441c-86ad-2901a54682f9.mp4"
+  ];
+
+  const SHADER_TYPES = [
+    "softaurora", "particles", "ghostfibers", "plasmawave", "strands", "siderays", "beams", "floatinglines", "silk", "radar", "ripplegrid", "pixelblast", "magicrings", "gridscan", "liquidchrome", "linewaves", "ferrofluid", "dither", "darkveil", "webthreads", "topography", "balatro", "faultyterminal", "morphslider", "antigravity", "aurora", "letterglitch", "plasma", "liquidether", "orb", "prism", "prismaticburst", "lightning", "evileye", "lighttunnel", "acidsquares", "moltenmetal"
+  ];
+
+  const RANDOM_POOL = [
+    "gym", "flowers", "red", "soft", "motivation", "api", "video", ...SHADER_TYPES
+  ];
+
+  const BACKGROUND_CATALOG = [
+    {
+      category: '🖼️ Galerias & Fotos HD',
+      key: 'galerias',
+      items: [
+        { id: 'gym', mode: 'gallery', name: 'GYM Aesthetics', icon: '🏋️', badge: '13 Fotos' },
+        { id: 'flowers', mode: 'gallery', name: 'Flowers Dream', icon: '🌸', badge: '8 Fotos' },
+        { id: 'red', mode: 'gallery', name: 'Red Ambient', icon: '🔴', badge: '7 Fotos' },
+        { id: 'soft', mode: 'gallery', name: 'Gen X Soft Club', icon: '💿', badge: '20 Fotos' },
+        { id: 'motivation', mode: 'gallery', name: 'Motivacional', icon: '💪', badge: '17 Fotos' },
+        { id: 'api', mode: 'gallery', name: 'Unsplash / Picsum', icon: '🌐', badge: 'Infinito' },
+        { id: 'video', mode: 'video', name: 'Cinematic Video', icon: '🎬', badge: '7 Vídeos' },
+        { id: 'random', mode: 'random', name: 'Aleatório Dinâmico', icon: '🎲', badge: 'Fotos + Shaders' },
+        { id: 'galaxybits', mode: 'galaxybits', name: 'Shaders Rotativo', icon: '✨', badge: '37 Shaders' }
+      ]
+    },
     {
       category: '🌌 Cósmico & Etéreo',
       key: 'cosmico',
       items: [
-        { id: 'softaurora', name: 'Soft Aurora', icon: '✨' },
-        { id: 'aurora', name: 'Aurora Borealis', icon: '🌌' },
-        { id: 'antigravity', name: 'Antigravity', icon: '🔮' },
-        { id: 'prism', name: 'Prism Light', icon: '💎' },
-        { id: 'prismaticburst', name: 'Prismatic Burst', icon: '🎆' },
-        { id: 'liquidether', name: 'Liquid Ether', icon: '🌀' },
-        { id: 'orb', name: 'Luminous Orb', icon: '🪐' }
+        { id: 'softaurora', mode: 'shader', name: 'Soft Aurora', icon: '✨', badge: 'Shader' },
+        { id: 'aurora', mode: 'shader', name: 'Aurora Borealis', icon: '🌌', badge: 'Shader' },
+        { id: 'antigravity', mode: 'shader', name: 'Antigravity', icon: '🔮', badge: 'Shader' },
+        { id: 'prism', mode: 'shader', name: 'Prism Light', icon: '💎', badge: 'Shader' },
+        { id: 'prismaticburst', mode: 'shader', name: 'Prismatic Burst', icon: '🎆', badge: 'Shader' },
+        { id: 'liquidether', mode: 'shader', name: 'Liquid Ether', icon: '🌀', badge: 'Shader' },
+        { id: 'orb', mode: 'shader', name: 'Luminous Orb', icon: '🪐', badge: 'Shader' }
       ]
     },
     {
       category: '⚡ Energia & Ondas',
       key: 'energia',
       items: [
-        { id: 'plasmawave', name: 'Plasma Wave', icon: '🌊' },
-        { id: 'plasma', name: 'Core Plasma', icon: '⚡' },
-        { id: 'strands', name: 'Neon Strands', icon: '🧵' },
-        { id: 'siderays', name: 'Side Rays', icon: '🔆' },
-        { id: 'beams', name: 'Beams Flow', icon: '🌠' },
-        { id: 'lightning', name: 'Lightning Storm', icon: '🌩️' },
-        { id: 'linewaves', name: 'Line Waves', icon: '〰️' },
-        { id: 'lighttunnel', name: 'Light Tunnel', icon: '🚇' }
+        { id: 'plasmawave', mode: 'shader', name: 'Plasma Wave', icon: '🌊', badge: 'Shader' },
+        { id: 'plasma', mode: 'shader', name: 'Core Plasma', icon: '⚡', badge: 'Shader' },
+        { id: 'strands', mode: 'shader', name: 'Neon Strands', icon: '🧵', badge: 'Shader' },
+        { id: 'siderays', mode: 'shader', name: 'Side Rays', icon: '🔆', badge: 'Shader' },
+        { id: 'beams', mode: 'shader', name: 'Beams Flow', icon: '🌠', badge: 'Shader' },
+        { id: 'lightning', mode: 'shader', name: 'Lightning Storm', icon: '🌩️', badge: 'Shader' },
+        { id: 'linewaves', mode: 'shader', name: 'Line Waves', icon: '〰️', badge: 'Shader' },
+        { id: 'lighttunnel', mode: 'shader', name: 'Light Tunnel', icon: '🚇', badge: 'Shader' }
       ]
     },
     {
       category: '🧪 Fluidos & Orgânico',
       key: 'fluidos',
       items: [
-        { id: 'ferrofluid', name: 'Ferrofluid', icon: '⚫' },
-        { id: 'liquidchrome', name: 'Liquid Chrome', icon: '🪞' },
-        { id: 'silk', name: 'Pure Silk', icon: '🪡' },
-        { id: 'floatinglines', name: 'Floating Lines', icon: '🪄' },
-        { id: 'ghostfibers', name: 'Ghost Fibers', icon: '🕸️' },
-        { id: 'webthreads', name: 'Web Threads', icon: '🕷️' },
-        { id: 'acidsquares', name: 'Acid Squares', icon: '🟩' },
-        { id: 'moltenmetal', name: 'Molten Metal', icon: '🪨' }
+        { id: 'ferrofluid', mode: 'shader', name: 'Ferrofluid', icon: '⚫', badge: 'Shader' },
+        { id: 'liquidchrome', mode: 'shader', name: 'Liquid Chrome', icon: '🪞', badge: 'Shader' },
+        { id: 'silk', mode: 'shader', name: 'Pure Silk', icon: '🪡', badge: 'Shader' },
+        { id: 'floatinglines', mode: 'shader', name: 'Floating Lines', icon: '🪄', badge: 'Shader' },
+        { id: 'ghostfibers', mode: 'shader', name: 'Ghost Fibers', icon: '🕸️', badge: 'Shader' },
+        { id: 'webthreads', mode: 'shader', name: 'Web Threads', icon: '🕷️', badge: 'Shader' },
+        { id: 'acidsquares', mode: 'shader', name: 'Acid Squares', icon: '🟩', badge: 'Shader' },
+        { id: 'moltenmetal', mode: 'shader', name: 'Molten Metal', icon: '🪨', badge: 'Shader' }
       ]
     },
     {
       category: '🎮 Cyber & Arcade',
       key: 'cyber',
       items: [
-        { id: 'balatro', name: 'Balatro CRT', icon: '🃏' },
-        { id: 'dither', name: 'Dither Noise', icon: '📺' },
-        { id: 'darkveil', name: 'Dark Veil', icon: '🕶️' },
-        { id: 'topography', name: 'Topography Map', icon: '🗺️' },
-        { id: 'faultyterminal', name: 'Faulty Terminal', icon: '📟' },
-        { id: 'gridscan', name: 'Grid Scanner', icon: '📡' },
-        { id: 'pixelblast', name: 'Pixel Blast', icon: '👾' },
-        { id: 'radar', name: 'Pulse Radar', icon: '🎯' },
-        { id: 'ripplegrid', name: 'Ripple Grid', icon: '🌐' },
-        { id: 'magicrings', name: 'Magic Rings', icon: '💫' },
-        { id: 'letterglitch', name: 'Letter Glitch', icon: '🔡' },
-        { id: 'evileye', name: 'Evil Eye', icon: '👁️' },
-        { id: 'particles', name: 'Starfield Particles', icon: '⭐' },
-        { id: 'morphslider', name: 'Morph Slider', icon: '🖼️' }
+        { id: 'balatro', mode: 'shader', name: 'Balatro CRT', icon: '🃏', badge: 'Shader' },
+        { id: 'dither', mode: 'shader', name: 'Dither Noise', icon: '📺', badge: 'Shader' },
+        { id: 'darkveil', mode: 'shader', name: 'Dark Veil', icon: '🕶️', badge: 'Shader' },
+        { id: 'topography', mode: 'shader', name: 'Topography Map', icon: '🗺️', badge: 'Shader' },
+        { id: 'faultyterminal', mode: 'shader', name: 'Faulty Terminal', icon: '📟', badge: 'Shader' },
+        { id: 'gridscan', mode: 'shader', name: 'Grid Scanner', icon: '📡', badge: 'Shader' },
+        { id: 'pixelblast', mode: 'shader', name: 'Pixel Blast', icon: '👾', badge: 'Shader' },
+        { id: 'radar', mode: 'shader', name: 'Pulse Radar', icon: '🎯', badge: 'Shader' },
+        { id: 'ripplegrid', mode: 'shader', name: 'Ripple Grid', icon: '🌐', badge: 'Shader' },
+        { id: 'magicrings', mode: 'shader', name: 'Magic Rings', icon: '💫', badge: 'Shader' },
+        { id: 'letterglitch', mode: 'shader', name: 'Letter Glitch', icon: '🔡', badge: 'Shader' },
+        { id: 'evileye', mode: 'shader', name: 'Evil Eye', icon: '👁️', badge: 'Shader' },
+        { id: 'particles', mode: 'shader', name: 'Starfield Particles', icon: '⭐', badge: 'Shader' },
+        { id: 'morphslider', mode: 'shader', name: 'Morph Slider', icon: '🖼️', badge: 'Shader' }
       ]
     }
   ];
 
+  const FLAT_BACKGROUNDS = BACKGROUND_CATALOG.flatMap(c => c.items);
+  const SHADER_CATALOG = BACKGROUND_CATALOG.filter(c => c.key !== 'galerias');
   const FLAT_SHADERS = SHADER_CATALOG.flatMap(c => c.items);
 
   // 2. State & Preferences
-  let activeShader = localStorage.getItem('feishin_active_shader') || 'plasmawave';
+  let activeBackground = localStorage.getItem('feishin_active_shader') || 'plasmawave';
+  let activeShader = activeBackground;
   let isRotative = localStorage.getItem('feishin_shader_rotative') === 'true';
-  let rotativeSeconds = parseInt(localStorage.getItem('feishin_shader_rotative_sec') || '30', 10);
+  let rotativeSeconds = parseInt(localStorage.getItem('feishin_shader_rotative_sec') || '25', 10);
   let isEcoMode = localStorage.getItem('feishin_shader_eco') === 'true';
   let glassBlur = parseInt(localStorage.getItem('personal_os_glass_blur') || '28', 10);
   let shaderDim = parseInt(localStorage.getItem('personal_os_shader_dim') || '25', 10);
   let rotativeTimer = null;
+  let currentBgIndex = 0;
+  let currentVideoIdx = 0;
+  let isVideoLoopRunning = false;
+  let galaxyBitsIndex = 0;
+  let currentEffectiveTarget = activeBackground;
   let currentRotativeIdx = 0;
 
   // Apply initial glass blur and shader darkening immediately to document
   document.documentElement.style.setProperty('--personal-os-glass-blur', glassBlur + 'px');
   document.documentElement.style.setProperty('--personal-os-shader-dim', (shaderDim / 100).toFixed(2));
 
-  // 3. Ensure DOM Canvas Container
-  function ensureShaderContainer() {
-    let container = document.getElementById('bg-webgl-container');
-    if (!container) {
-      container = document.createElement('div');
-      container.id = 'bg-webgl-container';
-      document.body.prepend(container);
+  // 3. Ensure DOM Canvas & Slideshow Container
+  function ensureBackgroundContainer() {
+    let slideshow = document.getElementById('bg-slideshow');
+    if (!slideshow) {
+      slideshow = document.createElement('div');
+      slideshow.id = 'bg-slideshow';
+      slideshow.className = 'bg-slideshow';
+      slideshow.innerHTML = `
+        <div id="bg-layer-active" class="bg-layer active"></div>
+        <div id="bg-layer-next" class="bg-layer"></div>
+        <video id="bg-video-1" class="bg-video-layer" muted playsinline webkit-playsinline disablePictureInPicture disableremoteplayback x5-playsinline controlslist="nodownload noplaybackrate nofullscreen" style="pointer-events: none !important;"></video>
+        <video id="bg-video-2" class="bg-video-layer" muted playsinline webkit-playsinline disablePictureInPicture disableremoteplayback x5-playsinline controlslist="nodownload noplaybackrate nofullscreen" style="pointer-events: none !important;"></video>
+        <div id="bg-webgl-container"></div>
+        <div class="bg-overlay"></div>
+      `;
+      document.body.prepend(slideshow);
+    } else {
+      if (!document.getElementById('bg-layer-active')) {
+        const l1 = document.createElement('div');
+        l1.id = 'bg-layer-active';
+        l1.className = 'bg-layer active';
+        slideshow.prepend(l1);
+      }
+      if (!document.getElementById('bg-layer-next')) {
+        const l2 = document.createElement('div');
+        l2.id = 'bg-layer-next';
+        l2.className = 'bg-layer';
+        slideshow.prepend(l2);
+      }
+      if (!document.getElementById('bg-video-1')) {
+        const v1 = document.createElement('video');
+        v1.id = 'bg-video-1';
+        v1.className = 'bg-video-layer';
+        v1.muted = true; v1.playsInline = true;
+        slideshow.appendChild(v1);
+      }
+      if (!document.getElementById('bg-video-2')) {
+        const v2 = document.createElement('video');
+        v2.id = 'bg-video-2';
+        v2.className = 'bg-video-layer';
+        v2.muted = true; v2.playsInline = true;
+        slideshow.appendChild(v2);
+      }
+      if (!document.getElementById('bg-webgl-container')) {
+        const wc = document.createElement('div');
+        wc.id = 'bg-webgl-container';
+        slideshow.appendChild(wc);
+      }
     }
+
     let dimEl = document.getElementById('bg-webgl-dim');
     if (!dimEl) {
       dimEl = document.createElement('div');
       dimEl.id = 'bg-webgl-dim';
-      document.body.insertBefore(dimEl, container.nextSibling);
+      document.body.insertBefore(dimEl, slideshow.nextSibling);
     }
     let vignette = document.getElementById('bg-webgl-vignette');
     if (!vignette) {
@@ -199,34 +360,190 @@ if (typeof window !== 'undefined') {
       vignette.id = 'bg-webgl-vignette';
       document.body.insertBefore(vignette, dimEl.nextSibling);
     }
-    return container;
+    return document.getElementById('bg-webgl-container');
   }
 
-  // 4. Activate Shader
-  function applyShader(shaderId) {
+  function ensureShaderContainer() {
+    return ensureBackgroundContainer();
+  }
+
+  function getNextBgUrl(category) {
+    if (category === 'api') {
+      const randomId = Math.floor(Math.random() * 1000);
+      return `https://picsum.photos/1920/1080?random=${randomId}`;
+    }
+    const list = GALLERIES[category] || GALLERIES.gym;
+    const img = list[currentBgIndex % list.length];
+    currentBgIndex = (currentBgIndex + 1) % list.length;
+    return img;
+  }
+
+  function playNextVideoTrack() {
+    const video1 = document.getElementById('bg-video-1');
+    const video2 = document.getElementById('bg-video-2');
+    if (!video1 || !video2) return;
+
+    video1.style.display = 'block';
+    video2.style.display = 'block';
+
+    let activeVid = (currentVideoIdx % 2 === 0) ? video1 : video2;
+    let nextVid = (currentVideoIdx % 2 === 0) ? video2 : video1;
+
+    const currentUrl = CINEMATIC_VIDEOS[currentVideoIdx % CINEMATIC_VIDEOS.length];
+    const nextIdx = (currentVideoIdx + 1) % CINEMATIC_VIDEOS.length;
+    const nextUrl = CINEMATIC_VIDEOS[nextIdx];
+
+    if (activeVid.src !== currentUrl) {
+      activeVid.src = currentUrl;
+      activeVid.load();
+    }
+    activeVid.classList.add('active');
+    nextVid.classList.remove('active');
+    activeVid.play().catch(() => {});
+
+    if (nextVid.src !== nextUrl) {
+      nextVid.src = nextUrl;
+      nextVid.load();
+    }
+
+    activeVid.onended = () => {
+      activeVid.onended = null;
+      currentVideoIdx = nextIdx;
+      playNextVideoTrack();
+    };
+  }
+
+  // 4. Activate Background (Shaders, Galerias de Imagens ou Vídeos)
+  function applyBackground(targetId, isCycle = false) {
+    ensureBackgroundContainer();
+
+    if (!isCycle) {
+      activeBackground = targetId;
+      activeShader = targetId;
+      localStorage.setItem('feishin_active_shader', targetId);
+    }
+
+    let effective = targetId;
+    if (targetId === 'random') {
+      effective = RANDOM_POOL[Math.floor(Math.random() * RANDOM_POOL.length)];
+    }
+    currentEffectiveTarget = effective;
+
+    const found = FLAT_BACKGROUNDS.find(b => b.id === targetId || b.id === effective) || FLAT_BACKGROUNDS[0];
+
+    const webglContainer = document.getElementById('bg-webgl-container');
+    const layer1 = document.getElementById('bg-layer-active');
+    const layer2 = document.getElementById('bg-layer-next');
+    const video1 = document.getElementById('bg-video-1');
+    const video2 = document.getElementById('bg-video-2');
+
     if (isEcoMode) {
-      if (window.stopWebGLBackground) window.stopWebGLBackground();
+      if (typeof window.stopWebGLBackground === 'function') window.stopWebGLBackground();
+      if (video1) { try { video1.pause(); } catch(e){} video1.style.display = 'none'; }
+      if (video2) { try { video2.pause(); } catch(e){} video2.style.display = 'none'; }
       updatePillLabel('🍃 Eco Mode (Pausado)');
+      updateModalUI();
       return;
     }
 
-    activeShader = shaderId;
-    localStorage.setItem('feishin_active_shader', shaderId);
+    // 1. Shaders Rotativo (GalaxyBits)
+    if (effective === 'galaxybits') {
+      isVideoLoopRunning = false;
+      if (video1) { try { video1.pause(); } catch(e){} video1.style.display = 'none'; }
+      if (video2) { try { video2.pause(); } catch(e){} video2.style.display = 'none'; }
+      if (layer1) layer1.style.display = 'none';
+      if (layer2) layer2.style.display = 'none';
+      if (webglContainer) webglContainer.style.display = 'block';
 
-    const found = FLAT_SHADERS.find(s => s.id === shaderId) || FLAT_SHADERS[0];
-
-    try {
+      const sh = SHADER_TYPES[galaxyBitsIndex % SHADER_TYPES.length];
+      galaxyBitsIndex = (galaxyBitsIndex + 1) % SHADER_TYPES.length;
       if (typeof window.setWebGLBackground === 'function') {
-        window.setWebGLBackground(shaderId);
+        window.setWebGLBackground(sh);
       } else if (typeof window.renderWebGLBackground === 'function') {
-        window.renderWebGLBackground(shaderId);
+        window.renderWebGLBackground(sh);
       }
-    } catch(err) {
-      console.warn('[Personal OS Shader Error]', err);
+      updatePillLabel(`✨ Shaders Rotativo (${sh})`);
+      updateModalUI();
+      return;
     }
 
-    updatePillLabel(`${found.icon} ${found.name}`);
+    // 2. Individual WebGL Shader
+    if (SHADER_TYPES.includes(effective)) {
+      isVideoLoopRunning = false;
+      if (video1) { try { video1.pause(); } catch(e){} video1.style.display = 'none'; }
+      if (video2) { try { video2.pause(); } catch(e){} video2.style.display = 'none'; }
+      if (layer1) layer1.style.display = 'none';
+      if (layer2) layer2.style.display = 'none';
+      if (webglContainer) webglContainer.style.display = 'block';
+
+      if (typeof window.setWebGLBackground === 'function') {
+        window.setWebGLBackground(effective);
+      } else if (typeof window.renderWebGLBackground === 'function') {
+        window.renderWebGLBackground(effective);
+      }
+      const labelText = targetId === 'random' ? `🎲 ${found.icon} ${found.name}` : `${found.icon} ${found.name}`;
+      updatePillLabel(labelText);
+      updateModalUI();
+      return;
+    }
+
+    // Parar WebGL se não for shader
+    if (typeof window.stopWebGLBackground === 'function') {
+      window.stopWebGLBackground();
+    }
+    if (webglContainer) webglContainer.style.display = 'none';
+
+    // 3. Cinematic Video
+    if (effective === 'video') {
+      if (layer1) layer1.style.display = 'none';
+      if (layer2) layer2.style.display = 'none';
+      if (!isVideoLoopRunning) {
+        isVideoLoopRunning = true;
+        playNextVideoTrack();
+      }
+      const labelText = targetId === 'random' ? '🎲 🎬 Cinematic Video' : '🎬 Cinematic Video';
+      updatePillLabel(labelText);
+      updateModalUI();
+      return;
+    }
+
+    // 4. Image Galleries (gym, flowers, red, soft, motivation, api)
+    isVideoLoopRunning = false;
+    if (video1) { try { video1.pause(); } catch(e){} video1.style.display = 'none'; }
+    if (video2) { try { video2.pause(); } catch(e){} video2.style.display = 'none'; }
+    if (layer1) layer1.style.display = 'block';
+    if (layer2) layer2.style.display = 'block';
+
+    const nextUrl = getNextBgUrl(effective);
+    const activeSlide = (layer1 && layer1.classList.contains('active')) ? layer1 : layer2;
+    const nextSlide = (activeSlide === layer1) ? layer2 : layer1;
+
+    if (nextSlide) {
+      const img = new Image();
+      img.src = nextUrl;
+      img.onload = () => {
+        nextSlide.style.backgroundImage = `url("${nextUrl}")`;
+        nextSlide.classList.add('active');
+        if (activeSlide) activeSlide.classList.remove('active');
+      };
+    }
+
+    const galleryNames = {
+      gym: '🏋️ GYM Aesthetics',
+      flowers: '🌸 Flowers Dream',
+      red: '🔴 Red Ambient',
+      soft: '💿 Gen X Soft Club',
+      motivation: '💪 Motivacional',
+      api: '🌐 Unsplash / Picsum'
+    };
+    const baseName = galleryNames[effective] || `${found.icon} ${found.name}`;
+    const labelText = targetId === 'random' ? `🎲 ${baseName}` : baseName;
+    updatePillLabel(labelText);
     updateModalUI();
+  }
+
+  function applyShader(shaderId) {
+    applyBackground(shaderId);
   }
 
   // 5. Rotative Mode Engine
@@ -234,8 +551,7 @@ if (typeof window !== 'undefined') {
     stopRotative();
     rotativeTimer = setInterval(() => {
       if (isEcoMode) return;
-      currentRotativeIdx = (currentRotativeIdx + 1) % FLAT_SHADERS.length;
-      applyShader(FLAT_SHADERS[currentRotativeIdx].id);
+      cycleBgNow();
     }, rotativeSeconds * 1000);
   }
 
@@ -245,6 +561,21 @@ if (typeof window !== 'undefined') {
       rotativeTimer = null;
     }
   }
+
+  function cycleBgNow() {
+    if (activeBackground === 'random' || activeBackground === 'galaxybits' || GALLERIES[activeBackground] || activeBackground === 'api') {
+      applyBackground(activeBackground, true);
+    } else if (isRotative) {
+      currentRotativeIdx = (currentRotativeIdx + 1) % FLAT_BACKGROUNDS.length;
+      applyBackground(FLAT_BACKGROUNDS[currentRotativeIdx].id);
+    } else {
+      applyBackground(activeBackground, true);
+    }
+  }
+
+  window.cycleBgNow = cycleBgNow;
+  window.applyBackground = applyBackground;
+  window.applyShader = applyShader;
 
   function updatePillLabel(text) {
     const lbl = document.getElementById('personal-os-pill-label');
@@ -300,15 +631,18 @@ if (typeof window !== 'undefined') {
           <div class="shader-modal-title-group">
             <span class="shader-modal-icon">🎨</span>
             <div>
-              <h3 class="shader-modal-title">Temas & Shaders</h3>
-              <span class="shader-modal-subtitle">Personal OS • 33 Shaders WebGL</span>
+              <h3 class="shader-modal-title">Temas, Shaders & Galerias</h3>
+              <span class="shader-modal-subtitle">Personal OS • 5 Galerias HD • 7 Vídeos • 37 Shaders WebGL</span>
             </div>
           </div>
           <div class="shader-header-actions">
+            <button class="shader-ctrl-btn" id="shader-cycle-now-btn" type="button" title="Avançar para o próximo fundo ou foto">
+              <span>🎲</span> Sortear Agora
+            </button>
             <button class="shader-ctrl-btn ${isRotative ? 'active' : ''}" id="shader-rotative-toggle" type="button" title="Alternar rotação automática de backgrounds">
               <span>🔄</span> Rotativo: ${isRotative ? 'Ativo' : 'Fixo'}
             </button>
-            <button class="shader-ctrl-btn ${isEcoMode ? 'active' : ''}" id="shader-eco-toggle" type="button" title="Pausar shaders para economia de bateria">
+            <button class="shader-ctrl-btn ${isEcoMode ? 'active' : ''}" id="shader-eco-toggle" type="button" title="Pausar visuais para economia de bateria">
               <span>${isEcoMode ? '▶️' : '🍃'}</span> ${isEcoMode ? 'Retomar' : 'Eco Mode'}
             </button>
             <button class="shader-modal-close" id="shader-modal-close-btn" type="button" title="Fechar (ESC)">✕</button>
@@ -360,7 +694,8 @@ if (typeof window !== 'undefined') {
         </div>
 
         <div class="shader-category-pills" id="shader-category-pills">
-          <button type="button" class="shader-pill-btn active" data-cat="all">Todos (33)</button>
+          <button type="button" class="shader-pill-btn active" data-cat="all">Todos (46)</button>
+          <button type="button" class="shader-pill-btn" data-cat="galerias">🖼️ Galerias & Fotos</button>
           <button type="button" class="shader-pill-btn" data-cat="cosmico">🌌 Cósmico</button>
           <button type="button" class="shader-pill-btn" data-cat="energia">⚡ Energia</button>
           <button type="button" class="shader-pill-btn" data-cat="fluidos">🧪 Fluidos</button>
@@ -376,18 +711,18 @@ if (typeof window !== 'undefined') {
 
       document.body.appendChild(modal);
 
-      // Populate Shaders into 4-Column Grid
+      // Populate Backgrounds & Shaders into 4-Column Grid
       const listContainer = modal.querySelector('#shader-grid-list-container');
-      SHADER_CATALOG.forEach(cat => {
-        cat.items.forEach(sh => {
+      BACKGROUND_CATALOG.forEach(cat => {
+        cat.items.forEach(item => {
           const card = document.createElement('div');
-          card.className = `shader-item-card ${sh.id === activeShader && !isEcoMode ? 'active' : ''}`;
-          card.setAttribute('data-shader-id', sh.id);
-          card.setAttribute('data-cat', cat.key || 'cosmico');
+          card.className = `shader-item-card ${(item.id === activeBackground || item.id === currentEffectiveTarget) && !isEcoMode ? 'active' : ''}`;
+          card.setAttribute('data-shader-id', item.id);
+          card.setAttribute('data-cat', cat.key || 'galerias');
           card.innerHTML = `
-            <div class="shader-card-icon">${sh.icon}</div>
-            <div class="shader-card-title">${sh.name}</div>
-            <div class="shader-card-badge">${sh.id}</div>
+            <div class="shader-card-icon">${item.icon}</div>
+            <div class="shader-card-title">${item.name}</div>
+            <div class="shader-card-badge">${item.badge || item.id}</div>
           `;
           card.onclick = (e) => {
             e.preventDefault();
@@ -399,11 +734,20 @@ if (typeof window !== 'undefined') {
               ecoBtn.classList.remove('active');
               ecoBtn.innerHTML = '<span>🍃</span> Eco Mode';
             }
-            applyShader(sh.id);
+            applyBackground(item.id);
           };
           listContainer.appendChild(card);
         });
       });
+
+      const cycleBtn = modal.querySelector('#shader-cycle-now-btn');
+      if (cycleBtn) {
+        cycleBtn.onclick = (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          cycleBgNow();
+        };
+      }
 
       // Dual Sliders & Preset Control Functions
       setGlassBlur = function(val) {
@@ -559,9 +903,13 @@ if (typeof window !== 'undefined') {
         this.innerHTML = `<span>${isEcoMode ? '▶️' : '🍃'}</span> ${isEcoMode ? 'Retomar' : 'Eco Mode'}`;
         if (isEcoMode) {
           if (window.stopWebGLBackground) window.stopWebGLBackground();
+          const v1 = document.getElementById('bg-video-1');
+          const v2 = document.getElementById('bg-video-2');
+          if (v1) { try { v1.pause(); } catch(e){} v1.style.display = 'none'; }
+          if (v2) { try { v2.pause(); } catch(e){} v2.style.display = 'none'; }
           updatePillLabel('🍃 Eco Mode');
         } else {
-          applyShader(activeShader);
+          applyBackground(activeBackground);
         }
       };
     }
@@ -782,7 +1130,7 @@ if (typeof window !== 'undefined') {
     });
 
     // Initial label update
-    const cur = FLAT_SHADERS.find(s => s.id === activeShader) || FLAT_SHADERS[0];
+    const cur = FLAT_BACKGROUNDS.find(s => s.id === activeBackground || s.id === currentEffectiveTarget) || FLAT_BACKGROUNDS[0];
     updatePillLabel(`${cur.icon} ${cur.name}`);
   }
 
@@ -791,7 +1139,7 @@ if (typeof window !== 'undefined') {
     if (!modal) return;
     modal.querySelectorAll('.shader-item-card').forEach(card => {
       const id = card.getAttribute('data-shader-id');
-      card.classList.toggle('active', id === activeShader && !isEcoMode);
+      card.classList.toggle('active', (id === activeBackground || id === currentEffectiveTarget) && !isEcoMode);
     });
   }
 
@@ -995,7 +1343,7 @@ if (typeof window !== 'undefined') {
     // Loop checking until setWebGLBackground is available
     const checkInit = () => {
       if (typeof window.setWebGLBackground === 'function' || typeof window.renderWebGLBackground === 'function') {
-        if (!isEcoMode) applyShader(activeShader);
+        if (!isEcoMode) applyBackground(activeBackground);
         if (isRotative) startRotative();
       } else {
         setTimeout(checkInit, 100);
