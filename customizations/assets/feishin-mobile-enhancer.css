@@ -1733,7 +1733,7 @@ thead {
     font-variant-numeric: tabular-nums !important;
 }
 
-/* Sheets e Modais */
+/* Sheets e Modais — Liquid Glass com Shaders Visíveis */
 .feishin-tp-sheet {
     position: absolute !important;
     top: 0 !important;
@@ -1742,10 +1742,10 @@ thead {
     bottom: 0 !important;
     width: 100% !important;
     height: 100% !important;
-    background: rgba(10, 8, 22, 0.94) !important;
-    backdrop-filter: blur(45px) saturate(210%) !important;
-    -webkit-backdrop-filter: blur(45px) saturate(210%) !important;
-    z-index: 10 !important;
+    background: rgba(10, 6, 20, 0.45) !important;
+    backdrop-filter: blur(28px) saturate(190%) contrast(105%) !important;
+    -webkit-backdrop-filter: blur(28px) saturate(190%) contrast(105%) !important;
+    z-index: 20 !important;
     display: flex !important;
     flex-direction: column !important;
     transform: translateY(100%) !important;
@@ -1767,8 +1767,45 @@ thead {
     justify-content: space-between !important;
     height: 52px !important;
     flex-shrink: 0 !important;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.12) !important;
     padding-bottom: 8px !important;
+    position: relative !important;
+    z-index: 25 !important;
+    background: rgba(14, 10, 28, 0.55) !important;
+    backdrop-filter: blur(20px) !important;
+    -webkit-backdrop-filter: blur(20px) !important;
+    margin-left: -18px !important;
+    margin-right: -18px !important;
+    padding-left: 18px !important;
+    padding-right: 18px !important;
+}
+
+/* Estado de Fila Aberta na Track Page: oculta capa e metadados centrais para evidenciar o Shader WebGL */
+#feishin-track-page.tp-queue-open .feishin-tp-cover-wrapper,
+#feishin-track-page.tp-queue-open .feishin-tp-info-section,
+#feishin-track-page.tp-queue-open .feishin-tp-quick-row,
+#feishin-track-page.tp-queue-open .feishin-tp-header {
+    opacity: 0 !important;
+    pointer-events: none !important;
+    transition: opacity 0.22s ease !important;
+}
+
+/* Controles de Playback elevados para z-index superior, 100% visíveis e interativos na Fila */
+#feishin-track-page.tp-queue-open .feishin-tp-progress-section,
+#feishin-track-page.tp-queue-open .feishin-tp-controls-row {
+    position: relative !important;
+    z-index: 35 !important;
+    pointer-events: auto !important;
+}
+
+#feishin-track-page.tp-queue-open .feishin-tp-landscape-right {
+    z-index: 35 !important;
+    justify-content: flex-end !important;
+}
+
+/* Espaço na lista da fila para os controles inferiores */
+#feishin-tp-queue-sheet .feishin-tp-sheet-content {
+    padding-bottom: calc(150px + var(--sab, 0px)) !important;
 }
 
 .feishin-tp-sheet-title {
