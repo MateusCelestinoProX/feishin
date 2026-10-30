@@ -19,23 +19,26 @@ Essa ordem reflete a história viva da biblioteca musical e deve ser preservada 
 
 ## 🏛️ 2. Preservação no Repositório (Base Imutável no Git)
 
-Para garantir que a biblioteca nunca dependa de um app específico ou de conexões efêmeras, a cronologia foi extraída via Android ADB e consolidada em dois artefatos centrais versionados no repositório:
+Para garantir que a biblioteca nunca dependa de um app específico ou de conexões efêmeras, a cronologia foi extraída via Android ADB diretamente do MediaStore físico e consolidada em dois artefatos centrais versionados no repositório:
 
 1. **[`samsung-music-chronology.json`](../app/src/main/assets/assets/samsung-music-chronology.json)**:
-   - Dicionário de 1.738 registros mapeados pelo ID permanente do Navidrome.
+   - Dicionário de 1.741 registros mapeados pelo ID permanente do Navidrome.
    - Cada entrada contém:
-     - `rank`: Posição ordinal exata no Samsung Music (de `0` para a mais recente a `1743` para a mais antiga).
+     - `rank`: Posição ordinal exata no Samsung Music (de `0` para a mais recente a `1744` para a mais antiga).
      - `date_modified`: Timestamp Unix em segundos da gravação física no Android.
      - `isoDate`: Timestamp ISO-8601 (`YYYY-MM-DDTHH:mm:ss`).
      - `formatted`: Data formatada para a interface brasileira (`DD/MM/YYYY às HH:mm`).
      - `filename`: Nome original do arquivo físico no disco.
 
 2. **[`samsung-music-chronology.js`](../app/src/main/assets/assets/samsung-music-chronology.js)**:
-   - Exportação em JavaScript nativo injetada no `window.__SAMSUNG_MUSIC_CHRONOLOGY__` no boot da aplicação, disponível para renderização instantânea a 0ms em qualquer plataforma (Android, macOS, Web).
+   - Exportação em JavaScript nativo contendo:
+     - `window.__SAMSUNG_MUSIC_CHRONOLOGY__`: Mapeamento por ID nativo.
+     - `window.__SAMSUNG_MUSIC_BY_TITLE__`: Mapeamento por normalização de título e nome de arquivo (resiliência total contra reindexações no servidor que alterem IDs).
 
 ### Marco de Corte do Snapshot Histórico (Baseline):
-- **Faixa Mais Recente do Snapshot (`rank: 0`):** `﻿Only by Man (Platino)` — *Shinnobu*
-- **Data de Modificação:** `23/10/2026 às 12:32:16` (`1792769536` Unix / `1792769536000` ms).
+- **Faixa nº 1 do Samsung Music (`rank: 0`):** `187 Family - "Drinking" (Remastered)` — *MemphisRapRemastered* (`27/10/2026 às 23:45:29` / `1793155529` Unix).
+- **Faixa nº 2 do Samsung Music (`rank: 1`):** `Only by Man (Platino)` — *Shinnobu* (`23/10/2026 às 12:32:16` / `1792769536` Unix).
+- **Cutoff Oficial da Baseline:** `1793155530000` ms (27/10/2026 às 23:45:30).
 
 ---
 
@@ -48,15 +51,25 @@ O motor de ordenação em [`feishin-recently-added.js`](../app/src/main/assets/a
 ```javascript
 function sortChronologically(songs) {
   songs.sort((a, b) => {
-    // 1. Ambas pertencem ao snapshot histórico do Samsung Music:
-    // Mantém a ordem exata extraída do MediaStore do aparelho (rank 0 ao 1743)
+    const aIsNew = !a.isSamsungOrder && a.sortTimestamp > SAMSUNG_BASELINE_CUTOFF_MS;
+    const bIsNew = !b.isSamsungOrder && b.sortTimestamp > SAMSUNG_BASELINE_CUTOFF_MS;
+
+    // 1. Novas faixas adicionadas após a baseline ganham o topo absoluto
+    if (aIsNew && bIsNew) {
+      return b.sortTimestamp - a.sortTimestamp;
+    }
+    if (aIsNew) return -1;
+    if (bIsNew) return 1;
+
+    // 2. Faixas do baseline Samsung Music ordenadas estritamente pelo rank ordinal
     if (a.isSamsungOrder && b.isSamsungOrder) {
       if (a.rank !== b.rank) return a.rank - b.rank;
       return b.sortTimestamp - a.sortTimestamp;
     }
+    if (a.isSamsungOrder && a.rank < 999999) return -1;
+    if (b.isSamsungOrder && b.rank < 999999) return 1;
 
-    // 2. Comparações envolvendo novas músicas adicionadas após o baseline:
-    // O timestamp de criação/chegada do arquivo mais recente assume prioridade absoluta no topo
+    // 3. Faixas residuais sem ranking
     return b.sortTimestamp - a.sortTimestamp;
   });
 }

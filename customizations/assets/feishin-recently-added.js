@@ -81,13 +81,34 @@
     return '';
   }
 
-  // Baseline de corte: 23 de Outubro de 2026 às 12:32:16 (última música registrada no snapshot Samsung)
-  const SAMSUNG_BASELINE_CUTOFF_MS = 1792769536000;
+  // Baseline de corte: 27 de Outubro de 2026 às 23:45:30 (momento de chegada de 187 Family - Drinking)
+  const SAMSUNG_BASELINE_CUTOFF_MS = 1793155530000;
+
+  function cleanKey(str) {
+    if (!str) return '';
+    return String(str).toLowerCase().replace(/\ufeff/g, '')
+      .replace(/\(.*?\)|\[.*?\]|_|-|"|\ufeff/g, ' ')
+      .replace(/feat\..*?|ft\..*?|official.*?|video|audio|lyrics|slowed|reverb|remastered|mp3.*|m4a.*|opus.*/g, ' ')
+      .replace(/[^a-z0-9]/g, ' ')
+      .trim().replace(/\s+/g, ' ');
+  }
+
+  function getChronoEntry(s) {
+    if (!s) return null;
+    if (window.__SAMSUNG_MUSIC_CHRONOLOGY__?.[s.id]) {
+      return window.__SAMSUNG_MUSIC_CHRONOLOGY__[s.id];
+    }
+    const ck = cleanKey(s.title || s.name);
+    if (ck && window.__SAMSUNG_MUSIC_BY_TITLE__?.[ck]) {
+      return window.__SAMSUNG_MUSIC_BY_TITLE__[ck];
+    }
+    return null;
+  }
 
   function normalizeSong(s, serverId, serverType = 'subsonic') {
     const durSec = s.duration || 0;
     const durMs = durSec > 10000 ? durSec : Math.round(durSec * 1000);
-    const chrono = window.__SAMSUNG_MUSIC_CHRONOLOGY__?.[s.id];
+    const chrono = getChronoEntry(s);
 
     let rank = 999999;
     let creationTime = s.created || s.birthTime || s.createdAt || s.updatedAt || new Date().toISOString();
@@ -95,8 +116,8 @@
     let isSamsungOrder = false;
     let sortTimestamp = 0;
 
-    if (chrono) {
-      rank = typeof chrono.rank === 'number' ? chrono.rank : 999999;
+    if (chrono && typeof chrono.rank === 'number' && chrono.rank < 999999) {
+      rank = chrono.rank;
       if (chrono.isoDate) creationTime = chrono.isoDate;
       if (chrono.formatted) formattedDate = chrono.formatted;
       else if (chrono.date_modified) {
@@ -111,9 +132,18 @@
       isSamsungOrder = true;
       sortTimestamp = (chrono.date_modified ? chrono.date_modified * 1000 : new Date(creationTime).getTime()) || 0;
     } else {
-      // Nova música adicionada no futuro (chegada ordenada pela data de criação do arquivo)
-      sortTimestamp = new Date(creationTime).getTime() || Date.now();
-      formattedDate = formatCreationDate(creationTime, null);
+      const rawTs = new Date(creationTime).getTime() || Date.now();
+      sortTimestamp = rawTs;
+      if (rawTs > SAMSUNG_BASELINE_CUTOFF_MS) {
+        // Nova música adicionada no futuro (chegada ordenada pela data de criação do arquivo)
+        isSamsungOrder = false;
+        formattedDate = formatCreationDate(creationTime, null);
+      } else {
+        // Faixa da baseline não ranqueada diretamente
+        isSamsungOrder = true;
+        rank = 999999;
+        formattedDate = formatCreationDate(creationTime, null);
+      }
     }
 
     const coverId = s.coverArt || s.imageId || (s.id ? ('mf-' + s.id) : s.id);
@@ -146,13 +176,25 @@
   // Função unificada de ordenação: preserva baseline Samsung histórico e aloca novos arquivos no topo
   function sortChronologically(songs) {
     songs.sort((a, b) => {
-      // 1. Ambas as faixas estão no baseline congelado Samsung Music
+      const aIsNew = !a.isSamsungOrder && a.sortTimestamp > SAMSUNG_BASELINE_CUTOFF_MS;
+      const bIsNew = !b.isSamsungOrder && b.sortTimestamp > SAMSUNG_BASELINE_CUTOFF_MS;
+
+      // 1. Faixas novas (chegada após baseline) ganham o topo absoluto
+      if (aIsNew && bIsNew) {
+        return b.sortTimestamp - a.sortTimestamp;
+      }
+      if (aIsNew) return -1;
+      if (bIsNew) return 1;
+
+      // 2. Faixas do baseline Samsung Music ordenadas estritamente pelo rank ordinal
       if (a.isSamsungOrder && b.isSamsungOrder) {
         if (a.rank !== b.rank) return a.rank - b.rank;
         return b.sortTimestamp - a.sortTimestamp;
       }
-      // 2. Faixa nova (chegada após baseline) vs Faixa histórica Samsung:
-      // O timestamp de chegada/criação mais recente ganha o topo
+      if (a.isSamsungOrder && a.rank < 999999) return -1;
+      if (b.isSamsungOrder && b.rank < 999999) return 1;
+
+      // 3. Faixas residuais sem ranking
       return b.sortTimestamp - a.sortTimestamp;
     });
   }
