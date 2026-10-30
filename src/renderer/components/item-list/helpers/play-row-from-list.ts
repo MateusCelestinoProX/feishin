@@ -33,6 +33,15 @@ export const playSongFromItemListControl = ({
     const playType = (meta?.playType as Play) || Play.NOW;
     const singleSongOnly = meta?.singleSongOnly === true;
     const isPlaylist = (item as any)?._itemType === LibraryItem.PLAYLIST_SONG || meta?.isPlaylist === true;
+    const isNextOrLast =
+        playType === Play.NEXT ||
+        playType === Play.LAST ||
+        playType === Play.NEXT_SHUFFLE ||
+        playType === Play.LAST_SHUFFLE;
+
+    if (typeof window !== 'undefined') {
+        (window as any).__FEISHIN_HAS_ENQUEUED_ITEMS__ = isNextOrLast;
+    }
 
     if (singleSongOnly || (!isPlaylist && playType === Play.NOW)) {
         const items = internalState?.getData() as Song[];

@@ -288,6 +288,8 @@
         },
         closePlayer: function () {
             if (window.AndroidBridge?.hapticFeedback) window.AndroidBridge.hapticFeedback(1);
+            window.__FEISHIN_HAS_ENQUEUED_ITEMS__ = false;
+            window.__FEISHIN_ACTIVE_COLLECTION__ = null;
             const store = window.__FEISHIN_PLAYER_STORE__?.getState?.();
             try { store?.mediaStop?.({ reset: true }); } catch (e) {}
             try { store?.clearQueue?.(); } catch (e) {}
@@ -824,7 +826,7 @@
             touchStartX = e.touches[0].clientX;
             longPressMoved = false;
 
-            const row = e.target.closest('.fs-item-table-list-column-module-data-row, [data-row-index], .ra-item-row, [role="row"]');
+            const row = e.target.closest('.fs-item-table-list-column-module-data-row, [data-row-index], .ra-item-row, .ra-tracklist-row, [role="row"]');
             if (row && !e.target.closest('button, [role="button"], input, a')) {
                 longPressTarget = row;
                 if (longPressTimer) clearTimeout(longPressTimer);
@@ -1912,6 +1914,19 @@
 
             this.updateProgress();
 
+            // Sincroniza a visibilidade do botão de fila mobile:
+            // SÓ aparece quando estiver em playlist OU quando o recurso Adicionar a Seguir for usado!
+            const queueBtn = document.getElementById('feishin-tp-btn-queue');
+            if (queueBtn) {
+                const isAllowed = isQueueAllowedToDisplayMobile();
+                if (isAllowed) {
+                    queueBtn.style.removeProperty('display');
+                } else {
+                    queueBtn.style.setProperty('display', 'none', 'important');
+                    document.getElementById('feishin-tp-queue-sheet')?.classList.remove('open');
+                }
+            }
+
             // Se o sheet de letras estiver aberto e mudou de música, atualiza
             if (cur && document.getElementById('feishin-tp-lyrics-sheet')?.classList.contains('open')) {
                 if (this.lyricsState.songId !== cur.id) {
@@ -2044,8 +2059,13 @@
 
         // =====================================================================
         // FILA DE REPRODUÇÃO TOTALMENTE OPERACIONAL (Sem quebra de forEach)
+        // Regra: Fila só pode ser exibida quando em playlist ou adicionar a seguir
         // =====================================================================
         openQueue: function () {
+            if (!isQueueAllowedToDisplayMobile()) {
+                if (window.AndroidBridge?.hapticFeedback) window.AndroidBridge.hapticFeedback(1);
+                return;
+            }
             const sheet = document.getElementById('feishin-tp-queue-sheet');
             const container = document.getElementById('feishin-tp-queue-list');
             if (!sheet || !container) return;
@@ -2647,6 +2667,17 @@
     // -------------------------------------------------------------------------
     // 14. SISTEMA DE FILAS UNITÁRIO INTELIGENTE (MAC E ANDROID)
     // -------------------------------------------------------------------------
+    function isQueueAllowedToDisplayMobile() {
+        const hash = window.location.hash || '';
+        const isPlaylistRoute = hash.startsWith('#/playlists/') || hash.startsWith('#/playlist/');
+        const store = window.__FEISHIN_PLAYER_STORE__?.getState?.();
+        const cur = (typeof store?.getCurrentSong === 'function' ? store.getCurrentSong() : null) || store?.player?.currentSong;
+        const isPlaylistSong = Boolean(cur && (cur._itemType === 'playlist_song' || cur.playlistId));
+        const isPlaylist = isPlaylistRoute || isPlaylistSong;
+        const hasEnqueuedItems = Boolean(window.__FEISHIN_HAS_ENQUEUED_ITEMS__);
+        return Boolean(isPlaylist || hasEnqueuedItems);
+    }
+
     function initUnitaryQueueSystem() {
         const store = window.__FEISHIN_PLAYER_STORE__?.getState?.();
         if (!store || window.__FEISHIN_UNITARY_QUEUE_ENGINE_READY__) return;
@@ -2667,12 +2698,20 @@
                 playType === 'next_shuffle' ||
                 playType === 'last_shuffle';
 
-            // Playlists estabelecidas ou adições explícitas à fila são preservadas na íntegra
-            if (isPlaylist || isPlaylistItems || isExplicitQueueAction) {
+            // 1. Recurso Adicionar a Seguir: marca flag e preserva na fila
+            if (isExplicitQueueAction) {
+                window.__FEISHIN_HAS_ENQUEUED_ITEMS__ = true;
                 return origAddToQueueByType.apply(this, arguments);
             }
 
-            // Reprodução de faixas normais (faixas, artistas, álbuns, busca): 100% UNITÁRIA no slot da fila
+            // 2. Playlists estabelecidas: mantém todas as faixas da playlist na fila
+            if (isPlaylist || isPlaylistItems) {
+                window.__FEISHIN_HAS_ENQUEUED_ITEMS__ = false;
+                return origAddToQueueByType.apply(this, arguments);
+            }
+
+            // 3. Salvo esses 2 casos: reprodução 100% UNITÁRIA (música em música). Nenhuma outra track entra na fila!
+            window.__FEISHIN_HAS_ENQUEUED_ITEMS__ = false;
             if (playType === 'now' || playType === 'shuffle') {
                 const target = (playSongId && items.find((i) => i.id === playSongId)) || items[0];
                 if (target) {
@@ -2691,7 +2730,7 @@
         store.setQueue = function (data, index, position) {
             const hash = window.location.hash || '';
             const isPlaylist = hash.startsWith('#/playlists/') || hash.startsWith('#/playlist/');
-            if (!isPlaylist && data && data.length > 1) {
+            if (!isPlaylist && data && data.length > 1 && !window.__FEISHIN_HAS_ENQUEUED_ITEMS__) {
                 const idx = typeof index === 'number' ? index : 0;
                 const target = data[idx] || data[0];
                 window.__FEISHIN_ACTIVE_COLLECTION__ = {

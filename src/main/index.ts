@@ -660,6 +660,8 @@ async function createWindow(first = true): Promise<void> {
     mainWindow = new BrowserWindow({
         autoHideMenuBar: true,
         frame: false,
+        fullscreenable: true,
+        simpleFullscreen: false,
         icon: isWindows() ? getAssetPath('icons/icon.ico') : getAssetPath('icons/icon.png'),
         minHeight: 120,
         minWidth: 480,
@@ -683,6 +685,34 @@ async function createWindow(first = true): Promise<void> {
 
     electronLocalShortcut.register(mainWindow, 'Ctrl+Shift+I', () => {
         mainWindow?.webContents.openDevTools();
+    });
+
+    if (isMacOS()) {
+        electronLocalShortcut.register(mainWindow, 'CommandOrControl+Control+F', () => {
+            if (mainWindow && !mainWindow.isDestroyed()) {
+                const next = !mainWindow.isFullScreen();
+                mainWindow.setFullScreen(next);
+                store.set('fullscreen', next);
+            }
+        });
+    }
+
+    electronLocalShortcut.register(mainWindow, 'F11', () => {
+        if (mainWindow && !mainWindow.isDestroyed()) {
+            const next = !mainWindow.isFullScreen();
+            mainWindow.setFullScreen(next);
+            store.set('fullscreen', next);
+        }
+    });
+
+    mainWindow.on('enter-full-screen', () => {
+        store.set('fullscreen', true);
+        mainWindow?.webContents.send('window-fullscreen-state', true);
+    });
+
+    mainWindow.on('leave-full-screen', () => {
+        store.set('fullscreen', false);
+        mainWindow?.webContents.send('window-fullscreen-state', false);
     });
 
     mainWindow.on('blur', () => {
@@ -724,6 +754,33 @@ async function createWindow(first = true): Promise<void> {
 
     ipcMain.on('window-unmaximize', () => {
         mainWindow?.unmaximize();
+    });
+
+    ipcMain.on('window-fullscreen', (_event, flag?: boolean) => {
+        if (mainWindow && !mainWindow.isDestroyed()) {
+            const next = flag !== undefined ? flag : !mainWindow.isFullScreen();
+            mainWindow.setFullScreen(next);
+            store.set('fullscreen', next);
+        }
+    });
+
+    ipcMain.on('window-set-fullscreen', (_event, flag: boolean) => {
+        if (mainWindow && !mainWindow.isDestroyed()) {
+            mainWindow.setFullScreen(flag);
+            store.set('fullscreen', flag);
+        }
+    });
+
+    ipcMain.on('window-toggle-fullscreen', () => {
+        if (mainWindow && !mainWindow.isDestroyed()) {
+            const next = !mainWindow.isFullScreen();
+            mainWindow.setFullScreen(next);
+            store.set('fullscreen', next);
+        }
+    });
+
+    ipcMain.handle('window-is-fullscreen', () => {
+        return mainWindow && !mainWindow.isDestroyed() ? mainWindow.isFullScreen() : false;
     });
 
     ipcMain.on('window-minimize', () => {
@@ -794,13 +851,12 @@ async function createWindow(first = true): Promise<void> {
 
         if (!first || !startWindowMinimized) {
             const maximized = store.get('maximized');
-            const fullScreen = store.get('fullscreen');
+            const fullScreen = store.get('fullscreen', isMacOS());
 
-            if (maximized) {
-                mainWindow.maximize();
-            }
             if (fullScreen) {
                 mainWindow.setFullScreen(true);
+            } else if (maximized) {
+                mainWindow.maximize();
             }
 
             mainWindow.show();

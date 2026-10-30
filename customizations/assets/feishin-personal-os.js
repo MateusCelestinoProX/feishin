@@ -915,6 +915,7 @@ if (typeof window !== 'undefined') {
     ensureShaderContainer();
     mountShaderSwitcherUI();
     initTrayBridge();
+    initNativeFullScreenSync();
     initFullScreenFreeSpaceDismiss();
 
     // Enforce album art staying in playerbar dock corner and queue inside full-screen player
@@ -1142,12 +1143,85 @@ if (typeof window !== 'undefined') {
   }
 
   // ==========================================================================
+  // 9b. NATIVE macOS REAL FULL SCREEN SYNC
+  // Transforma o Feishin no macOS em um aplicativo de natureza Real Full Screen
+  // ocupando a tela/janela de forma nativa e completa (macOS Spaces).
+  // ==========================================================================
+  function initNativeFullScreenSync() {
+    console.log('[Personal OS] Inicializando Real Full Screen nativo macOS...');
+
+    const triggerFullScreen = (flag) => {
+      try {
+        if (window.api?.browser?.setFullScreen) {
+          window.api.browser.setFullScreen(flag);
+        } else if (window.api?.ipc?.send) {
+          window.api.ipc.send('window-set-fullscreen', flag);
+        }
+      } catch (err) {
+        console.warn('[Personal OS] Erro ao sincronizar fullscreen nativo:', err);
+      }
+    };
+
+    const toggleFullScreen = () => {
+      try {
+        if (window.api?.browser?.toggleFullScreen) {
+          window.api.browser.toggleFullScreen();
+        } else if (window.api?.ipc?.send) {
+          window.api.ipc.send('window-toggle-fullscreen');
+        }
+      } catch (err) {
+        console.warn('[Personal OS] Erro ao alternar fullscreen nativo:', err);
+      }
+    };
+
+    // 1. Mapeamento de atalhos globais do macOS (Cmd+Ctrl+F) e F11
+    window.addEventListener('keydown', (e) => {
+      if ((e.metaKey && e.ctrlKey && (e.key === 'f' || e.key === 'F' || e.code === 'KeyF')) || e.key === 'F11') {
+        e.preventDefault();
+        e.stopPropagation();
+        toggleFullScreen();
+      }
+    }, true);
+
+    // 2. Observer para garantir tela cheia real nativa quando o player expandir
+    let lastFsOpen = false;
+    const checkFullScreenPlayer = () => {
+      const fsContainer = document.querySelector('.fs-full-screen-player-module-container');
+      const isFsOpen = Boolean(fsContainer && fsContainer.offsetParent !== null);
+      if (isFsOpen !== lastFsOpen) {
+        lastFsOpen = isFsOpen;
+        if (isFsOpen) {
+          console.log('[Personal OS] Player expandido -> Ativando Real Full Screen nativo no macOS...');
+          triggerFullScreen(true);
+        }
+      }
+    };
+
+    const fsObserver = new MutationObserver(() => {
+      checkFullScreenPlayer();
+    });
+    fsObserver.observe(document.body, { childList: true, subtree: true });
+
+    // 3. Garantir natureza Real Full Screen nativa ao carregar no macOS
+    setTimeout(() => {
+      triggerFullScreen(true);
+    }, 600);
+  }
+
+  // ==========================================================================
   // 10. FULLSCREEN FREE-SPACE CLICK-TO-DISMISS (ESC ACTION)
-  // Clicar em qualquer espaço livre da tela de reprodução expandida
-  // executa a ação da tecla Esc, retraindo a tela de volta para a barra.
+  // Clicar em qualquer espaço livre da interface retrai imediatamente e
+  // rapidamente o painel da música (music page) de volta para a barra.
   // ==========================================================================
   function initFullScreenFreeSpaceDismiss() {
     let pointerDownPos = null;
+
+    const isElementVisible = (el) => {
+      if (!el || el.hidden) return false;
+      const style = window.getComputedStyle(el);
+      if (style.display === 'none' || style.visibility === 'hidden' || style.opacity === '0') return false;
+      return el.offsetWidth > 0 || el.offsetHeight > 0 || el.getClientRects().length > 0;
+    };
 
     window.addEventListener('pointerdown', (e) => {
       if (e.button === 0) {
@@ -1167,17 +1241,21 @@ if (typeof window !== 'undefined') {
         if (dx > 8 || dy > 8) return;
       }
 
-      // 3. Verifica se a tela cheia / expandida está ativa
+      // 3. Verifica se a tela cheia / expandida está ativa e visível
       const fsContainer = document.querySelector('.fs-full-screen-player-module-container');
-      if (!fsContainer) return;
+      if (!fsContainer || !isElementVisible(fsContainer)) return;
 
       // 4. Ignora se houver texto selecionado
       if (window.getSelection && window.getSelection().toString().trim().length > 0) return;
 
-      // 5. Ignora se algum modal, popover, menu ou o widget de temas estiver aberto
-      if (document.querySelector('.mantine-Modal-content, .mantine-Popover-dropdown, .mantine-Menu-dropdown, .mantine-Select-dropdown')) return;
+      // 5. Ignora se algum modal, popover ou menu suspenso estiver REALMENTE aberto e visível
+      const openModals = Array.from(document.querySelectorAll(
+        '.mantine-Modal-content, .mantine-Popover-dropdown, .mantine-Menu-dropdown, .mantine-Select-dropdown'
+      )).filter(isElementVisible);
+      if (openModals.length > 0) return;
+
       const themeModal = document.getElementById('personal-os-shader-modal');
-      if (themeModal && themeModal.style.display === 'flex') return;
+      if (themeModal && isElementVisible(themeModal)) return;
 
       // 6. Lista de controles interativos que devem preservar sua ação própria
       const interactive = e.target.closest(
@@ -1197,8 +1275,14 @@ if (typeof window !== 'undefined') {
       );
       if (!isWithinFS) return;
 
-      // 8. Executa a ação do botão Esc / Minimizar retraindo a tela
-      console.log('[Personal OS] Espaço livre clicado — executando ação do Esc para retrair a barra...');
+      // 8. Contração imediata e ultrarrápida (hardware accelerated) do painel
+      console.log('[Personal OS] Espaço livre clicado — contraindo painel imediatamente...');
+      fsContainer.classList.add('fs-fast-dismiss');
+      fsContainer.style.setProperty('transition', 'transform 0.16s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.12s ease-out', 'important');
+      fsContainer.style.setProperty('transform', 'translateY(100%)', 'important');
+      fsContainer.style.setProperty('opacity', '0', 'important');
+      fsContainer.style.setProperty('pointer-events', 'none', 'important');
+
       const minBtn = document.querySelector('.fs-full-screen-player-module-container .full-screen-player-controls-container:not(.fs-full-screen-player-queue-module-controls-container) button');
       if (minBtn) {
         minBtn.click();
@@ -1216,79 +1300,90 @@ if (typeof window !== 'undefined') {
   }
 
   // ==========================================================================
-  // 11. PLAYER SPLIT QUEUE (50/50: CAPA DA TRACK + FILA DE REPRODUÇÃO)
-  // Divide a tela da música permanentemente em 2: metade esquerda a capa,
-  // metade direita a fila de reprodução integrada, eliminando o balão lateral.
+  // CONTROLE GLOBAL DE PERMISSÃO DA FILA DE REPRODUÇÃO
+  // Regra Estrita:
+  // 1. Estivermos dentro de uma playlist.
+  // 2. O recurso de adicionar a seguir for usado.
+  // Salvo esses dois casos, NENHUMA track deve aparecer na fila e ela NÃO deve ser exibida.
+  // ==========================================================================
+  function isQueueAllowedToDisplay() {
+    const hash = window.location.hash || '';
+    const isPlaylistRoute = hash.startsWith('#/playlists/') || hash.startsWith('#/playlist/');
+    const store = (window.__FEISHIN_PLAYER_STORE__ && window.__FEISHIN_PLAYER_STORE__.getState)
+      ? window.__FEISHIN_PLAYER_STORE__.getState()
+      : null;
+    const cur = (typeof store?.getCurrentSong === 'function' ? store.getCurrentSong() : null) || store?.player?.currentSong;
+    const isPlaylistSong = Boolean(cur && (cur._itemType === 'playlist_song' || cur.playlistId));
+    const isPlaylist = isPlaylistRoute || isPlaylistSong;
+
+    // Recurso de adicionar a seguir for usado:
+    const hasEnqueuedItems = Boolean(window.__FEISHIN_HAS_ENQUEUED_ITEMS__);
+
+    return Boolean(isPlaylist || hasEnqueuedItems);
+  }
+
+  // ==========================================================================
+  // 11. CONTROLE INTELIGENTE DE EXIBIÇÃO DA FILA NO REPRODUTOR FULLSCREEN
+  // SÓ exibe a fila se estivermos em uma playlist OU se o recurso Adicionar a Seguir foi usado.
+  // Em modo simples (música em música): a fila fica 100% oculta e a capa centralizada!
   // ==========================================================================
   function initPlayerSplitQueue() {
-    console.log('[Personal OS] Ativando Reprodutor com Tela Dividida (Capa + Fila)...');
+    console.log('[Personal OS] Ativando Controlador Inteligente de Visibilidade da Fila...');
 
-    let isEnforcing = false;
-    let lastEnforceTime = 0;
-    let lastFsState = false;
-
-    const enforceQueueActive = () => {
-      const now = Date.now();
-      if (isEnforcing || (now - lastEnforceTime < 800)) return;
-      
+    const syncVisibility = () => {
+      const allowed = isQueueAllowedToDisplay();
       const fsContainer = document.querySelector('.fs-full-screen-player-module-container');
-      if (!fsContainer) {
-        lastFsState = false;
-        return;
-      }
+      const respContainer = document.querySelector('.fs-full-screen-player-module-responsive-container');
+      const qg = document.querySelector('.fs-full-screen-player-queue-module-grid-container');
 
-      isEnforcing = true;
-      lastEnforceTime = now;
-      lastFsState = true;
-
-      try {
-        // 1. Assegura persistência de activeTab: "queue"
-        const rawFs = localStorage.getItem('store_full_screen_player');
-        if (rawFs) {
-          const parsedFs = JSON.parse(rawFs);
-          if (parsedFs?.state && parsedFs.state.activeTab !== 'queue') {
-            parsedFs.state.activeTab = 'queue';
-            localStorage.setItem('store_full_screen_player', JSON.stringify(parsedFs));
+      if (!allowed) {
+        // Modo simples: fila estritamente oculta e capa 100% centralizada
+        if (respContainer) {
+          respContainer.classList.remove('personal-os-queue-visible');
+        }
+        if (qg) {
+          qg.classList.remove('fs-queue-allowed');
+          qg.classList.add('fs-full-screen-player-queue-module-grid-container-collapsed');
+        }
+        try {
+          const rawFs = localStorage.getItem('store_full_screen_player');
+          if (rawFs) {
+            const parsedFs = JSON.parse(rawFs);
+            if (parsedFs?.state && parsedFs.state.activeTab === 'queue') {
+              parsedFs.state.activeTab = '';
+              localStorage.setItem('store_full_screen_player', JSON.stringify(parsedFs));
+            }
+          }
+        } catch (e) {}
+      } else {
+        // Permitido: playlist ou recurso Adicionar a Seguir ativo
+        if (qg) {
+          qg.classList.add('fs-queue-allowed');
+          if (!qg.classList.contains('fs-full-screen-player-queue-module-grid-container-collapsed') && respContainer) {
+            respContainer.classList.add('personal-os-queue-visible');
           }
         }
-
-        // 2. Se a fila estiver colapsada no DOM, dispara o clique no botão de fila
-        const qg = fsContainer.querySelector('.fs-full-screen-player-queue-module-grid-container');
-        if (qg && (qg.classList.contains('fs-full-screen-player-queue-module-grid-container-collapsed') || qg.children.length === 0)) {
-          const queueControls = fsContainer.querySelector('.fs-full-screen-player-queue-module-controls-container');
-          const btns = queueControls ? queueControls.querySelectorAll('button') : [];
-          if (btns[0]) btns[0].click();
-        }
-      } catch (e) {
-      } finally {
-        setTimeout(() => { isEnforcing = false; }, 300);
       }
     };
 
-    // Observa entrada na tela da música somente quando o estado de presença do container mudar
-    let checkTimeout = null;
     const playerObserver = new MutationObserver(() => {
-      const isFSNow = !!document.querySelector('.fs-full-screen-player-module-container');
-      if (isFSNow !== lastFsState) {
-        if (checkTimeout) clearTimeout(checkTimeout);
-        checkTimeout = setTimeout(enforceQueueActive, 100);
-      }
+      syncVisibility();
     });
-    playerObserver.observe(document.body, { childList: true, subtree: false });
-    enforceQueueActive();
+    playerObserver.observe(document.body, { childList: true, subtree: true });
+    setInterval(syncVisibility, 300);
 
-    // Redireciona clique no botão de fila da dock inferior para abrir a tela da música
+    // Redireciona clique no botão de fila da dock inferior
     window.addEventListener('click', (e) => {
       const queueToggle = e.target.closest('.fs-playerbar-module-right-grid-item button');
       if (queueToggle && queueToggle.querySelector('rect[width="18"]')) {
-        e.preventDefault();
-        e.stopPropagation();
-        const isFS = !!document.querySelector('.fs-full-screen-player-module-container');
-        if (!isFS) {
+        const allowed = isQueueAllowedToDisplay();
+        if (!allowed) {
+          e.preventDefault();
+          e.stopPropagation();
           const cover = document.querySelector('.fs-left-controls-module-image') || document.querySelector('#player-bar img');
           cover?.click();
+          syncVisibility();
         }
-        setTimeout(enforceQueueActive, 100);
       }
     }, true);
   }
@@ -1308,6 +1403,8 @@ if (typeof window !== 'undefined') {
 
     function executeKillSwitch() {
       console.log('[Personal OS] Executando Kill Switch: Encerrando música e limpando fila...');
+      window.__FEISHIN_HAS_ENQUEUED_ITEMS__ = false;
+      window.__FEISHIN_ACTIVE_COLLECTION__ = null;
       const store = (window.__FEISHIN_PLAYER_STORE__ && window.__FEISHIN_PLAYER_STORE__.getState)
         ? window.__FEISHIN_PLAYER_STORE__.getState()
         : null;
@@ -1688,10 +1785,20 @@ if (typeof window !== 'undefined') {
         playType === 'next_shuffle' ||
         playType === 'last_shuffle';
 
-      if (isPlaylist || isPlaylistItems || isExplicitQueueAction) {
+      // 1. Recurso Adicionar a Seguir: marca flag e preserva inserção na fila
+      if (isExplicitQueueAction) {
+        window.__FEISHIN_HAS_ENQUEUED_ITEMS__ = true;
         return origAddToQueueByType.apply(this, arguments);
       }
 
+      // 2. Playlists estabelecidas: mantém todas as faixas da playlist na fila
+      if (isPlaylist || isPlaylistItems) {
+        window.__FEISHIN_HAS_ENQUEUED_ITEMS__ = false;
+        return origAddToQueueByType.apply(this, arguments);
+      }
+
+      // 3. Salvo esses 2 casos: modo simples unitário (música em música). Nenhuma outra track entra na fila!
+      window.__FEISHIN_HAS_ENQUEUED_ITEMS__ = false;
       if (playType === 'now' || playType === 'shuffle') {
         const target = (playSongId && items.find((i) => i.id === playSongId)) || items[0];
         if (target) {
@@ -1710,7 +1817,7 @@ if (typeof window !== 'undefined') {
     const customSetQueue = function (data, index, position) {
       const hash = window.location.hash || '';
       const isPlaylist = hash.startsWith('#/playlists/') || hash.startsWith('#/playlist/');
-      if (!isPlaylist && data && data.length > 1) {
+      if (!isPlaylist && data && data.length > 1 && !window.__FEISHIN_HAS_ENQUEUED_ITEMS__) {
         const idx = typeof index === 'number' ? index : 0;
         const target = data[idx] || data[0];
         window.__FEISHIN_ACTIVE_COLLECTION__ = {

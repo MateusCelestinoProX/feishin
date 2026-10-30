@@ -28,13 +28,28 @@ const clearCache = (): Promise<void> => {
     return ipcRenderer.invoke('window-clear-cache');
 };
 
+const setFullScreen = (flag: boolean) => {
+    ipcRenderer.send('window-set-fullscreen', flag);
+};
+
+const toggleFullScreen = () => {
+    ipcRenderer.send('window-toggle-fullscreen');
+};
+
+const isFullScreen = (): Promise<boolean> => {
+    return ipcRenderer.invoke('window-is-fullscreen');
+};
+
 export const browser = {
     clearCache,
     devtools,
     exit,
+    isFullScreen,
     maximize,
     minimize,
     quit,
+    setFullScreen,
+    toggleFullScreen,
     unmaximize,
 };
 

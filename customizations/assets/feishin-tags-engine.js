@@ -31,6 +31,8 @@
     constructor() {
       this.tags = [];
       this.taggedTracks = {}; // tagId -> Array<SongObject>
+      this.selectedSongs = new Map(); // key -> SongObject
+      this.isMultiSelectActive = false;
       this.viewMode = localStorage.getItem(STORAGE_VIEW_KEY) || 'boxes'; // 'boxes' | 'tabs'
       this.activeTabId = null;
       this.openedBoxTagId = null;
@@ -69,6 +71,7 @@
         console.error('[Tags Engine] Erro ao salvar tags:', e);
       }
       this.notify();
+      this.updateAllVisibleTrackBadges();
     }
 
     subscribe(fn) {
@@ -175,24 +178,54 @@
       return this.taggedTracks[tagId] || [];
     }
 
-    isSongInTag(songId, tagId) {
-      if (!songId || !tagId || !this.taggedTracks[tagId]) return false;
-      return this.taggedTracks[tagId].some(s => s.id === songId);
+    isSongInTag(songOrId, tagId) {
+      if (!songOrId || !tagId || !this.taggedTracks[tagId]) return false;
+      const list = this.taggedTracks[tagId];
+      if (typeof songOrId === 'string') {
+        return list.some(s => s.id === songOrId || (s.name && s.name.toLowerCase() === songOrId.toLowerCase()));
+      }
+      const targetId = songOrId.id ? String(songOrId.id) : null;
+      const targetName = (songOrId.name || songOrId.title || '').trim().toLowerCase();
+      const targetArtist = (songOrId.artistName || songOrId.artist || (songOrId.artists?.[0]?.name) || '').trim().toLowerCase();
+
+      return list.some(s => {
+        if (targetId && s.id && String(s.id) === targetId) return true;
+        if (targetName && (s.name || s.title)) {
+          const sName = (s.name || s.title || '').trim().toLowerCase();
+          const sArtist = (s.artistName || s.artist || '').trim().toLowerCase();
+          if (sName === targetName && (!targetArtist || !sArtist || sArtist === targetArtist)) {
+            return true;
+          }
+        }
+        return false;
+      });
     }
 
-    assignTrack(song, tagId) {
+    getTagsForSong(songOrId) {
+      if (!songOrId) return [];
+      const matched = [];
+      for (const tag of this.tags) {
+        if (this.isSongInTag(songOrId, tag.id)) {
+          matched.push(tag);
+        }
+      }
+      return matched;
+    }
+
+    assignTrack(song, tagId, silent = false) {
       if (!song || !tagId) return false;
       const tag = this.getTag(tagId);
       if (!tag) return false;
       if (!this.taggedTracks[tagId]) this.taggedTracks[tagId] = [];
       const list = this.taggedTracks[tagId];
-      if (!list.some(s => s.id === song.id)) {
-        // Clone song to ensure all playback metadata is preserved
+
+      if (!this.isSongInTag(song, tagId)) {
         const cleanSong = {
-          id: song.id,
-          name: song.name || 'Faixa sem título',
-          artistName: song.artistName || (song.artists?.[0]?.name) || 'Artista Desconhecido',
-          album: song.album || 'Álbum',
+          id: song.id ? String(song.id) : ('trk_' + Date.now() + '_' + Math.random().toString(36).substring(2, 7)),
+          name: song.name || song.title || 'Faixa sem título',
+          title: song.name || song.title || 'Faixa sem título',
+          artistName: song.artistName || song.artist || (song.artists?.[0]?.name) || 'Artista Desconhecido',
+          album: song.album || song.albumName || 'Álbum',
           albumId: song.albumId || song.id,
           duration: song.duration || 0,
           imageId: song.imageId || song.id,
@@ -203,37 +236,337 @@
         };
         list.push(cleanSong);
         this.save();
-        this.showToast(`Faixa "${cleanSong.name}" atribuída à tag "${tag.name}"!`);
+        if (!silent) {
+          this.showToast(`Faixa "${cleanSong.name}" atribuída à tag "${tag.name}"!`);
+        }
         return true;
       }
       return false;
     }
 
-    removeTrack(songId, tagId) {
-      if (!songId || !tagId || !this.taggedTracks[tagId]) return false;
+    removeTrack(songOrId, tagId, silent = false) {
+      if (!songOrId || !tagId || !this.taggedTracks[tagId]) return false;
       const tag = this.getTag(tagId);
-      this.taggedTracks[tagId] = this.taggedTracks[tagId].filter(s => s.id !== songId);
+      const targetId = typeof songOrId === 'string' ? songOrId : (songOrId.id ? String(songOrId.id) : null);
+      const targetName = typeof songOrId === 'object' ? (songOrId.name || songOrId.title || '').trim().toLowerCase() : '';
+
+      this.taggedTracks[tagId] = this.taggedTracks[tagId].filter(s => {
+        if (targetId && s.id && String(s.id) === targetId) return false;
+        if (targetName && (s.name || s.title)) {
+          const sName = (s.name || s.title || '').trim().toLowerCase();
+          if (sName === targetName) return false;
+        }
+        return true;
+      });
       this.save();
-      this.showToast(`Faixa removida da tag "${tag?.name || 'Tag'}".`);
+      if (!silent) {
+        this.showToast(`Faixa removida da tag "${tag?.name || 'Tag'}".`);
+      }
       return true;
+    }
+
+    renderTagBadgesHtml(song) {
+      if (!song) return '';
+      const tags = this.getTagsForSong(song);
+      if (!tags || !tags.length) return '';
+      return `<span class="fs-track-tag-badges">${tags.map(t => `
+        <span class="fs-track-tag-badge" data-tag-id="${t.id}" title="Tag: ${escapeHtml(t.name)}">
+          🏷️ ${escapeHtml(t.name)}
+        </span>
+      `).join('')}</span>`;
+    }
+
+    assignTagToSongs(songs, tagId) {
+      if (!songs || !songs.length || !tagId) return;
+      const tag = this.getTag(tagId);
+      if (!tag) return;
+      let count = 0;
+      songs.forEach(s => {
+        if (this.assignTrack(s, tagId, true)) count++;
+      });
+      this.save();
+      this.showToast(`Tag "${tag.name}" atribuída a ${songs.length} faixa(s)!`);
+      this.updateAllVisibleTrackBadges();
+    }
+
+    removeTagFromSongs(songs, tagId) {
+      if (!songs || !songs.length || !tagId) return;
+      const tag = this.getTag(tagId);
+      if (!tag) return;
+      songs.forEach(s => {
+        this.removeTrack(s, tagId, true);
+      });
+      this.save();
+      this.showToast(`Tag "${tag.name}" removida de ${songs.length} faixa(s).`);
+      this.updateAllVisibleTrackBadges();
     }
 
     toggleTracksTag(songs, tagId) {
       if (!songs || !songs.length || !tagId) return;
       const tag = this.getTag(tagId);
       if (!tag) return;
-      const allIn = songs.every(s => this.isSongInTag(s.id, tagId));
+      const allIn = songs.every(s => this.isSongInTag(s, tagId));
       if (allIn) {
-        songs.forEach(s => this.removeTrack(s.id, tagId));
-        this.showToast(`${songs.length > 1 ? songs.length + ' faixas removidas' : 'Faixa removida'} da tag "${tag.name}".`);
+        this.removeTagFromSongs(songs, tagId);
       } else {
-        songs.forEach(s => this.assignTrack(s, tagId));
-        this.showToast(`${songs.length > 1 ? songs.length + ' faixas atribuídas' : 'Faixa atribuída'} à tag "${tag.name}"!`);
+        this.assignTagToSongs(songs, tagId);
+      }
+    }
+
+    setMultiSelectActive(active, initialSongs = null) {
+      this.isMultiSelectActive = active;
+      if (active) {
+        document.body.classList.add('fs-multiselect-active');
+        if (initialSongs && initialSongs.length) {
+          initialSongs.forEach(s => {
+            const key = s.id || `${s.name}:::${s.artistName}`;
+            this.selectedSongs.set(key, s);
+          });
+        }
+        renderMultiSelectFloatingBar();
+        this.updateSelectionRowDecorations();
+        this.showToast(`Modo de Seleção Ativado (${this.selectedSongs.size} selecionadas)`);
+      } else {
+        document.body.classList.remove('fs-multiselect-active');
+        this.selectedSongs.clear();
+        removeMultiSelectFloatingBar();
+        this.updateSelectionRowDecorations();
+      }
+    }
+
+    toggleSongSelection(song) {
+      if (!song) return;
+      const key = song.id || `${song.name}:::${song.artistName}`;
+      if (this.selectedSongs.has(key)) {
+        this.selectedSongs.delete(key);
+      } else {
+        this.selectedSongs.set(key, song);
+      }
+      if (window.AndroidBridge?.vibrate) {
+        window.AndroidBridge.vibrate(15);
+      }
+      renderMultiSelectFloatingBar();
+      this.updateSelectionRowDecorations();
+    }
+
+    selectAllVisible() {
+      const rows = document.querySelectorAll(
+        '.fs-item-table-list-column-module-data-row, [data-row-index], .ra-tracklist-row, [role="row"]'
+      );
+      rows.forEach(r => {
+        const s = extractSongFromElement(r);
+        if (s) {
+          const key = s.id || `${s.name}:::${s.artistName}`;
+          this.selectedSongs.set(key, s);
+        }
+      });
+      renderMultiSelectFloatingBar();
+      this.updateSelectionRowDecorations();
+      this.showToast(`${this.selectedSongs.size} faixas selecionadas!`);
+    }
+
+    clearSelection() {
+      this.selectedSongs.clear();
+      renderMultiSelectFloatingBar();
+      this.updateSelectionRowDecorations();
+    }
+
+    updateSelectionRowDecorations() {
+      const rows = document.querySelectorAll(
+        '.fs-item-table-list-column-module-data-row, [data-row-index], .ra-tracklist-row'
+      );
+      rows.forEach(r => {
+        const song = extractSongFromElement(r);
+        if (!song) return;
+        const key = song.id || `${song.name}:::${song.artistName}`;
+        const isSelected = this.selectedSongs.has(key);
+
+        if (this.isMultiSelectActive) {
+          r.classList.add('fs-multiselect-row');
+          if (isSelected) {
+            r.classList.add('fs-row-is-selected');
+          } else {
+            r.classList.remove('fs-row-is-selected');
+          }
+
+          let indicator = r.querySelector('.fs-multiselect-indicator');
+          if (!indicator) {
+            indicator = document.createElement('div');
+            indicator.className = 'fs-multiselect-indicator';
+            indicator.onclick = (e) => {
+              e.stopPropagation();
+              this.toggleSongSelection(song);
+            };
+            r.insertBefore(indicator, r.firstChild);
+          }
+          indicator.innerHTML = isSelected ? '✓' : '';
+          indicator.className = 'fs-multiselect-indicator ' + (isSelected ? 'checked' : '');
+        } else {
+          r.classList.remove('fs-multiselect-row', 'fs-row-is-selected');
+          const indicator = r.querySelector('.fs-multiselect-indicator');
+          if (indicator) indicator.remove();
+        }
+      });
+    }
+
+    updateAllVisibleTrackBadges() {
+      // 1. Virtualized Tracks Table (Faixas page / Playlists / Albums)
+      const dataRows = document.querySelectorAll(
+        '.fs-title-combined-column-module-title-combined, .fs-title-artist-column-module-title-artist, .fs-song-title-column-module-song-title, .fs-item-table-list-column-module-data-row'
+      );
+
+      dataRows.forEach(cell => {
+        const song = extractSongFromElement(cell);
+        if (!song) return;
+
+        const tags = this.getTagsForSong(song);
+        let badgeWrap = cell.querySelector('.fs-track-tag-badges');
+
+        if (tags.length > 0) {
+          if (!badgeWrap) {
+            badgeWrap = document.createElement('span');
+            badgeWrap.className = 'fs-track-tag-badges';
+            const titleEl = cell.querySelector('.fs-title-combined-column-module-title, .fs-title-artist-column-module-title, .fs-song-title-column-module-song-title, [class*="title"], a') || cell;
+            if (titleEl.parentNode) {
+              if (titleEl.nextSibling) {
+                titleEl.parentNode.insertBefore(badgeWrap, titleEl.nextSibling);
+              } else {
+                titleEl.parentNode.appendChild(badgeWrap);
+              }
+            } else {
+              cell.appendChild(badgeWrap);
+            }
+          }
+          const badgesHtml = tags.map(t => `
+            <span class="fs-track-tag-badge" data-tag-id="${t.id}" title="Tag: ${escapeHtml(t.name)}">
+              🏷️ ${escapeHtml(t.name)}
+            </span>
+          `).join('');
+          if (badgeWrap.innerHTML !== badgesHtml) {
+            badgeWrap.innerHTML = badgesHtml;
+            badgeWrap.querySelectorAll('.fs-track-tag-badge').forEach(b => {
+              b.onclick = (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                window.location.hash = `#/library/genres?tag=${encodeURIComponent(b.getAttribute('data-tag-id'))}`;
+              };
+            });
+          }
+        } else if (badgeWrap) {
+          badgeWrap.remove();
+        }
+      });
+
+      // 2. Recently Added Tracks (.ra-tracklist-row)
+      document.querySelectorAll('.ra-tracklist-row').forEach(row => {
+        const id = row.getAttribute('data-id');
+        let song = null;
+        if (window.FeishinRecentlyAdded?.getCachedSongs) {
+          song = window.FeishinRecentlyAdded.getCachedSongs().find(s => s.id === id);
+        }
+        if (!song) song = extractSongFromElement(row);
+        if (!song) return;
+
+        const tags = this.getTagsForSong(song);
+        let badgeWrap = row.querySelector('.fs-track-tag-badges');
+
+        if (tags.length > 0) {
+          if (!badgeWrap) {
+            badgeWrap = document.createElement('span');
+            badgeWrap.className = 'fs-track-tag-badges';
+            const titleEl = row.querySelector('.ra-track-title') || row.querySelector('.ra-mobile-track-info');
+            if (titleEl) {
+              titleEl.appendChild(badgeWrap);
+            }
+          }
+          const badgesHtml = tags.map(t => `
+            <span class="fs-track-tag-badge" data-tag-id="${t.id}" title="Tag: ${escapeHtml(t.name)}">
+              🏷️ ${escapeHtml(t.name)}
+            </span>
+          `).join('');
+          if (badgeWrap.innerHTML !== badgesHtml) {
+            badgeWrap.innerHTML = badgesHtml;
+            badgeWrap.querySelectorAll('.fs-track-tag-badge').forEach(b => {
+              b.onclick = (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                window.location.hash = `#/library/genres?tag=${encodeURIComponent(b.getAttribute('data-tag-id'))}`;
+              };
+            });
+          }
+        } else if (badgeWrap) {
+          badgeWrap.remove();
+        }
+      });
+
+      // 3. Player Bar ("Tocando Agora")
+      const playerSong = window.__FEISHIN_PLAYER_STORE__?.getState()?.getCurrentSong?.();
+      if (playerSong) {
+        const playerTitle = document.querySelector('.fs-player-module-track-info, #feishin-playerbar-title, [class*="playerbar"]');
+        if (playerTitle) {
+          const tags = this.getTagsForSong(playerSong);
+          let pbBadgeWrap = playerTitle.querySelector('.fs-track-tag-badges');
+          if (tags.length > 0) {
+            if (!pbBadgeWrap) {
+              pbBadgeWrap = document.createElement('span');
+              pbBadgeWrap.className = 'fs-track-tag-badges';
+              playerTitle.appendChild(pbBadgeWrap);
+            }
+            const badgesHtml = tags.map(t => `
+              <span class="fs-track-tag-badge" data-tag-id="${t.id}" title="Tag: ${escapeHtml(t.name)}">
+                🏷️ ${escapeHtml(t.name)}
+              </span>
+            `).join('');
+            if (pbBadgeWrap.innerHTML !== badgesHtml) {
+              pbBadgeWrap.innerHTML = badgesHtml;
+              pbBadgeWrap.querySelectorAll('.fs-track-tag-badge').forEach(b => {
+                b.onclick = (e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  window.location.hash = `#/library/genres?tag=${encodeURIComponent(b.getAttribute('data-tag-id'))}`;
+                };
+              });
+            }
+          } else if (pbBadgeWrap) {
+            pbBadgeWrap.remove();
+          }
+        }
+      }
+
+      // 4. Fullscreen Player / Track Page
+      const tpTitle = document.getElementById('feishin-tp-title') || document.querySelector('.fs-fullscreen-title');
+      if (tpTitle && playerSong) {
+        const tags = this.getTagsForSong(playerSong);
+        let tpBadgeWrap = tpTitle.querySelector('.fs-track-tag-badges');
+        if (tags.length > 0) {
+          if (!tpBadgeWrap) {
+            tpBadgeWrap = document.createElement('span');
+            tpBadgeWrap.className = 'fs-track-tag-badges';
+            tpTitle.appendChild(tpBadgeWrap);
+          }
+          const badgesHtml = tags.map(t => `
+            <span class="fs-track-tag-badge" data-tag-id="${t.id}" title="Tag: ${escapeHtml(t.name)}">
+              🏷️ ${escapeHtml(t.name)}
+            </span>
+          `).join('');
+          if (tpBadgeWrap.innerHTML !== badgesHtml) {
+            tpBadgeWrap.innerHTML = badgesHtml;
+            tpBadgeWrap.querySelectorAll('.fs-track-tag-badge').forEach(b => {
+              b.onclick = (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                window.location.hash = `#/library/genres?tag=${encodeURIComponent(b.getAttribute('data-tag-id'))}`;
+              };
+            });
+          }
+        } else if (tpBadgeWrap) {
+          tpBadgeWrap.remove();
+        }
       }
     }
 
     promptCreateTagAndAssign(songs) {
-      openTagEditorModal(null, songs);
+      openTagAssignmentModal(songs);
     }
 
     playTag(tagId, shuffle = false) {
@@ -269,14 +602,12 @@
 
     showToast(message, type = 'success') {
       console.log(`[Tags Toast] [${type.toUpperCase()}] ${message}`);
-      // Native Feishin toast if available
       if (window.__FEISHIN_NOTIFY__) {
         if (type === 'error') window.__FEISHIN_NOTIFY__.error({ message });
         else if (type === 'warning') window.__FEISHIN_NOTIFY__.info({ message });
         else window.__FEISHIN_NOTIFY__.success({ message });
         return;
       }
-      // Floating glass banner fallback
       let toastEl = document.getElementById('fs-tags-floating-toast');
       if (!toastEl) {
         toastEl = document.createElement('div');
@@ -294,66 +625,155 @@
 
   const engine = new TagsEngine();
   window.__FEISHIN_TAGS_ENGINE__ = engine;
+  window.TagsEngine = engine;
 
-  // 3. REACT NATIVE SUBMENU COMPONENT FOR CONTEXT MENUS
-  window.__FEISHIN_TAG_MENU_ITEM__ = function({ items, mt, p }) {
-    if (!items || !items.length || !mt || !p) return null;
-    const allTags = engine.getTags();
+  // ==========================================================================
+  // HELPERS: SONG RESOLVER & RADIX CONTEXT MENU OBSERVER
+  // ==========================================================================
 
-    return p.jsxs(mt.Submenu, {
-      key: "feishin-tags-submenu-item",
-      children: [
-        p.jsx(mt.SubmenuTarget, {
-          children: p.jsx(mt.Item, {
-            leftIcon: "priceTag",
-            rightIcon: "arrowRightS",
-            children: "🏷️ Atribuir a Tag"
-          })
-        }),
-        p.jsxs(mt.SubmenuContent, {
-          children: [
-            allTags.length === 0 ? p.jsx(mt.Item, {
-              disabled: true,
-              children: "Nenhuma tag criada ainda"
-            }) : null,
-            ...allTags.map(tag => {
-              const isAllTagged = items.every(s => engine.isSongInTag(s.id, tag.id));
-              return p.jsx(mt.Item, {
-                key: tag.id,
-                leftIcon: isAllTagged ? "check" : void 0,
-                onSelect: () => {
-                  engine.toggleTracksTag(items, tag.id);
-                },
-                children: tag.name
-              });
-            }),
-            p.jsx(mt.Divider, {}),
-            p.jsx(mt.Item, {
-              leftIcon: "add",
-              onSelect: () => {
-                engine.promptCreateTagAndAssign(items);
-              },
-              children: "+ Criar nova tag..."
-            })
-          ]
-        })
-      ]
-    });
-  };
+  let lastRightClickedElement = null;
+  let lastTargetRow = null;
 
-  // 4. DOM OBSERVER FOR RIGHT-CLICK CONTEXT MENU INJECTION
-  // Garante que o item "Atribuir a Tag" apareça instantaneamente mesmo em menus virtuais
-  function initContextMenuObserver() {
-    const observer = new MutationObserver((mutations) => {
-      for (const m of mutations) {
-        for (const node of m.addedNodes) {
-          if (node.nodeType === 1) {
-            const dropdown = node.matches?.('.mantine-Menu-dropdown') ? node : node.querySelector?.('.mantine-Menu-dropdown');
-            if (dropdown && !dropdown.querySelector('.fs-tags-context-item')) {
-              checkAndInjectTagsMenuItem(dropdown);
+  document.addEventListener('contextmenu', (e) => {
+    lastRightClickedElement = e.target;
+    lastTargetRow = e.target.closest('[data-row-index], .ra-tracklist-row, .fs-item-table-list-column-module-data-row, [role="row"], tr');
+  }, true);
+
+  function findSongFromReactFiber(el) {
+    if (!el) return null;
+    let curr = el;
+    let depth = 0;
+    while (curr && depth < 10) {
+      const fiberKey = Object.keys(curr).find(k => k.startsWith('__reactFiber$') || k.startsWith('__reactInternalInstance$'));
+      if (fiberKey) {
+        let fiber = curr[fiberKey];
+        let fDepth = 0;
+        while (fiber && fDepth < 15) {
+          const props = fiber.memoizedProps || fiber.pendingProps;
+          if (props) {
+            if (props.song && (props.song.id || props.song.name || props.song.title)) return props.song;
+            if (props.item && (props.item.id || props.item.name || props.item.title)) return props.item;
+            if (props.row?.original && (props.row.original.id || props.row.original.name)) return props.row.original;
+            if (props.data?.items && typeof props.index === 'number') {
+              const item = props.data.items[props.index];
+              if (item) return item;
             }
           }
+          fiber = fiber.return;
+          fDepth++;
         }
+      }
+      curr = curr.parentElement;
+      depth++;
+    }
+    return null;
+  }
+
+  function extractSongFromElement(el) {
+    if (!el) return null;
+    const row = el.closest('[data-row-index], .ra-tracklist-row, .fs-item-table-list-column-module-data-row, [role="row"], tr') || el;
+
+    // 1. Recently Added cached songs
+    const dataId = row.getAttribute('data-id') || row.getAttribute('data-song-id');
+    if (dataId && window.FeishinRecentlyAdded?.getCachedSongs) {
+      const found = window.FeishinRecentlyAdded.getCachedSongs().find(s => s.id === dataId);
+      if (found) return found;
+    }
+
+    // 2. React fiber
+    const fiberSong = findSongFromReactFiber(row);
+    if (fiberSong) {
+      return {
+        id: String(fiberSong.id || fiberSong.songId || dataId || 'trk_' + (fiberSong.name || 'song')),
+        name: fiberSong.name || fiberSong.title || 'Música',
+        title: fiberSong.name || fiberSong.title || 'Música',
+        artistName: fiberSong.artistName || fiberSong.artist || (fiberSong.artists?.[0]?.name) || 'Artista',
+        album: fiberSong.album || fiberSong.albumName || 'Álbum',
+        duration: fiberSong.duration || 0,
+        imageUrl: fiberSong.imageUrl || fiberSong.coverArt || null
+      };
+    }
+
+    // 3. Image tag with Subsonic ID (e.g. id="mf-5US6IrXl7jzBo7fR5lELGg_...")
+    const img = row.querySelector('img');
+    const m = img?.id?.match(/mf-([^_]+)/);
+    const subsonicSongId = m ? m[1] : null;
+
+    // 4. DOM text
+    const titleEl = row.querySelector(
+      '.fs-song-title-column-module-song-title, .fs-title-combined-column-module-title, .fs-title-artist-column-module-title, .fs-title-column-module-title, .ra-track-title, [class*="title"], a'
+    );
+    const artistEl = row.querySelector(
+      '.fs-song-artist-column-module-artist, .fs-title-combined-column-module-artists, .fs-artist-column-module-artist, .ra-track-artist, [class*="artist"]'
+    );
+
+    const title = titleEl ? titleEl.innerText.trim() : '';
+    const artist = artistEl ? artistEl.innerText.trim() : '';
+
+    if (title || subsonicSongId) {
+      return {
+        id: subsonicSongId || dataId || ('track_' + encodeURIComponent(title + '_' + artist).replace(/%/g, '')),
+        name: title || 'Música',
+        title: title || 'Música',
+        artistName: artist || 'Artista',
+        album: 'Álbum',
+        duration: 0
+      };
+    }
+
+    return null;
+  }
+
+  function getActiveTargetSong() {
+    if (lastTargetRow) {
+      const song = extractSongFromElement(lastTargetRow);
+      if (song) return song;
+    }
+    if (lastRightClickedElement) {
+      const song = extractSongFromElement(lastRightClickedElement);
+      if (song) return song;
+    }
+    const cur = window.__FEISHIN_PLAYER_STORE__?.getState()?.getCurrentSong?.();
+    if (cur) return cur;
+    return null;
+  }
+
+  function getActiveTargetSongs() {
+    // 1. If Multi-Select mode is active with selected songs
+    if (engine.isMultiSelectActive && engine.selectedSongs && engine.selectedSongs.size > 0) {
+      return Array.from(engine.selectedSongs.values());
+    }
+
+    // 2. Check if multiple rows are selected in the Feishin table or DOM
+    const selectedElements = document.querySelectorAll(
+      '.fs-item-table-list-column-module-row-selected, [class*="row-selected"], [data-selected="true"], .ra-row-selected, .fs-row-is-selected'
+    );
+    if (selectedElements.length > 1) {
+      const songsMap = new Map();
+      selectedElements.forEach(el => {
+        const song = extractSongFromElement(el);
+        if (song) {
+          const key = song.id || `${song.name}:::${song.artistName}`;
+          if (!songsMap.has(key)) songsMap.set(key, song);
+        }
+      });
+      if (songsMap.size > 0) {
+        return Array.from(songsMap.values());
+      }
+    }
+
+    // 3. Fallback to single targeted song
+    const single = getActiveTargetSong();
+    return single ? [single] : [];
+  }
+
+  function initContextMenuObserver() {
+    const observer = new MutationObserver(() => {
+      const activeMenus = document.querySelectorAll('[role="menu"], [data-radix-menu-content], .fs-context-menu-module-content, .mantine-Menu-dropdown');
+      if (activeMenus.length === 0) return;
+
+      for (const menu of activeMenus) {
+        checkAndInjectTagsMenuItem(menu);
       }
     });
 
@@ -371,227 +791,708 @@
     }
   }
 
-  function checkAndInjectTagsMenuItem(dropdown) {
-    const items = Array.from(dropdown.querySelectorAll('.mantine-Menu-item, [role="menuitem"], button'));
-    // Check if this is a track/song context menu
-    const isSongMenu = items.some(it => {
-      const text = it.innerText || '';
-      return text.includes('playlist') || text.includes('Playlist') || text.includes('tocar') || text.includes('Tocar');
-    });
+  function checkAndInjectTagsMenuItem(menu) {
+    if (!menu || menu.dataset.tagsInjected === 'true') return;
+    if (menu.querySelector('.fs-tags-menu-item')) {
+      menu.dataset.tagsInjected = 'true';
+      return;
+    }
 
-    if (!isSongMenu || dropdown.querySelector('.fs-tags-context-item')) return;
+    const menuText = (menu.innerText || '').toLowerCase();
+    const isSongMenu = menuText.includes('tocar') || menuText.includes('play') ||
+                       menuText.includes('playlist') || menuText.includes('informações') ||
+                       menuText.includes('baixar') || menuText.includes('deletar');
 
-    // Detect target song from current selection or hovering row
-    const targetSong = getActiveTargetSong();
-    if (!targetSong) return;
+    if (!isSongMenu) return;
+    menu.dataset.tagsInjected = 'true';
 
-    const tagItemBtn = document.createElement('button');
-    tagItemBtn.type = 'button';
-    tagItemBtn.className = 'mantine-focus-never mantine-active fs-menu-item-module-item mantine-Menu-item fs-tags-context-item';
-    tagItemBtn.setAttribute('role', 'menuitem');
-    tagItemBtn.innerHTML = `
-      <div style="display: flex; align-items: center; justify-content: space-between; width: 100%;">
-        <div style="display: flex; align-items: center; gap: 8px;">
-          <span>🏷️</span>
-          <span>Atribuir a Tag</span>
+    const targetSongs = getActiveTargetSongs();
+    if (!targetSongs || targetSongs.length === 0) return;
+
+    // 1. Tag Assignment Item
+    const tagItem = document.createElement('div');
+    tagItem.className = 'fs-context-menu-module-item fs-context-menu-module-has-left-icon fs-tags-menu-item';
+    tagItem.setAttribute('role', 'menuitem');
+    tagItem.setAttribute('tabindex', '-1');
+    tagItem.setAttribute('data-orientation', 'vertical');
+    tagItem.setAttribute('data-radix-collection-item', '');
+    tagItem.style.cssText = `
+      color: #c4b5fd !important;
+      font-weight: 600 !important;
+      cursor: pointer !important;
+      transition: background 0.15s ease !important;
+      display: flex !important;
+      align-items: center !important;
+      gap: 8px !important;
+    `;
+
+    const label = targetSongs.length > 1
+      ? `🏷️ Atribuir Tag (${targetSongs.length} faixas)`
+      : `🏷️ Atribuir Tag`;
+
+    tagItem.innerHTML = `
+      <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#a78bfa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="fs-context-menu-module-left-icon" style="flex-shrink:0;">
+        <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path>
+        <line x1="7" y1="7" x2="7.01" y2="7"></line>
+      </svg>
+      <span style="flex: 1;">${label}</span>
+      <span style="font-size: 11px; opacity: 0.55; font-weight: 400;">Tag</span>
+    `;
+
+    tagItem.onmouseenter = () => {
+      tagItem.style.background = 'rgba(167, 139, 250, 0.18)';
+    };
+    tagItem.onmouseleave = () => {
+      tagItem.style.background = 'transparent';
+    };
+
+    tagItem.onclick = (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+
+      document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+      const backdrop = document.getElementById('feishin-context-backdrop');
+      if (backdrop) backdrop.remove();
+
+      setTimeout(() => {
+        openTagAssignmentModal(targetSongs);
+      }, 50);
+    };
+
+    // 2. Multi-Select Toggle Item
+    const multiSelectItem = document.createElement('div');
+    multiSelectItem.className = 'fs-context-menu-module-item fs-context-menu-module-has-left-icon fs-selection-menu-item';
+    multiSelectItem.setAttribute('role', 'menuitem');
+    multiSelectItem.setAttribute('tabindex', '-1');
+    multiSelectItem.setAttribute('data-orientation', 'vertical');
+    multiSelectItem.setAttribute('data-radix-collection-item', '');
+    multiSelectItem.style.cssText = `
+      color: rgba(255, 255, 255, 0.85) !important;
+      font-size: 13px !important;
+      cursor: pointer !important;
+      transition: background 0.15s ease !important;
+      display: flex !important;
+      align-items: center !important;
+      gap: 8px !important;
+    `;
+
+    multiSelectItem.innerHTML = `
+      <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="fs-context-menu-module-left-icon" style="flex-shrink:0;">
+        <polyline points="9 11 12 14 22 4"></polyline>
+        <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
+      </svg>
+      <span>${engine.isMultiSelectActive ? 'Desativar Seleção' : 'Selecionar Múltiplas Faixas'}</span>
+    `;
+
+    multiSelectItem.onmouseenter = () => {
+      multiSelectItem.style.background = 'rgba(255, 255, 255, 0.08)';
+    };
+    multiSelectItem.onmouseleave = () => {
+      multiSelectItem.style.background = 'transparent';
+    };
+
+    multiSelectItem.onclick = (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+      const backdrop = document.getElementById('feishin-context-backdrop');
+      if (backdrop) backdrop.remove();
+
+      engine.setMultiSelectActive(!engine.isMultiSelectActive, targetSongs);
+    };
+
+    const deleteBtn = menu.querySelector('.feishin-delete-menu-item');
+    const divider = document.createElement('div');
+    divider.className = 'fs-context-menu-module-divider';
+    divider.setAttribute('role', 'separator');
+
+    if (deleteBtn && deleteBtn.parentNode) {
+      deleteBtn.parentNode.insertBefore(divider, deleteBtn);
+      deleteBtn.parentNode.insertBefore(tagItem, divider);
+      deleteBtn.parentNode.insertBefore(multiSelectItem, divider);
+    } else {
+      menu.appendChild(divider);
+      menu.appendChild(tagItem);
+      menu.appendChild(multiSelectItem);
+    }
+  }
+
+  // ==========================================================================
+  // MODAL ELEGANTE DE ATRIBUIÇÃO DE TAGS (MAC & ANDROID)
+  // ==========================================================================
+
+  function openTagAssignmentModal(targetSongs) {
+    if (!targetSongs || targetSongs.length === 0) return;
+    closeTagModals();
+
+    const isMultiple = targetSongs.length > 1;
+    let filterQuery = '';
+
+    const modalBackdrop = document.createElement('div');
+    modalBackdrop.id = 'fs-tag-modal-container';
+    modalBackdrop.className = 'fs-tag-modal-backdrop fs-tag-assign-backdrop';
+
+    const subtitleText = isMultiple
+      ? `${targetSongs.length} faixas selecionadas para atribuição simultânea`
+      : `${escapeHtml(targetSongs[0].name || targetSongs[0].title || 'Faixa')} • ${escapeHtml(targetSongs[0].artistName || targetSongs[0].artist || '')}`;
+
+    modalBackdrop.innerHTML = `
+      <div class="fs-tag-modal-dialog fs-tag-assign-dialog" role="dialog" aria-modal="true">
+        <!-- Header -->
+        <div class="fs-tag-modal-header">
+          <div class="fs-tag-modal-title-group">
+            <div class="fs-tag-modal-icon-badge" style="background: rgba(167, 139, 250, 0.2); border-color: rgba(167, 139, 250, 0.4);">
+              <span style="font-size: 18px;">🏷️</span>
+            </div>
+            <div>
+              <h2 class="fs-tag-modal-title">Atribuir Tags</h2>
+              <span class="fs-tag-assign-subtitle" title="${subtitleText}">${subtitleText}</span>
+            </div>
+          </div>
+          <button type="button" class="fs-tag-modal-close-btn" id="fs-modal-close" title="Fechar (Esc)">✕</button>
         </div>
-        <span style="font-size: 11px; opacity: 0.6;">▸</span>
+
+        <!-- Filter Input -->
+        <div class="fs-tag-assign-search-wrap">
+          <input type="text" id="fs-tag-assign-filter" placeholder="🔍 Filtrar tags existentes..." class="fs-tag-modal-input" />
+        </div>
+
+        <!-- Tags List -->
+        <div class="fs-tag-assign-list" id="fs-tag-assign-list"></div>
+
+        <!-- Quick Create Tag -->
+        <div class="fs-tag-assign-quick-create">
+          <input type="text" id="fs-tag-quick-name" placeholder="+ Criar nova tag e atribuir..." class="fs-tag-modal-input" />
+          <button type="button" id="fs-tag-quick-btn" class="fs-modal-btn-save" style="padding: 8px 16px; font-size: 12px; white-space: nowrap;">
+            Criar &amp; Atribuir
+          </button>
+        </div>
+
+        <!-- Footer -->
+        <div class="fs-tag-modal-footer">
+          <span style="font-size: 11px; color: rgba(255,255,255,0.45);">
+            ${isMultiple ? 'Toque nas tags para marcar ou desmarcar nas ' + targetSongs.length + ' faixas.' : 'Toque em uma tag para marcar ou desmarcar.'}
+          </span>
+          <div class="fs-modal-footer-right">
+            <button type="button" id="fs-tag-assign-done" class="fs-modal-btn-save">Concluir</button>
+          </div>
+        </div>
       </div>
     `;
 
-    // Submenu container
-    const submenu = document.createElement('div');
-    submenu.className = 'fs-tags-context-submenu';
-    submenu.style.display = 'none';
+    document.body.appendChild(modalBackdrop);
 
-    function renderSubmenuItems() {
-      const allTags = engine.getTags();
-      let html = `<div style="padding: 6px 10px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: rgba(255,255,255,0.45); border-bottom: 1px solid rgba(255,255,255,0.08);">Escolher Tag</div>`;
-      if (allTags.length === 0) {
-        html += `<div style="padding: 10px; font-size: 13px; color: rgba(255,255,255,0.5);">Nenhuma tag criada</div>`;
-      } else {
-        allTags.forEach(t => {
-          const isTagged = engine.isSongInTag(targetSong.id, t.id);
-          html += `
-            <div class="fs-tags-submenu-row" data-tag-id="${t.id}" style="display: flex; align-items: center; justify-content: space-between; padding: 8px 12px; cursor: pointer; border-radius: 6px; font-size: 13px; margin: 2px 4px; transition: background 0.15s ease;">
-              <span>${t.name}</span>
-              <span style="font-weight: bold; color: #a78bfa;">${isTagged ? '✓' : ''}</span>
-            </div>
-          `;
-        });
+    function renderTagRows() {
+      const listEl = modalBackdrop.querySelector('#fs-tag-assign-list');
+      if (!listEl) return;
+
+      let tags = engine.getTags();
+      if (filterQuery.trim()) {
+        const q = filterQuery.toLowerCase().trim();
+        tags = tags.filter(t => t.name.toLowerCase().includes(q));
       }
-      html += `
-        <div style="border-top: 1px solid rgba(255,255,255,0.08); margin-top: 4px; padding-top: 4px;">
-          <div id="fs-tags-submenu-create" style="display: flex; align-items: center; gap: 6px; padding: 8px 12px; cursor: pointer; border-radius: 6px; font-size: 13px; margin: 2px 4px; color: #c4b5fd; font-weight: 600;">
-            <span>+</span> <span>Nova Tag...</span>
+
+      if (tags.length === 0) {
+        listEl.innerHTML = `
+          <div style="text-align: center; padding: 24px; color: rgba(255,255,255,0.45); font-size: 13px;">
+            ${filterQuery ? 'Nenhuma tag encontrada com esse filtro.' : 'Nenhuma tag criada ainda. Digite o nome acima para criar!'}
           </div>
-        </div>
-      `;
-      submenu.innerHTML = html;
+        `;
+        return;
+      }
 
-      // Click handlers
-      submenu.querySelectorAll('.fs-tags-submenu-row').forEach(row => {
-        row.addEventListener('click', (ev) => {
-          ev.stopPropagation();
+      listEl.innerHTML = tags.map(tag => {
+        const totalInTag = targetSongs.filter(s => engine.isSongInTag(s, tag.id)).length;
+        const allChecked = totalInTag === targetSongs.length;
+        const someChecked = totalInTag > 0 && !allChecked;
+
+        return `
+          <div class="fs-tag-assign-row ${allChecked ? 'is-checked' : ''} ${someChecked ? 'is-partial' : ''}" data-tag-id="${tag.id}">
+            <div class="fs-tag-assign-row-left">
+              <div class="fs-tag-assign-thumb" style="background-image: ${safeCssUrl(tag.heroImage)};"></div>
+              <div class="fs-tag-assign-name-wrap">
+                <span class="fs-tag-assign-name">${escapeHtml(tag.name)}</span>
+                <span class="fs-tag-assign-count">${engine.getSongsForTag(tag.id).length} faixas cadastradas</span>
+              </div>
+            </div>
+            <div class="fs-tag-assign-checkbox ${allChecked ? 'checked' : ''} ${someChecked ? 'partial' : ''}">
+              ${allChecked ? '✓' : (someChecked ? '–' : '')}
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      listEl.querySelectorAll('.fs-tag-assign-row').forEach(row => {
+        row.addEventListener('click', () => {
           const tId = row.getAttribute('data-tag-id');
-          engine.toggleTracksTag([targetSong], tId);
-          renderSubmenuItems();
+          if (window.AndroidBridge?.vibrate) window.AndroidBridge.vibrate(15);
+          engine.toggleTracksTag(targetSongs, tId);
+          renderTagRows();
         });
       });
+    }
 
-      const createBtn = submenu.querySelector('#fs-tags-submenu-create');
-      if (createBtn) {
-        createBtn.addEventListener('click', (ev) => {
-          ev.stopPropagation();
-          engine.promptCreateTagAndAssign([targetSong]);
-          renderSubmenuItems();
-        });
+    renderTagRows();
+
+    // Event handlers
+    const filterInput = modalBackdrop.querySelector('#fs-tag-assign-filter');
+    filterInput?.addEventListener('input', (e) => {
+      filterQuery = e.target.value;
+      renderTagRows();
+    });
+
+    const quickInput = modalBackdrop.querySelector('#fs-tag-quick-name');
+    const quickBtn = modalBackdrop.querySelector('#fs-tag-quick-btn');
+
+    const handleCreateQuick = () => {
+      const name = (quickInput?.value || '').trim();
+      if (!name) return;
+      const newTag = engine.createTag(name);
+      if (newTag) {
+        engine.assignTagToSongs(targetSongs, newTag.id);
+        if (quickInput) quickInput.value = '';
+        renderTagRows();
       }
-    }
+    };
 
-    tagItemBtn.addEventListener('mouseenter', () => {
-      renderSubmenuItems();
-      submenu.style.display = 'block';
-      const rect = tagItemBtn.getBoundingClientRect();
-      submenu.style.top = rect.top + 'px';
-      submenu.style.left = (rect.right + 4) + 'px';
+    quickBtn?.addEventListener('click', handleCreateQuick);
+    quickInput?.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        handleCreateQuick();
+      }
     });
 
-    tagItemBtn.addEventListener('mouseleave', (e) => {
-      setTimeout(() => {
-        if (!submenu.matches(':hover') && !tagItemBtn.matches(':hover')) {
-          submenu.style.display = 'none';
-        }
-      }, 150);
+    modalBackdrop.querySelector('#fs-modal-close')?.addEventListener('click', closeTagModals);
+    modalBackdrop.querySelector('#fs-tag-assign-done')?.addEventListener('click', () => {
+      closeTagModals();
+      engine.showToast(`Tags atualizadas com sucesso para ${targetSongs.length} faixa(s)!`);
+      if (engine.isMultiSelectActive) {
+        engine.setMultiSelectActive(false);
+      }
     });
 
-    submenu.addEventListener('mouseleave', () => {
-      submenu.style.display = 'none';
+    modalBackdrop.addEventListener('click', (e) => {
+      if (e.target === modalBackdrop) closeTagModals();
     });
-
-    document.body.appendChild(submenu);
-
-    // Insert tag button below playlist item or at top
-    const playlistItem = items.find(it => (it.innerText || '').includes('playlist') || (it.innerText || '').includes('Playlist'));
-    if (playlistItem && playlistItem.parentNode) {
-      playlistItem.parentNode.insertBefore(tagItemBtn, playlistItem.nextSibling);
-    } else if (dropdown.firstChild) {
-      dropdown.insertBefore(tagItemBtn, dropdown.firstChild);
-    }
   }
 
-  let lastRightClickedElement = null;
-  document.addEventListener('contextmenu', (e) => {
-    lastRightClickedElement = e.target;
-  }, true);
+  engine.openTagAssignmentModal = openTagAssignmentModal;
 
-  function findSongFromReactFiber(el) {
-    if (!el) return null;
-    let curr = el;
-    let depth = 0;
-    while (curr && depth < 10) {
-      const fiberKey = Object.keys(curr).find(k => k.startsWith('__reactFiber$') || k.startsWith('__reactInternalInstance$'));
-      if (fiberKey) {
-        let fiber = curr[fiberKey];
-        let fDepth = 0;
-        while (fiber && fDepth < 15) {
-          const props = fiber.memoizedProps || fiber.pendingProps;
-          if (props) {
-            if (props.song && (props.song.id || props.song.name || props.song.title)) {
-              return props.song;
-            }
-            if (props.item && (props.item.id || props.item.name || props.item.title)) {
-              return props.item;
-            }
-            if (props.row?.original && (props.row.original.id || props.row.original.name)) {
-              return props.row.original;
-            }
-            if (props.data?.items && typeof props.index === 'number') {
-              const item = props.data.items[props.index];
-              if (item) return item;
-            }
-          }
-          fiber = fiber.return;
-          fDepth++;
-        }
-      }
-      curr = curr.parentElement;
-      depth++;
+  // ==========================================================================
+  // BARRA FLUTUANTE DE SELEÇÃO MÚLTIPLA
+  // ==========================================================================
+
+  function renderMultiSelectFloatingBar() {
+    let bar = document.getElementById('fs-multiselect-floating-bar');
+    if (!engine.isMultiSelectActive) {
+      if (bar) bar.remove();
+      return;
     }
-    return null;
+    const count = engine.selectedSongs.size;
+    if (!bar) {
+      bar = document.createElement('div');
+      bar.id = 'fs-multiselect-floating-bar';
+      bar.className = 'fs-multiselect-bar-container';
+      document.body.appendChild(bar);
+    }
+
+    bar.innerHTML = `
+      <div class="fs-multiselect-bar-glass">
+        <div class="fs-multiselect-bar-info">
+          <div class="fs-multiselect-bar-count-badge">${count}</div>
+          <span class="fs-multiselect-bar-label">${count === 1 ? 'faixa selecionada' : 'faixas selecionadas'}</span>
+        </div>
+        <div class="fs-multiselect-bar-actions">
+          <button type="button" id="fs-ms-select-all" class="fs-ms-btn fs-ms-btn-secondary">Selecionar Tudo</button>
+          <button type="button" id="fs-ms-clear" class="fs-ms-btn fs-ms-btn-secondary">Limpar</button>
+          <button type="button" id="fs-ms-assign-tag" class="fs-ms-btn fs-ms-btn-primary" ${count === 0 ? 'disabled' : ''}>
+            🏷️ Atribuir Tag
+          </button>
+          <button type="button" id="fs-ms-close" class="fs-ms-btn fs-ms-btn-close" title="Sair da Seleção">✕</button>
+        </div>
+      </div>
+    `;
+
+    bar.querySelector('#fs-ms-select-all')?.addEventListener('click', () => {
+      engine.selectAllVisible();
+    });
+    bar.querySelector('#fs-ms-clear')?.addEventListener('click', () => {
+      engine.clearSelection();
+    });
+    bar.querySelector('#fs-ms-assign-tag')?.addEventListener('click', () => {
+      if (engine.selectedSongs.size > 0) {
+        openTagAssignmentModal(Array.from(engine.selectedSongs.values()));
+      }
+    });
+    bar.querySelector('#fs-ms-close')?.addEventListener('click', () => {
+      engine.setMultiSelectActive(false);
+    });
   }
 
-  function getActiveTargetSong() {
-    // 1. Tenta obter o objeto real da música via React Fiber do elemento clicado
-    if (lastRightClickedElement) {
-      const fiberSong = findSongFromReactFiber(lastRightClickedElement);
-      if (fiberSong) {
-        return {
-          id: String(fiberSong.id || fiberSong.songId || 'trk_' + (fiberSong.name || 'song')),
-          name: fiberSong.name || fiberSong.title || 'Música',
-          artistName: fiberSong.artistName || fiberSong.artist || 'Artista',
-          album: fiberSong.album || fiberSong.albumName || 'Álbum',
-          duration: fiberSong.duration || 0,
-          imageUrl: fiberSong.imageUrl || fiberSong.coverArt || null
+  function removeMultiSelectFloatingBar() {
+    const bar = document.getElementById('fs-multiselect-floating-bar');
+    if (bar) bar.remove();
+  }
+
+  function initHeaderSelectButtonObserver() {
+    const checkHeader = () => {
+      const hash = window.location.hash || '';
+      const isTracksPage = hash.includes('songs') || hash.includes('recently-added') || hash.includes('playlist');
+      if (!isTracksPage) return;
+
+      const toolbar = document.querySelector('.fs-song-list-header-module-actions, .ra-action-buttons-row, .fs-item-list-header-actions, .fs-header-actions');
+      if (toolbar && !toolbar.querySelector('#fs-toolbar-select-btn')) {
+        const btn = document.createElement('button');
+        btn.id = 'fs-toolbar-select-btn';
+        btn.type = 'button';
+        btn.className = 'ra-glass-btn fs-toolbar-select-btn';
+        btn.style.cssText = `
+          display: inline-flex;
+          align-items: center;
+          gap: 6px;
+          padding: 6px 12px;
+          border-radius: 10px;
+          background: rgba(255, 255, 255, 0.08);
+          border: 1px solid rgba(255, 255, 255, 0.15);
+          color: #ffffff;
+          font-size: 12px;
+          font-weight: 600;
+          cursor: pointer;
+        `;
+        btn.innerHTML = `
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="9 11 12 14 22 4"/>
+            <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
+          </svg>
+          <span>${engine.isMultiSelectActive ? 'Cancelar' : 'Selecionar'}</span>
+        `;
+        btn.onclick = () => {
+          engine.setMultiSelectActive(!engine.isMultiSelectActive);
+          btn.querySelector('span').innerText = engine.isMultiSelectActive ? 'Cancelar' : 'Selecionar';
         };
+        toolbar.appendChild(btn);
       }
-    }
+    };
 
-    // 2. Procura linhas no DOM por hover ou seleção
-    const selectedRows = document.querySelectorAll('.fs-virtualized-list-module-row, [role="row"], tr, .fs-table-row');
-    let hoveredRow = null;
-    if (lastRightClickedElement) {
-      hoveredRow = lastRightClickedElement.closest('.fs-virtualized-list-module-row, [role="row"], tr, .fs-table-row');
-    }
-    if (!hoveredRow) {
-      selectedRows.forEach(r => {
-        if (r.matches(':hover') || r.classList.contains('fs-table-row-selected') || r.getAttribute('data-selected') === 'true') {
-          hoveredRow = r;
-        }
+    window.addEventListener('hashchange', checkHeader);
+    setInterval(checkHeader, 1500);
+    checkHeader();
+  }
+
+  function initReactiveBadgesObserver() {
+    let timer = null;
+    const debouncedUpdate = () => {
+      if (timer) return;
+      timer = requestAnimationFrame(() => {
+        timer = null;
+        engine.updateAllVisibleTrackBadges();
       });
-    }
+    };
 
-    if (hoveredRow) {
-      const fiberSong = findSongFromReactFiber(hoveredRow);
-      if (fiberSong) {
-        return {
-          id: String(fiberSong.id || fiberSong.songId || 'trk_' + (fiberSong.name || 'song')),
-          name: fiberSong.name || fiberSong.title || 'Música',
-          artistName: fiberSong.artistName || fiberSong.artist || 'Artista',
-          album: fiberSong.album || fiberSong.albumName || 'Álbum',
-          duration: fiberSong.duration || 0,
-          imageUrl: fiberSong.imageUrl || fiberSong.coverArt || null
-        };
+    const observer = new MutationObserver((mutations) => {
+      let shouldUpdate = false;
+      for (const m of mutations) {
+        if (m.addedNodes.length > 0 || m.type === 'attributes') {
+          shouldUpdate = true;
+          break;
+        }
       }
+      if (shouldUpdate) debouncedUpdate();
+    });
 
-      const titleEl = hoveredRow.querySelector('.fs-song-title-column-module-song-title, .fs-title-column-module-title, a');
-      const artistEl = hoveredRow.querySelector('.fs-song-artist-column-module-artist, .fs-artist-column-module-artist');
-      const title = titleEl ? titleEl.innerText.trim() : 'Música';
-      const artist = artistEl ? artistEl.innerText.trim() : 'Artista';
-      return {
-        id: 'track_' + encodeURIComponent(title + '_' + artist).replace(/%/g, ''),
-        name: title,
-        artistName: artist,
-        album: 'Álbum',
-        duration: 210
-      };
-    }
+    const start = () => {
+      const target = document.body || document.documentElement;
+      if (target) {
+        observer.observe(target, { childList: true, subtree: true, attributes: false });
+        window.addEventListener('scroll', debouncedUpdate, { passive: true });
+        window.addEventListener('resize', debouncedUpdate, { passive: true });
+        window.addEventListener('hashchange', () => setTimeout(debouncedUpdate, 300));
+      }
+    };
 
-    // 3. Fallback to current song in player store
-    const cur = window.__FEISHIN_PLAYER_STORE__?.getState()?.getCurrentSong?.();
-    if (cur) return cur;
-
-    return null;
+    if (document.body) start();
+    else document.addEventListener('DOMContentLoaded', start);
   }
 
-  function getTagParamFromHash() {
-    const hash = window.location.hash || '';
-    const qIdx = hash.indexOf('?');
-    if (qIdx === -1) return null;
-    const params = new URLSearchParams(hash.substring(qIdx + 1));
-    return params.get('tag');
+  function injectTagCustomStyles() {
+    if (document.getElementById('fs-tag-custom-injected-styles')) return;
+    const style = document.createElement('style');
+    style.id = 'fs-tag-custom-injected-styles';
+    style.textContent = `
+      .fs-track-tag-badges {
+        display: inline-flex !important;
+        align-items: center !important;
+        gap: 4px !important;
+        vertical-align: middle !important;
+        margin-left: 6px !important;
+        flex-wrap: wrap !important;
+        pointer-events: auto !important;
+      }
+      .fs-track-tag-badge, .ra-track-tag-pill {
+        display: inline-flex !important;
+        align-items: center !important;
+        gap: 3px !important;
+        padding: 1px 7px !important;
+        border-radius: 999px !important;
+        font-size: 10px !important;
+        font-weight: 600 !important;
+        line-height: 1.4 !important;
+        letter-spacing: -0.1px !important;
+        background: rgba(168, 85, 247, 0.18) !important;
+        color: #e9d5ff !important;
+        border: 1px solid rgba(168, 85, 247, 0.38) !important;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25) !important;
+        backdrop-filter: blur(8px) !important;
+        -webkit-backdrop-filter: blur(8px) !important;
+        cursor: pointer !important;
+        user-select: none !important;
+        transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1) !important;
+        white-space: nowrap !important;
+      }
+      .fs-track-tag-badge:hover, .ra-track-tag-pill:hover {
+        background: rgba(168, 85, 247, 0.35) !important;
+        border-color: rgba(192, 132, 252, 0.65) !important;
+        color: #ffffff !important;
+        transform: translateY(-1px) scale(1.02) !important;
+      }
+      .fs-tag-assign-dialog {
+        max-width: min(440px, 92vw) !important;
+        width: 100% !important;
+      }
+      .fs-tag-assign-subtitle {
+        font-size: 11.5px !important;
+        color: rgba(255, 255, 255, 0.55) !important;
+        display: block !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+        white-space: nowrap !important;
+        max-width: 320px !important;
+      }
+      .fs-tag-assign-search-wrap {
+        padding: 12px 24px 6px !important;
+      }
+      .fs-tag-modal-input {
+        width: 100% !important;
+        padding: 9px 14px !important;
+        border-radius: 12px !important;
+        background: rgba(255, 255, 255, 0.05) !important;
+        border: 1px solid rgba(255, 255, 255, 0.1) !important;
+        color: #ffffff !important;
+        font-size: 13px !important;
+        outline: none !important;
+        box-sizing: border-box !important;
+        transition: all 0.2s ease !important;
+      }
+      .fs-tag-modal-input:focus {
+        border-color: #a78bfa !important;
+        background: rgba(167, 139, 250, 0.08) !important;
+        box-shadow: 0 0 16px rgba(167, 139, 250, 0.25) !important;
+      }
+      .fs-tag-assign-list {
+        max-height: 40vh !important;
+        overflow-y: auto !important;
+        padding: 6px 24px !important;
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 8px !important;
+      }
+      .fs-tag-assign-row {
+        display: flex !important;
+        align-items: center !important;
+        justify-content: space-between !important;
+        padding: 9px 14px !important;
+        border-radius: 14px !important;
+        background: rgba(255, 255, 255, 0.03) !important;
+        border: 1px solid rgba(255, 255, 255, 0.06) !important;
+        cursor: pointer !important;
+        transition: all 0.18s ease !important;
+      }
+      .fs-tag-assign-row:hover {
+        background: rgba(255, 255, 255, 0.07) !important;
+        border-color: rgba(255, 255, 255, 0.12) !important;
+      }
+      .fs-tag-assign-row.is-checked {
+        background: rgba(167, 139, 250, 0.12) !important;
+        border-color: rgba(167, 139, 250, 0.35) !important;
+      }
+      .fs-tag-assign-row.is-partial {
+        background: rgba(245, 158, 11, 0.08) !important;
+        border-color: rgba(245, 158, 11, 0.25) !important;
+      }
+      .fs-tag-assign-row-left {
+        display: flex !important;
+        align-items: center !important;
+        gap: 12px !important;
+      }
+      .fs-tag-assign-thumb {
+        width: 36px !important;
+        height: 36px !important;
+        border-radius: 9px !important;
+        background-size: cover !important;
+        background-position: center !important;
+        flex-shrink: 0 !important;
+        border: 1px solid rgba(255, 255, 255, 0.1) !important;
+      }
+      .fs-tag-assign-name-wrap {
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 2px !important;
+      }
+      .fs-tag-assign-name {
+        font-size: 13.5px !important;
+        font-weight: 600 !important;
+        color: #ffffff !important;
+      }
+      .fs-tag-assign-count {
+        font-size: 11px !important;
+        color: rgba(255, 255, 255, 0.45) !important;
+      }
+      .fs-tag-assign-checkbox {
+        width: 22px !important;
+        height: 22px !important;
+        border-radius: 7px !important;
+        border: 1.5px solid rgba(255, 255, 255, 0.25) !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        font-size: 13px !important;
+        font-weight: bold !important;
+        color: #ffffff !important;
+        transition: all 0.18s ease !important;
+      }
+      .fs-tag-assign-checkbox.checked {
+        background: linear-gradient(135deg, #8b5cf6, #6d28d9) !important;
+        border-color: #a78bfa !important;
+        box-shadow: 0 0 12px rgba(139, 92, 246, 0.4) !important;
+      }
+      .fs-tag-assign-checkbox.partial {
+        background: rgba(245, 158, 11, 0.8) !important;
+        border-color: #fbbf24 !important;
+      }
+      .fs-tag-assign-quick-create {
+        display: flex !important;
+        align-items: center !important;
+        gap: 8px !important;
+        padding: 10px 24px !important;
+        border-top: 1px solid rgba(255, 255, 255, 0.06) !important;
+      }
+      .fs-multiselect-bar-container {
+        position: fixed !important;
+        bottom: calc(env(safe-area-inset-bottom, 0px) + 90px) !important;
+        left: 50% !important;
+        transform: translateX(-50%) !important;
+        z-index: 99990 !important;
+        max-width: 92vw !important;
+        animation: feishinMenuCenterPop 0.25s cubic-bezier(0.16, 1, 0.3, 1) !important;
+      }
+      .fs-multiselect-bar-glass {
+        display: flex !important;
+        align-items: center !important;
+        gap: 14px !important;
+        background: rgba(18, 18, 28, 0.92) !important;
+        border: 1px solid rgba(167, 139, 250, 0.35) !important;
+        border-radius: 20px !important;
+        padding: 8px 16px !important;
+        backdrop-filter: blur(24px) saturate(190%) !important;
+        -webkit-backdrop-filter: blur(24px) saturate(190%) !important;
+        box-shadow: 0 16px 48px rgba(0, 0, 0, 0.75), 0 0 24px rgba(139, 92, 246, 0.25) !important;
+      }
+      .fs-multiselect-bar-info {
+        display: flex !important;
+        align-items: center !important;
+        gap: 8px !important;
+      }
+      .fs-multiselect-bar-count-badge {
+        min-width: 24px !important;
+        height: 24px !important;
+        padding: 0 6px !important;
+        border-radius: 99px !important;
+        background: #8b5cf6 !important;
+        color: #ffffff !important;
+        font-size: 12px !important;
+        font-weight: 700 !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+      }
+      .fs-multiselect-bar-label {
+        font-size: 13px !important;
+        font-weight: 600 !important;
+        color: #ffffff !important;
+        white-space: nowrap !important;
+      }
+      .fs-multiselect-bar-actions {
+        display: flex !important;
+        align-items: center !important;
+        gap: 8px !important;
+      }
+      .fs-ms-btn {
+        padding: 7px 12px !important;
+        border-radius: 10px !important;
+        font-size: 12px !important;
+        font-weight: 600 !important;
+        cursor: pointer !important;
+        transition: all 0.15s ease !important;
+        border: 1px solid transparent !important;
+        white-space: nowrap !important;
+      }
+      .fs-ms-btn-secondary {
+        background: rgba(255, 255, 255, 0.08) !important;
+        border-color: rgba(255, 255, 255, 0.12) !important;
+        color: rgba(255, 255, 255, 0.85) !important;
+      }
+      .fs-ms-btn-secondary:hover {
+        background: rgba(255, 255, 255, 0.15) !important;
+        color: #ffffff !important;
+      }
+      .fs-ms-btn-primary {
+        background: linear-gradient(135deg, #8b5cf6, #6d28d9) !important;
+        border-color: rgba(255, 255, 255, 0.25) !important;
+        color: #ffffff !important;
+        box-shadow: 0 4px 14px rgba(109, 40, 217, 0.4) !important;
+      }
+      .fs-ms-btn-primary:hover {
+        filter: brightness(1.15) !important;
+        transform: translateY(-1px) !important;
+      }
+      .fs-ms-btn-close {
+        background: rgba(255, 255, 255, 0.05) !important;
+        color: rgba(255, 255, 255, 0.6) !important;
+        padding: 7px 10px !important;
+      }
+      .fs-ms-btn-close:hover {
+        background: rgba(239, 68, 68, 0.2) !important;
+        color: #ffffff !important;
+      }
+      .fs-multiselect-indicator {
+        width: 20px !important;
+        height: 20px !important;
+        border-radius: 50% !important;
+        border: 2px solid rgba(255, 255, 255, 0.3) !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        font-size: 11px !important;
+        font-weight: bold !important;
+        color: #ffffff !important;
+        margin-right: 8px !important;
+        flex-shrink: 0 !important;
+        cursor: pointer !important;
+        transition: all 0.15s ease !important;
+      }
+      .fs-multiselect-indicator.checked {
+        background: #8b5cf6 !important;
+        border-color: #a78bfa !important;
+        box-shadow: 0 0 10px rgba(139, 92, 246, 0.5) !important;
+      }
+      .fs-row-is-selected {
+        background: rgba(139, 92, 246, 0.12) !important;
+        border-left: 3px solid #8b5cf6 !important;
+      }
+    `;
+    document.head.appendChild(style);
   }
-
   // 5. TAGS PAGE VIEW RENDERER (Hero Boxes & Tag Editor + Tabs View)
   function initTagsPageRouter() {
     function checkRoute() {
@@ -1595,6 +2496,11 @@
   // 6. INITIALIZATION
   function startTagsEngine() {
     try {
+      injectTagCustomStyles();
+    } catch (e) {
+      console.error('[Tags Engine] Erro ao injetar estilos de tags:', e);
+    }
+    try {
       initContextMenuObserver();
     } catch (e) {
       console.error('[Tags Engine] Erro ao iniciar context menu observer:', e);
@@ -1604,7 +2510,22 @@
     } catch (e) {
       console.error('[Tags Engine] Erro ao iniciar router de tags:', e);
     }
-    console.log('[Tags Engine] Sistema de Tags carregado e ativo.');
+    try {
+      initReactiveBadgesObserver();
+    } catch (e) {
+      console.error('[Tags Engine] Erro ao iniciar reactive badges observer:', e);
+    }
+    try {
+      initHeaderSelectButtonObserver();
+    } catch (e) {
+      console.error('[Tags Engine] Erro ao iniciar header select observer:', e);
+    }
+    try {
+      engine.updateAllVisibleTrackBadges();
+    } catch (e) {
+      console.error('[Tags Engine] Erro ao atualizar badges iniciais:', e);
+    }
+    console.log('[Tags Engine] Sistema de Tags & Multi-Select carregado e ativo.');
   }
 
   if (document.readyState === 'loading') {

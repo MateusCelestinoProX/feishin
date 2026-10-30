@@ -285,8 +285,18 @@ export const PlayerProvider = ({ children }: { children: React.ReactNode }) => {
                 resolvedContextId !== null ||
                 (data.length > 0 && (data[0] as any)._itemType === LibraryItem.PLAYLIST_SONG);
 
-            if (!isPlaylist && type === Play.NOW && playSongId && filteredData.length > 1) {
-                const targetSong = filteredData.find((s) => s.id === playSongId) || filteredData[0];
+            const isNextOrLast =
+                type === Play.NEXT ||
+                type === Play.LAST ||
+                type === Play.NEXT_SHUFFLE ||
+                type === Play.LAST_SHUFFLE;
+
+            if (typeof window !== 'undefined') {
+                (window as any).__FEISHIN_HAS_ENQUEUED_ITEMS__ = isNextOrLast;
+            }
+
+            if (!isPlaylist && type === Play.NOW && filteredData.length > 1) {
+                const targetSong = (playSongId && filteredData.find((s) => s.id === playSongId)) || filteredData[0];
                 if (targetSong) {
                     if (typeof window !== 'undefined') {
                         (window as any).__FEISHIN_ACTIVE_COLLECTION__ = {
@@ -419,6 +429,21 @@ export const PlayerProvider = ({ children }: { children: React.ReactNode }) => {
                         : null);
                 if (resolvedContextId) {
                     filteredSongs = tagPlaylistContext(filteredSongs, resolvedContextId);
+                }
+
+                if (itemType !== LibraryItem.PLAYLIST && type === Play.NOW && filteredSongs.length > 1) {
+                    const targetSong = (options?.playSongId && filteredSongs.find((s) => s.id === options.playSongId)) || filteredSongs[0];
+                    if (targetSong) {
+                        if (typeof window !== 'undefined') {
+                            (window as any).__FEISHIN_ACTIVE_COLLECTION__ = {
+                                items: filteredSongs,
+                                currentIndex: filteredSongs.indexOf(targetSong),
+                                isShuffle: false,
+                            };
+                            (window as any).__FEISHIN_HAS_ENQUEUED_ITEMS__ = false;
+                        }
+                        filteredSongs = [targetSong];
+                    }
                 }
 
                 const addToQueue = () => {

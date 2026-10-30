@@ -157,6 +157,31 @@ if (!require$$0.ipcMain.eventNames().includes("request-open-settings")) {
     }
   });
 }
+
+if (!require$$0.ipcMain.eventNames().includes("window-set-fullscreen")) {
+  require$$0.ipcMain.on("window-set-fullscreen", (_event, flag) => {
+    if (mainWindow && !mainWindow.isDestroyed()) {
+      mainWindow.setFullScreen(flag !== undefined ? !!flag : !mainWindow.isFullScreen());
+      store.set("fullscreen", mainWindow.isFullScreen());
+    }
+  });
+}
+
+if (!require$$0.ipcMain.eventNames().includes("window-toggle-fullscreen")) {
+  require$$0.ipcMain.on("window-toggle-fullscreen", () => {
+    if (mainWindow && !mainWindow.isDestroyed()) {
+      const next = !mainWindow.isFullScreen();
+      mainWindow.setFullScreen(next);
+      store.set("fullscreen", next);
+    }
+  });
+}
+
+if (!require$$0.ipcMain.eventNames().includes("window-is-fullscreen")) {
+  require$$0.ipcMain.handle("window-is-fullscreen", () => {
+    return mainWindow && !mainWindow.isDestroyed() ? mainWindow.isFullScreen() : false;
+  });
+}
 """
 
     replacement = helper_code + """
@@ -233,6 +258,30 @@ if (!require$$0.ipcMain.eventNames().includes("request-open-settings")) {
   mainWindow.on("restore", () => {
     mainWindow?.webContents.send("window-visibility-state", true);
   });
+  mainWindow.on("enter-full-screen", () => {
+    store.set("fullscreen", true);
+    mainWindow?.webContents.send("window-fullscreen-state", true);
+  });
+  mainWindow.on("leave-full-screen", () => {
+    store.set("fullscreen", false);
+    mainWindow?.webContents.send("window-fullscreen-state", false);
+  });
+  try {
+    electronLocalShortcut.register(mainWindow, "CommandOrControl+Control+F", () => {
+      if (mainWindow && !mainWindow.isDestroyed()) {
+        const next = !mainWindow.isFullScreen();
+        mainWindow.setFullScreen(next);
+        store.set("fullscreen", next);
+      }
+    });
+    electronLocalShortcut.register(mainWindow, "F11", () => {
+      if (mainWindow && !mainWindow.isDestroyed()) {
+        const next = !mainWindow.isFullScreen();
+        mainWindow.setFullScreen(next);
+        store.set("fullscreen", next);
+      }
+    });
+  } catch (e) {}
   mainWindow.webContents.on("unresponsive", () => {
     log.error("Renderer process unresponsive");
     setTimeout(() => {
@@ -284,6 +333,39 @@ if (process.platform === "darwin") {
     else:
         print("[!] Aviso: Target Flags não encontrado em out/main/index.js.")
 
+    # Patch Real Full Screen BrowserWindow Options
+    target_win_opts = 'mainWindow = new require$$0.BrowserWindow({\n    autoHideMenuBar: true,\n    frame: false,'
+    replacement_win_opts = 'mainWindow = new require$$0.BrowserWindow({\n    autoHideMenuBar: true,\n    frame: false,\n    fullscreenable: true,\n    simpleFullscreen: false,'
+    if target_win_opts in content:
+        content = content.replace(target_win_opts, replacement_win_opts, 1)
+        print("[✓] Patch BrowserWindow fullscreenable & simpleFullscreen aplicado.")
+    elif "fullscreenable: true" in content:
+        print("[-] Patch BrowserWindow fullscreenable já presente.")
+
+    # Patch Real Full Screen Startup macOS
+    target_show = """      const maximized = store.get("maximized");
+      const fullScreen = store.get("fullscreen");
+      if (maximized) {
+        mainWindow.maximize();
+      }
+      if (fullScreen) {
+        mainWindow.setFullScreen(true);
+      }"""
+
+    replacement_show = """      const maximized = store.get("maximized");
+      const fullScreen = store.get("fullscreen", process.platform === "darwin");
+      if (fullScreen !== false && (process.platform === "darwin" || fullScreen)) {
+        mainWindow.setFullScreen(true);
+        store.set("fullscreen", true);
+      } else if (maximized) {
+        mainWindow.maximize();
+      }"""
+    if target_show in content:
+        content = content.replace(target_show, replacement_show, 1)
+        print("[✓] Patch Real Full Screen Startup macOS aplicado.")
+    elif 'store.get("fullscreen", process.platform === "darwin")' in content:
+        print("[-] Patch Real Full Screen Startup macOS já presente.")
+
     with open(main_js_path, "w", encoding="utf-8") as f:
         f.write(content)
     return True
@@ -313,18 +395,55 @@ const ipc = {
   on
 };"""
 
+    target_browser = """const browser = {
+  clearCache,
+  devtools,
+  exit,
+  maximize,
+  minimize,
+  quit: quit$2,
+  unmaximize
+};"""
+
+    replacement_browser = """const setFullScreen = (flag) => {
+  electron.ipcRenderer.send("window-set-fullscreen", flag);
+};
+const toggleFullScreen = () => {
+  electron.ipcRenderer.send("window-toggle-fullscreen");
+};
+const isFullScreen = () => {
+  return electron.ipcRenderer.invoke("window-is-fullscreen");
+};
+const browser = {
+  clearCache,
+  devtools,
+  exit,
+  maximize,
+  minimize,
+  quit: quit$2,
+  unmaximize,
+  setFullScreen,
+  toggleFullScreen,
+  isFullScreen
+};"""
+
+    if target_browser in content:
+        content = content.replace(target_browser, replacement_browser, 1)
+        print("[✓] Patch browser.setFullScreen aplicado em out/preload/index.js.")
+    elif "setFullScreen" in content:
+        print("[-] Patch browser.setFullScreen já presente em out/preload/index.js.")
+
     if target in content:
         content = content.replace(target, replacement, 1)
-        with open(preload_js_path, "w", encoding="utf-8") as f:
-            f.write(content)
         print("[✓] Patch aplicado em out/preload/index.js com sucesso.")
-        return True
     elif "on: (channel, listener)" in content or "const ipc = {\n  removeAllListeners,\n  removeListener,\n  send,\n  on" in content:
         print("[-] Patch já presente em out/preload/index.js.")
-        return True
     else:
         print("[!] Aviso: Target não encontrado em out/preload/index.js.")
-        return False
+
+    with open(preload_js_path, "w", encoding="utf-8") as f:
+        f.write(content)
+    return True
 
 if __name__ == "__main__":
     if len(sys.argv) < 3:

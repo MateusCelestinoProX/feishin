@@ -143,7 +143,7 @@ def main():
     # 9. Relaunch seguro se estava em execução
     if feishin_was_running:
         print("[*] Reiniciando Feishin com depuração ativa...")
-        subprocess.Popen(["open", "-a", "/Applications/Feishin.app", "--args", "--remote-debugging-port=9222"])
+        subprocess.Popen(["open", "-a", "/Applications/Feishin.app", "--args", "--remote-debugging-port=9223"])
         time.sleep(1.5)
         print("[✓] Feishin reiniciado e operando normalmente.")
 

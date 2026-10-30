@@ -52,9 +52,9 @@ def patch_bundle(file_path):
         ('{className:es.lineItem,onClick:L,children:p.jsxs(It,{align:\\"center\\"', '{className:es.lineItem,onClick:void 0,children:p.jsxs(It,{align:\\"center\\"'),
         ('secondary,js.songArtist),onClick:L,children:p.jsx(ug,{artistName:(l==n', 'secondary,js.songArtist),onClick:void 0,children:p.jsx(ug,{artistName:(l==n'),
         ('.secondary,js.songAlbum),onClick:L,children:p.jsx(Ve,{component:Or,fw:', '.secondary,js.songAlbum),onClick:void 0,children:p.jsx(Ve,{component:Or,fw:'),
-        # 2.1 Reprodutor Tela Dividida em 2 (Capa + Fila Integrada) e remoção da fila lateral
+        # 2.1 Reprodutor: manter activeTab:"" por padrão (modo simples de música em música sem fila aberta)
         ('function XHt(t){return{collapsed:t.sidebar.collapsed,image:t.sidebar.image}}', 'function XHt(t){return{collapsed:t.sidebar.collapsed,image:!1}}'),
-        ('activeTab:"",coverArtSize:75', 'activeTab:"queue",coverArtSize:75'),
+        ('activeTab:"queue",coverArtSize:75', 'activeTab:"",coverArtSize:75'),
         ('r==="sideQueue"?n({rightExpanded:!a}):s(JWt)', 'n({rightExpanded:!1}),(document.querySelector(".fs-left-controls-module-image")||document.querySelector("#player-bar img"))?.click()')
     ]
 
@@ -195,16 +195,24 @@ def patch_bundle(file_path):
         else:
             print(f"[!] Aviso: Padrão Menu de Contexto não encontrado: {old[:35]}...")
 
-    # 9. Patch de Fila Completa de Reprodução (Elimina singleSongOnly e garante que Avançar/Retroceder sempre funcionem)
+    # 9. Patch de Fila Unitária Inteligente: Fila só com playlist ou adicionar a seguir
     replacements_queue_playback = [
-        # 9.1 Ao reproduzir na tabela, priorizar lista completa de faixas (e.getData())
+        # 9.1 Ao reproduzir na tabela (f9t):
+        # Se playlist -> carrega faixas da playlist
+        # Se adicionar a seguir (NEXT/LAST) -> carrega [a] e ativa flag
+        # Salvo esses 2 casos -> modo simples unitário [a], salva coleção em __FEISHIN_ACTIVE_COLLECTION__
+        ('f9t=({index:t,internalState:e,item:a,meta:n,player:r})=>{const i=(n==null?void 0:n.playType)||Gt.NOW,s=e==null?void 0:e.getData();if(s&&s.length>1&&t!==void 0){r.addToQueueByData(s,i,a.id);return}if((n==null?void 0:n.singleSongOnly)===!0){r.addToQueueByData([a],i,a.id);return}t!==void 0&&s&&r.addToQueueByData(s,i,a.id)}',
+         'f9t=({index:t,internalState:e,item:a,meta:n,player:r})=>{const i=(n==null?void 0:n.playType)||Gt.NOW,s=e==null?void 0:e.getData(),isP=a?._itemType==="playlist_song"||(n==null?void 0:n.isPlaylist)===!0||(window.location.hash||"").startsWith("#/playlist"),isNextOrLast=i===Gt.NEXT||i===Gt.LAST||i===Gt.NEXT_SHUFFLE||i===Gt.LAST_SHUFFLE;if(isNextOrLast){window.__FEISHIN_HAS_ENQUEUED_ITEMS__=!0;r.addToQueueByData([a],i,a.id);return;}if(isP&&s&&s.length>0&&t!==void 0){window.__FEISHIN_HAS_ENQUEUED_ITEMS__=!1;r.addToQueueByData(s,i,a.id);return;}window.__FEISHIN_HAS_ENQUEUED_ITEMS__=!1;if(s&&t!==void 0){window.__FEISHIN_ACTIVE_COLLECTION__={items:s,currentIndex:t,isShuffle:!1};}r.addToQueueByData([a],i,a.id);}'),
+
         ('f9t=({index:t,internalState:e,item:a,meta:n,player:r})=>{const i=(n==null?void 0:n.playType)||Gt.NOW;if((n==null?void 0:n.singleSongOnly)===!0){r.addToQueueByData([a],i,a.id);return}const s=e==null?void 0:e.getData();t!==void 0&&s&&r.addToQueueByData(s,i,a.id)}',
-         'f9t=({index:t,internalState:e,item:a,meta:n,player:r})=>{const i=(n==null?void 0:n.playType)||Gt.NOW,s=e==null?void 0:e.getData();if(s&&s.length>1&&t!==void 0){r.addToQueueByData(s,i,a.id);return}if((n==null?void 0:n.singleSongOnly)===!0){r.addToQueueByData([a],i,a.id);return}t!==void 0&&s&&r.addToQueueByData(s,i,a.id)}'),
-        # 9.2 Ao reproduzir faixa individual, sempre carregar fatia de 100 faixas ao redor em vez de apenas [g]
-        ('const R=(v==null?void 0:v.playType)||Gt.NOW,E=(v==null?void 0:v.singleSongOnly)===!0;let T;if(E||R===Gt.NEXT||R===Gt.LAST||R===Gt.NEXT_SHUFFLE||R===Gt.LAST_SHUFFLE)T=[g];',
-         'const R=(v==null?void 0:v.playType)||Gt.NOW,E=!1;let T;if(R===Gt.NEXT||R===Gt.LAST||R===Gt.NEXT_SHUFFLE||R===Gt.LAST_SHUFFLE)T=[g];'),
-        # 9.3 Substituir todas as chamadas forçadas de singleSongOnly:!0 por singleSongOnly:!1
-        ('singleSongOnly:!0', 'singleSongOnly:!1')
+         'f9t=({index:t,internalState:e,item:a,meta:n,player:r})=>{const i=(n==null?void 0:n.playType)||Gt.NOW,s=e==null?void 0:e.getData(),isP=a?._itemType==="playlist_song"||(n==null?void 0:n.isPlaylist)===!0||(window.location.hash||"").startsWith("#/playlist"),isNextOrLast=i===Gt.NEXT||i===Gt.LAST||i===Gt.NEXT_SHUFFLE||i===Gt.LAST_SHUFFLE;if(isNextOrLast){window.__FEISHIN_HAS_ENQUEUED_ITEMS__=!0;r.addToQueueByData([a],i,a.id);return;}if(isP&&s&&s.length>0&&t!==void 0){window.__FEISHIN_HAS_ENQUEUED_ITEMS__=!1;r.addToQueueByData(s,i,a.id);return;}window.__FEISHIN_HAS_ENQUEUED_ITEMS__=!1;if(s&&t!==void 0){window.__FEISHIN_ACTIVE_COLLECTION__={items:s,currentIndex:t,isShuffle:!1};}r.addToQueueByData([a],i,a.id);}'),
+
+        # 9.2 Ao reproduzir faixa individual pelo item-list-controls (findIndex...):
+        ('.findIndex(L=>L.id===A);const R=(v==null?void 0:v.playType)||Gt.NOW,E=!1;let T;if(R===Gt.NEXT||R===Gt.LAST||R===Gt.NEXT_SHUFFLE||R===Gt.LAST_SHUFFLE)T=[g];',
+         '.findIndex(L=>L.id===A);const R=(v==null?void 0:v.playType)||Gt.NOW,isP=b===he.PLAYLIST_SONG||(window.location.hash||"").startsWith("#/playlist"),isNextOrLast=R===Gt.NEXT||R===Gt.LAST||R===Gt.NEXT_SHUFFLE||R===Gt.LAST_SHUFFLE;let T;if(isNextOrLast){window.__FEISHIN_HAS_ENQUEUED_ITEMS__=!0;T=[g];}else if(isP&&_.length>0&&C!==-1){window.__FEISHIN_HAS_ENQUEUED_ITEMS__=!1;T=_;o.current.addToQueueByData(T,R,g.id);return;}else{window.__FEISHIN_HAS_ENQUEUED_ITEMS__=!1;T=[g];if(_.length>0&&C!==-1){window.__FEISHIN_ACTIVE_COLLECTION__={items:_,currentIndex:C,isShuffle:!1};}}if(!T||T.length===0)T=[g];o.current.addToQueueByData(T,R,g.id);return}if(b===he.QUEUE_SONG){const S=g;S._uniqueId'),
+
+        ('.findIndex(L=>L.id===A);const R=(v==null?void 0:v.playType)||Gt.NOW,E=(v==null?void 0:v.singleSongOnly)===!0;let T;if(E||R===Gt.NEXT||R===Gt.LAST||R===Gt.NEXT_SHUFFLE||R===Gt.LAST_SHUFFLE||_.length===0||C===-1)T=[g];else{const M=Math.max(0,C-50),F=Math.min(_.length,C+50+1);T=_.slice(M,F)}if(!T||T.length===0)T=[g];o.current.addToQueueByData(T,R,g.id);return}',
+         '.findIndex(L=>L.id===A);const R=(v==null?void 0:v.playType)||Gt.NOW,isP=b===he.PLAYLIST_SONG||(window.location.hash||"").startsWith("#/playlist"),isNextOrLast=R===Gt.NEXT||R===Gt.LAST||R===Gt.NEXT_SHUFFLE||R===Gt.LAST_SHUFFLE;let T;if(isNextOrLast){window.__FEISHIN_HAS_ENQUEUED_ITEMS__=!0;T=[g];}else if(isP&&_.length>0&&C!==-1){window.__FEISHIN_HAS_ENQUEUED_ITEMS__=!1;T=_;o.current.addToQueueByData(T,R,g.id);return;}else{window.__FEISHIN_HAS_ENQUEUED_ITEMS__=!1;T=[g];if(_.length>0&&C!==-1){window.__FEISHIN_ACTIVE_COLLECTION__={items:_,currentIndex:C,isShuffle:!1};}}if(!T||T.length===0)T=[g];o.current.addToQueueByData(T,R,g.id);return}')
     ]
 
     for old, new in replacements_queue_playback:

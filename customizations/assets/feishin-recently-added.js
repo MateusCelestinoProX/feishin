@@ -522,6 +522,14 @@
               </svg>
               <span>Aleatório</span>
             </button>
+
+            <button type="button" class="ra-glass-btn" id="ra-btn-select-mode" title="Selecionar faixas em lote">
+              <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="9 11 12 14 22 4"/>
+                <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
+              </svg>
+              <span>${window.TagsEngine?.isMultiSelectActive ? 'Cancelar' : 'Selecionar'}</span>
+            </button>
           </div>
 
           <div class="ra-search-wrap">
@@ -592,7 +600,7 @@
                       const creationStr = formatCreationDate(song.creationTime, song);
 
                       return `
-                        <div class="ra-tracklist-row ra-mobile-track-row ${isPlaying ? 'is-playing' : ''}" data-id="${song.id}" data-index="${idx}">
+                        <div class="ra-tracklist-row ra-mobile-track-row ${isPlaying ? 'is-playing' : ''}" role="row" data-id="${song.id}" data-index="${idx}">
                           <div class="ra-col-idx ra-mobile-col-idx">
                             ${isPlaying ? `
                               <div class="ra-mini-equalizer">
@@ -611,7 +619,10 @@
                           </div>
 
                           <div class="ra-mobile-track-info">
-                            <div class="ra-track-title">${escapeHtml(song.name || song.title || 'Faixa')}</div>
+                            <div class="ra-track-title">
+                              ${escapeHtml(song.name || song.title || 'Faixa')}
+                              ${window.TagsEngine?.renderTagBadgesHtml ? window.TagsEngine.renderTagBadgesHtml(song) : ''}
+                            </div>
                             <div class="ra-mobile-meta-line">
                               <span class="ra-track-artist">${escapeHtml(song.artistName || (song.artists?.[0]?.name) || '[Unknown Artist]')}</span>
                               <span class="ra-meta-dot">•</span>
@@ -654,7 +665,7 @@
                         const creationStr = formatCreationDate(song.creationTime, song);
 
                         return `
-                          <tr class="ra-tracklist-row ${isPlaying ? 'is-playing' : ''}" data-id="${song.id}" data-index="${idx}">
+                          <tr class="ra-tracklist-row ${isPlaying ? 'is-playing' : ''}" role="row" data-id="${song.id}" data-index="${idx}">
                             <td class="ra-col-idx">
                               ${isPlaying ? `
                                 <div class="ra-mini-equalizer">
@@ -671,7 +682,10 @@
                               </div>
                             </td>
                             <td class="ra-track-title-cell">
-                              <div class="ra-track-title">${escapeHtml(song.name || song.title || 'Faixa')}</div>
+                              <div class="ra-track-title">
+                                ${escapeHtml(song.name || song.title || 'Faixa')}
+                                ${window.TagsEngine?.renderTagBadgesHtml ? window.TagsEngine.renderTagBadgesHtml(song) : ''}
+                              </div>
                               <div class="ra-track-artist">${escapeHtml(song.artistName || (song.artists?.[0]?.name) || '[Unknown Artist]')}</div>
                             </td>
                             <td>
@@ -731,6 +745,20 @@
       renderViewContent();
     });
 
+    // Select Mode Button
+    const selectBtn = container.querySelector('#ra-btn-select-mode');
+    if (selectBtn) {
+      selectBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (window.AndroidBridge?.vibrate) window.AndroidBridge.vibrate(15);
+        if (window.TagsEngine) {
+          window.TagsEngine.setMultiSelectActive(!window.TagsEngine.isMultiSelectActive);
+          const span = selectBtn.querySelector('span');
+          if (span) span.innerText = window.TagsEngine.isMultiSelectActive ? 'Cancelar' : 'Selecionar';
+        }
+      });
+    }
+
     // Play Section Button
     container.querySelectorAll('.ra-section-play-btn').forEach(btn => {
       btn.addEventListener('click', (e) => {
@@ -745,9 +773,15 @@
     container.querySelectorAll('.ra-tracklist-row').forEach(row => {
       const handlePlay = (e) => {
         if (e.target.closest('#ra-search-clear') || e.target.closest('.ra-section-play-btn')) return;
+        if (e.target.closest('.fs-track-tag-badge')) return;
+        if (e.target.closest('.fs-multiselect-indicator')) return;
         const id = row.getAttribute('data-id');
         const song = cachedSongs.find(s => s.id === id);
         if (song) {
+          if (window.TagsEngine?.isMultiSelectActive) {
+            window.TagsEngine.toggleSongSelection(song);
+            return;
+          }
           if (window.AndroidBridge?.vibrate) window.AndroidBridge.vibrate(12);
           playTrack(song, getFilteredSongs(), Number(row.getAttribute('data-index') || 0));
         }
@@ -1030,7 +1064,9 @@
     playAll,
     playGroup,
     getSongs: () => cachedSongs,
+    getCachedSongs: () => cachedSongs,
     reload: loadInitialSongs
   };
+  window.FeishinRecentlyAdded = window.__FEISHIN_RECENTLY_ADDED__;
 
 })();
