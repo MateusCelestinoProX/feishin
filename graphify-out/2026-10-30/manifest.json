@@ -24,9 +24,9 @@
     "semantic_hash": ""
   },
   "customizations/assets/webgl-backgrounds.js": {
-    "mtime": 1793289841.068756,
-    "seen": 1793290314.6649249,
-    "ast_hash": "4699f0d574c5d470b08720e045f8eade",
+    "mtime": 1793390574.087913,
+    "seen": 1793390575.209118,
+    "ast_hash": "751bf06eccb912b9f06efabac02a03fe",
     "semantic_hash": ""
   },
   "customizations/i18n/feishin_pt_full.json": {
@@ -72,9 +72,9 @@
     "semantic_hash": ""
   },
   "customizations/index.html": {
-    "mtime": 1793290157.2399983,
-    "seen": 1793290314.6658921,
-    "ast_hash": "914e7ac63ebd882e17b39ff1a1ad3728",
+    "mtime": 1793390487.9177744,
+    "seen": 1793390575.2100852,
+    "ast_hash": "d173a48f41264041c61e6c758482c551",
     "semantic_hash": ""
   },
   "customizations/patches/patch_main.py": {
@@ -102,9 +102,9 @@
     "semantic_hash": ""
   },
   "customizations/assets/feishin-tags-engine.js": {
-    "mtime": 1793390361.5274372,
-    "seen": 1793390420.777458,
-    "ast_hash": "f67690eda2b7a9e1a6279d8a41422dd5",
+    "mtime": 1793390503.192665,
+    "seen": 1793390575.209109,
+    "ast_hash": "7e3eda4243bf494b93c16b674ed61df7",
     "semantic_hash": ""
   },
   "scripts/test_tags_system.mjs": {
@@ -1140,9 +1140,9 @@
     "semantic_hash": ""
   },
   "src/renderer/assets/custom/feishin-tags-engine.js": {
-    "mtime": 1793390331.8370247,
-    "seen": 1793390420.777644,
-    "ast_hash": "7b91adf111ed7f4dbbee35a76d42be75",
+    "mtime": 1793390536.9507344,
+    "seen": 1793390575.209292,
+    "ast_hash": "7e3eda4243bf494b93c16b674ed61df7",
     "semantic_hash": ""
   },
   "src/renderer/assets/custom/music-analytics.js": {
@@ -1170,9 +1170,9 @@
     "semantic_hash": ""
   },
   "src/renderer/assets/custom/webgl-backgrounds.js": {
-    "mtime": 1793289845.7637281,
-    "seen": 1793290314.6651,
-    "ast_hash": "4699f0d574c5d470b08720e045f8eade",
+    "mtime": 1793390574.0981386,
+    "seen": 1793390575.209298,
+    "ast_hash": "751bf06eccb912b9f06efabac02a03fe",
     "semantic_hash": ""
   },
   "src/renderer/components/drag-preview/drag-preview.tsx": {

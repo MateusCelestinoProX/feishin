@@ -66,6 +66,12 @@ Motor gráfico em tempo real renderizado sobre OGL (`ogl.js` + `webgl-background
 - **Preservação de Chegada Real no Android**: Respeita rigorosamente a cronologia factual de gravação dos arquivos de áudio (`date_modified`), mapeada e documentada em [`docs/CHRONOLOGY_ARCHITECTURE.md`](docs/CHRONOLOGY_ARCHITECTURE.md).
 - **Ingestão Subsonic Contínua & Forward-Compatibility**: Novas faixas adicionadas ao Navidrome são inseridas diretamente no topo via data de criação/upload com agrupamento inteligente de datas.
 
+### 13. 🎵 Normalização & Higienização em Massa de Metadados (Navidrome Pipeline)
+- **Pipeline Automatizado de 1.736 Faixas (~17 GB)**: Resolução heurística de canais de rip, canonização online via iTunes Store e MusicBrainz APIs, sanitização de sistema de arquivos e suporte total a grafias Unicode internacionais (CJK, cirílico e acentuação).
+- **Preservação Acústica Rigorosa**: Modificadores sonoros essenciais (`(Slowed + Reverb)`, `(Sped Up)`, `(Remix)`, `(Remastered)`) foram mantidos como características legítimas de cada faixa.
+- **Sincronização Multi-Cliente**: Propagação e invalidação de cache a quente nos clientes **Feishin macOS** (purge de caches Electron) e **Feishin Android** (via protocolo CDP / ADB).
+- **Documentação de Engenharia**: Detalhes completos dos algoritmos, esquema SQLite de auditoria e procedimentos de rollback em [`docs/LIBRARY_NORMALIZATION_ARCHITECTURE.md`](docs/LIBRARY_NORMALIZATION_ARCHITECTURE.md).
+
 ---
 
 ## 📂 Estrutura do Repositório
