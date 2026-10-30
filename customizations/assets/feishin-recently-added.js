@@ -81,6 +81,9 @@
     return '';
   }
 
+  // Baseline de corte: 23 de Outubro de 2026 às 12:32:16 (última música registrada no snapshot Samsung)
+  const SAMSUNG_BASELINE_CUTOFF_MS = 1792769536000;
+
   function normalizeSong(s, serverId, serverType = 'subsonic') {
     const durSec = s.duration || 0;
     const durMs = durSec > 10000 ? durSec : Math.round(durSec * 1000);
@@ -90,15 +93,13 @@
     let creationTime = s.created || s.birthTime || s.createdAt || s.updatedAt || new Date().toISOString();
     let formattedDate = null;
     let isSamsungOrder = false;
+    let sortTimestamp = 0;
 
     if (chrono) {
       rank = typeof chrono.rank === 'number' ? chrono.rank : 999999;
-      if (chrono.isoDate) {
-        creationTime = chrono.isoDate;
-      }
-      if (chrono.formatted) {
-        formattedDate = chrono.formatted;
-      } else if (chrono.date_modified) {
+      if (chrono.isoDate) creationTime = chrono.isoDate;
+      if (chrono.formatted) formattedDate = chrono.formatted;
+      else if (chrono.date_modified) {
         const cd = new Date(chrono.date_modified * 1000);
         const day = String(cd.getDate()).padStart(2, '0');
         const mo = String(cd.getMonth() + 1).padStart(2, '0');
@@ -108,6 +109,11 @@
         formattedDate = `${day}/${mo}/${yr} às ${hr}:${min}`;
       }
       isSamsungOrder = true;
+      sortTimestamp = (chrono.date_modified ? chrono.date_modified * 1000 : new Date(creationTime).getTime()) || 0;
+    } else {
+      // Nova música adicionada no futuro (chegada ordenada pela data de criação do arquivo)
+      sortTimestamp = new Date(creationTime).getTime() || Date.now();
+      formattedDate = formatCreationDate(creationTime, null);
     }
 
     const coverId = s.coverArt || s.imageId || (s.id ? ('mf-' + s.id) : s.id);
@@ -125,6 +131,7 @@
       birthTime: s.birthTime || s.created || null,
       createdAt: s.createdAt || s.created || null,
       creationTime: creationTime,
+      sortTimestamp: sortTimestamp,
       rank: rank,
       formattedDate: formattedDate,
       isSamsungOrder: isSamsungOrder,
@@ -134,6 +141,20 @@
       _itemType: 'song',
       _uniqueId: 'ra_' + s.id + '_' + Date.now()
     };
+  }
+
+  // Função unificada de ordenação: preserva baseline Samsung histórico e aloca novos arquivos no topo
+  function sortChronologically(songs) {
+    songs.sort((a, b) => {
+      // 1. Ambas as faixas estão no baseline congelado Samsung Music
+      if (a.isSamsungOrder && b.isSamsungOrder) {
+        if (a.rank !== b.rank) return a.rank - b.rank;
+        return b.sortTimestamp - a.sortTimestamp;
+      }
+      // 2. Faixa nova (chegada após baseline) vs Faixa histórica Samsung:
+      // O timestamp de chegada/criação mais recente ganha o topo
+      return b.sortTimestamp - a.sortTimestamp;
+    });
   }
 
   // 2. High-Performance Full Library Ingestion Sorted by Samsung Music MediaStore Order
@@ -158,10 +179,7 @@
         const parsed = JSON.parse(saved);
         if (Array.isArray(parsed) && parsed.length > 0) {
           cachedSongs = parsed.map(s => normalizeSong(s, serverId, serverType));
-          cachedSongs.sort((a, b) => {
-            if (a.rank !== b.rank) return a.rank - b.rank;
-            return new Date(b.creationTime) - new Date(a.creationTime);
-          });
+          sortChronologically(cachedSongs);
           totalRecordCount = cachedSongs.length;
           renderViewContent();
         }
@@ -185,13 +203,7 @@
 
       if (Array.isArray(rawSongs) && rawSongs.length > 0) {
         cachedSongs = rawSongs.map(s => normalizeSong(s, serverId, serverType));
-
-        // Sort strictly by Samsung Music chronological rank, then creationTime DESC
-        cachedSongs.sort((a, b) => {
-          if (a.rank !== b.rank) return a.rank - b.rank;
-          return new Date(b.creationTime) - new Date(a.creationTime);
-        });
-
+        sortChronologically(cachedSongs);
         totalRecordCount = cachedSongs.length;
 
         try {
@@ -222,10 +234,7 @@
           });
           if (qcItems.length > 0) {
             cachedSongs = qcItems.map(s => normalizeSong(s, serverId, serverType));
-            cachedSongs.sort((a, b) => {
-              if (a.rank !== b.rank) return a.rank - b.rank;
-              return new Date(b.creationTime) - new Date(a.creationTime);
-            });
+            sortChronologically(cachedSongs);
             totalRecordCount = cachedSongs.length;
             renderViewContent();
           }
@@ -371,6 +380,7 @@
       'Domingo', 'Segunda-feira', 'Terça-feira', 'Quarta-feira',
       'Quinta-feira', 'Sexta-feira', 'Sábado'
     ];
+    const now = new Date();
 
     songs.forEach(song => {
       let key = '';
@@ -390,19 +400,28 @@
         title = 'Outras Faixas';
         subtitle = 'Sem data registrada';
         icon = '📁';
-      } else if (year >= 2026 && month >= 9) { // October 2026 or later
+      } else if (year >= 2026 && (year > 2026 || month >= 9)) {
+        // Faixas recentes (Outubro de 2026 em diante e todas as novas adições futuras)
         key = `group-day-${year}-${month + 1}-${day}`;
         title = `${day} de ${monthNames[month]} de ${year}`;
         const dow = dayNames[songDate.getDay()];
-        if (day >= 20) {
+
+        const isToday = songDate.toDateString() === now.toDateString();
+        const yesterday = new Date(now);
+        yesterday.setDate(now.getDate() - 1);
+        const isYesterday = songDate.toDateString() === yesterday.toDateString();
+
+        if (isToday) {
+          title = `Hoje (${day} de ${monthNames[month]})`;
           subtitle = `${dow} • Adicionadas recentemente no dispositivo`;
           icon = '⚡';
-        } else if (day >= 10) {
-          subtitle = `${dow} • Adições recentes do mês`;
-          icon = '✨';
+        } else if (isYesterday) {
+          title = `Ontem (${day} de ${monthNames[month]})`;
+          subtitle = `${dow} • Adicionadas recentemente no dispositivo`;
+          icon = '⚡';
         } else {
-          subtitle = `${dow} • Início do mês`;
-          icon = '🔥';
+          subtitle = `${dow} • Linha temporal contínua Samsung Music`;
+          icon = (day >= 20) ? '⚡' : (day >= 10 ? '✨' : '🔥');
         }
       } else if (year === 2025) {
         key = 'group-year-2025';

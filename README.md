@@ -62,6 +62,10 @@ Motor gráfico em tempo real renderizado sobre OGL (`ogl.js` + `webgl-background
 - **SafeGuard WebGL Prototype**: Intercepta eventos `webglcontextlost` com `event.preventDefault()` em nível de canvas prototype para impedir que falhas de GPU encerrem o processo Chromium.
 - **Troca Atômica de ASAR**: Utiliza chamada atômica do kernel (`os.replace` / `rename(2)`) no instalador, prevenindo corrupção de memória durante patches.
 
+### 12. ⏳ Motor de Cronologia Perpétua (Samsung Music Chronology Engine)
+- **Preservação de Chegada Real no Android**: Respeita rigorosamente a cronologia factual de gravação dos arquivos de áudio (`date_modified`), mapeada e documentada em [`docs/CHRONOLOGY_ARCHITECTURE.md`](docs/CHRONOLOGY_ARCHITECTURE.md).
+- **Ingestão Subsonic Contínua & Forward-Compatibility**: Novas faixas adicionadas ao Navidrome são inseridas diretamente no topo via data de criação/upload com agrupamento inteligente de datas.
+
 ---
 
 ## 📂 Estrutura do Repositório
