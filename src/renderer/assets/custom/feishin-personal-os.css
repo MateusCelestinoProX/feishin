@@ -1968,9 +1968,9 @@ body.feishin-tp-open #feishin-alphabet-hud,
     position: fixed !important;
     inset: 0 !important;
     z-index: 999999 !important;
-    background: rgba(6, 7, 14, 0.78) !important;
-    backdrop-filter: blur(24px) saturate(160%) !important;
-    -webkit-backdrop-filter: blur(24px) saturate(160%) !important;
+    background: rgba(8, 6, 18, 0.22) !important;
+    backdrop-filter: blur(8px) saturate(190%) contrast(105%) !important;
+    -webkit-backdrop-filter: blur(8px) saturate(190%) contrast(105%) !important;
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
@@ -1992,11 +1992,13 @@ body.feishin-tp-open #feishin-alphabet-hud,
     width: 100% !important;
     max-width: 720px !important;
     max-height: 90vh !important;
-    background: rgba(18, 18, 28, 0.94) !important;
-    border: 1px solid rgba(255, 255, 255, 0.12) !important;
-    border-top: 1px solid rgba(255, 255, 255, 0.25) !important;
+    background: rgba(20, 16, 38, 0.48) !important;
+    backdrop-filter: blur(32px) saturate(210%) contrast(110%) !important;
+    -webkit-backdrop-filter: blur(32px) saturate(210%) contrast(110%) !important;
+    border: 1px solid rgba(255, 255, 255, 0.22) !important;
+    border-top: 1px solid rgba(255, 255, 255, 0.45) !important;
     border-radius: 24px !important;
-    box-shadow: 0 24px 70px rgba(0, 0, 0, 0.65), 0 0 40px rgba(139, 92, 246, 0.2) !important;
+    box-shadow: 0 28px 80px rgba(0, 0, 0, 0.5), inset 0 1px 1px rgba(255, 255, 255, 0.35), 0 0 35px rgba(139, 92, 246, 0.22) !important;
     display: flex !important;
     flex-direction: column !important;
     overflow: hidden !important;
@@ -2008,8 +2010,8 @@ body.feishin-tp-open #feishin-alphabet-hud,
     align-items: center !important;
     justify-content: space-between !important;
     padding: 20px 26px !important;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
-    background: rgba(255, 255, 255, 0.02) !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.12) !important;
+    background: rgba(255, 255, 255, 0.05) !important;
 }
 
 .fs-tag-modal-title-group {

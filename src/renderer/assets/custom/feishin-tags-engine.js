@@ -1558,13 +1558,24 @@
         color: #ffffff !important;
         transform: translateY(-1px) scale(1.02) !important;
       }
+      .fs-tag-assign-backdrop {
+        background: rgba(8, 6, 18, 0.22) !important;
+        backdrop-filter: blur(8px) saturate(190%) contrast(105%) !important;
+        -webkit-backdrop-filter: blur(8px) saturate(190%) contrast(105%) !important;
+      }
       .fs-tag-assign-dialog {
         max-width: min(440px, 92vw) !important;
         width: 100% !important;
+        background: rgba(20, 16, 38, 0.48) !important;
+        backdrop-filter: blur(32px) saturate(210%) contrast(110%) !important;
+        -webkit-backdrop-filter: blur(32px) saturate(210%) contrast(110%) !important;
+        border: 1px solid rgba(255, 255, 255, 0.22) !important;
+        border-top: 1px solid rgba(255, 255, 255, 0.45) !important;
+        box-shadow: 0 28px 80px rgba(0, 0, 0, 0.5), inset 0 1px 1px rgba(255, 255, 255, 0.35), 0 0 35px rgba(139, 92, 246, 0.22) !important;
       }
       .fs-tag-assign-subtitle {
         font-size: 11.5px !important;
-        color: rgba(255, 255, 255, 0.55) !important;
+        color: rgba(255, 255, 255, 0.7) !important;
         display: block !important;
         overflow: hidden !important;
         text-overflow: ellipsis !important;
@@ -1578,8 +1589,10 @@
         width: 100% !important;
         padding: 9px 14px !important;
         border-radius: 12px !important;
-        background: rgba(255, 255, 255, 0.05) !important;
-        border: 1px solid rgba(255, 255, 255, 0.1) !important;
+        background: rgba(255, 255, 255, 0.08) !important;
+        border: 1px solid rgba(255, 255, 255, 0.16) !important;
+        backdrop-filter: blur(14px) !important;
+        -webkit-backdrop-filter: blur(14px) !important;
         color: #ffffff !important;
         font-size: 13px !important;
         outline: none !important;
@@ -1587,9 +1600,9 @@
         transition: all 0.2s ease !important;
       }
       .fs-tag-modal-input:focus {
-        border-color: #a78bfa !important;
-        background: rgba(167, 139, 250, 0.08) !important;
-        box-shadow: 0 0 16px rgba(167, 139, 250, 0.25) !important;
+        border-color: rgba(167, 139, 250, 0.6) !important;
+        background: rgba(167, 139, 250, 0.14) !important;
+        box-shadow: 0 0 16px rgba(167, 139, 250, 0.3) !important;
       }
       .fs-tag-assign-list {
         max-height: 40vh !important;
@@ -1605,22 +1618,27 @@
         justify-content: space-between !important;
         padding: 9px 14px !important;
         border-radius: 14px !important;
-        background: rgba(255, 255, 255, 0.03) !important;
-        border: 1px solid rgba(255, 255, 255, 0.06) !important;
+        background: rgba(255, 255, 255, 0.06) !important;
+        border: 1px solid rgba(255, 255, 255, 0.1) !important;
+        border-top: 1px solid rgba(255, 255, 255, 0.2) !important;
+        backdrop-filter: blur(14px) !important;
+        -webkit-backdrop-filter: blur(14px) !important;
+        box-shadow: 0 4px 14px rgba(0, 0, 0, 0.18) !important;
         cursor: pointer !important;
         transition: all 0.18s ease !important;
       }
       .fs-tag-assign-row:hover {
-        background: rgba(255, 255, 255, 0.07) !important;
-        border-color: rgba(255, 255, 255, 0.12) !important;
+        background: rgba(255, 255, 255, 0.12) !important;
+        border-color: rgba(255, 255, 255, 0.24) !important;
       }
       .fs-tag-assign-row.is-checked {
-        background: rgba(167, 139, 250, 0.12) !important;
-        border-color: rgba(167, 139, 250, 0.35) !important;
+        background: rgba(139, 92, 246, 0.26) !important;
+        border-color: rgba(167, 139, 250, 0.5) !important;
+        box-shadow: 0 4px 18px rgba(139, 92, 246, 0.28) !important;
       }
       .fs-tag-assign-row.is-partial {
-        background: rgba(245, 158, 11, 0.08) !important;
-        border-color: rgba(245, 158, 11, 0.25) !important;
+        background: rgba(245, 158, 11, 0.14) !important;
+        border-color: rgba(245, 158, 11, 0.35) !important;
       }
       .fs-tag-assign-row-left {
         display: flex !important;
@@ -1634,7 +1652,8 @@
         background-size: cover !important;
         background-position: center !important;
         flex-shrink: 0 !important;
-        border: 1px solid rgba(255, 255, 255, 0.1) !important;
+        border: 1px solid rgba(255, 255, 255, 0.15) !important;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3) !important;
       }
       .fs-tag-assign-name-wrap {
         display: flex !important;
@@ -1645,16 +1664,17 @@
         font-size: 13.5px !important;
         font-weight: 600 !important;
         color: #ffffff !important;
+        text-shadow: 0 1px 4px rgba(0, 0, 0, 0.5) !important;
       }
       .fs-tag-assign-count {
         font-size: 11px !important;
-        color: rgba(255, 255, 255, 0.45) !important;
+        color: rgba(255, 255, 255, 0.65) !important;
       }
       .fs-tag-assign-checkbox {
         width: 22px !important;
         height: 22px !important;
         border-radius: 7px !important;
-        border: 1.5px solid rgba(255, 255, 255, 0.25) !important;
+        border: 1.5px solid rgba(255, 255, 255, 0.3) !important;
         display: flex !important;
         align-items: center !important;
         justify-content: center !important;
@@ -1677,7 +1697,12 @@
         align-items: center !important;
         gap: 8px !important;
         padding: 10px 24px !important;
-        border-top: 1px solid rgba(255, 255, 255, 0.06) !important;
+        background: rgba(255, 255, 255, 0.03) !important;
+        border-top: 1px solid rgba(255, 255, 255, 0.1) !important;
+      }
+      .fs-tag-modal-footer {
+        background: rgba(0, 0, 0, 0.18) !important;
+        border-top: 1px solid rgba(255, 255, 255, 0.12) !important;
       }
       /* Multi-select: ocultar numeração de faixa e play/pause nativo para layout limpo sem duplicidade */
       body.fs-multiselect-active .fs-row-index-column-module-content,
