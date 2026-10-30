@@ -415,9 +415,19 @@
     }
 
     updateAllVisibleTrackBadges() {
+      // 0. Safety cleanup: remove any stray badges injected inside image containers or root playerbar
+      document.querySelectorAll(
+        '.fs-title-combined-column-module-image-container > .fs-track-tag-badges, ' +
+        '.fs-playerbar-module-container > .fs-track-tag-badges, ' +
+        '.fs-title-combined-column-module-title > .fs-track-tag-badges'
+      ).forEach(el => el.remove());
+
       // 1. Virtualized Tracks Table (Faixas page / Playlists / Queue)
+      // Only target the root table column cells, NEVER the inner image or text containers
       const titleCells = document.querySelectorAll(
-        '.fs-title-combined-column-module-title-combined, .fs-title-artist-column-module-title-artist, .fs-song-title-column-module-song-title, .fs-title-column-module-name-container, [class*="title-combined"], [class*="title-artist"]'
+        '.fs-item-table-list-column-module-container.fs-title-combined-column-module-title-combined, ' +
+        '.fs-item-table-list-column-module-container.fs-title-artist-column-module-title-artist, ' +
+        '.fs-item-table-list-column-module-container.fs-song-title-column-module-song-title'
       );
 
       titleCells.forEach(cell => {
@@ -425,25 +435,18 @@
         if (!song) return;
 
         const tags = this.getTagsForSong(song);
-        let badgeWrap = cell.querySelector('.fs-track-tag-badges');
+        const artistsContainer = cell.querySelector(
+          '.fs-title-combined-column-module-artists, .fs-title-artist-column-module-artists'
+        );
+        if (!artistsContainer) return;
 
-        if (tags.length > 0) {
+        let badgeWrap = artistsContainer.querySelector(':scope > .fs-track-tag-badges');
+
+        if (tags && tags.length > 0) {
           if (!badgeWrap) {
             badgeWrap = document.createElement('span');
             badgeWrap.className = 'fs-track-tag-badges';
-            const textWrap = cell.querySelector('.fs-title-combined-column-module-text-container') || cell.querySelector('[class*="text-container"]') || cell;
-            const titleEl = cell.querySelector(
-              '.fs-title-combined-column-module-title, .fs-song-title-column-module-song-title, .fs-title-artist-column-module-title, .fs-title-column-module-title, [class*="title"]'
-            );
-            if (titleEl && titleEl.parentNode) {
-              if (titleEl.nextSibling) {
-                titleEl.parentNode.insertBefore(badgeWrap, titleEl.nextSibling);
-              } else {
-                titleEl.parentNode.appendChild(badgeWrap);
-              }
-            } else {
-              textWrap.appendChild(badgeWrap);
-            }
+            artistsContainer.appendChild(badgeWrap);
           }
           const badgesHtml = tags.map(t => `
             <span class="fs-track-tag-badge" data-tag-id="${t.id}" title="Tag: ${escapeHtml(t.name)}">
@@ -463,22 +466,56 @@
         } else if (badgeWrap) {
           badgeWrap.remove();
         }
+
+        // Also populate the Genre Column if enabled in this row
+        const rowIndex = cell.getAttribute('data-row-index');
+        if (rowIndex && cell.parentElement) {
+          const genreCell = cell.parentElement.querySelector(`[data-row-index="${rowIndex}"] > .fs-genre-column-module-genres-container`);
+          if (genreCell) {
+            let gBadgeWrap = genreCell.querySelector(':scope > .fs-track-tag-badges');
+            if (tags && tags.length > 0) {
+              if (!gBadgeWrap) {
+                gBadgeWrap = document.createElement('span');
+                gBadgeWrap.className = 'fs-track-tag-badges';
+                genreCell.appendChild(gBadgeWrap);
+              }
+              const gHtml = tags.map(t => `
+                <span class="fs-track-tag-badge" data-tag-id="${t.id}" title="Tag: ${escapeHtml(t.name)}">
+                  🏷️ ${escapeHtml(t.name)}
+                </span>
+              `).join('');
+              if (gBadgeWrap.innerHTML !== gHtml) {
+                gBadgeWrap.innerHTML = gHtml;
+                gBadgeWrap.querySelectorAll('.fs-track-tag-badge').forEach(b => {
+                  b.onclick = (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    window.location.hash = `#/library/genres?tag=${encodeURIComponent(b.getAttribute('data-tag-id'))}`;
+                  };
+                });
+              }
+            } else if (gBadgeWrap) {
+              gBadgeWrap.remove();
+            }
+          }
+        }
       });
 
       // 2. ItemDetailList Track Rows (Album Detail / Artist Detail)
-      const detailRows = document.querySelectorAll('[class*="item-detail-list-module-track-row"], [class*="track-row"]:not([class*="skeleton"])');
+      const detailRows = document.querySelectorAll('[class*="item-detail-list-module-track-row"]');
       detailRows.forEach(row => {
         const song = extractSongFromElement(row);
         if (!song) return;
 
         const tags = this.getTagsForSong(song);
-        let badgeWrap = row.querySelector('.fs-track-tag-badges');
+        const titleEl = row.querySelector('[class*="title-column"] span, [class*="title-artist-column"] span');
+        if (!titleEl) return;
 
-        if (tags.length > 0) {
+        let badgeWrap = titleEl.querySelector(':scope > .fs-track-tag-badges');
+        if (tags && tags.length > 0) {
           if (!badgeWrap) {
             badgeWrap = document.createElement('span');
             badgeWrap.className = 'fs-track-tag-badges';
-            const titleEl = row.querySelector('[class*="title"], [class*="text-container"], [role="gridcell"]:nth-child(2)') || row;
             titleEl.appendChild(badgeWrap);
           }
           const badgesHtml = tags.map(t => `
@@ -501,7 +538,7 @@
         }
       });
 
-      // 2. Recently Added Tracks (.ra-tracklist-row)
+      // 3. Recently Added Tracks (.ra-tracklist-row)
       document.querySelectorAll('.ra-tracklist-row').forEach(row => {
         const id = row.getAttribute('data-id');
         let song = null;
@@ -512,16 +549,15 @@
         if (!song) return;
 
         const tags = this.getTagsForSong(song);
-        let badgeWrap = row.querySelector('.fs-track-tag-badges');
+        const titleEl = row.querySelector('.ra-track-title') || row.querySelector('.ra-mobile-track-info');
+        if (!titleEl) return;
 
-        if (tags.length > 0) {
+        let badgeWrap = titleEl.querySelector(':scope > .fs-track-tag-badges');
+        if (tags && tags.length > 0) {
           if (!badgeWrap) {
             badgeWrap = document.createElement('span');
             badgeWrap.className = 'fs-track-tag-badges';
-            const titleEl = row.querySelector('.ra-track-title') || row.querySelector('.ra-mobile-track-info');
-            if (titleEl) {
-              titleEl.appendChild(badgeWrap);
-            }
+            titleEl.appendChild(badgeWrap);
           }
           const badgesHtml = tags.map(t => `
             <span class="fs-track-tag-badge" data-tag-id="${t.id}" title="Tag: ${escapeHtml(t.name)}">
@@ -543,18 +579,18 @@
         }
       });
 
-      // 3. Player Bar ("Tocando Agora")
+      // 4. Player Bar ("Tocando Agora") - Inside left-controls artist line
       const playerSong = window.__FEISHIN_PLAYER_STORE__?.getState()?.getCurrentSong?.();
       if (playerSong) {
-        const playerTitle = document.querySelector('.fs-player-module-track-info, #feishin-playerbar-title, [class*="playerbar"]');
-        if (playerTitle) {
+        const pbArtist = document.querySelector('.fs-left-controls-module-metadata-stack .song-artist');
+        if (pbArtist) {
           const tags = this.getTagsForSong(playerSong);
-          let pbBadgeWrap = playerTitle.querySelector('.fs-track-tag-badges');
-          if (tags.length > 0) {
+          let pbBadgeWrap = pbArtist.querySelector(':scope > .fs-track-tag-badges');
+          if (tags && tags.length > 0) {
             if (!pbBadgeWrap) {
               pbBadgeWrap = document.createElement('span');
               pbBadgeWrap.className = 'fs-track-tag-badges';
-              playerTitle.appendChild(pbBadgeWrap);
+              pbArtist.appendChild(pbBadgeWrap);
             }
             const badgesHtml = tags.map(t => `
               <span class="fs-track-tag-badge" data-tag-id="${t.id}" title="Tag: ${escapeHtml(t.name)}">
@@ -577,12 +613,12 @@
         }
       }
 
-      // 4. Fullscreen Player / Track Page
+      // 5. Fullscreen Player / Track Page
       const tpTitle = document.getElementById('feishin-tp-title') || document.querySelector('.fs-fullscreen-title');
       if (tpTitle && playerSong) {
         const tags = this.getTagsForSong(playerSong);
-        let tpBadgeWrap = tpTitle.querySelector('.fs-track-tag-badges');
-        if (tags.length > 0) {
+        let tpBadgeWrap = tpTitle.querySelector(':scope > .fs-track-tag-badges');
+        if (tags && tags.length > 0) {
           if (!tpBadgeWrap) {
             tpBadgeWrap = document.createElement('span');
             tpBadgeWrap.className = 'fs-track-tag-badges';
@@ -1347,19 +1383,36 @@
     let timer = null;
     const debouncedUpdate = () => {
       if (timer) return;
-      timer = requestAnimationFrame(() => {
+      timer = setTimeout(() => {
         timer = null;
         engine.updateAllVisibleTrackBadges();
-      });
+      }, 120);
     };
 
     const observer = new MutationObserver((mutations) => {
       let shouldUpdate = false;
       for (const m of mutations) {
-        if (m.addedNodes.length > 0 || m.type === 'attributes') {
-          shouldUpdate = true;
-          break;
+        if (m.addedNodes.length > 0) {
+          for (let i = 0; i < m.addedNodes.length; i++) {
+            const node = m.addedNodes[i];
+            if (node.nodeType === 1) {
+              if (node.classList?.contains('fs-track-tag-badges') || node.classList?.contains('fs-track-tag-badge')) {
+                continue;
+              }
+              if (
+                node.getAttribute?.('data-row-index') !== null ||
+                node.className?.includes?.('item-table') ||
+                node.className?.includes?.('track-row') ||
+                node.className?.includes?.('main-content') ||
+                node.querySelector?.('[data-row-index]')
+              ) {
+                shouldUpdate = true;
+                break;
+              }
+            }
+          }
         }
+        if (shouldUpdate) break;
       }
       if (shouldUpdate) debouncedUpdate();
     });
@@ -1384,39 +1437,68 @@
     const style = document.createElement('style');
     style.id = 'fs-tag-custom-injected-styles';
     style.textContent = `
+      /* Artist line flex container: keeps artist and tags on one neat 18px line */
+      .fs-title-combined-column-module-artists,
+      .fs-title-artist-column-module-artists {
+        display: flex !important;
+        align-items: center !important;
+        gap: 6px !important;
+        min-width: 0 !important;
+        max-width: 100% !important;
+        overflow: hidden !important;
+        white-space: nowrap !important;
+      }
+      .fs-title-combined-column-module-artists > span:first-child,
+      .fs-title-artist-column-module-artists > span:first-child {
+        min-width: 0 !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+        white-space: nowrap !important;
+        flex-shrink: 1 !important;
+      }
+      .fs-left-controls-module-metadata-stack .song-artist {
+        display: flex !important;
+        align-items: center !important;
+        gap: 6px !important;
+      }
+
+      /* Badge Container */
       .fs-track-tag-badges {
         display: inline-flex !important;
         align-items: center !important;
         gap: 4px !important;
         vertical-align: middle !important;
-        margin-left: 6px !important;
-        flex-wrap: wrap !important;
+        margin-left: 4px !important;
+        flex-shrink: 0 !important;
         pointer-events: auto !important;
       }
+
+      /* Tag Badge Pill */
       .fs-track-tag-badge, .ra-track-tag-pill {
         display: inline-flex !important;
         align-items: center !important;
         gap: 3px !important;
-        padding: 1px 7px !important;
+        height: 15px !important;
+        padding: 0 6px !important;
         border-radius: 999px !important;
-        font-size: 10px !important;
+        font-size: 9.5px !important;
         font-weight: 600 !important;
-        line-height: 1.4 !important;
+        line-height: 15px !important;
         letter-spacing: -0.1px !important;
-        background: rgba(168, 85, 247, 0.18) !important;
+        background: rgba(168, 85, 247, 0.22) !important;
         color: #e9d5ff !important;
-        border: 1px solid rgba(168, 85, 247, 0.38) !important;
-        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25) !important;
+        border: 1px solid rgba(168, 85, 247, 0.45) !important;
+        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2) !important;
         backdrop-filter: blur(8px) !important;
         -webkit-backdrop-filter: blur(8px) !important;
         cursor: pointer !important;
         user-select: none !important;
-        transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1) !important;
+        transition: all 0.15s cubic-bezier(0.16, 1, 0.3, 1) !important;
         white-space: nowrap !important;
       }
       .fs-track-tag-badge:hover, .ra-track-tag-pill:hover {
-        background: rgba(168, 85, 247, 0.35) !important;
-        border-color: rgba(192, 132, 252, 0.65) !important;
+        background: rgba(168, 85, 247, 0.45) !important;
+        border-color: rgba(192, 132, 252, 0.75) !important;
         color: #ffffff !important;
         transform: translateY(-1px) scale(1.02) !important;
       }

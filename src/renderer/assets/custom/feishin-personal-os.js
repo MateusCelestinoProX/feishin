@@ -1300,42 +1300,16 @@ if (typeof window !== 'undefined') {
   }
 
   // ==========================================================================
-  // CONTROLE GLOBAL DE PERMISSÃO DA FILA DE REPRODUÇÃO
-  // Regra Estrita:
-  // Se não tiver nada na fila -> fica só a hero da imagem da track no centro.
-  // Se tiver em fila (playlist ou adicionar a seguir) -> a fila deve aparecer (split 50/50).
-  // ==========================================================================
-  function isQueueAllowedToDisplay() {
-    const hash = window.location.hash || '';
-    const isPlaylistRoute = hash.startsWith('#/playlists/') || hash.startsWith('#/playlist/');
-    const store = (window.__FEISHIN_PLAYER_STORE__ && window.__FEISHIN_PLAYER_STORE__.getState)
-      ? window.__FEISHIN_PLAYER_STORE__.getState()
-      : null;
-    const cur = (typeof store?.getCurrentSong === 'function' ? store.getCurrentSong() : null) || store?.player?.currentSong;
-    const isPlaylistSong = Boolean(cur && (cur._itemType === 'playlist_song' || cur.playlistId));
-    const isPlaylist = isPlaylistRoute || isPlaylistSong;
-
-    const q = store?.getQueue?.();
-    const queueItems = (q && Array.isArray(q.items)) ? q.items : [];
-    const hasEnqueuedItems = Boolean(window.__FEISHIN_HAS_ENQUEUED_ITEMS__) || queueItems.length > 1;
-
-    // Se estiver em playlist E houver faixas OU se o recurso Adicionar a Seguir foi usado (fila > 1)
-    return Boolean((isPlaylist && queueItems.length > 0) || hasEnqueuedItems);
-  }
-
-  // ==========================================================================
-  // 11. CONTROLE INTELIGENTE DE EXIBIÇÃO DA FILA NO REPRODUTOR FULLSCREEN
-  // Se não tiver nada -> fica só a hero image centralizada.
-  // Se tiver em fila -> obviamente a fila aparece dividindo a tela.
+  // 11. SINCRONIZAÇÃO DA FILA E CONTROLES RETRÁTEIS NO REPRODUTOR FULLSCREEN
+  // A fila é retrátil: quando contraída, a capa expande para o centro da tela (hero image).
+  // Quando expandida, a tela se divide 50/50 lado a lado sem sobreposição (estilo original).
+  // Oculta estritamente o Scrubber A-Z e o HUD quando o Reprodutor Fullscreen estiver aberto.
   // ==========================================================================
   function initPlayerSplitQueue() {
-    console.log('[Personal OS] Ativando Controlador Inteligente de Visibilidade da Fila...');
+    console.log('[Personal OS] Ativando Sincronizador de Fila Retrátil do Player Fullscreen...');
 
     const syncVisibility = () => {
-      const allowed = isQueueAllowedToDisplay();
       const fsContainer = document.querySelector('.fs-full-screen-player-module-container');
-      const respContainer = document.querySelector('.fs-full-screen-player-module-responsive-container');
-      const qg = document.querySelector('.fs-full-screen-player-queue-module-grid-container');
 
       // Ocultar estritamente o Scrubber A-Z e o HUD quando o Reprodutor Fullscreen estiver aberto
       const scrubber = document.getElementById('feishin-alphabet-scrubber');
@@ -1349,84 +1323,25 @@ if (typeof window !== 'undefined') {
           scrubber.style.removeProperty('display');
         }
       }
-
-      if (!allowed) {
-        // Nada na fila: fica só a hero image da track no centro
-        if (respContainer) {
-          respContainer.classList.remove('personal-os-queue-visible');
-        }
-        if (qg) {
-          qg.classList.remove('fs-queue-allowed');
-          qg.classList.add('fs-full-screen-player-queue-module-grid-container-collapsed');
-        }
-        if (window.__FEISHIN_FS_STORE__?.getState) {
-          try {
-            const fsState = window.__FEISHIN_FS_STORE__.getState();
-            if (fsState?.activeTab === 'queue') {
-              fsState.actions?.setStore({ activeTab: '' });
-            }
-          } catch (e) {}
-        }
-        try {
-          const rawFs = localStorage.getItem('store_full_screen_player');
-          if (rawFs) {
-            const parsedFs = JSON.parse(rawFs);
-            if (parsedFs?.state && parsedFs.state.activeTab === 'queue') {
-              parsedFs.state.activeTab = '';
-              localStorage.setItem('store_full_screen_player', JSON.stringify(parsedFs));
-            }
-          }
-        } catch (e) {}
-      } else {
-        // Tiver em fila: obviamente a fila aparece!
-        if (respContainer) {
-          respContainer.classList.add('personal-os-queue-visible');
-        }
-        if (qg) {
-          qg.classList.add('fs-queue-allowed');
-          qg.classList.remove('fs-full-screen-player-queue-module-grid-container-collapsed');
-        }
-        if (window.__FEISHIN_FS_STORE__?.getState) {
-          try {
-            const fsState = window.__FEISHIN_FS_STORE__.getState();
-            if (fsState?.activeTab !== 'queue') {
-              fsState.actions?.setStore({ activeTab: 'queue' });
-            }
-          } catch (e) {}
-        }
-        try {
-          const rawFs = localStorage.getItem('store_full_screen_player');
-          const parsedFs = rawFs ? JSON.parse(rawFs) : null;
-          if (parsedFs?.state && parsedFs.state.activeTab !== 'queue') {
-            parsedFs.state.activeTab = 'queue';
-            localStorage.setItem('store_full_screen_player', JSON.stringify(parsedFs));
-          }
-        } catch (e) {}
-        if (qg && (qg.classList.contains('fs-full-screen-player-queue-module-grid-container-collapsed') || qg.children.length === 0)) {
-          const queueControls = document.querySelector('.fs-full-screen-player-queue-module-controls-container');
-          const btns = queueControls ? queueControls.querySelectorAll('button') : [];
-          if (btns[0]) btns[0].click();
-        }
-      }
     };
 
     const playerObserver = new MutationObserver(() => {
       syncVisibility();
     });
     playerObserver.observe(document.body, { childList: true, subtree: true });
-    setInterval(syncVisibility, 300);
+    syncVisibility();
 
-    // Redireciona clique no botão de fila da dock inferior
+    // Redireciona clique no botão de fila da dock inferior para alternar a fila no fullscreen
     window.addEventListener('click', (e) => {
       const queueToggle = e.target.closest('.fs-playerbar-module-right-grid-item button');
       if (queueToggle && queueToggle.querySelector('rect[width="18"]')) {
-        const allowed = isQueueAllowedToDisplay();
-        if (!allowed) {
+        const fsContainer = document.querySelector('.fs-full-screen-player-module-container');
+        if (fsContainer && window.__FEISHIN_FS_STORE__?.getState) {
           e.preventDefault();
           e.stopPropagation();
-          const cover = document.querySelector('.fs-left-controls-module-image') || document.querySelector('#player-bar img');
-          cover?.click();
-          syncVisibility();
+          const fsStore = window.__FEISHIN_FS_STORE__.getState();
+          const nextTab = fsStore.activeTab === 'queue' ? '' : 'queue';
+          fsStore.actions?.setStore({ activeTab: nextTab });
         }
       }
     }, true);

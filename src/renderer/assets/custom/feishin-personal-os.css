@@ -1479,16 +1479,15 @@ button.fs-player-button-module-main svg {
     width: 100vw !important;
     height: 100vh !important;
     align-items: center !important;
-    justify-content: center !important;
+    justify-content: flex-start !important;
     box-sizing: border-box !important;
     padding: 0 !important;
     margin: 0 !important;
 }
 
-/* MODO SIMPLES (PADRÃO): Capa centralizada (100% de respiro imersivo sem fila visível) */
-.fs-full-screen-player-module-image-column,
+/* MODO SIMPLES / RETRAÍDO: Capa centralizada (100% de respiro imersivo sem fila visível) */
 .fs-full-screen-player-module-image-column.fs-full-screen-player-module-image-column-full,
-.fs-full-screen-player-module-responsive-container:not(.personal-os-queue-visible) .fs-full-screen-player-module-image-column {
+.fs-full-screen-player-module-responsive-container:has(.fs-full-screen-player-queue-module-grid-container-collapsed) .fs-full-screen-player-module-image-column {
     flex: 1 1 100vw !important;
     width: 100vw !important;
     max-width: 100vw !important;
@@ -1498,14 +1497,22 @@ button.fs-player-button-module-main svg {
     justify-content: center !important;
     box-sizing: border-box !important;
     margin: 0 auto !important;
-    transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1) !important;
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1) !important;
 }
 
-/* MODO DIVIDIDO: Quando fila é permitida (Playlists ou Adicionar a Seguir) e está ativa */
-.fs-full-screen-player-module-responsive-container.personal-os-queue-visible .fs-full-screen-player-module-image-column {
+/* MODO DIVIDIDO: Quando a fila estiver visível/expandida (Split side-by-side 50/50 sem sobreposição - Imagem 2) */
+.fs-full-screen-player-module-responsive-container:not(:has(.fs-full-screen-player-queue-module-grid-container-collapsed)) .fs-full-screen-player-module-image-column:not(.fs-full-screen-player-module-image-column-full),
+.fs-full-screen-player-module-image-column:not(.fs-full-screen-player-module-image-column-full) {
     flex: 0 0 50vw !important;
     width: 50vw !important;
     max-width: 50vw !important;
+    height: calc(100vh - 104px) !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    box-sizing: border-box !important;
+    margin: 0 !important;
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1) !important;
 }
 
 .fs-full-screen-player-image-module-player-container {
@@ -1560,16 +1567,18 @@ body.feishin-tp-open #feishin-alphabet-hud,
     pointer-events: none !important;
 }
 
-/* FILA DE REPRODUÇÃO: Oculta por padrão em modo simples; visível SOMENTE quando personal-os-queue-visible estiver ativo */
-.fs-full-screen-player-queue-module-grid-container,
-.fs-full-screen-player-module-responsive-container:not(.personal-os-queue-visible) .fs-full-screen-player-queue-module-grid-container {
-    display: none !important;
+/* FILA DE REPRODUÇÃO QUANDO CONTRAÍDA / RECOLHIDA */
+.fs-full-screen-player-queue-module-grid-container.fs-full-screen-player-queue-module-grid-container-collapsed,
+.fs-full-screen-player-module-responsive-container:has(.fs-full-screen-player-module-image-column-full) .fs-full-screen-player-queue-module-grid-container {
+    transform: translateX(110%) !important;
     opacity: 0 !important;
     visibility: hidden !important;
     pointer-events: none !important;
+    transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease, visibility 0.4s !important;
 }
 
-.fs-full-screen-player-module-responsive-container.personal-os-queue-visible .fs-full-screen-player-queue-module-grid-container {
+/* FILA DE REPRODUÇÃO QUANDO ABERTA / EXPANDIDA (Side-by-side 50% na direita com Liquid Glass - Imagem 2) */
+.fs-full-screen-player-queue-module-grid-container:not(.fs-full-screen-player-queue-module-grid-container-collapsed) {
     position: absolute !important;
     top: 72px !important;
     right: 20px !important;
@@ -1584,6 +1593,7 @@ body.feishin-tp-open #feishin-alphabet-hud,
     opacity: 1 !important;
     visibility: visible !important;
     pointer-events: auto !important;
+    transform: translateX(0%) !important;
     border-radius: 24px !important;
     background: linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.02) 100%), rgba(10, 10, 16, 0.38) !important;
     border: 1px solid rgba(255, 255, 255, 0.18) !important;
@@ -1594,6 +1604,7 @@ body.feishin-tp-open #feishin-alphabet-hud,
     margin: 0 !important;
     overflow: hidden !important;
     box-sizing: border-box !important;
+    transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease !important;
 }
 
 .fs-full-screen-player-queue-module-grid-container:before {
