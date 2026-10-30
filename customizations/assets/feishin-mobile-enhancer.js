@@ -2729,8 +2729,13 @@
         const cur = (typeof store?.getCurrentSong === 'function' ? store.getCurrentSong() : null) || store?.player?.currentSong;
         const isPlaylistSong = Boolean(cur && (cur._itemType === 'playlist_song' || cur.playlistId));
         const isPlaylist = isPlaylistRoute || isPlaylistSong;
-        const hasEnqueuedItems = Boolean(window.__FEISHIN_HAS_ENQUEUED_ITEMS__);
-        return Boolean(isPlaylist || hasEnqueuedItems);
+
+        const q = store?.getQueue?.();
+        const queueItems = (q && Array.isArray(q.items)) ? q.items : [];
+        const hasEnqueuedItems = Boolean(window.__FEISHIN_HAS_ENQUEUED_ITEMS__) || queueItems.length > 1;
+
+        // Se estiver em playlist E houver faixas OU se o recurso Adicionar a Seguir foi usado (fila > 1)
+        return Boolean((isPlaylist && queueItems.length > 0) || hasEnqueuedItems);
     }
 
     function initUnitaryQueueSystem() {

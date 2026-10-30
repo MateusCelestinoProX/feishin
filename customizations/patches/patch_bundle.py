@@ -71,7 +71,11 @@ def patch_bundle(file_path):
     # 3. Patch de Exposição do Player Store & Auth Store para Analytics e Mini Painel do Tray
     replacements_tray_stores = [
         (',Pa=hYe(Ma)', ',Pa=(typeof window!=="undefined"&&(window.__FEISHIN_PLAYER_STORE__=Ma),hYe(Ma))'),
-        ('to=()=>fr(NHe,la)', 'to=()=>(typeof window!=="undefined"&&(window.__FEISHIN_AUTH_STORE__=fr),fr(NHe,la))')
+        ('to=()=>fr(NHe,la)', 'to=()=>(typeof window!=="undefined"&&(window.__FEISHIN_AUTH_STORE__=fr),fr(NHe,la))'),
+        (':t=>AWe(t,["visualizerReturnToPlayer"]),version:5})),W0=',
+         ':t=>AWe(t,["visualizerReturnToPlayer"]),version:5})),_fs_init=(typeof window!=="undefined"&&(window.__FEISHIN_FS_STORE__=Xi)),W0='),
+        (':t=>AWe(t,["visualizerReturnToPlayer"]),version:5})),(typeof window!=="undefined"&&(window.__FEISHIN_FS_STORE__=Xi)),W0=',
+         ':t=>AWe(t,["visualizerReturnToPlayer"]),version:5})),_fs_init=(typeof window!=="undefined"&&(window.__FEISHIN_FS_STORE__=Xi)),W0=')
     ]
 
     for old, new in replacements_tray_stores:

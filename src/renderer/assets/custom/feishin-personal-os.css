@@ -1543,18 +1543,16 @@ button.fs-player-button-module-main svg {
     object-fit: cover !important;
 }
 
-/* FILA DE REPRODUÇÃO: Oculta por padrão em modo simples; visível SOMENTE se permitida (playlist ou adicionar a seguir) */
+/* FILA DE REPRODUÇÃO: Oculta por padrão em modo simples; visível SOMENTE quando personal-os-queue-visible estiver ativo */
 .fs-full-screen-player-queue-module-grid-container,
-.fs-full-screen-player-queue-module-grid-container.fs-full-screen-player-queue-module-grid-container-collapsed,
-.fs-full-screen-player-module-responsive-container:not(.personal-os-queue-visible) .fs-full-screen-player-queue-module-grid-container,
-.fs-full-screen-player-queue-module-grid-container:not(.fs-queue-allowed) {
+.fs-full-screen-player-module-responsive-container:not(.personal-os-queue-visible) .fs-full-screen-player-queue-module-grid-container {
     display: none !important;
     opacity: 0 !important;
     visibility: hidden !important;
     pointer-events: none !important;
 }
 
-.fs-full-screen-player-module-responsive-container.personal-os-queue-visible .fs-full-screen-player-queue-module-grid-container.fs-queue-allowed:not(.fs-full-screen-player-queue-module-grid-container-collapsed) {
+.fs-full-screen-player-module-responsive-container.personal-os-queue-visible .fs-full-screen-player-queue-module-grid-container {
     position: absolute !important;
     top: 72px !important;
     right: 20px !important;
@@ -1574,12 +1572,6 @@ button.fs-player-button-module-main svg {
     border: 1px solid rgba(255, 255, 255, 0.18) !important;
     border-top: 1px solid rgba(255, 255, 255, 0.38) !important;
     backdrop-filter: blur(var(--personal-os-glass-blur, 28px)) saturate(200%) !important;
-    -webkit-backdrop-filter: blur(var(--personal-os-glass-blur, 28px)) saturate(200%) !important;
-    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.45), inset 0 1px 1px rgba(255, 255, 255, 0.30) !important;
-    margin: 0 !important;
-    overflow: hidden !important;
-    box-sizing: border-box !important;
-}
     -webkit-backdrop-filter: blur(var(--personal-os-glass-blur, 28px)) saturate(200%) !important;
     box-shadow: 0 20px 50px rgba(0, 0, 0, 0.45), inset 0 1px 1px rgba(255, 255, 255, 0.30) !important;
     margin: 0 !important;

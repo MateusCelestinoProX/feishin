@@ -1302,9 +1302,8 @@ if (typeof window !== 'undefined') {
   // ==========================================================================
   // CONTROLE GLOBAL DE PERMISSÃO DA FILA DE REPRODUÇÃO
   // Regra Estrita:
-  // 1. Estivermos dentro de uma playlist.
-  // 2. O recurso de adicionar a seguir for usado.
-  // Salvo esses dois casos, NENHUMA track deve aparecer na fila e ela NÃO deve ser exibida.
+  // Se não tiver nada na fila -> fica só a hero da imagem da track no centro.
+  // Se tiver em fila (playlist ou adicionar a seguir) -> a fila deve aparecer (split 50/50).
   // ==========================================================================
   function isQueueAllowedToDisplay() {
     const hash = window.location.hash || '';
@@ -1316,16 +1315,18 @@ if (typeof window !== 'undefined') {
     const isPlaylistSong = Boolean(cur && (cur._itemType === 'playlist_song' || cur.playlistId));
     const isPlaylist = isPlaylistRoute || isPlaylistSong;
 
-    // Recurso de adicionar a seguir for usado:
-    const hasEnqueuedItems = Boolean(window.__FEISHIN_HAS_ENQUEUED_ITEMS__);
+    const q = store?.getQueue?.();
+    const queueItems = (q && Array.isArray(q.items)) ? q.items : [];
+    const hasEnqueuedItems = Boolean(window.__FEISHIN_HAS_ENQUEUED_ITEMS__) || queueItems.length > 1;
 
-    return Boolean(isPlaylist || hasEnqueuedItems);
+    // Se estiver em playlist E houver faixas OU se o recurso Adicionar a Seguir foi usado (fila > 1)
+    return Boolean((isPlaylist && queueItems.length > 0) || hasEnqueuedItems);
   }
 
   // ==========================================================================
   // 11. CONTROLE INTELIGENTE DE EXIBIÇÃO DA FILA NO REPRODUTOR FULLSCREEN
-  // SÓ exibe a fila se estivermos em uma playlist OU se o recurso Adicionar a Seguir foi usado.
-  // Em modo simples (música em música): a fila fica 100% oculta e a capa centralizada!
+  // Se não tiver nada -> fica só a hero image centralizada.
+  // Se tiver em fila -> obviamente a fila aparece dividindo a tela.
   // ==========================================================================
   function initPlayerSplitQueue() {
     console.log('[Personal OS] Ativando Controlador Inteligente de Visibilidade da Fila...');
@@ -1337,13 +1338,21 @@ if (typeof window !== 'undefined') {
       const qg = document.querySelector('.fs-full-screen-player-queue-module-grid-container');
 
       if (!allowed) {
-        // Modo simples: fila estritamente oculta e capa 100% centralizada
+        // Nada na fila: fica só a hero image da track no centro
         if (respContainer) {
           respContainer.classList.remove('personal-os-queue-visible');
         }
         if (qg) {
           qg.classList.remove('fs-queue-allowed');
           qg.classList.add('fs-full-screen-player-queue-module-grid-container-collapsed');
+        }
+        if (window.__FEISHIN_FS_STORE__?.getState) {
+          try {
+            const fsState = window.__FEISHIN_FS_STORE__.getState();
+            if (fsState?.activeTab === 'queue') {
+              fsState.actions?.setStore({ activeTab: '' });
+            }
+          } catch (e) {}
         }
         try {
           const rawFs = localStorage.getItem('store_full_screen_player');
@@ -1356,12 +1365,34 @@ if (typeof window !== 'undefined') {
           }
         } catch (e) {}
       } else {
-        // Permitido: playlist ou recurso Adicionar a Seguir ativo
+        // Tiver em fila: obviamente a fila aparece!
+        if (respContainer) {
+          respContainer.classList.add('personal-os-queue-visible');
+        }
         if (qg) {
           qg.classList.add('fs-queue-allowed');
-          if (!qg.classList.contains('fs-full-screen-player-queue-module-grid-container-collapsed') && respContainer) {
-            respContainer.classList.add('personal-os-queue-visible');
+          qg.classList.remove('fs-full-screen-player-queue-module-grid-container-collapsed');
+        }
+        if (window.__FEISHIN_FS_STORE__?.getState) {
+          try {
+            const fsState = window.__FEISHIN_FS_STORE__.getState();
+            if (fsState?.activeTab !== 'queue') {
+              fsState.actions?.setStore({ activeTab: 'queue' });
+            }
+          } catch (e) {}
+        }
+        try {
+          const rawFs = localStorage.getItem('store_full_screen_player');
+          const parsedFs = rawFs ? JSON.parse(rawFs) : null;
+          if (parsedFs?.state && parsedFs.state.activeTab !== 'queue') {
+            parsedFs.state.activeTab = 'queue';
+            localStorage.setItem('store_full_screen_player', JSON.stringify(parsedFs));
           }
+        } catch (e) {}
+        if (qg && (qg.classList.contains('fs-full-screen-player-queue-module-grid-container-collapsed') || qg.children.length === 0)) {
+          const queueControls = document.querySelector('.fs-full-screen-player-queue-module-controls-container');
+          const btns = queueControls ? queueControls.querySelectorAll('button') : [];
+          if (btns[0]) btns[0].click();
         }
       }
     };
