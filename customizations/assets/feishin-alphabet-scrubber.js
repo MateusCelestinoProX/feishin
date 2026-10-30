@@ -36,11 +36,23 @@
     }
 
     init() {
+      const isFullScreenOpen = () => {
+        const fs = document.querySelector('.fs-full-screen-player-module-container');
+        const tp = document.getElementById('feishin-track-page');
+        const fsStore = window.__FEISHIN_FS_STORE__?.getState();
+        return Boolean(
+          (fs && fs.offsetParent !== null) ||
+          fsStore?.expanded ||
+          (tp && tp.classList.contains('open') && !tp.classList.contains('feishin-tp-hidden')) ||
+          document.body.classList.contains('feishin-tp-open')
+        );
+      };
+
       // Monitorar rota para montar/desmontar dinamicamente na página de Faixas (/library/songs)
       const checkRoute = () => {
         const hash = window.location.hash || '';
         const isSongsPage = hash.includes('/library/songs');
-        if (isSongsPage) {
+        if (isSongsPage && !isFullScreenOpen()) {
           this.mount();
         } else {
           this.unmount();
@@ -52,14 +64,14 @@
       // Checagem periódica resiliente caso ocorra renderização tardia do React
       setInterval(() => {
         const hash = window.location.hash || '';
-        if (hash.includes('/library/songs')) {
+        if (hash.includes('/library/songs') && !isFullScreenOpen()) {
           if (!this.container || !document.body.contains(this.container)) {
             this.mount();
           }
         } else if (this.container) {
           this.unmount();
         }
-      }, 1200);
+      }, 300);
 
       // Execução inicial
       if (document.readyState === 'complete' || document.readyState === 'interactive') {

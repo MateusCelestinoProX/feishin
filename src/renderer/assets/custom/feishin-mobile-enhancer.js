@@ -587,6 +587,13 @@
                     <span class="feishin-more-item-label">Playlists</span>
                 </button>
 
+                <button class="feishin-more-item" id="feishin-more-queue-btn" aria-label="Fila de Reprodução">
+                    <div class="feishin-more-icon-wrap">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+                    </div>
+                    <span class="feishin-more-item-label">Fila</span>
+                </button>
+
                 <button class="feishin-more-item" id="feishin-more-drawer-btn" aria-label="Menu Lateral">
                     <div class="feishin-more-icon-wrap">
                         <svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/></svg>
@@ -611,6 +618,13 @@
                 window.FeishinNative.closeMoreMenu();
                 if (route) {
                     window.location.hash = route;
+                } else if (item.id === 'feishin-more-queue-btn') {
+                    if (window.FeishinTrackPage) {
+                        window.FeishinTrackPage.open();
+                        setTimeout(() => {
+                            window.FeishinTrackPage.openQueue();
+                        }, 200);
+                    }
                 } else if (item.id === 'feishin-more-drawer-btn') {
                     window.FeishinNative.openSidebarDrawer();
                 }
@@ -1424,6 +1438,12 @@
                       </svg>
                       Letras
                     </button>
+                    <button class="feishin-tp-queue-pill" id="feishin-tp-pill-queue" style="display:none;" aria-label="Abrir Fila de Reprodução">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14" style="vertical-align: middle; margin-right: 4px;">
+                        <line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/>
+                      </svg>
+                      <span id="feishin-tp-pill-queue-label">Fila</span>
+                    </button>
                   </div>
                 </div>
 
@@ -1734,6 +1754,8 @@
             // Sheets & Ações
             document.getElementById('feishin-tp-pill-lyrics')?.addEventListener('click', () => this.openLyrics());
             document.getElementById('feishin-tp-btn-lyrics')?.addEventListener('click', () => this.openLyrics());
+            document.getElementById('feishin-tp-pill-queue')?.addEventListener('click', () => this.openQueue());
+            document.getElementById('feishin-tp-btn-queue')?.addEventListener('click', () => this.openQueue());
             document.getElementById('feishin-tp-lyrics-close')?.addEventListener('click', () => {
                 document.getElementById('feishin-tp-lyrics-sheet')?.classList.remove('open');
             });
@@ -1969,17 +1991,24 @@
 
             this.updateProgress();
 
-            // Sincroniza a visibilidade do botão de fila mobile:
-            // SÓ aparece quando estiver em playlist OU quando o recurso Adicionar a Seguir for usado!
+            // Sincroniza a visibilidade do botão e pill de fila mobile:
             const queueBtn = document.getElementById('feishin-tp-btn-queue');
-            if (queueBtn) {
-                const isAllowed = isQueueAllowedToDisplayMobile();
-                if (isAllowed) {
-                    queueBtn.style.removeProperty('display');
-                } else {
-                    queueBtn.style.setProperty('display', 'none', 'important');
-                    document.getElementById('feishin-tp-queue-sheet')?.classList.remove('open');
+            const queuePill = document.getElementById('feishin-tp-pill-queue');
+            const queuePillLabel = document.getElementById('feishin-tp-pill-queue-label');
+            const isAllowed = isQueueAllowedToDisplayMobile();
+            const q = window.__FEISHIN_PLAYER_STORE__?.getState?.()?.getQueue?.();
+            const queueCount = (q?.items && Array.isArray(q.items)) ? q.items.length : 0;
+
+            if (isAllowed && queueCount > 0) {
+                if (queueBtn) queueBtn.style.removeProperty('display');
+                if (queuePill) {
+                    queuePill.style.display = 'flex';
+                    if (queuePillLabel) queuePillLabel.innerText = `Fila (${queueCount})`;
                 }
+            } else {
+                if (queueBtn) queueBtn.style.setProperty('display', 'none', 'important');
+                if (queuePill) queuePill.style.setProperty('display', 'none', 'important');
+                document.getElementById('feishin-tp-queue-sheet')?.classList.remove('open');
             }
 
             // Se o sheet de letras estiver aberto e mudou de música, atualiza

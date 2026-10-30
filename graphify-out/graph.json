@@ -47678,7 +47678,7 @@
       "file_type": "code",
       "norm_label": "initsingleclicktrackplayback()",
       "source_file": "src/renderer/assets/custom/feishin-personal-os.js",
-      "source_location": "L1710"
+      "source_location": "L1723"
     },
     {
       "id": "src_renderer_assets_custom_feishin_personal_os_initunitaryqueuesystem",
@@ -47690,7 +47690,7 @@
       "file_type": "code",
       "norm_label": "initunitaryqueuesystem()",
       "source_file": "src/renderer/assets/custom/feishin-personal-os.js",
-      "source_location": "L1797"
+      "source_location": "L1810"
     },
     {
       "id": "src_renderer_assets_custom_feishin_personal_os_initunitaryqueuesystem_generateshuffledindices",
@@ -47702,7 +47702,7 @@
       "file_type": "code",
       "norm_label": "generateshuffledindices()",
       "source_file": "src/renderer/assets/custom/feishin-personal-os.js",
-      "source_location": "L1810"
+      "source_location": "L1823"
     },
     {
       "id": "src_renderer_assets_custom_feishin_personal_os_isqueueallowedtodisplay",
@@ -49010,7 +49010,7 @@
       "file_type": "code",
       "norm_label": ".bindevents()",
       "source_file": "customizations/assets/feishin-alphabet-scrubber.js",
-      "source_location": "L322"
+      "source_location": "L334"
     },
     {
       "id": "customizations_assets_feishin_alphabet_scrubber_alphabetscrubber_buildsectionmap",
@@ -49022,7 +49022,7 @@
       "file_type": "code",
       "norm_label": ".buildsectionmap()",
       "source_file": "customizations/assets/feishin-alphabet-scrubber.js",
-      "source_location": "L149"
+      "source_location": "L161"
     },
     {
       "id": "customizations_assets_feishin_alphabet_scrubber_alphabetscrubber_constructor",
@@ -49046,7 +49046,7 @@
       "file_type": "code",
       "norm_label": ".createelements()",
       "source_file": "customizations/assets/feishin-alphabet-scrubber.js",
-      "source_location": "L266"
+      "source_location": "L278"
     },
     {
       "id": "customizations_assets_feishin_alphabet_scrubber_alphabetscrubber_findnearestsection",
@@ -49058,7 +49058,7 @@
       "file_type": "code",
       "norm_label": ".findnearestsection()",
       "source_file": "customizations/assets/feishin-alphabet-scrubber.js",
-      "source_location": "L208"
+      "source_location": "L220"
     },
     {
       "id": "customizations_assets_feishin_alphabet_scrubber_alphabetscrubber_getauthandserver",
@@ -49070,7 +49070,7 @@
       "file_type": "code",
       "norm_label": ".getauthandserver()",
       "source_file": "customizations/assets/feishin-alphabet-scrubber.js",
-      "source_location": "L72"
+      "source_location": "L84"
     },
     {
       "id": "customizations_assets_feishin_alphabet_scrubber_alphabetscrubber_handlepointermove",
@@ -49082,7 +49082,7 @@
       "file_type": "code",
       "norm_label": ".handlepointermove()",
       "source_file": "customizations/assets/feishin-alphabet-scrubber.js",
-      "source_location": "L413"
+      "source_location": "L425"
     },
     {
       "id": "customizations_assets_feishin_alphabet_scrubber_alphabetscrubber_init",
@@ -49106,7 +49106,7 @@
       "file_type": "code",
       "norm_label": ".jumptoletter()",
       "source_file": "customizations/assets/feishin-alphabet-scrubber.js",
-      "source_location": "L433"
+      "source_location": "L445"
     },
     {
       "id": "customizations_assets_feishin_alphabet_scrubber_alphabetscrubber_loadindexdata",
@@ -49118,7 +49118,7 @@
       "file_type": "code",
       "norm_label": ".loadindexdata()",
       "source_file": "customizations/assets/feishin-alphabet-scrubber.js",
-      "source_location": "L90"
+      "source_location": "L102"
     },
     {
       "id": "customizations_assets_feishin_alphabet_scrubber_alphabetscrubber_mount",
@@ -49130,7 +49130,7 @@
       "file_type": "code",
       "norm_label": ".mount()",
       "source_file": "customizations/assets/feishin-alphabet-scrubber.js",
-      "source_location": "L232"
+      "source_location": "L244"
     },
     {
       "id": "customizations_assets_feishin_alphabet_scrubber_alphabetscrubber_renderalphabetitems",
@@ -49142,7 +49142,7 @@
       "file_type": "code",
       "norm_label": ".renderalphabetitems()",
       "source_file": "customizations/assets/feishin-alphabet-scrubber.js",
-      "source_location": "L297"
+      "source_location": "L309"
     },
     {
       "id": "customizations_assets_feishin_alphabet_scrubber_alphabetscrubber_showhudforletter",
@@ -49154,7 +49154,7 @@
       "file_type": "code",
       "norm_label": ".showhudforletter()",
       "source_file": "customizations/assets/feishin-alphabet-scrubber.js",
-      "source_location": "L473"
+      "source_location": "L485"
     },
     {
       "id": "customizations_assets_feishin_alphabet_scrubber_alphabetscrubber_syncwithcurrentscroll",
@@ -49166,7 +49166,7 @@
       "file_type": "code",
       "norm_label": ".syncwithcurrentscroll()",
       "source_file": "customizations/assets/feishin-alphabet-scrubber.js",
-      "source_location": "L519"
+      "source_location": "L531"
     },
     {
       "id": "customizations_assets_feishin_alphabet_scrubber_alphabetscrubber_unmount",
@@ -49178,7 +49178,7 @@
       "file_type": "code",
       "norm_label": ".unmount()",
       "source_file": "customizations/assets/feishin-alphabet-scrubber.js",
-      "source_location": "L250"
+      "source_location": "L262"
     },
     {
       "id": "customizations_assets_feishin_alphabet_scrubber_alphabetscrubber_updateactiveitem",
@@ -49190,7 +49190,7 @@
       "file_type": "code",
       "norm_label": ".updateactiveitem()",
       "source_file": "customizations/assets/feishin-alphabet-scrubber.js",
-      "source_location": "L461"
+      "source_location": "L473"
     },
     {
       "id": "customizations_assets_feishin_personal_os_applyshader",
@@ -49286,7 +49286,7 @@
       "file_type": "code",
       "norm_label": "initsingleclicktrackplayback()",
       "source_file": "customizations/assets/feishin-personal-os.js",
-      "source_location": "L1710"
+      "source_location": "L1723"
     },
     {
       "id": "customizations_assets_feishin_personal_os_initunitaryqueuesystem",
@@ -49298,7 +49298,7 @@
       "file_type": "code",
       "norm_label": "initunitaryqueuesystem()",
       "source_file": "customizations/assets/feishin-personal-os.js",
-      "source_location": "L1797"
+      "source_location": "L1810"
     },
     {
       "id": "customizations_assets_feishin_personal_os_initunitaryqueuesystem_generateshuffledindices",
@@ -49310,7 +49310,7 @@
       "file_type": "code",
       "norm_label": "generateshuffledindices()",
       "source_file": "customizations/assets/feishin-personal-os.js",
-      "source_location": "L1810"
+      "source_location": "L1823"
     },
     {
       "id": "customizations_assets_feishin_personal_os_isqueueallowedtodisplay",
@@ -52442,7 +52442,7 @@
       "file_type": "code",
       "norm_label": ".bindevents()",
       "source_file": "src/renderer/assets/custom/feishin-alphabet-scrubber.js",
-      "source_location": "L322"
+      "source_location": "L334"
     },
     {
       "id": "src_renderer_assets_custom_feishin_alphabet_scrubber_alphabetscrubber_buildsectionmap",
@@ -52454,7 +52454,7 @@
       "file_type": "code",
       "norm_label": ".buildsectionmap()",
       "source_file": "src/renderer/assets/custom/feishin-alphabet-scrubber.js",
-      "source_location": "L149"
+      "source_location": "L161"
     },
     {
       "id": "src_renderer_assets_custom_feishin_alphabet_scrubber_alphabetscrubber_constructor",
@@ -52478,7 +52478,7 @@
       "file_type": "code",
       "norm_label": ".createelements()",
       "source_file": "src/renderer/assets/custom/feishin-alphabet-scrubber.js",
-      "source_location": "L266"
+      "source_location": "L278"
     },
     {
       "id": "src_renderer_assets_custom_feishin_alphabet_scrubber_alphabetscrubber_findnearestsection",
@@ -52490,7 +52490,7 @@
       "file_type": "code",
       "norm_label": ".findnearestsection()",
       "source_file": "src/renderer/assets/custom/feishin-alphabet-scrubber.js",
-      "source_location": "L208"
+      "source_location": "L220"
     },
     {
       "id": "src_renderer_assets_custom_feishin_alphabet_scrubber_alphabetscrubber_getauthandserver",
@@ -52502,7 +52502,7 @@
       "file_type": "code",
       "norm_label": ".getauthandserver()",
       "source_file": "src/renderer/assets/custom/feishin-alphabet-scrubber.js",
-      "source_location": "L72"
+      "source_location": "L84"
     },
     {
       "id": "src_renderer_assets_custom_feishin_alphabet_scrubber_alphabetscrubber_handlepointermove",
@@ -52514,7 +52514,7 @@
       "file_type": "code",
       "norm_label": ".handlepointermove()",
       "source_file": "src/renderer/assets/custom/feishin-alphabet-scrubber.js",
-      "source_location": "L406"
+      "source_location": "L425"
     },
     {
       "id": "src_renderer_assets_custom_feishin_alphabet_scrubber_alphabetscrubber_init",
@@ -52538,7 +52538,7 @@
       "file_type": "code",
       "norm_label": ".jumptoletter()",
       "source_file": "src/renderer/assets/custom/feishin-alphabet-scrubber.js",
-      "source_location": "L423"
+      "source_location": "L445"
     },
     {
       "id": "src_renderer_assets_custom_feishin_alphabet_scrubber_alphabetscrubber_loadindexdata",
@@ -52550,7 +52550,7 @@
       "file_type": "code",
       "norm_label": ".loadindexdata()",
       "source_file": "src/renderer/assets/custom/feishin-alphabet-scrubber.js",
-      "source_location": "L90"
+      "source_location": "L102"
     },
     {
       "id": "src_renderer_assets_custom_feishin_alphabet_scrubber_alphabetscrubber_mount",
@@ -52562,7 +52562,7 @@
       "file_type": "code",
       "norm_label": ".mount()",
       "source_file": "src/renderer/assets/custom/feishin-alphabet-scrubber.js",
-      "source_location": "L232"
+      "source_location": "L244"
     },
     {
       "id": "src_renderer_assets_custom_feishin_alphabet_scrubber_alphabetscrubber_renderalphabetitems",
@@ -52574,7 +52574,7 @@
       "file_type": "code",
       "norm_label": ".renderalphabetitems()",
       "source_file": "src/renderer/assets/custom/feishin-alphabet-scrubber.js",
-      "source_location": "L297"
+      "source_location": "L309"
     },
     {
       "id": "src_renderer_assets_custom_feishin_alphabet_scrubber_alphabetscrubber_showhudforletter",
@@ -52586,7 +52586,7 @@
       "file_type": "code",
       "norm_label": ".showhudforletter()",
       "source_file": "src/renderer/assets/custom/feishin-alphabet-scrubber.js",
-      "source_location": "L463"
+      "source_location": "L485"
     },
     {
       "id": "src_renderer_assets_custom_feishin_alphabet_scrubber_alphabetscrubber_syncwithcurrentscroll",
@@ -52598,7 +52598,7 @@
       "file_type": "code",
       "norm_label": ".syncwithcurrentscroll()",
       "source_file": "src/renderer/assets/custom/feishin-alphabet-scrubber.js",
-      "source_location": "L509"
+      "source_location": "L531"
     },
     {
       "id": "src_renderer_assets_custom_feishin_alphabet_scrubber_alphabetscrubber_unmount",
@@ -52610,7 +52610,7 @@
       "file_type": "code",
       "norm_label": ".unmount()",
       "source_file": "src/renderer/assets/custom/feishin-alphabet-scrubber.js",
-      "source_location": "L250"
+      "source_location": "L262"
     },
     {
       "id": "src_renderer_assets_custom_feishin_alphabet_scrubber_alphabetscrubber_updateactiveitem",
@@ -52622,7 +52622,7 @@
       "file_type": "code",
       "norm_label": ".updateactiveitem()",
       "source_file": "src/renderer/assets/custom/feishin-alphabet-scrubber.js",
-      "source_location": "L451"
+      "source_location": "L473"
     },
     {
       "id": "src_renderer_components_item_card_item_card_controls_createexpandhandler",
@@ -103538,7 +103538,7 @@
       "file_type": "code",
       "norm_label": "connectsse()",
       "source_file": "customizations/assets/feishin-mobile-enhancer.js",
-      "source_location": "L2545"
+      "source_location": "L2574"
     },
     {
       "id": "customizations_assets_feishin_mobile_enhancer_initunitaryqueuesystem",
@@ -103550,7 +103550,7 @@
       "file_type": "code",
       "norm_label": "initunitaryqueuesystem()",
       "source_file": "customizations/assets/feishin-mobile-enhancer.js",
-      "source_location": "L2741"
+      "source_location": "L2770"
     },
     {
       "id": "customizations_assets_feishin_mobile_enhancer_initunitaryqueuesystem_attachaudiolooplistener",
@@ -103562,7 +103562,7 @@
       "file_type": "code",
       "norm_label": "attachaudiolooplistener()",
       "source_file": "customizations/assets/feishin-mobile-enhancer.js",
-      "source_location": "L2943"
+      "source_location": "L2972"
     },
     {
       "id": "customizations_assets_feishin_mobile_enhancer_injectheadermenubutton",
@@ -103574,7 +103574,7 @@
       "file_type": "code",
       "norm_label": "injectheadermenubutton()",
       "source_file": "customizations/assets/feishin-mobile-enhancer.js",
-      "source_location": "L736"
+      "source_location": "L750"
     },
     {
       "id": "customizations_assets_feishin_mobile_enhancer_isqueueallowedtodisplaymobile",
@@ -103586,7 +103586,7 @@
       "file_type": "code",
       "norm_label": "isqueueallowedtodisplaymobile()",
       "source_file": "customizations/assets/feishin-mobile-enhancer.js",
-      "source_location": "L2725"
+      "source_location": "L2754"
     },
     {
       "id": "customizations_assets_feishin_mobile_enhancer_preloadnexttracksinqueue",
@@ -103598,7 +103598,7 @@
       "file_type": "code",
       "norm_label": "preloadnexttracksinqueue()",
       "source_file": "customizations/assets/feishin-mobile-enhancer.js",
-      "source_location": "L848"
+      "source_location": "L862"
     },
     {
       "id": "customizations_assets_feishin_mobile_enhancer_runautocoverprecache",
@@ -103610,7 +103610,7 @@
       "file_type": "code",
       "norm_label": "runautocoverprecache()",
       "source_file": "customizations/assets/feishin-mobile-enhancer.js",
-      "source_location": "L2671"
+      "source_location": "L2700"
     },
     {
       "id": "customizations_assets_feishin_mobile_enhancer_runautocoverprecache_worker",
@@ -103622,7 +103622,7 @@
       "file_type": "code",
       "norm_label": "worker()",
       "source_file": "customizations/assets/feishin-mobile-enhancer.js",
-      "source_location": "L2699"
+      "source_location": "L2728"
     },
     {
       "id": "customizations_assets_feishin_mobile_enhancer_sanitizesettings",
@@ -103658,7 +103658,7 @@
       "file_type": "code",
       "norm_label": "syncactivetab()",
       "source_file": "customizations/assets/feishin-mobile-enhancer.js",
-      "source_location": "L674"
+      "source_location": "L688"
     },
     {
       "id": "customizations_assets_feishin_mobile_enhancer_syncplayerstate",
@@ -103670,7 +103670,7 @@
       "file_type": "code",
       "norm_label": "syncplayerstate()",
       "source_file": "customizations/assets/feishin-mobile-enhancer.js",
-      "source_location": "L746"
+      "source_location": "L760"
     },
     {
       "id": "customizations_assets_feishin_mobile_enhancer_unifytoolbar",
@@ -103682,7 +103682,7 @@
       "file_type": "code",
       "norm_label": "unifytoolbar()",
       "source_file": "customizations/assets/feishin-mobile-enhancer.js",
-      "source_location": "L2600"
+      "source_location": "L2629"
     },
     {
       "id": "customizations_assets_index_c3w9uefe_gy_enum",
@@ -103898,7 +103898,7 @@
       "file_type": "code",
       "norm_label": "connectsse()",
       "source_file": "src/renderer/assets/custom/feishin-mobile-enhancer.js",
-      "source_location": "L2545"
+      "source_location": "L2574"
     },
     {
       "id": "src_renderer_assets_custom_feishin_mobile_enhancer_initunitaryqueuesystem",
@@ -103910,7 +103910,7 @@
       "file_type": "code",
       "norm_label": "initunitaryqueuesystem()",
       "source_file": "src/renderer/assets/custom/feishin-mobile-enhancer.js",
-      "source_location": "L2741"
+      "source_location": "L2770"
     },
     {
       "id": "src_renderer_assets_custom_feishin_mobile_enhancer_initunitaryqueuesystem_attachaudiolooplistener",
@@ -103922,7 +103922,7 @@
       "file_type": "code",
       "norm_label": "attachaudiolooplistener()",
       "source_file": "src/renderer/assets/custom/feishin-mobile-enhancer.js",
-      "source_location": "L2943"
+      "source_location": "L2972"
     },
     {
       "id": "src_renderer_assets_custom_feishin_mobile_enhancer_injectheadermenubutton",
@@ -103934,7 +103934,7 @@
       "file_type": "code",
       "norm_label": "injectheadermenubutton()",
       "source_file": "src/renderer/assets/custom/feishin-mobile-enhancer.js",
-      "source_location": "L736"
+      "source_location": "L750"
     },
     {
       "id": "src_renderer_assets_custom_feishin_mobile_enhancer_isqueueallowedtodisplaymobile",
@@ -103946,7 +103946,7 @@
       "file_type": "code",
       "norm_label": "isqueueallowedtodisplaymobile()",
       "source_file": "src/renderer/assets/custom/feishin-mobile-enhancer.js",
-      "source_location": "L2725"
+      "source_location": "L2754"
     },
     {
       "id": "src_renderer_assets_custom_feishin_mobile_enhancer_preloadnexttracksinqueue",
@@ -103958,7 +103958,7 @@
       "file_type": "code",
       "norm_label": "preloadnexttracksinqueue()",
       "source_file": "src/renderer/assets/custom/feishin-mobile-enhancer.js",
-      "source_location": "L848"
+      "source_location": "L862"
     },
     {
       "id": "src_renderer_assets_custom_feishin_mobile_enhancer_runautocoverprecache",
@@ -103970,7 +103970,7 @@
       "file_type": "code",
       "norm_label": "runautocoverprecache()",
       "source_file": "src/renderer/assets/custom/feishin-mobile-enhancer.js",
-      "source_location": "L2671"
+      "source_location": "L2700"
     },
     {
       "id": "src_renderer_assets_custom_feishin_mobile_enhancer_runautocoverprecache_worker",
@@ -103982,7 +103982,7 @@
       "file_type": "code",
       "norm_label": "worker()",
       "source_file": "src/renderer/assets/custom/feishin-mobile-enhancer.js",
-      "source_location": "L2699"
+      "source_location": "L2728"
     },
     {
       "id": "src_renderer_assets_custom_feishin_mobile_enhancer_sanitizesettings",
@@ -104018,7 +104018,7 @@
       "file_type": "code",
       "norm_label": "syncactivetab()",
       "source_file": "src/renderer/assets/custom/feishin-mobile-enhancer.js",
-      "source_location": "L674"
+      "source_location": "L688"
     },
     {
       "id": "src_renderer_assets_custom_feishin_mobile_enhancer_syncplayerstate",
@@ -104030,7 +104030,7 @@
       "file_type": "code",
       "norm_label": "syncplayerstate()",
       "source_file": "src/renderer/assets/custom/feishin-mobile-enhancer.js",
-      "source_location": "L746"
+      "source_location": "L760"
     },
     {
       "id": "src_renderer_assets_custom_feishin_mobile_enhancer_unifytoolbar",
@@ -104042,7 +104042,7 @@
       "file_type": "code",
       "norm_label": "unifytoolbar()",
       "source_file": "src/renderer/assets/custom/feishin-mobile-enhancer.js",
-      "source_location": "L2600"
+      "source_location": "L2629"
     },
     {
       "id": "customizations_assets_index_c3w9uefe_9e",
@@ -108698,7 +108698,7 @@
       "file_type": "code",
       "norm_label": "initplayerkillswitch()",
       "source_file": "customizations/assets/feishin-personal-os.js",
-      "source_location": "L1429"
+      "source_location": "L1442"
     },
     {
       "id": "customizations_assets_feishin_personal_os_initplayerkillswitch_executekillswitch",
@@ -108710,7 +108710,7 @@
       "file_type": "code",
       "norm_label": "executekillswitch()",
       "source_file": "customizations/assets/feishin-personal-os.js",
-      "source_location": "L1435"
+      "source_location": "L1448"
     },
     {
       "id": "customizations_assets_feishin_personal_os_initplayerkillswitch_mountkillbutton",
@@ -108722,7 +108722,7 @@
       "file_type": "code",
       "norm_label": "mountkillbutton()",
       "source_file": "customizations/assets/feishin-personal-os.js",
-      "source_location": "L1649"
+      "source_location": "L1662"
     },
     {
       "id": "customizations_assets_feishin_personal_os_initplayerkillswitch_openkillswitchglassdialog",
@@ -108734,7 +108734,7 @@
       "file_type": "code",
       "norm_label": "openkillswitchglassdialog()",
       "source_file": "customizations/assets/feishin-personal-os.js",
-      "source_location": "L1496"
+      "source_location": "L1509"
     },
     {
       "id": "customizations_assets_feishin_personal_os_initplayerkillswitch_updatekillbuttonstate",
@@ -108746,7 +108746,7 @@
       "file_type": "code",
       "norm_label": "updatekillbuttonstate()",
       "source_file": "customizations/assets/feishin-personal-os.js",
-      "source_location": "L1624"
+      "source_location": "L1637"
     },
     {
       "id": "scripts_apply_customizations_is_feishin_running",
@@ -108950,7 +108950,7 @@
       "file_type": "code",
       "norm_label": "initplayerkillswitch()",
       "source_file": "src/renderer/assets/custom/feishin-personal-os.js",
-      "source_location": "L1429"
+      "source_location": "L1442"
     },
     {
       "id": "src_renderer_assets_custom_feishin_personal_os_initplayerkillswitch_executekillswitch",
@@ -108962,7 +108962,7 @@
       "file_type": "code",
       "norm_label": "executekillswitch()",
       "source_file": "src/renderer/assets/custom/feishin-personal-os.js",
-      "source_location": "L1435"
+      "source_location": "L1448"
     },
     {
       "id": "src_renderer_assets_custom_feishin_personal_os_initplayerkillswitch_mountkillbutton",
@@ -108974,7 +108974,7 @@
       "file_type": "code",
       "norm_label": "mountkillbutton()",
       "source_file": "src/renderer/assets/custom/feishin-personal-os.js",
-      "source_location": "L1649"
+      "source_location": "L1662"
     },
     {
       "id": "src_renderer_assets_custom_feishin_personal_os_initplayerkillswitch_openkillswitchglassdialog",
@@ -108986,7 +108986,7 @@
       "file_type": "code",
       "norm_label": "openkillswitchglassdialog()",
       "source_file": "src/renderer/assets/custom/feishin-personal-os.js",
-      "source_location": "L1496"
+      "source_location": "L1509"
     },
     {
       "id": "src_renderer_assets_custom_feishin_personal_os_initplayerkillswitch_updatekillbuttonstate",
@@ -108998,7 +108998,7 @@
       "file_type": "code",
       "norm_label": "updatekillbuttonstate()",
       "source_file": "src/renderer/assets/custom/feishin-personal-os.js",
-      "source_location": "L1624"
+      "source_location": "L1637"
     },
     {
       "id": "src_renderer_router_app_router_addtoplaylistcontextmodal",
@@ -199453,7 +199453,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "customizations/assets/feishin-alphabet-scrubber.js",
-      "source_location": "L337",
+      "source_location": "L349",
       "weight": 1.0
     },
     {
@@ -199465,7 +199465,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "customizations/assets/feishin-alphabet-scrubber.js",
-      "source_location": "L388",
+      "source_location": "L400",
       "weight": 1.0
     },
     {
@@ -199477,7 +199477,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "customizations/assets/feishin-alphabet-scrubber.js",
-      "source_location": "L407",
+      "source_location": "L419",
       "weight": 1.0
     },
     {
@@ -199501,7 +199501,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "customizations/assets/feishin-alphabet-scrubber.js",
-      "source_location": "L294",
+      "source_location": "L306",
       "weight": 1.0
     },
     {
@@ -199513,7 +199513,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "customizations/assets/feishin-alphabet-scrubber.js",
-      "source_location": "L428",
+      "source_location": "L440",
       "weight": 1.0
     },
     {
@@ -199525,7 +199525,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "customizations/assets/feishin-alphabet-scrubber.js",
-      "source_location": "L44",
+      "source_location": "L56",
       "weight": 1.0
     },
     {
@@ -199537,7 +199537,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "customizations/assets/feishin-alphabet-scrubber.js",
-      "source_location": "L46",
+      "source_location": "L58",
       "weight": 1.0
     },
     {
@@ -199549,7 +199549,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "customizations/assets/feishin-alphabet-scrubber.js",
-      "source_location": "L435",
+      "source_location": "L447",
       "weight": 1.0
     },
     {
@@ -199561,7 +199561,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "customizations/assets/feishin-alphabet-scrubber.js",
-      "source_location": "L436",
+      "source_location": "L448",
       "weight": 1.0
     },
     {
@@ -199573,31 +199573,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "customizations/assets/feishin-alphabet-scrubber.js",
-      "source_location": "L438",
-      "weight": 1.0
-    },
-    {
-      "source": "customizations_assets_feishin_alphabet_scrubber_alphabetscrubber_loadindexdata",
-      "target": "customizations_assets_feishin_alphabet_scrubber_alphabetscrubber_getauthandserver",
-      "relation": "calls",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "source_file": "customizations/assets/feishin-alphabet-scrubber.js",
-      "source_location": "L105",
-      "weight": 1.0
-    },
-    {
-      "source": "customizations_assets_feishin_alphabet_scrubber_alphabetscrubber_loadindexdata",
-      "target": "customizations_assets_feishin_alphabet_scrubber_alphabetscrubber_buildsectionmap",
-      "relation": "calls",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "source_file": "customizations/assets/feishin-alphabet-scrubber.js",
-      "source_location": "L131",
+      "source_location": "L450",
       "weight": 1.0
     },
     {
@@ -199609,7 +199585,31 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "customizations/assets/feishin-alphabet-scrubber.js",
-      "source_location": "L99",
+      "source_location": "L111",
+      "weight": 1.0
+    },
+    {
+      "source": "customizations_assets_feishin_alphabet_scrubber_alphabetscrubber_loadindexdata",
+      "target": "customizations_assets_feishin_alphabet_scrubber_alphabetscrubber_getauthandserver",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "customizations/assets/feishin-alphabet-scrubber.js",
+      "source_location": "L117",
+      "weight": 1.0
+    },
+    {
+      "source": "customizations_assets_feishin_alphabet_scrubber_alphabetscrubber_loadindexdata",
+      "target": "customizations_assets_feishin_alphabet_scrubber_alphabetscrubber_buildsectionmap",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "customizations/assets/feishin-alphabet-scrubber.js",
+      "source_location": "L143",
       "weight": 1.0
     },
     {
@@ -199621,7 +199621,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "customizations/assets/feishin-alphabet-scrubber.js",
-      "source_location": "L245",
+      "source_location": "L257",
       "weight": 1.0
     },
     {
@@ -199633,7 +199633,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "customizations/assets/feishin-alphabet-scrubber.js",
-      "source_location": "L246",
+      "source_location": "L258",
       "weight": 1.0
     },
     {
@@ -199645,7 +199645,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "customizations/assets/feishin-alphabet-scrubber.js",
-      "source_location": "L247",
+      "source_location": "L259",
       "weight": 1.0
     },
     {
@@ -199657,7 +199657,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "customizations/assets/feishin-alphabet-scrubber.js",
-      "source_location": "L535",
+      "source_location": "L547",
       "weight": 1.0
     },
     {
@@ -199753,7 +199753,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "customizations/assets/feishin-mobile-enhancer.js",
-      "source_location": "L838",
+      "source_location": "L852",
       "weight": 1.0
     },
     {
@@ -199933,7 +199933,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "customizations/assets/feishin-personal-os.js",
-      "source_location": "L1493",
+      "source_location": "L1506",
       "weight": 1.0
     },
     {
@@ -199945,7 +199945,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "customizations/assets/feishin-personal-os.js",
-      "source_location": "L1680",
+      "source_location": "L1693",
       "weight": 1.0
     },
     {
@@ -199957,7 +199957,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "customizations/assets/feishin-personal-os.js",
-      "source_location": "L1685",
+      "source_location": "L1698",
       "weight": 1.0
     },
     {
@@ -199969,7 +199969,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "customizations/assets/feishin-personal-os.js",
-      "source_location": "L1564",
+      "source_location": "L1577",
       "weight": 1.0
     },
     {
@@ -373477,7 +373477,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/renderer/assets/custom/feishin-alphabet-scrubber.js",
-      "source_location": "L337",
+      "source_location": "L349",
       "weight": 1.0
     },
     {
@@ -373489,7 +373489,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/renderer/assets/custom/feishin-alphabet-scrubber.js",
-      "source_location": "L381",
+      "source_location": "L400",
       "weight": 1.0
     },
     {
@@ -373501,7 +373501,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/renderer/assets/custom/feishin-alphabet-scrubber.js",
-      "source_location": "L400",
+      "source_location": "L419",
       "weight": 1.0
     },
     {
@@ -373525,7 +373525,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/renderer/assets/custom/feishin-alphabet-scrubber.js",
-      "source_location": "L294",
+      "source_location": "L306",
       "weight": 1.0
     },
     {
@@ -373537,7 +373537,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/renderer/assets/custom/feishin-alphabet-scrubber.js",
-      "source_location": "L418",
+      "source_location": "L440",
       "weight": 1.0
     },
     {
@@ -373549,7 +373549,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/renderer/assets/custom/feishin-alphabet-scrubber.js",
-      "source_location": "L44",
+      "source_location": "L56",
       "weight": 1.0
     },
     {
@@ -373561,7 +373561,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/renderer/assets/custom/feishin-alphabet-scrubber.js",
-      "source_location": "L46",
+      "source_location": "L58",
       "weight": 1.0
     },
     {
@@ -373573,7 +373573,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/renderer/assets/custom/feishin-alphabet-scrubber.js",
-      "source_location": "L425",
+      "source_location": "L447",
       "weight": 1.0
     },
     {
@@ -373585,7 +373585,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/renderer/assets/custom/feishin-alphabet-scrubber.js",
-      "source_location": "L426",
+      "source_location": "L448",
       "weight": 1.0
     },
     {
@@ -373597,31 +373597,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/renderer/assets/custom/feishin-alphabet-scrubber.js",
-      "source_location": "L428",
-      "weight": 1.0
-    },
-    {
-      "source": "src_renderer_assets_custom_feishin_alphabet_scrubber_alphabetscrubber_loadindexdata",
-      "target": "src_renderer_assets_custom_feishin_alphabet_scrubber_alphabetscrubber_getauthandserver",
-      "relation": "calls",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "source_file": "src/renderer/assets/custom/feishin-alphabet-scrubber.js",
-      "source_location": "L105",
-      "weight": 1.0
-    },
-    {
-      "source": "src_renderer_assets_custom_feishin_alphabet_scrubber_alphabetscrubber_loadindexdata",
-      "target": "src_renderer_assets_custom_feishin_alphabet_scrubber_alphabetscrubber_buildsectionmap",
-      "relation": "calls",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "source_file": "src/renderer/assets/custom/feishin-alphabet-scrubber.js",
-      "source_location": "L131",
+      "source_location": "L450",
       "weight": 1.0
     },
     {
@@ -373633,7 +373609,31 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/renderer/assets/custom/feishin-alphabet-scrubber.js",
-      "source_location": "L99",
+      "source_location": "L111",
+      "weight": 1.0
+    },
+    {
+      "source": "src_renderer_assets_custom_feishin_alphabet_scrubber_alphabetscrubber_loadindexdata",
+      "target": "src_renderer_assets_custom_feishin_alphabet_scrubber_alphabetscrubber_getauthandserver",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "src/renderer/assets/custom/feishin-alphabet-scrubber.js",
+      "source_location": "L117",
+      "weight": 1.0
+    },
+    {
+      "source": "src_renderer_assets_custom_feishin_alphabet_scrubber_alphabetscrubber_loadindexdata",
+      "target": "src_renderer_assets_custom_feishin_alphabet_scrubber_alphabetscrubber_buildsectionmap",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "src/renderer/assets/custom/feishin-alphabet-scrubber.js",
+      "source_location": "L143",
       "weight": 1.0
     },
     {
@@ -373645,7 +373645,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/renderer/assets/custom/feishin-alphabet-scrubber.js",
-      "source_location": "L245",
+      "source_location": "L257",
       "weight": 1.0
     },
     {
@@ -373657,7 +373657,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/renderer/assets/custom/feishin-alphabet-scrubber.js",
-      "source_location": "L246",
+      "source_location": "L258",
       "weight": 1.0
     },
     {
@@ -373669,7 +373669,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/renderer/assets/custom/feishin-alphabet-scrubber.js",
-      "source_location": "L247",
+      "source_location": "L259",
       "weight": 1.0
     },
     {
@@ -373681,7 +373681,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/renderer/assets/custom/feishin-alphabet-scrubber.js",
-      "source_location": "L525",
+      "source_location": "L547",
       "weight": 1.0
     },
     {
@@ -373777,7 +373777,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/renderer/assets/custom/feishin-mobile-enhancer.js",
-      "source_location": "L838",
+      "source_location": "L852",
       "weight": 1.0
     },
     {
@@ -373957,7 +373957,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/renderer/assets/custom/feishin-personal-os.js",
-      "source_location": "L1493",
+      "source_location": "L1506",
       "weight": 1.0
     },
     {
@@ -373969,7 +373969,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/renderer/assets/custom/feishin-personal-os.js",
-      "source_location": "L1680",
+      "source_location": "L1693",
       "weight": 1.0
     },
     {
@@ -373981,7 +373981,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/renderer/assets/custom/feishin-personal-os.js",
-      "source_location": "L1685",
+      "source_location": "L1698",
       "weight": 1.0
     },
     {
@@ -373993,7 +373993,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/renderer/assets/custom/feishin-personal-os.js",
-      "source_location": "L1564",
+      "source_location": "L1577",
       "weight": 1.0
     },
     {
@@ -415189,7 +415189,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "customizations/assets/feishin-mobile-enhancer.js",
-      "source_location": "L2943",
+      "source_location": "L2972",
       "weight": 1.0
     },
     {
@@ -415201,7 +415201,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "customizations/assets/feishin-mobile-enhancer.js",
-      "source_location": "L674",
+      "source_location": "L688",
       "weight": 1.0
     },
     {
@@ -415213,7 +415213,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "customizations/assets/feishin-personal-os.js",
-      "source_location": "L1435",
+      "source_location": "L1448",
       "weight": 1.0
     },
     {
@@ -415225,7 +415225,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "customizations/assets/feishin-personal-os.js",
-      "source_location": "L1496",
+      "source_location": "L1509",
       "weight": 1.0
     },
     {
@@ -415237,7 +415237,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "customizations/assets/feishin-personal-os.js",
-      "source_location": "L1649",
+      "source_location": "L1662",
       "weight": 1.0
     },
     {
@@ -415285,7 +415285,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "customizations/assets/feishin-personal-os.js",
-      "source_location": "L1810",
+      "source_location": "L1823",
       "weight": 1.0
     },
     {
@@ -417253,7 +417253,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/renderer/assets/custom/feishin-mobile-enhancer.js",
-      "source_location": "L2943",
+      "source_location": "L2972",
       "weight": 1.0
     },
     {
@@ -417265,7 +417265,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/renderer/assets/custom/feishin-mobile-enhancer.js",
-      "source_location": "L674",
+      "source_location": "L688",
       "weight": 1.0
     },
     {
@@ -417277,7 +417277,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/renderer/assets/custom/feishin-personal-os.js",
-      "source_location": "L1435",
+      "source_location": "L1448",
       "weight": 1.0
     },
     {
@@ -417289,7 +417289,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/renderer/assets/custom/feishin-personal-os.js",
-      "source_location": "L1496",
+      "source_location": "L1509",
       "weight": 1.0
     },
     {
@@ -417301,7 +417301,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/renderer/assets/custom/feishin-personal-os.js",
-      "source_location": "L1649",
+      "source_location": "L1662",
       "weight": 1.0
     },
     {
@@ -417349,7 +417349,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/renderer/assets/custom/feishin-personal-os.js",
-      "source_location": "L1810",
+      "source_location": "L1823",
       "weight": 1.0
     },
     {
@@ -456665,7 +456665,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "customizations/assets/feishin-mobile-enhancer.js",
-      "source_location": "L2545",
+      "source_location": "L2574",
       "weight": 1.0
     },
     {
@@ -456676,7 +456676,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "customizations/assets/feishin-mobile-enhancer.js",
-      "source_location": "L2600",
+      "source_location": "L2629",
       "weight": 1.0
     },
     {
@@ -456687,7 +456687,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "customizations/assets/feishin-mobile-enhancer.js",
-      "source_location": "L2671",
+      "source_location": "L2700",
       "weight": 1.0
     },
     {
@@ -456698,7 +456698,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "customizations/assets/feishin-mobile-enhancer.js",
-      "source_location": "L2725",
+      "source_location": "L2754",
       "weight": 1.0
     },
     {
@@ -456709,7 +456709,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "customizations/assets/feishin-mobile-enhancer.js",
-      "source_location": "L2741",
+      "source_location": "L2770",
       "weight": 1.0
     },
     {
@@ -456731,7 +456731,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "customizations/assets/feishin-mobile-enhancer.js",
-      "source_location": "L736",
+      "source_location": "L750",
       "weight": 1.0
     },
     {
@@ -456742,7 +456742,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "customizations/assets/feishin-mobile-enhancer.js",
-      "source_location": "L746",
+      "source_location": "L760",
       "weight": 1.0
     },
     {
@@ -456753,7 +456753,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "customizations/assets/feishin-mobile-enhancer.js",
-      "source_location": "L848",
+      "source_location": "L862",
       "weight": 1.0
     },
     {
@@ -456819,7 +456819,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "customizations/assets/feishin-personal-os.js",
-      "source_location": "L1429",
+      "source_location": "L1442",
       "weight": 1.0
     },
     {
@@ -456830,7 +456830,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "customizations/assets/feishin-personal-os.js",
-      "source_location": "L1710",
+      "source_location": "L1723",
       "weight": 1.0
     },
     {
@@ -456841,7 +456841,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "customizations/assets/feishin-personal-os.js",
-      "source_location": "L1797",
+      "source_location": "L1810",
       "weight": 1.0
     },
     {
@@ -456951,7 +456951,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "customizations/assets/feishin-personal-os.js",
-      "source_location": "L1624",
+      "source_location": "L1637",
       "weight": 1.0
     },
     {
@@ -515823,7 +515823,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/renderer/assets/custom/feishin-mobile-enhancer.js",
-      "source_location": "L2545",
+      "source_location": "L2574",
       "weight": 1.0
     },
     {
@@ -515834,7 +515834,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/renderer/assets/custom/feishin-mobile-enhancer.js",
-      "source_location": "L2600",
+      "source_location": "L2629",
       "weight": 1.0
     },
     {
@@ -515845,7 +515845,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/renderer/assets/custom/feishin-mobile-enhancer.js",
-      "source_location": "L2671",
+      "source_location": "L2700",
       "weight": 1.0
     },
     {
@@ -515856,7 +515856,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/renderer/assets/custom/feishin-mobile-enhancer.js",
-      "source_location": "L2725",
+      "source_location": "L2754",
       "weight": 1.0
     },
     {
@@ -515867,7 +515867,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/renderer/assets/custom/feishin-mobile-enhancer.js",
-      "source_location": "L2741",
+      "source_location": "L2770",
       "weight": 1.0
     },
     {
@@ -515889,7 +515889,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/renderer/assets/custom/feishin-mobile-enhancer.js",
-      "source_location": "L736",
+      "source_location": "L750",
       "weight": 1.0
     },
     {
@@ -515900,7 +515900,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/renderer/assets/custom/feishin-mobile-enhancer.js",
-      "source_location": "L746",
+      "source_location": "L760",
       "weight": 1.0
     },
     {
@@ -515911,7 +515911,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/renderer/assets/custom/feishin-mobile-enhancer.js",
-      "source_location": "L848",
+      "source_location": "L862",
       "weight": 1.0
     },
     {
@@ -515977,7 +515977,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/renderer/assets/custom/feishin-personal-os.js",
-      "source_location": "L1429",
+      "source_location": "L1442",
       "weight": 1.0
     },
     {
@@ -515988,7 +515988,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/renderer/assets/custom/feishin-personal-os.js",
-      "source_location": "L1710",
+      "source_location": "L1723",
       "weight": 1.0
     },
     {
@@ -515999,7 +515999,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/renderer/assets/custom/feishin-personal-os.js",
-      "source_location": "L1797",
+      "source_location": "L1810",
       "weight": 1.0
     },
     {
@@ -516109,7 +516109,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/renderer/assets/custom/feishin-personal-os.js",
-      "source_location": "L1624",
+      "source_location": "L1637",
       "weight": 1.0
     },
     {
@@ -567849,13 +567849,24 @@
     },
     {
       "source": "customizations_assets_feishin_alphabet_scrubber_alphabetscrubber",
+      "target": "customizations_assets_feishin_alphabet_scrubber_alphabetscrubber_loadindexdata",
+      "relation": "method",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "customizations/assets/feishin-alphabet-scrubber.js",
+      "source_location": "L102",
+      "weight": 1.0
+    },
+    {
+      "source": "customizations_assets_feishin_alphabet_scrubber_alphabetscrubber",
       "target": "customizations_assets_feishin_alphabet_scrubber_alphabetscrubber_buildsectionmap",
       "relation": "method",
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "customizations/assets/feishin-alphabet-scrubber.js",
-      "source_location": "L149",
+      "source_location": "L161",
       "weight": 1.0
     },
     {
@@ -567877,7 +567888,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "customizations/assets/feishin-alphabet-scrubber.js",
-      "source_location": "L208",
+      "source_location": "L220",
       "weight": 1.0
     },
     {
@@ -567888,7 +567899,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "customizations/assets/feishin-alphabet-scrubber.js",
-      "source_location": "L232",
+      "source_location": "L244",
       "weight": 1.0
     },
     {
@@ -567899,7 +567910,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "customizations/assets/feishin-alphabet-scrubber.js",
-      "source_location": "L250",
+      "source_location": "L262",
       "weight": 1.0
     },
     {
@@ -567910,7 +567921,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "customizations/assets/feishin-alphabet-scrubber.js",
-      "source_location": "L266",
+      "source_location": "L278",
       "weight": 1.0
     },
     {
@@ -567921,7 +567932,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "customizations/assets/feishin-alphabet-scrubber.js",
-      "source_location": "L297",
+      "source_location": "L309",
       "weight": 1.0
     },
     {
@@ -567932,7 +567943,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "customizations/assets/feishin-alphabet-scrubber.js",
-      "source_location": "L322",
+      "source_location": "L334",
       "weight": 1.0
     },
     {
@@ -567954,7 +567965,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "customizations/assets/feishin-alphabet-scrubber.js",
-      "source_location": "L413",
+      "source_location": "L425",
       "weight": 1.0
     },
     {
@@ -567965,7 +567976,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "customizations/assets/feishin-alphabet-scrubber.js",
-      "source_location": "L433",
+      "source_location": "L445",
       "weight": 1.0
     },
     {
@@ -567976,7 +567987,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "customizations/assets/feishin-alphabet-scrubber.js",
-      "source_location": "L461",
+      "source_location": "L473",
       "weight": 1.0
     },
     {
@@ -567987,7 +567998,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "customizations/assets/feishin-alphabet-scrubber.js",
-      "source_location": "L473",
+      "source_location": "L485",
       "weight": 1.0
     },
     {
@@ -567998,7 +568009,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "customizations/assets/feishin-alphabet-scrubber.js",
-      "source_location": "L519",
+      "source_location": "L531",
       "weight": 1.0
     },
     {
@@ -568009,18 +568020,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "customizations/assets/feishin-alphabet-scrubber.js",
-      "source_location": "L72",
-      "weight": 1.0
-    },
-    {
-      "source": "customizations_assets_feishin_alphabet_scrubber_alphabetscrubber",
-      "target": "customizations_assets_feishin_alphabet_scrubber_alphabetscrubber_loadindexdata",
-      "relation": "method",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "customizations/assets/feishin-alphabet-scrubber.js",
-      "source_location": "L90",
+      "source_location": "L84",
       "weight": 1.0
     },
     {
@@ -592929,13 +592929,24 @@
     },
     {
       "source": "src_renderer_assets_custom_feishin_alphabet_scrubber_alphabetscrubber",
+      "target": "src_renderer_assets_custom_feishin_alphabet_scrubber_alphabetscrubber_loadindexdata",
+      "relation": "method",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "src/renderer/assets/custom/feishin-alphabet-scrubber.js",
+      "source_location": "L102",
+      "weight": 1.0
+    },
+    {
+      "source": "src_renderer_assets_custom_feishin_alphabet_scrubber_alphabetscrubber",
       "target": "src_renderer_assets_custom_feishin_alphabet_scrubber_alphabetscrubber_buildsectionmap",
       "relation": "method",
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/renderer/assets/custom/feishin-alphabet-scrubber.js",
-      "source_location": "L149",
+      "source_location": "L161",
       "weight": 1.0
     },
     {
@@ -592957,7 +592968,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/renderer/assets/custom/feishin-alphabet-scrubber.js",
-      "source_location": "L208",
+      "source_location": "L220",
       "weight": 1.0
     },
     {
@@ -592968,7 +592979,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/renderer/assets/custom/feishin-alphabet-scrubber.js",
-      "source_location": "L232",
+      "source_location": "L244",
       "weight": 1.0
     },
     {
@@ -592979,7 +592990,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/renderer/assets/custom/feishin-alphabet-scrubber.js",
-      "source_location": "L250",
+      "source_location": "L262",
       "weight": 1.0
     },
     {
@@ -592990,7 +593001,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/renderer/assets/custom/feishin-alphabet-scrubber.js",
-      "source_location": "L266",
+      "source_location": "L278",
       "weight": 1.0
     },
     {
@@ -593001,7 +593012,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/renderer/assets/custom/feishin-alphabet-scrubber.js",
-      "source_location": "L297",
+      "source_location": "L309",
       "weight": 1.0
     },
     {
@@ -593012,7 +593023,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/renderer/assets/custom/feishin-alphabet-scrubber.js",
-      "source_location": "L322",
+      "source_location": "L334",
       "weight": 1.0
     },
     {
@@ -593034,7 +593045,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/renderer/assets/custom/feishin-alphabet-scrubber.js",
-      "source_location": "L406",
+      "source_location": "L425",
       "weight": 1.0
     },
     {
@@ -593045,7 +593056,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/renderer/assets/custom/feishin-alphabet-scrubber.js",
-      "source_location": "L423",
+      "source_location": "L445",
       "weight": 1.0
     },
     {
@@ -593056,7 +593067,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/renderer/assets/custom/feishin-alphabet-scrubber.js",
-      "source_location": "L451",
+      "source_location": "L473",
       "weight": 1.0
     },
     {
@@ -593067,7 +593078,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/renderer/assets/custom/feishin-alphabet-scrubber.js",
-      "source_location": "L463",
+      "source_location": "L485",
       "weight": 1.0
     },
     {
@@ -593078,7 +593089,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/renderer/assets/custom/feishin-alphabet-scrubber.js",
-      "source_location": "L509",
+      "source_location": "L531",
       "weight": 1.0
     },
     {
@@ -593089,18 +593100,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/renderer/assets/custom/feishin-alphabet-scrubber.js",
-      "source_location": "L72",
-      "weight": 1.0
-    },
-    {
-      "source": "src_renderer_assets_custom_feishin_alphabet_scrubber_alphabetscrubber",
-      "target": "src_renderer_assets_custom_feishin_alphabet_scrubber_alphabetscrubber_loadindexdata",
-      "relation": "method",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "src/renderer/assets/custom/feishin-alphabet-scrubber.js",
-      "source_location": "L90",
+      "source_location": "L84",
       "weight": 1.0
     },
     {
@@ -610955,7 +610955,7 @@
       "confidence_score": 0.85,
       "context": "argument",
       "source_file": "customizations/assets/feishin-mobile-enhancer.js",
-      "source_location": "L2709",
+      "source_location": "L2738",
       "weight": 1.0
     },
     {
@@ -641843,7 +641843,7 @@
       "confidence_score": 0.85,
       "context": "argument",
       "source_file": "src/renderer/assets/custom/feishin-mobile-enhancer.js",
-      "source_location": "L2709",
+      "source_location": "L2738",
       "weight": 1.0
     },
     {
@@ -673012,5 +673012,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "067c07e0b3f9512fcbf9c2f62f58945ef75b57cc"
+  "built_at_commit": "50654144082849c0ef6aaa23ae5ad9c6ef59c4aa"
 }

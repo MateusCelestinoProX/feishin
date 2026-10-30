@@ -1337,6 +1337,19 @@ if (typeof window !== 'undefined') {
       const respContainer = document.querySelector('.fs-full-screen-player-module-responsive-container');
       const qg = document.querySelector('.fs-full-screen-player-queue-module-grid-container');
 
+      // Ocultar estritamente o Scrubber A-Z e o HUD quando o Reprodutor Fullscreen estiver aberto
+      const scrubber = document.getElementById('feishin-alphabet-scrubber');
+      const hud = document.getElementById('feishin-alphabet-hud');
+      if (fsContainer) {
+        if (scrubber) scrubber.style.setProperty('display', 'none', 'important');
+        if (hud) hud.style.setProperty('display', 'none', 'important');
+      } else {
+        const hash = window.location.hash || '';
+        if (hash.includes('/library/songs') && scrubber && scrubber.style.display === 'none') {
+          scrubber.style.removeProperty('display');
+        }
+      }
+
       if (!allowed) {
         // Nada na fila: fica só a hero image da track no centro
         if (respContainer) {

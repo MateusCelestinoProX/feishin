@@ -1543,6 +1543,23 @@ button.fs-player-button-module-main svg {
     object-fit: cover !important;
 }
 
+/* OCULTAR SCRUBBER A-Z & HUD NO REPRODUTOR FULLSCREEN (MAC E ANDROID) */
+body:has(.fs-full-screen-player-module-container) #feishin-alphabet-scrubber,
+body:has(.fs-full-screen-player-module-container) #feishin-alphabet-hud,
+.fs-full-screen-player-module-container ~ #feishin-alphabet-scrubber,
+.fs-full-screen-player-module-container ~ #feishin-alphabet-hud,
+.fs-full-screen-player-module-container #feishin-alphabet-scrubber,
+.fs-full-screen-player-module-container #feishin-alphabet-hud,
+body.feishin-tp-open #feishin-alphabet-scrubber,
+body.feishin-tp-open #feishin-alphabet-hud,
+#feishin-track-page.open ~ #feishin-alphabet-scrubber,
+#feishin-track-page.open ~ #feishin-alphabet-hud {
+    display: none !important;
+    opacity: 0 !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+}
+
 /* FILA DE REPRODUÇÃO: Oculta por padrão em modo simples; visível SOMENTE quando personal-os-queue-visible estiver ativo */
 .fs-full-screen-player-queue-module-grid-container,
 .fs-full-screen-player-module-responsive-container:not(.personal-os-queue-visible) .fs-full-screen-player-queue-module-grid-container {

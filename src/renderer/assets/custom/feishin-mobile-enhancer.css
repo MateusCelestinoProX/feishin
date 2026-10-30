@@ -1309,6 +1309,36 @@ thead {
     background: rgba(168, 85, 247, 0.5) !important;
 }
 
+/* Pill "Fila" flutuante dentro da capa (canto inferior direito) */
+.feishin-tp-queue-pill {
+    position: absolute !important;
+    bottom: 12px !important;
+    right: 12px !important;
+    padding: 6px 14px !important;
+    border-radius: 9999px !important;
+    background: rgba(168, 85, 247, 0.35) !important;
+    backdrop-filter: blur(20px) saturate(200%) !important;
+    -webkit-backdrop-filter: blur(20px) saturate(200%) !important;
+    border: 1px solid rgba(255, 255, 255, 0.28) !important;
+    border-top: 1px solid rgba(255, 255, 255, 0.55) !important;
+    color: #FFFFFF !important;
+    font-size: 13px !important;
+    font-weight: 600 !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.5) !important;
+    cursor: pointer !important;
+    outline: none !important;
+    transition: transform 0.12s ease, background 0.15s ease !important;
+    z-index: 5 !important;
+}
+
+.feishin-tp-queue-pill:active {
+    transform: scale(0.93) !important;
+    background: rgba(168, 85, 247, 0.6) !important;
+}
+
 /* Seção de Informações da Faixa */
 .feishin-tp-info-section {
     display: flex !important;
