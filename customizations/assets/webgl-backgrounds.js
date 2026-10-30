@@ -3019,6 +3019,7 @@ window.renderWebGLBackground = function(type) {
       });
       break;
 
+    case 'ancidsquares':
     case 'acidsquares':
       currentCleanup = initAcidSquares(container, {
         color1: '#5227FF', color2: '#A855F7', color3: '#FFFFFF',

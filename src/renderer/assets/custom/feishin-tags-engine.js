@@ -326,15 +326,52 @@
             this.selectedSongs.set(key, s);
           });
         }
+        this.ensureRowClickInterceptor();
         renderMultiSelectFloatingBar();
         this.updateSelectionRowDecorations();
         this.showToast(`Modo de Seleção Ativado (${this.selectedSongs.size} selecionadas)`);
+        const headerBtn = document.querySelector('#fs-toolbar-select-btn span');
+        if (headerBtn) headerBtn.innerText = 'Cancelar';
       } else {
         document.body.classList.remove('fs-multiselect-active');
         this.selectedSongs.clear();
         removeMultiSelectFloatingBar();
         this.updateSelectionRowDecorations();
+        const headerBtn = document.querySelector('#fs-toolbar-select-btn span');
+        if (headerBtn) headerBtn.innerText = 'Selecionar';
       }
+    }
+
+    ensureRowClickInterceptor() {
+      if (this._rowClickInterceptorAttached) return;
+      this._rowClickInterceptorAttached = true;
+      document.addEventListener('click', (e) => {
+        if (!this.isMultiSelectActive) return;
+
+        // Se o clique foi na barra flutuante, modais, menu dropdown ou no botão de alternar seleção, não intercepta
+        if (e.target.closest('#fs-multiselect-floating-bar, .fs-tag-modal-container, .fs-tag-modal-backdrop, #fs-toolbar-select-btn, .mantine-Menu-dropdown')) {
+          return;
+        }
+
+        const row = e.target.closest('[data-row-index], .ra-tracklist-row, [class*="track-row"]');
+        if (row) {
+          e.stopPropagation();
+          e.preventDefault();
+
+          let song = extractSongFromElement(row);
+          if (!song && row.getAttribute('data-row-index') && row.parentElement) {
+            const rowIndex = row.getAttribute('data-row-index');
+            const titleCell = row.parentElement.querySelector(`[data-row-index="${rowIndex}"].fs-title-combined-column-module-title-combined, [data-row-index="${rowIndex}"] [class*="title-combined"]`);
+            if (titleCell) {
+              song = extractSongFromElement(titleCell);
+            }
+          }
+
+          if (song) {
+            this.toggleSongSelection(song);
+          }
+        }
+      }, true);
     }
 
     toggleSongSelection(song) {

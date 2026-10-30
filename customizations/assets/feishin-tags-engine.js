@@ -326,15 +326,52 @@
             this.selectedSongs.set(key, s);
           });
         }
+        this.ensureRowClickInterceptor();
         renderMultiSelectFloatingBar();
         this.updateSelectionRowDecorations();
         this.showToast(`Modo de Seleção Ativado (${this.selectedSongs.size} selecionadas)`);
+        const headerBtn = document.querySelector('#fs-toolbar-select-btn span');
+        if (headerBtn) headerBtn.innerText = 'Cancelar';
       } else {
         document.body.classList.remove('fs-multiselect-active');
         this.selectedSongs.clear();
         removeMultiSelectFloatingBar();
         this.updateSelectionRowDecorations();
+        const headerBtn = document.querySelector('#fs-toolbar-select-btn span');
+        if (headerBtn) headerBtn.innerText = 'Selecionar';
       }
+    }
+
+    ensureRowClickInterceptor() {
+      if (this._rowClickInterceptorAttached) return;
+      this._rowClickInterceptorAttached = true;
+      document.addEventListener('click', (e) => {
+        if (!this.isMultiSelectActive) return;
+
+        // Se o clique foi na barra flutuante, modais, menu dropdown ou no botão de alternar seleção, não intercepta
+        if (e.target.closest('#fs-multiselect-floating-bar, .fs-tag-modal-container, .fs-tag-modal-backdrop, #fs-toolbar-select-btn, .mantine-Menu-dropdown')) {
+          return;
+        }
+
+        const row = e.target.closest('[data-row-index], .ra-tracklist-row, [class*="track-row"]');
+        if (row) {
+          e.stopPropagation();
+          e.preventDefault();
+
+          let song = extractSongFromElement(row);
+          if (!song && row.getAttribute('data-row-index') && row.parentElement) {
+            const rowIndex = row.getAttribute('data-row-index');
+            const titleCell = row.parentElement.querySelector(`[data-row-index="${rowIndex}"].fs-title-combined-column-module-title-combined, [data-row-index="${rowIndex}"] [class*="title-combined"]`);
+            if (titleCell) {
+              song = extractSongFromElement(titleCell);
+            }
+          }
+
+          if (song) {
+            this.toggleSongSelection(song);
+          }
+        }
+      }, true);
     }
 
     toggleSongSelection(song) {
@@ -1293,19 +1330,34 @@
       document.body.appendChild(bar);
     }
 
+    const playerBar = document.getElementById('player-bar');
+    const isPlayerVisible = Boolean(playerBar && !playerBar.classList.contains('feishin-player-hidden') && (playerBar.offsetHeight > 0 || (window.__FEISHIN_PLAYER_STORE__ && window.__FEISHIN_PLAYER_STORE__.getState()?.status !== 'stopped')));
+    if (isPlayerVisible) {
+      bar.classList.add('has-player');
+    } else {
+      bar.classList.remove('has-player');
+    }
+
     bar.innerHTML = `
       <div class="fs-multiselect-bar-glass">
-        <div class="fs-multiselect-bar-info">
-          <div class="fs-multiselect-bar-count-badge">${count}</div>
-          <span class="fs-multiselect-bar-label">${count === 1 ? 'faixa selecionada' : 'faixas selecionadas'}</span>
+        <div class="fs-multiselect-bar-header">
+          <div class="fs-multiselect-bar-info">
+            <div class="fs-multiselect-bar-count-badge">${count}</div>
+            <span class="fs-multiselect-bar-label">${count === 1 ? '1 faixa selecionada' : `${count} faixas selecionadas`}</span>
+          </div>
+          <button type="button" id="fs-ms-close" class="fs-ms-btn-close" aria-label="Sair da Seleção" title="Sair da Seleção">
+            <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+          </button>
         </div>
         <div class="fs-multiselect-bar-actions">
-          <button type="button" id="fs-ms-select-all" class="fs-ms-btn fs-ms-btn-secondary">Selecionar Tudo</button>
+          <button type="button" id="fs-ms-select-all" class="fs-ms-btn fs-ms-btn-secondary">Selecionar tudo</button>
           <button type="button" id="fs-ms-clear" class="fs-ms-btn fs-ms-btn-secondary">Limpar</button>
           <button type="button" id="fs-ms-assign-tag" class="fs-ms-btn fs-ms-btn-primary" ${count === 0 ? 'disabled' : ''}>
             🏷️ Atribuir Tag
           </button>
-          <button type="button" id="fs-ms-close" class="fs-ms-btn fs-ms-btn-close" title="Sair da Seleção">✕</button>
         </div>
       </div>
     `;
@@ -1386,6 +1438,10 @@
       timer = setTimeout(() => {
         timer = null;
         engine.updateAllVisibleTrackBadges();
+        if (engine.isMultiSelectActive) {
+          engine.updateSelectionRowDecorations();
+          renderMultiSelectFloatingBar();
+        }
       }, 120);
     };
 
