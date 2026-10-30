@@ -411,11 +411,11 @@
 
     updateAllVisibleTrackBadges() {
       // 1. Virtualized Tracks Table (Faixas page / Playlists / Albums)
-      const dataRows = document.querySelectorAll(
-        '.fs-title-combined-column-module-title-combined, .fs-title-artist-column-module-title-artist, .fs-song-title-column-module-song-title, .fs-item-table-list-column-module-data-row'
+      const titleCells = document.querySelectorAll(
+        '.fs-title-combined-column-module-title-combined, .fs-title-artist-column-module-title-artist, .fs-song-title-column-module-song-title'
       );
 
-      dataRows.forEach(cell => {
+      titleCells.forEach(cell => {
         const song = extractSongFromElement(cell);
         if (!song) return;
 
@@ -426,15 +426,18 @@
           if (!badgeWrap) {
             badgeWrap = document.createElement('span');
             badgeWrap.className = 'fs-track-tag-badges';
-            const titleEl = cell.querySelector('.fs-title-combined-column-module-title, .fs-title-artist-column-module-title, .fs-song-title-column-module-song-title, [class*="title"], a') || cell;
-            if (titleEl.parentNode) {
+            const textWrap = cell.querySelector('.fs-title-combined-column-module-text-container') || cell;
+            const titleEl = cell.querySelector(
+              '.fs-title-combined-column-module-title, .fs-song-title-column-module-song-title, .fs-title-artist-column-module-title, .fs-title-column-module-title'
+            );
+            if (titleEl && titleEl.parentNode) {
               if (titleEl.nextSibling) {
                 titleEl.parentNode.insertBefore(badgeWrap, titleEl.nextSibling);
               } else {
                 titleEl.parentNode.appendChild(badgeWrap);
               }
             } else {
-              cell.appendChild(badgeWrap);
+              textWrap.appendChild(badgeWrap);
             }
           }
           const badgesHtml = tags.map(t => `
@@ -701,10 +704,10 @@
 
     // 4. DOM text
     const titleEl = row.querySelector(
-      '.fs-song-title-column-module-song-title, .fs-title-combined-column-module-title, .fs-title-artist-column-module-title, .fs-title-column-module-title, .ra-track-title, [class*="title"], a'
-    );
+      '.fs-title-combined-column-module-title, .fs-song-title-column-module-song-title, .fs-title-artist-column-module-title, .fs-title-column-module-title, .ra-track-title'
+    ) || row.querySelector('.mantine-Text-root:not(.fs-title-combined-column-module-artists)') || row.querySelector('a');
     const artistEl = row.querySelector(
-      '.fs-song-artist-column-module-artist, .fs-title-combined-column-module-artists, .fs-artist-column-module-artist, .ra-track-artist, [class*="artist"]'
+      '.fs-title-combined-column-module-artists, .fs-song-artist-column-module-artist, .fs-artist-column-module-artist, .ra-track-artist'
     );
 
     const title = titleEl ? titleEl.innerText.trim() : '';

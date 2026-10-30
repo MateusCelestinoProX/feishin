@@ -286,6 +286,64 @@
                 store.mediaSeekToTimestamp(seconds);
             }
         },
+        generateShuffledIndices: function (length, currentIndex) {
+            const pool = [];
+            for (let i = 0; i < length; i++) {
+                if (i !== currentIndex) pool.push(i);
+            }
+            for (let i = pool.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [pool[i], pool[j]] = [pool[j], pool[i]];
+            }
+            if (currentIndex >= 0 && currentIndex < length) {
+                pool.unshift(currentIndex);
+            }
+            return pool;
+        },
+        toggleShuffle: function () {
+            const store = window.__FEISHIN_PLAYER_STORE__?.getState?.();
+            if (!store) return;
+            const isShuffle = store.player?.shuffle === 'track' || store.player?.shuffle === 'album';
+            const nextShuffle = isShuffle ? 'none' : 'track';
+            if (typeof store.setShuffle === 'function') {
+                store.setShuffle(nextShuffle);
+            } else if (typeof store.toggleShuffle === 'function') {
+                store.toggleShuffle();
+            }
+            const col = window.__FEISHIN_ACTIVE_COLLECTION__;
+            if (col && Array.isArray(col.items)) {
+                col.isShuffle = (nextShuffle === 'track');
+                if (col.isShuffle) {
+                    col.shuffledIndices = window.FeishinNative.generateShuffledIndices(col.items.length, col.currentIndex);
+                    col.shuffledPointer = 0;
+                } else {
+                    col.shuffledIndices = null;
+                }
+            }
+            if (window.FeishinTrackPage?.sync) window.FeishinTrackPage.sync();
+        },
+        toggleRepeat: function () {
+            const store = window.__FEISHIN_PLAYER_STORE__?.getState?.();
+            if (!store) return;
+            const cur = store.player?.repeat || 'none';
+            let nextRepeat = 'none';
+            if (cur === 'none') {
+                nextRepeat = 'all';
+            } else if (cur === 'all') {
+                nextRepeat = 'one';
+            } else {
+                nextRepeat = 'none';
+            }
+            if (typeof store.setRepeat === 'function') {
+                store.setRepeat(nextRepeat);
+            } else if (typeof store.toggleRepeat === 'function') {
+                store.toggleRepeat();
+            }
+            document.querySelectorAll('audio').forEach(a => {
+                a.loop = (nextRepeat === 'one');
+            });
+            if (window.FeishinTrackPage?.sync) window.FeishinTrackPage.sync();
+        },
         closePlayer: function () {
             if (window.AndroidBridge?.hapticFeedback) window.AndroidBridge.hapticFeedback(1);
             window.__FEISHIN_HAS_ENQUEUED_ITEMS__ = false;
@@ -1614,18 +1672,12 @@
 
             document.getElementById('feishin-tp-btn-shuffle')?.addEventListener('click', () => {
                 if (window.AndroidBridge?.hapticFeedback) window.AndroidBridge.hapticFeedback(0);
-                const store = window.__FEISHIN_PLAYER_STORE__?.getState?.();
-                if (store?.toggleShuffle) store.toggleShuffle();
-                else if (store?.mediaToggleShuffle) store.mediaToggleShuffle();
-                setTimeout(() => this.sync(), 80);
+                window.FeishinNative.toggleShuffle();
             });
 
             document.getElementById('feishin-tp-btn-repeat')?.addEventListener('click', () => {
                 if (window.AndroidBridge?.hapticFeedback) window.AndroidBridge.hapticFeedback(0);
-                const store = window.__FEISHIN_PLAYER_STORE__?.getState?.();
-                if (store?.toggleRepeat) store.toggleRepeat();
-                else if (store?.mediaToggleRepeat) store.mediaToggleRepeat();
-                setTimeout(() => this.sync(), 80);
+                window.FeishinNative.toggleRepeat();
             });
 
             // Barra de Busca Touch & Drag (Seek Slider)
@@ -1890,11 +1942,14 @@
             }
 
             // Shuffle & Repeat
-            if (shuffleBtn && store?.player?.shuffle !== undefined) {
-                shuffleBtn.classList.toggle('active', Boolean(store.player.shuffle));
+            const isShuffleActive = store?.player?.shuffle === 'track' || store?.player?.shuffle === 'album';
+            if (shuffleBtn) {
+                shuffleBtn.classList.toggle('active', isShuffleActive);
             }
-            if (repeatBtn && store?.player?.repeat !== undefined) {
-                repeatBtn.classList.toggle('active', store.player.repeat !== 'off' && store.player.repeat !== false);
+            const repeatMode = store?.player?.repeat || 'none';
+            if (repeatBtn) {
+                repeatBtn.classList.toggle('active', repeatMode === 'all' || repeatMode === 'one');
+                repeatBtn.classList.toggle('repeat-one', repeatMode === 'one');
             }
 
             // Favorito Sincronizado
@@ -2686,6 +2741,7 @@
         const origAddToQueueByType = store.addToQueueByType;
         const origSetQueue = store.setQueue;
         const origMediaNext = store.mediaNext;
+        const origMediaAutoNext = store.mediaAutoNext;
         const origMediaPrevious = store.mediaPrevious;
 
         store.addToQueueByType = function (items, playType, playSongId) {
@@ -2715,10 +2771,15 @@
             if (playType === 'now' || playType === 'shuffle') {
                 const target = (playSongId && items.find((i) => i.id === playSongId)) || items[0];
                 if (target) {
+                    const isShuffle = playType === 'shuffle' || store.player?.shuffle === 'track' || store.player?.shuffle === 'album';
+                    const targetIdx = items.indexOf(target);
                     window.__FEISHIN_ACTIVE_COLLECTION__ = {
                         items: items,
-                        currentIndex: items.indexOf(target),
-                        isShuffle: playType === 'shuffle',
+                        currentIndex: targetIdx,
+                        isShuffle: isShuffle,
+                        shuffledIndices: isShuffle ? window.FeishinNative.generateShuffledIndices(items.length, targetIdx) : null,
+                        shuffledPointer: 0,
+                        history: []
                     };
                     return origAddToQueueByType.call(this, [target], 'now', target.id);
                 }
@@ -2733,9 +2794,14 @@
             if (!isPlaylist && data && data.length > 1 && !window.__FEISHIN_HAS_ENQUEUED_ITEMS__) {
                 const idx = typeof index === 'number' ? index : 0;
                 const target = data[idx] || data[0];
+                const isShuffle = store.player?.shuffle === 'track' || store.player?.shuffle === 'album';
                 window.__FEISHIN_ACTIVE_COLLECTION__ = {
                     items: data,
                     currentIndex: idx,
+                    isShuffle: isShuffle,
+                    shuffledIndices: isShuffle ? window.FeishinNative.generateShuffledIndices(data.length, idx) : null,
+                    shuffledPointer: 0,
+                    history: []
                 };
                 return origSetQueue.call(this, [target], 0, position);
             }
@@ -2745,21 +2811,37 @@
         store.mediaNext = function (toNextAlbum) {
             const q = store.getQueue();
             const currentIdx = store.player.index;
-            // Se existem itens adicionados explicitamente à fila (via Adicionar a seguir)
             if (q && q.items && q.items.length > currentIdx + 1) {
                 return origMediaNext.call(this, toNextAlbum);
             }
 
-            // Modo unitário: avança para a próxima música da lista ativa sem inflar a fila
             const col = window.__FEISHIN_ACTIVE_COLLECTION__;
             if (col && col.items && col.items.length > 0) {
-                const isShuffle = store.player.shuffle === 'track' || col.isShuffle;
+                const repeat = store.player?.repeat || 'none';
+                const isShuffle = store.player?.shuffle === 'track' || store.player?.shuffle === 'album';
+
+                col.history = col.history || [];
+                if (typeof col.currentIndex === 'number' && col.currentIndex >= 0) {
+                    col.history.push(col.currentIndex);
+                    if (col.history.length > 50) col.history.shift();
+                }
+
                 let nextIdx;
                 if (isShuffle) {
-                    nextIdx = Math.floor(Math.random() * col.items.length);
+                    if (!col.shuffledIndices || col.shuffledIndices.length !== col.items.length) {
+                        col.shuffledIndices = window.FeishinNative.generateShuffledIndices(col.items.length, col.currentIndex);
+                        col.shuffledPointer = 0;
+                    }
+                    col.shuffledPointer = (col.shuffledPointer || 0) + 1;
+                    if (col.shuffledPointer >= col.shuffledIndices.length) {
+                        col.shuffledIndices = window.FeishinNative.generateShuffledIndices(col.items.length, col.currentIndex);
+                        col.shuffledPointer = 0;
+                    }
+                    nextIdx = col.shuffledIndices[col.shuffledPointer];
                 } else {
                     nextIdx = (col.currentIndex + 1) % col.items.length;
                 }
+
                 col.currentIndex = nextIdx;
                 const nextSong = col.items[nextIdx];
                 if (nextSong) {
@@ -2770,6 +2852,66 @@
             return origMediaNext.call(this, toNextAlbum);
         };
 
+        store.mediaAutoNext = function () {
+            const repeat = store.player?.repeat || 'none';
+            if (repeat === 'one') {
+                document.querySelectorAll('audio').forEach(a => {
+                    try { a.currentTime = 0; a.play().catch(() => {}); } catch (e) {}
+                });
+                return typeof origMediaAutoNext === 'function' ? origMediaAutoNext.call(this) : null;
+            }
+
+            const q = store.getQueue();
+            const currentIdx = store.player.index;
+            if (q && q.items && q.items.length > currentIdx + 1) {
+                return typeof origMediaAutoNext === 'function' ? origMediaAutoNext.call(this) : null;
+            }
+
+            const col = window.__FEISHIN_ACTIVE_COLLECTION__;
+            if (col && col.items && col.items.length > 0) {
+                const isShuffle = store.player?.shuffle === 'track' || store.player?.shuffle === 'album';
+
+                let nextIdx;
+                if (isShuffle) {
+                    if (!col.shuffledIndices || col.shuffledIndices.length !== col.items.length) {
+                        col.shuffledIndices = window.FeishinNative.generateShuffledIndices(col.items.length, col.currentIndex);
+                        col.shuffledPointer = 0;
+                    }
+                    col.shuffledPointer = (col.shuffledPointer || 0) + 1;
+                    if (col.shuffledPointer >= col.shuffledIndices.length) {
+                        if (repeat === 'none') {
+                            return typeof origMediaAutoNext === 'function' ? origMediaAutoNext.call(this) : null;
+                        }
+                        col.shuffledIndices = window.FeishinNative.generateShuffledIndices(col.items.length, col.currentIndex);
+                        col.shuffledPointer = 0;
+                    }
+                    nextIdx = col.shuffledIndices[col.shuffledPointer];
+                } else {
+                    nextIdx = col.currentIndex + 1;
+                    if (nextIdx >= col.items.length) {
+                        if (repeat === 'none') {
+                            return typeof origMediaAutoNext === 'function' ? origMediaAutoNext.call(this) : null;
+                        }
+                        nextIdx = 0;
+                    }
+                }
+
+                col.history = col.history || [];
+                if (typeof col.currentIndex === 'number' && col.currentIndex >= 0) {
+                    col.history.push(col.currentIndex);
+                    if (col.history.length > 50) col.history.shift();
+                }
+
+                col.currentIndex = nextIdx;
+                const nextSong = col.items[nextIdx];
+                if (nextSong) {
+                    return origAddToQueueByType.call(store, [nextSong], 'now', nextSong.id);
+                }
+            }
+
+            return typeof origMediaAutoNext === 'function' ? origMediaAutoNext.call(this) : null;
+        };
+
         store.mediaPrevious = function (toPrevAlbum) {
             const currentIdx = store.player.index;
             if (currentIdx > 0) {
@@ -2777,7 +2919,13 @@
             }
             const col = window.__FEISHIN_ACTIVE_COLLECTION__;
             if (col && col.items && col.items.length > 0) {
-                const prevIdx = (col.currentIndex - 1 + col.items.length) % col.items.length;
+                col.history = col.history || [];
+                let prevIdx;
+                if (col.history.length > 0) {
+                    prevIdx = col.history.pop();
+                } else {
+                    prevIdx = (col.currentIndex - 1 + col.items.length) % col.items.length;
+                }
                 col.currentIndex = prevIdx;
                 const prevSong = col.items[prevIdx];
                 if (prevSong) {
@@ -2786,6 +2934,22 @@
             }
             return origMediaPrevious.call(this, toPrevAlbum);
         };
+
+        function attachAudioLoopListener() {
+            document.querySelectorAll('audio').forEach(a => {
+                if (a.__feishinLoopBound) return;
+                a.__feishinLoopBound = true;
+                a.addEventListener('ended', () => {
+                    const s = window.__FEISHIN_PLAYER_STORE__?.getState?.();
+                    if (s?.player?.repeat === 'one') {
+                        a.currentTime = 0;
+                        a.play().catch(() => {});
+                    }
+                });
+            });
+        }
+        attachAudioLoopListener();
+        setInterval(attachAudioLoopListener, 1500);
     }
 
     setInterval(initUnitaryQueueSystem, 400);

@@ -1773,7 +1773,23 @@ if (typeof window !== 'undefined') {
     const origAddToQueueByType = store.addToQueueByType;
     const origSetQueue = store.setQueue;
     const origMediaNext = store.mediaNext;
+    const origMediaAutoNext = store.mediaAutoNext;
     const origMediaPrevious = store.mediaPrevious;
+
+    function generateShuffledIndices(length, currentIndex) {
+      const pool = [];
+      for (let i = 0; i < length; i++) {
+        if (i !== currentIndex) pool.push(i);
+      }
+      for (let i = pool.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [pool[i], pool[j]] = [pool[j], pool[i]];
+      }
+      if (currentIndex >= 0 && currentIndex < length) {
+        pool.unshift(currentIndex);
+      }
+      return pool;
+    }
 
     const customAddToQueueByType = function (items, playType, playSongId) {
       const hash = window.location.hash || '';
@@ -1802,10 +1818,16 @@ if (typeof window !== 'undefined') {
       if (playType === 'now' || playType === 'shuffle') {
         const target = (playSongId && items.find((i) => i.id === playSongId)) || items[0];
         if (target) {
+          const curStore = storeObj.getState();
+          const isShuffle = playType === 'shuffle' || curStore?.player?.shuffle === 'track' || curStore?.player?.shuffle === 'album';
+          const targetIdx = items.indexOf(target);
           window.__FEISHIN_ACTIVE_COLLECTION__ = {
             items: items,
-            currentIndex: items.indexOf(target),
-            isShuffle: playType === 'shuffle',
+            currentIndex: targetIdx,
+            isShuffle: isShuffle,
+            shuffledIndices: isShuffle ? generateShuffledIndices(items.length, targetIdx) : null,
+            shuffledPointer: 0,
+            history: []
           };
           return origAddToQueueByType.call(this, [target], 'now', target.id);
         }
@@ -1820,9 +1842,15 @@ if (typeof window !== 'undefined') {
       if (!isPlaylist && data && data.length > 1 && !window.__FEISHIN_HAS_ENQUEUED_ITEMS__) {
         const idx = typeof index === 'number' ? index : 0;
         const target = data[idx] || data[0];
+        const curStore = storeObj.getState();
+        const isShuffle = curStore?.player?.shuffle === 'track' || curStore?.player?.shuffle === 'album';
         window.__FEISHIN_ACTIVE_COLLECTION__ = {
           items: data,
           currentIndex: idx,
+          isShuffle: isShuffle,
+          shuffledIndices: isShuffle ? generateShuffledIndices(data.length, idx) : null,
+          shuffledPointer: 0,
+          history: []
         };
         return origSetQueue.call(this, [target], 0, position);
       }
@@ -1839,13 +1867,31 @@ if (typeof window !== 'undefined') {
 
       const col = window.__FEISHIN_ACTIVE_COLLECTION__;
       if (col && col.items && col.items.length > 0) {
-        const isShuffle = curStore.player?.shuffle === 'track' || col.isShuffle;
+        const repeat = curStore.player?.repeat || 'none';
+        const isShuffle = curStore.player?.shuffle === 'track' || curStore.player?.shuffle === 'album';
+
+        col.history = col.history || [];
+        if (typeof col.currentIndex === 'number' && col.currentIndex >= 0) {
+          col.history.push(col.currentIndex);
+          if (col.history.length > 50) col.history.shift();
+        }
+
         let nextIdx;
         if (isShuffle) {
-          nextIdx = Math.floor(Math.random() * col.items.length);
+          if (!col.shuffledIndices || col.shuffledIndices.length !== col.items.length) {
+            col.shuffledIndices = generateShuffledIndices(col.items.length, col.currentIndex);
+            col.shuffledPointer = 0;
+          }
+          col.shuffledPointer = (col.shuffledPointer || 0) + 1;
+          if (col.shuffledPointer >= col.shuffledIndices.length) {
+            col.shuffledIndices = generateShuffledIndices(col.items.length, col.currentIndex);
+            col.shuffledPointer = 0;
+          }
+          nextIdx = col.shuffledIndices[col.shuffledPointer];
         } else {
           nextIdx = (col.currentIndex + 1) % col.items.length;
         }
+
         col.currentIndex = nextIdx;
         const nextSong = col.items[nextIdx];
         if (nextSong) {
@@ -1856,6 +1902,67 @@ if (typeof window !== 'undefined') {
       return origMediaNext.call(this, toNextAlbum);
     };
 
+    const customMediaAutoNext = function () {
+      const curStore = storeObj.getState();
+      const repeat = curStore.player?.repeat || 'none';
+      if (repeat === 'one') {
+        document.querySelectorAll('audio').forEach(a => {
+          try { a.currentTime = 0; a.play().catch(() => {}); } catch (e) {}
+        });
+        return typeof origMediaAutoNext === 'function' ? origMediaAutoNext.call(this) : null;
+      }
+
+      const q = curStore.getQueue?.();
+      const currentIdx = curStore.player?.index ?? -1;
+      if (q && q.items && q.items.length > currentIdx + 1) {
+        return typeof origMediaAutoNext === 'function' ? origMediaAutoNext.call(this) : null;
+      }
+
+      const col = window.__FEISHIN_ACTIVE_COLLECTION__;
+      if (col && col.items && col.items.length > 0) {
+        const isShuffle = curStore.player?.shuffle === 'track' || curStore.player?.shuffle === 'album';
+
+        let nextIdx;
+        if (isShuffle) {
+          if (!col.shuffledIndices || col.shuffledIndices.length !== col.items.length) {
+            col.shuffledIndices = generateShuffledIndices(col.items.length, col.currentIndex);
+            col.shuffledPointer = 0;
+          }
+          col.shuffledPointer = (col.shuffledPointer || 0) + 1;
+          if (col.shuffledPointer >= col.shuffledIndices.length) {
+            if (repeat === 'none') {
+              return typeof origMediaAutoNext === 'function' ? origMediaAutoNext.call(this) : null;
+            }
+            col.shuffledIndices = generateShuffledIndices(col.items.length, col.currentIndex);
+            col.shuffledPointer = 0;
+          }
+          nextIdx = col.shuffledIndices[col.shuffledPointer];
+        } else {
+          nextIdx = col.currentIndex + 1;
+          if (nextIdx >= col.items.length) {
+            if (repeat === 'none') {
+              return typeof origMediaAutoNext === 'function' ? origMediaAutoNext.call(this) : null;
+            }
+            nextIdx = 0;
+          }
+        }
+
+        col.history = col.history || [];
+        if (typeof col.currentIndex === 'number' && col.currentIndex >= 0) {
+          col.history.push(col.currentIndex);
+          if (col.history.length > 50) col.history.shift();
+        }
+
+        col.currentIndex = nextIdx;
+        const nextSong = col.items[nextIdx];
+        if (nextSong) {
+          return origAddToQueueByType.call(curStore, [nextSong], 'now', nextSong.id);
+        }
+      }
+
+      return typeof origMediaAutoNext === 'function' ? origMediaAutoNext.call(this) : null;
+    };
+
     const customMediaPrevious = function (toPrevAlbum) {
       const curStore = storeObj.getState();
       const currentIdx = curStore.player?.index ?? -1;
@@ -1864,7 +1971,13 @@ if (typeof window !== 'undefined') {
       }
       const col = window.__FEISHIN_ACTIVE_COLLECTION__;
       if (col && col.items && col.items.length > 0) {
-        const prevIdx = (col.currentIndex - 1 + col.items.length) % col.items.length;
+        col.history = col.history || [];
+        let prevIdx;
+        if (col.history.length > 0) {
+          prevIdx = col.history.pop();
+        } else {
+          prevIdx = (col.currentIndex - 1 + col.items.length) % col.items.length;
+        }
         col.currentIndex = prevIdx;
         const prevSong = col.items[prevIdx];
         if (prevSong) {
@@ -1877,6 +1990,7 @@ if (typeof window !== 'undefined') {
     store.addToQueueByType = customAddToQueueByType;
     store.setQueue = customSetQueue;
     store.mediaNext = customMediaNext;
+    store.mediaAutoNext = customMediaAutoNext;
     store.mediaPrevious = customMediaPrevious;
 
     if (typeof storeObj.setState === 'function') {
@@ -1884,6 +1998,7 @@ if (typeof window !== 'undefined') {
         addToQueueByType: customAddToQueueByType,
         setQueue: customSetQueue,
         mediaNext: customMediaNext,
+        mediaAutoNext: customMediaAutoNext,
         mediaPrevious: customMediaPrevious,
       });
     }
