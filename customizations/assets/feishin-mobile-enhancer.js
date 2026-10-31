@@ -246,73 +246,39 @@
 
     sanitizeSettings();
 
-    // 2. Ponte Nativa Android & Playback Engine Contínuo
-    window.__FEISHIN_USER_PAUSED__ = false;
-
-    function triggerInstantAudioPlay(targetSong) {
-        window.__FEISHIN_USER_PAUSED__ = false;
-        const forcePlay = () => {
-            if (window.__FEISHIN_USER_PAUSED__) return;
-            const audios = document.querySelectorAll('audio');
-            audios.forEach(a => {
-                if (a.paused && a.src && !a.src.startsWith('data:audio')) {
-                    const p = a.play();
-                    if (p && typeof p.catch === 'function') {
-                        p.catch(() => {});
-                    }
-                }
-            });
-        };
-        forcePlay();
-        [20, 50, 100, 200, 350, 500, 750, 1000, 1500, 2000].forEach(ms => setTimeout(forcePlay, ms));
-    }
-
+    // 2. Ponte Nativa Android
     window.FeishinNative = {
         play: function () {
-            window.__FEISHIN_USER_PAUSED__ = false;
             const store = window.__FEISHIN_PLAYER_STORE__?.getState?.();
             if (store && typeof store.mediaPlay === 'function') {
                 const cur = store.player?.currentSong;
                 if (cur?._uniqueId) store.mediaPlay(cur._uniqueId);
                 else store.mediaTogglePlayPause?.();
             }
-            triggerInstantAudioPlay();
         },
         pause: function () {
-            window.__FEISHIN_USER_PAUSED__ = true;
             const store = window.__FEISHIN_PLAYER_STORE__?.getState?.();
             if (store && typeof store.mediaPause === 'function') {
                 store.mediaPause();
             }
-            document.querySelectorAll('audio').forEach(a => {
-                try { a.pause(); } catch (e) {}
-            });
         },
         togglePlay: function () {
             const store = window.__FEISHIN_PLAYER_STORE__?.getState?.();
-            const status = store?.player?.status;
-            const isPlaying = status === 'playing' || status === 1;
-            if (isPlaying) {
-                this.pause();
-            } else {
-                this.play();
+            if (store && typeof store.mediaTogglePlayPause === 'function') {
+                store.mediaTogglePlayPause();
             }
         },
         next: function () {
-            window.__FEISHIN_USER_PAUSED__ = false;
             const store = window.__FEISHIN_PLAYER_STORE__?.getState?.();
             if (store && typeof store.mediaNext === 'function') {
                 store.mediaNext();
             }
-            triggerInstantAudioPlay();
         },
         prev: function () {
-            window.__FEISHIN_USER_PAUSED__ = false;
             const store = window.__FEISHIN_PLAYER_STORE__?.getState?.();
             if (store && typeof store.mediaPrevious === 'function') {
                 store.mediaPrevious();
             }
-            triggerInstantAudioPlay();
         },
         seekTo: function (seconds) {
             const store = window.__FEISHIN_PLAYER_STORE__?.getState?.();
@@ -380,7 +346,6 @@
         },
         closePlayer: function () {
             if (window.AndroidBridge?.hapticFeedback) window.AndroidBridge.hapticFeedback(1);
-            window.__FEISHIN_USER_PAUSED__ = true;
             window.__FEISHIN_HAS_ENQUEUED_ITEMS__ = false;
             window.__FEISHIN_ACTIVE_COLLECTION__ = null;
             const store = window.__FEISHIN_PLAYER_STORE__?.getState?.();
@@ -875,118 +840,39 @@
         });
         modalObserver.observe(document.body, { childList: true, subtree: true });
 
-        // 3.1. Motor Cinemático de Transição de Interface (Portrait <-> Landscape)
-        let __currentOrientationLandscape = null;
-        let __cinematicTransitionRunning = false;
-        let __orientationTransitionTimeout = null;
-        let __veilHideTimeout = null;
-
-        function ensureCinematicVeil() {
-            let veil = document.getElementById('feishin-cinematic-veil');
-            if (!veil) {
-                veil = document.createElement('div');
-                veil.id = 'feishin-cinematic-veil';
-                document.body.appendChild(veil);
-            }
-            veil.classList.add('active');
-            clearTimeout(__veilHideTimeout);
-            __veilHideTimeout = setTimeout(() => {
-                veil.classList.remove('active');
-            }, 180);
-        }
-
-        function applyOrientationState(isLandscape) {
+        // 3.1. Gestor de Orientação Dinâmico (Landscape vs Portrait)
+        function updateAppOrientation() {
+            const isLandscape = window.matchMedia('(orientation: landscape)').matches || (window.innerWidth > window.innerHeight);
             if (isLandscape) {
                 document.body.classList.add('feishin-landscape');
                 document.documentElement.classList.add('feishin-landscape');
-                document.body.classList.remove('feishin-portrait');
-                document.documentElement.classList.remove('feishin-portrait');
             } else {
                 document.body.classList.remove('feishin-landscape');
                 document.documentElement.classList.remove('feishin-landscape');
-                document.body.classList.add('feishin-portrait');
-                document.documentElement.classList.add('feishin-portrait');
             }
             if (typeof syncActiveTab === 'function') {
                 syncActiveTab();
             }
         }
 
-        function triggerCinematicOrientationTransition(forcedLandscape) {
-            const isLandscape = typeof forcedLandscape === 'boolean'
-                ? forcedLandscape
-                : (window.matchMedia('(orientation: landscape)').matches || (window.innerWidth > window.innerHeight));
-
-            // Na primeira carga, define estado sem animar
-            if (__currentOrientationLandscape === null) {
-                __currentOrientationLandscape = isLandscape;
-                applyOrientationState(isLandscape);
-                return;
-            }
-
-            // Se já está na mesma orientação, sincroniza abas e encerra
-            if (__currentOrientationLandscape === isLandscape) {
-                applyOrientationState(isLandscape);
-                return;
-            }
-
-            __currentOrientationLandscape = isLandscape;
-            __cinematicTransitionRunning = true;
-
-            // Ativa o véu cinemático líquido imediatamente antes de reflow
-            ensureCinematicVeil();
-
-            document.documentElement.classList.add('feishin-orientation-transitioning');
-            document.body.classList.add('feishin-orientation-transitioning');
-
-            // Imediatamente atualiza o layout atrás do véu protetor
-            applyOrientationState(isLandscape);
-
-            clearTimeout(__orientationTransitionTimeout);
-            __orientationTransitionTimeout = setTimeout(() => {
-                document.documentElement.classList.remove('feishin-orientation-transitioning');
-                document.body.classList.remove('feishin-orientation-transitioning');
-                __cinematicTransitionRunning = false;
-            }, 320);
-        }
-
-        window.__feishinTriggerCinematicOrientationChange = triggerCinematicOrientationTransition;
-        window.__feishinUpdateOrientation = triggerCinematicOrientationTransition;
-
-        let __resizeDebounce = null;
-        window.addEventListener('resize', () => {
-            if (__cinematicTransitionRunning) return;
-            cancelAnimationFrame(__resizeDebounce);
-            __resizeDebounce = requestAnimationFrame(() => triggerCinematicOrientationTransition());
-        }, { passive: true });
-
+        window.__feishinUpdateOrientation = updateAppOrientation;
+        window.addEventListener('resize', updateAppOrientation, { passive: true });
         window.addEventListener('orientationchange', function () {
-            triggerCinematicOrientationTransition();
-            setTimeout(() => triggerCinematicOrientationTransition(), 40);
-            setTimeout(() => triggerCinematicOrientationTransition(), 180);
+            setTimeout(updateAppOrientation, 40);
+            setTimeout(updateAppOrientation, 180);
         }, { passive: true });
-
-        if (screen.orientation && screen.orientation.addEventListener) {
-            screen.orientation.addEventListener('change', () => {
-                triggerCinematicOrientationTransition();
-            }, { passive: true });
-        }
 
         if (window.matchMedia) {
             try {
-                window.matchMedia('(orientation: landscape)').addEventListener('change', (e) => {
-                    triggerCinematicOrientationTransition(e.matches);
-                });
+                window.matchMedia('(orientation: landscape)').addEventListener('change', updateAppOrientation);
             } catch (e) {
                 try {
-                    window.matchMedia('(orientation: landscape)').addListener((e) => {
-                        triggerCinematicOrientationTransition(e.matches);
-                    });
+                    window.matchMedia('(orientation: landscape)').addListener(updateAppOrientation);
                 } catch (ignored) {}
             }
         }
 
-        triggerCinematicOrientationTransition();
+        updateAppOrientation();
 
         document.body.appendChild(bottomNav);
         console.log('[FeishinMobile] Dock Android 6-itens e Popup Mais inicializados com sucesso.');
@@ -1273,34 +1159,11 @@
         dspNodes: null,
         initialized: false,
 
-        getWebAudio: function () {
-            if (window.__feishinWebAudio && window.__feishinWebAudio.context && window.__feishinWebAudio.dsp) {
-                return window.__feishinWebAudio;
-            }
-            try {
-                const wp = document.getElementById("web-player-engine");
-                if (wp) {
-                    const fiberKey = Object.keys(wp).find(k => k.startsWith("__reactFiber"));
-                    if (fiberKey) {
-                        let fiber = wp[fiberKey];
-                        while (fiber) {
-                            if (fiber.memoizedProps?.audioContext?.context && fiber.memoizedProps?.audioContext?.dsp) {
-                                window.__feishinWebAudio = fiber.memoizedProps.audioContext;
-                                return window.__feishinWebAudio;
-                            }
-                            fiber = fiber.return;
-                        }
-                    }
-                }
-            } catch (e) {}
-            return null;
-        },
-
-        // Curva de saturacao analogica C1-continua sem descontinuidade ou ganho espurio em baixos sinais
+        // Curva de saturação analógica C1-contínua sem descontinuidade ou ganho espúrio em baixos sinais
         getSaturationCurve: function (samples) {
             samples = samples || 8192;
             const curve = new Float32Array(samples);
-            const T = 0.72; // Linear ate 72% da escala (-2.85 dBFS)
+            const T = 0.70; // Linear até 70% da escala (-3.1 dBFS)
             for (let i = 0; i < samples; ++i) {
                 const x = (i * 2) / samples - 1;
                 const ax = Math.abs(x);
@@ -1319,8 +1182,8 @@
             if (this.initialized) return;
             this.initialized = true;
 
-            const saved = localStorage.getItem("feishin_extra_mode");
-            this.active = (saved === "true");
+            const saved = localStorage.getItem('feishin_extra_mode');
+            this.active = (saved === 'true');
 
             this.attachAudioGuard();
 
@@ -1329,27 +1192,25 @@
         },
 
         syncSystemMaxVolume: function () {
-            // No-op: preserva o volume do sistema Android definido pelo usuario
+            // No-op: não alterar o volume de mídia do sistema Android
         },
 
         attachAudioGuard: function () {
             const enforceVolume = () => {
-                document.querySelectorAll("audio").forEach(a => {
+                document.querySelectorAll('audio').forEach(a => {
                     try {
                         if (a.volume < 1.0) a.volume = 1.0;
                         if (a.muted) a.muted = false;
                     } catch (e) {}
                 });
-                if (this.active) {
-                    this.applyDSP();
-                }
             };
-            setInterval(enforceVolume, 2000);
-            document.addEventListener("play", (e) => {
-                if (e.target && e.target.tagName === "AUDIO") {
+            setInterval(enforceVolume, 1000);
+            document.addEventListener('play', (e) => {
+                if (e.target && e.target.tagName === 'AUDIO') {
                     try { e.target.volume = 1.0; } catch (err) {}
-                    setTimeout(() => this.applyDSP(), 60);
-                    setTimeout(() => this.applyDSP(), 300);
+                    if (this.active) {
+                        setTimeout(() => this.applyDSP(), 80);
+                    }
                 }
             }, true);
         },
@@ -1360,24 +1221,35 @@
 
         set: function (enable) {
             this.active = Boolean(enable);
-            localStorage.setItem("feishin_extra_mode", this.active ? "true" : "false");
+            localStorage.setItem('feishin_extra_mode', this.active ? 'true' : 'false');
 
-            if (window.AndroidBridge && typeof window.AndroidBridge.hapticFeedback === "function") {
+            if (window.AndroidBridge && typeof window.AndroidBridge.hapticFeedback === 'function') {
                 window.AndroidBridge.hapticFeedback(1);
-            } else if (window.AndroidBridge && typeof window.AndroidBridge.vibrate === "function") {
+            } else if (window.AndroidBridge && typeof window.AndroidBridge.vibrate === 'function') {
                 window.AndroidBridge.vibrate(25);
             }
 
-            document.querySelectorAll("audio").forEach(a => {
+            if (this.active) {
+                // Desativa o LoudnessEnhancer nativo da HAL para evitar distorção de intermodulação/double clipping
+                if (window.AndroidBridge && typeof window.AndroidBridge.setNativeLoudnessBoost === 'function') {
+                    window.AndroidBridge.setNativeLoudnessBoost(false, 0);
+                }
+            } else {
+                if (window.AndroidBridge && typeof window.AndroidBridge.setNativeLoudnessBoost === 'function') {
+                    window.AndroidBridge.setNativeLoudnessBoost(false, 0);
+                }
+            }
+
+            document.querySelectorAll('audio').forEach(a => {
                 try { a.volume = 1.0; a.muted = false; } catch (e) {}
             });
 
             this.applyDSP();
             this.updateUI();
 
-            if (window.AndroidBridge && typeof window.AndroidBridge.showToast === "function") {
+            if (window.AndroidBridge && typeof window.AndroidBridge.showToast === 'function') {
                 if (this.active) {
-                    window.AndroidBridge.showToast("⚡ EXTRA MODE ATIVADO: Potencia Maxima +6.6dB (Studio Limiter Sem Distorcao)");
+                    window.AndroidBridge.showToast("⚡ EXTRA MODE ATIVADO: Potência Máxima Galaxy Ultra (Studio Limiter Sem Distorção)");
                 } else {
                     window.AndroidBridge.showToast("Extra Mode Desativado: Volume Normal");
                 }
@@ -1385,7 +1257,7 @@
         },
 
         applyDSP: function () {
-            const wa = this.getWebAudio();
+            const wa = window.__feishinWebAudio;
             if (!wa || !wa.context || !wa.dsp) return;
 
             const ctx = wa.context;
@@ -1393,65 +1265,53 @@
             const comp = dsp.compressor;
             const preamp = dsp.preampGain;
 
-            if (ctx.state !== "running") {
+            if (ctx.state !== 'running') {
                 ctx.resume().catch(() => {});
             }
 
-            // O ultimo no da cadeia de EQ ou o preamp
+            // O último nó da cadeia de EQ ou o preamp
             const lastEqNode = (dsp.eqFilters && dsp.eqFilters.length > 0)
                 ? dsp.eqFilters[dsp.eqFilters.length - 1]
                 : preamp;
 
             if (this.active) {
-                // Ganho de entrada otimizado: +6.6 dB (2.15x) - Potencia maxima sem distorcao
-                const targetPreamp = 2.15;
+                // Ganho de entrada otimizado: +4.2 dB (1.62x) - Sem sobrecarregar o teto
+                const targetPreamp = 1.62;
                 try {
-                    preamp.gain.setValueAtTime(targetPreamp, ctx.currentTime);
+                    preamp.gain.setTargetAtTime(targetPreamp, ctx.currentTime, 0.02);
                 } catch (e) {
                     preamp.gain.value = targetPreamp;
                 }
 
                 if (!this.dspNodes || this.dspNodes.ctx !== ctx) {
-                    // 1. Highpass Subsonico (35 Hz, Q=0.707) - Libera headroom e impede distorcao fisica dos alto-falantes
-                    const hpFilter = ctx.createBiquadFilter();
-                    hpFilter.type = "highpass";
-                    hpFilter.frequency.value = 35;
-                    hpFilter.Q.value = 0.707;
-
-                    // 2. Low-End Punch (95 Hz, Q=0.85, +2.6 dB) - Graves encorpados e definidos
                     const bassNode = ctx.createBiquadFilter();
-                    bassNode.type = "peaking";
-                    bassNode.frequency.value = 95;
+                    bassNode.type = 'peaking';
+                    bassNode.frequency.value = 120;
                     bassNode.Q.value = 0.85;
-                    bassNode.gain.value = 2.6;
+                    bassNode.gain.value = 2.2;
 
-                    // 3. Presenca & Articulacao Vocal (3000 Hz, Q=0.80, +2.0 dB) - Vocais e ataque nitidos
                     const clarityNode = ctx.createBiquadFilter();
-                    clarityNode.type = "peaking";
-                    clarityNode.frequency.value = 3000;
+                    clarityNode.type = 'peaking';
+                    clarityNode.frequency.value = 3200;
                     clarityNode.Q.value = 0.80;
-                    clarityNode.gain.value = 2.0;
+                    clarityNode.gain.value = 1.8;
 
-                    // 4. Ar & Brilho Espacial (10000 Hz, +1.6 dB highshelf) - Extensao suave de agudos
                     const airNode = ctx.createBiquadFilter();
-                    airNode.type = "highshelf";
-                    airNode.frequency.value = 10000;
-                    airNode.gain.value = 1.6;
+                    airNode.type = 'highshelf';
+                    airNode.frequency.value = 9500;
+                    airNode.gain.value = 1.0;
 
-                    // 5. Saturacao Analogica C1-continua (Soft-Knee com 4x Oversampling)
                     const shaper = ctx.createWaveShaper();
                     shaper.curve = this.getSaturationCurve(8192);
-                    try { shaper.oversample = "4x"; } catch (e) {
-                        try { shaper.oversample = "2x"; } catch (e2) {}
+                    try { shaper.oversample = '4x'; } catch (e) {
+                        try { shaper.oversample = '2x'; } catch (e2) {}
                     }
 
-                    // 6. True-Peak Output Ceiling (-0.13 dBFS / 0.985 gain) - Zero clipping no HAL Android
                     const ceilingGain = ctx.createGain();
-                    ceilingGain.gain.value = 0.985;
+                    ceilingGain.gain.value = 0.965; // -0.31 dBFS True-Peak Ceiling
 
                     this.dspNodes = {
                         ctx,
-                        hpFilter,
                         bassNode,
                         clarityNode,
                         airNode,
@@ -1460,23 +1320,20 @@
                     };
                 }
 
-                // 7. Master Studio Peak Limiter Musical (Threshold -1.2 dBFS, Ratio 14:1, Knee 3.5 dB, Attack 2.5ms, Release 75ms)
+                // Configura o Compressor como Brickwall Peak Limiter Musical com Knee suave
                 try {
-                    comp.threshold.setValueAtTime(-1.2, ctx.currentTime);
-                    comp.knee.setValueAtTime(3.5, ctx.currentTime);
-                    comp.ratio.setValueAtTime(14.0, ctx.currentTime);
-                    comp.attack.setValueAtTime(0.0025, ctx.currentTime);
-                    comp.release.setValueAtTime(0.075, ctx.currentTime);
+                    comp.threshold.setValueAtTime(-0.8, ctx.currentTime);
+                    comp.knee.setValueAtTime(2.5, ctx.currentTime);
+                    comp.ratio.setValueAtTime(20.0, ctx.currentTime);
+                    comp.attack.setValueAtTime(0.002, ctx.currentTime);
+                    comp.release.setValueAtTime(0.06, ctx.currentTime);
                 } catch (e) {}
 
                 // Roteamento Studio Limiting:
-                // lastEqNode -> hpFilter -> bassNode -> clarityNode -> airNode -> shaper -> comp (Limiter) -> ceilingGain -> ctx.destination
+                // lastEqNode -> bassNode -> clarityNode -> airNode -> shaper -> comp (Limiter) -> ceilingGain -> ctx.destination
                 try {
                     lastEqNode.disconnect();
-                    lastEqNode.connect(this.dspNodes.hpFilter);
-
-                    this.dspNodes.hpFilter.disconnect();
-                    this.dspNodes.hpFilter.connect(this.dspNodes.bassNode);
+                    lastEqNode.connect(this.dspNodes.bassNode);
 
                     this.dspNodes.bassNode.disconnect();
                     this.dspNodes.bassNode.connect(this.dspNodes.clarityNode);
@@ -1496,7 +1353,7 @@
                     this.dspNodes.ceilingGain.disconnect();
                     this.dspNodes.ceilingGain.connect(ctx.destination);
                 } catch (err) {
-                    console.warn("[FeishinMobile] Erro no roteamento Extra Mode:", err);
+                    console.warn('[FeishinMobile] Erro no roteamento Extra Mode:', err);
                     try {
                         lastEqNode.disconnect();
                         lastEqNode.connect(comp);
@@ -1505,9 +1362,9 @@
                     } catch (e) {}
                 }
             } else {
-                // Modo Normal: Preamp 1.0 (0 dB), Limiter transparente, bypass completo
+                // Modo Normal: Preamp 1.0, Limiter transparente, conexão direta
                 try {
-                    preamp.gain.setValueAtTime(1.0, ctx.currentTime);
+                    preamp.gain.setTargetAtTime(1.0, ctx.currentTime, 0.02);
                 } catch (e) {
                     preamp.gain.value = 1.0;
                 }
@@ -1516,7 +1373,7 @@
                     comp.threshold.setValueAtTime(0, ctx.currentTime);
                     comp.knee.setValueAtTime(0, ctx.currentTime);
                     comp.ratio.setValueAtTime(1.0, ctx.currentTime);
-                    comp.attack.setValueAtTime(0, ctx.currentTime);
+                    comp.attack.setValueAtTime(0.003, ctx.currentTime);
                     comp.release.setValueAtTime(0.25, ctx.currentTime);
                 } catch (e) {}
 
@@ -1525,7 +1382,6 @@
                     lastEqNode.connect(comp);
 
                     if (this.dspNodes) {
-                        try { this.dspNodes.hpFilter.disconnect(); } catch (e) {}
                         try { this.dspNodes.bassNode.disconnect(); } catch (e) {}
                         try { this.dspNodes.clarityNode.disconnect(); } catch (e) {}
                         try { this.dspNodes.airNode.disconnect(); } catch (e) {}
@@ -1536,25 +1392,25 @@
                     comp.disconnect();
                     comp.connect(ctx.destination);
                 } catch (err) {
-                    console.warn("[FeishinMobile] Erro no bypass Extra Mode:", err);
+                    console.warn('[FeishinMobile] Erro no bypass Extra Mode:', err);
                     try { comp.connect(ctx.destination); } catch (e) {}
                 }
             }
         },
 
         updateUI: function () {
-            // Remove qualquer botao antigo da barra inferior (mini widget / playerbar)
-            const unwantedBarBtn = document.getElementById("feishin-bar-btn-extra-mode");
+            // Remove qualquer botão antigo da barra inferior (mini widget / playerbar)
+            const unwantedBarBtn = document.getElementById('feishin-bar-btn-extra-mode');
             if (unwantedBarBtn) {
                 unwantedBarBtn.remove();
             }
 
-            // Atualiza exclusivamente o botao da pagina Fullscreen (Tocando Agora)
-            const tpBtn = document.getElementById("feishin-tp-btn-extra-mode");
+            // Atualiza exclusivamente o botão da página Fullscreen (Tocando Agora)
+            const tpBtn = document.getElementById('feishin-tp-btn-extra-mode');
             if (tpBtn) {
                 if (this.active) {
-                    tpBtn.classList.add("feishin-extra-mode-active");
-                    tpBtn.setAttribute("data-active", "true");
+                    tpBtn.classList.add('feishin-extra-mode-active');
+                    tpBtn.setAttribute('data-active', 'true');
                     tpBtn.innerHTML = `
                         <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16">
                             <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
@@ -1562,8 +1418,8 @@
                         <span class="feishin-tp-extra-label">EXTRA ON</span>
                     `;
                 } else {
-                    tpBtn.classList.remove("feishin-extra-mode-active");
-                    tpBtn.setAttribute("data-active", "false");
+                    tpBtn.classList.remove('feishin-extra-mode-active');
+                    tpBtn.setAttribute('data-active', 'false');
                     tpBtn.innerHTML = `
                         <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16">
                             <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
@@ -1573,12 +1429,12 @@
                 }
             }
 
-            // Atualiza status no modal Mais Opcoes
-            const moreStatus = document.getElementById("feishin-tp-more-extra-mode-status");
+            // Atualiza status no modal Mais Opções
+            const moreStatus = document.getElementById('feishin-tp-more-extra-mode-status');
             if (moreStatus) {
-                moreStatus.textContent = this.active ? "ATIVADO (MAX)" : "DESATIVADO";
-                moreStatus.style.color = this.active ? "#FACC15" : "rgba(255, 255, 255, 0.5)";
-                moreStatus.style.background = this.active ? "rgba(234, 179, 8, 0.25)" : "rgba(255, 255, 255, 0.1)";
+                moreStatus.textContent = this.active ? 'ATIVADO (MAX)' : 'DESATIVADO';
+                moreStatus.style.color = this.active ? '#FACC15' : 'rgba(255, 255, 255, 0.5)';
+                moreStatus.style.background = this.active ? 'rgba(234, 179, 8, 0.25)' : 'rgba(255, 255, 255, 0.1)';
             }
         }
     };
@@ -1604,81 +1460,6 @@
             const m = Math.floor(sec / 60);
             const s = sec % 60;
             return m + ':' + (s < 10 ? '0' : '') + s;
-        },
-
-        updateInstant: function (song) {
-            if (!song) return;
-            this._lastInstantSongId = song.id;
-            if (this._instantLockTimer) clearTimeout(this._instantLockTimer);
-            this._instantLockTimer = setTimeout(() => {
-                this._lastInstantSongId = null;
-                this.sync();
-            }, 800);
-            const titleEl = document.getElementById('feishin-tp-title');
-            const artistEl = document.getElementById('feishin-tp-artist');
-            const coverEl = document.getElementById('feishin-tp-cover');
-            const fallbackEl = document.getElementById('feishin-tp-cover-fallback');
-            const auraEl = document.getElementById('feishin-tp-aura');
-            const playIcon = document.getElementById('feishin-tp-play-icon');
-            const pauseIcon = document.getElementById('feishin-tp-pause-icon');
-            const totalEl = document.getElementById('feishin-tp-time-total');
-            const timeCurEl = document.getElementById('feishin-tp-time-cur');
-            const fillEl = document.getElementById('feishin-tp-fill');
-            const thumbEl = document.getElementById('feishin-tp-thumb');
-
-            const title = song.name || song.title || 'Faixa';
-            const artist = song.artistName || (song.artists && song.artists.map(a => a.name).join(', ')) || 'Artista';
-
-            if (titleEl) titleEl.innerText = title;
-            if (artistEl) artistEl.innerText = artist;
-
-            if (fillEl) fillEl.style.setProperty('width', '0%', 'important');
-            if (thumbEl) thumbEl.style.setProperty('left', '0%', 'important');
-            if (timeCurEl) timeCurEl.innerText = '0:00';
-
-            let dur = song.duration || 0;
-            if (dur > 1000) dur = dur / 1000;
-            this.currentDuration = dur;
-            if (totalEl) totalEl.innerText = this.formatTime(dur);
-
-            let coverSrc = song.imageUrl || '';
-            if (!coverSrc) {
-                try {
-                    const auth = JSON.parse(localStorage.getItem('store_authentication') || '{}');
-                    const server = auth?.state?.currentServer;
-                    const imageId = song.imageId || (song.id ? ('mf-' + song.id) : null);
-                    if (imageId && server?.url && server?.credential) {
-                        coverSrc = `${server.url}/rest/getCoverArt.view?id=${imageId}&${server.credential}&v=1.13.0&c=Feishin&size=1000`;
-                    }
-                } catch (e) {}
-            }
-
-            if (coverSrc && !coverSrc.includes('data:image/svg')) {
-                if (coverEl) {
-                    coverEl.src = coverSrc;
-                    coverEl.style.setProperty('display', 'block', 'important');
-                }
-                if (fallbackEl) {
-                    fallbackEl.style.setProperty('display', 'none', 'important');
-                    fallbackEl.classList.add('feishin-hidden');
-                }
-                if (auraEl) auraEl.style.setProperty('background-image', 'url("' + coverSrc + '")', 'important');
-            }
-
-            if (playIcon && pauseIcon) {
-                playIcon.classList.add('feishin-tp-hidden');
-                playIcon.style.display = 'none';
-                pauseIcon.classList.remove('feishin-tp-hidden');
-                pauseIcon.style.display = 'block';
-                auraEl?.classList.remove('paused');
-            }
-
-            try {
-                if (window.AndroidBridge?.updatePlaybackMetadata) {
-                    const durMs = Math.round(dur * 1000);
-                    window.AndroidBridge.updatePlaybackMetadata(title, artist, song.albumName || song.album || '', durMs, true);
-                }
-            } catch (e) {}
         },
 
         isOpen: function () {
@@ -2033,22 +1814,12 @@
             // Controles de Playback
             document.getElementById('feishin-tp-btn-play')?.addEventListener('click', () => {
                 if (window.AndroidBridge?.hapticFeedback) window.AndroidBridge.hapticFeedback(0);
-                const store = window.__FEISHIN_PLAYER_STORE__?.getState?.();
-                const status = store?.player?.status;
-                const isPlaying = status === 'playing' || status === 1;
-
-                if (isPlaying) {
-                    window.__FEISHIN_USER_PAUSED__ = true;
-                    window.FeishinNative.pause();
-                } else {
-                    window.__FEISHIN_USER_PAUSED__ = false;
-                    window.FeishinNative.play();
-                }
-
+                window.FeishinNative.togglePlay();
                 const playIcon = document.getElementById('feishin-tp-play-icon');
                 const pauseIcon = document.getElementById('feishin-tp-pause-icon');
                 if (playIcon && pauseIcon) {
-                    if (!isPlaying) {
+                    const isVisiblePlay = playIcon.style.display !== 'none' && !playIcon.classList.contains('feishin-tp-hidden');
+                    if (isVisiblePlay) {
                         playIcon.classList.add('feishin-tp-hidden');
                         playIcon.style.display = 'none';
                         pauseIcon.classList.remove('feishin-tp-hidden');
@@ -2066,35 +1837,14 @@
 
             document.getElementById('feishin-tp-btn-next')?.addEventListener('click', () => {
                 if (window.AndroidBridge?.hapticFeedback) window.AndroidBridge.hapticFeedback(0);
-                window.__FEISHIN_USER_PAUSED__ = false;
-                const store = window.__FEISHIN_PLAYER_STORE__?.getState?.();
-                const col = (typeof getOrBuildActiveCollection === 'function' && store) ? getOrBuildActiveCollection(store) : window.__FEISHIN_ACTIVE_COLLECTION__;
-                if (col && col.items && col.items.length > 0) {
-                    const isShuffle = store?.player?.shuffle === 'track' || store?.player?.shuffle === 'album';
-                    let peekIdx = isShuffle ? ((col.shuffledPointer || 0) + 1) % col.items.length : ((col.currentIndex || 0) + 1) % col.items.length;
-                    const peekSong = isShuffle && col.shuffledIndices ? col.items[col.shuffledIndices[peekIdx]] : col.items[peekIdx];
-                    if (peekSong) {
-                        this.updateInstant(peekSong);
-                    }
-                }
                 window.FeishinNative.next();
-                setTimeout(() => this.sync(), 250);
+                setTimeout(() => this.sync(), 200);
             });
 
             document.getElementById('feishin-tp-btn-prev')?.addEventListener('click', () => {
                 if (window.AndroidBridge?.hapticFeedback) window.AndroidBridge.hapticFeedback(0);
-                window.__FEISHIN_USER_PAUSED__ = false;
-                const store = window.__FEISHIN_PLAYER_STORE__?.getState?.();
-                const col = (typeof getOrBuildActiveCollection === 'function' && store) ? getOrBuildActiveCollection(store) : window.__FEISHIN_ACTIVE_COLLECTION__;
-                if (col && col.items && col.items.length > 0) {
-                    let peekIdx = ((col.currentIndex || 0) - 1 + col.items.length) % col.items.length;
-                    const peekSong = col.items[peekIdx];
-                    if (peekSong) {
-                        this.updateInstant(peekSong);
-                    }
-                }
                 window.FeishinNative.prev();
-                setTimeout(() => this.sync(), 250);
+                setTimeout(() => this.sync(), 200);
             });
 
             document.getElementById('feishin-tp-btn-shuffle')?.addEventListener('click', () => {
@@ -2307,10 +2057,6 @@
         sync: function () {
             const store = window.__FEISHIN_PLAYER_STORE__?.getState?.();
             const cur = (typeof store?.getCurrentSong === 'function' ? store.getCurrentSong() : null) || store?.player?.currentSong;
-            if (this._lastInstantSongId && cur && cur.id !== this._lastInstantSongId) {
-                return;
-            }
-            this._lastInstantSongId = null;
             const status = store?.player?.status;
             const isPlaying = status === 'playing' || status === 1;
             if (window.FeishinExtraMode) window.FeishinExtraMode.updateUI();
@@ -3248,163 +2994,6 @@
         return Boolean((isPlaylist && queueItems.length > 0) || hasEnqueuedItems);
     }
 
-    function getOrBuildActiveCollection(store) {
-        let col = window.__FEISHIN_ACTIVE_COLLECTION__;
-        if (col && Array.isArray(col.items) && col.items.length > 0) {
-            return col;
-        }
-
-        const q = store?.getQueue?.();
-        if (q && Array.isArray(q.items) && q.items.length > 0) {
-            const curIdx = typeof store.player?.index === 'number' ? store.player.index : 0;
-            const isShuffle = store.player?.shuffle === 'track' || store.player?.shuffle === 'album';
-            col = {
-                items: q.items,
-                currentIndex: curIdx,
-                isShuffle: isShuffle,
-                shuffledIndices: isShuffle ? window.FeishinNative.generateShuffledIndices(q.items.length, curIdx) : null,
-                shuffledPointer: 0,
-                history: []
-            };
-            window.__FEISHIN_ACTIVE_COLLECTION__ = col;
-            return col;
-        }
-
-        if (Array.isArray(window.__FEISHIN_LAST_KNOWN_COLLECTION__) && window.__FEISHIN_LAST_KNOWN_COLLECTION__.length > 0) {
-            const items = window.__FEISHIN_LAST_KNOWN_COLLECTION__;
-            const isShuffle = store?.player?.shuffle === 'track' || store?.player?.shuffle === 'album';
-            col = {
-                items: items,
-                currentIndex: 0,
-                isShuffle: isShuffle,
-                shuffledIndices: isShuffle ? window.FeishinNative.generateShuffledIndices(items.length, 0) : null,
-                shuffledPointer: 0,
-                history: []
-            };
-            window.__FEISHIN_ACTIVE_COLLECTION__ = col;
-            return col;
-        }
-
-        if (!window.__FEISHIN_FETCHING_FALLBACK__) {
-            window.__FEISHIN_FETCHING_FALLBACK__ = true;
-            try {
-                const auth = JSON.parse(localStorage.getItem('store_authentication') || '{}');
-                const server = auth?.state?.currentServer;
-                if (server?.url && server?.credential) {
-                    fetch(`${server.url}/rest/getRandomSongs.view?${server.credential}&v=1.13.0&c=Feishin&f=json&size=50`)
-                        .then(r => r.json())
-                        .then(data => {
-                            const songs = data?.['subsonic-response']?.randomSongs?.song;
-                            if (Array.isArray(songs) && songs.length > 0) {
-                                const formatted = songs.map(s => ({
-                                    id: s.id,
-                                    name: s.title,
-                                    title: s.title,
-                                    artistName: s.artist,
-                                    albumName: s.album,
-                                    albumId: s.albumId,
-                                    duration: s.duration,
-                                    _itemType: 'song',
-                                    _serverId: server.id || 'FsiBb_mTdwLVTb1o_94bm',
-                                    imageUrl: `${server.url}/rest/getCoverArt.view?id=${s.coverArt || s.id}&${server.credential}&v=1.13.0&c=Feishin&size=1000`
-                                }));
-                                window.__FEISHIN_LAST_KNOWN_COLLECTION__ = formatted;
-                                window.__FEISHIN_ACTIVE_COLLECTION__ = {
-                                    items: formatted,
-                                    currentIndex: 0,
-                                    isShuffle: false,
-                                    shuffledIndices: null,
-                                    shuffledPointer: 0,
-                                    history: []
-                                };
-                                if (!window.__FEISHIN_USER_PAUSED__) {
-                                    window.FeishinNative.next();
-                                }
-                            }
-                        })
-                        .catch(() => {})
-                        .finally(() => { window.__FEISHIN_FETCHING_FALLBACK__ = false; });
-                }
-            } catch (e) {
-                window.__FEISHIN_FETCHING_FALLBACK__ = false;
-            }
-        }
-
-        return col;
-    }
-
-    function attachAudioContinuousWatchdog() {
-        window.__FEISHIN_USER_PAUSED__ = window.__FEISHIN_USER_PAUSED__ || false;
-
-        function hookAudio(a) {
-            if (a.__feishinContinuousWatchdogBound) return;
-            a.__feishinContinuousWatchdogBound = true;
-
-            const autoPlayIfReady = () => {
-                if (!window.__FEISHIN_USER_PAUSED__ && a.paused) {
-                    const p = a.play();
-                    if (p && typeof p.catch === 'function') p.catch(() => {});
-                }
-            };
-
-            a.addEventListener('loadeddata', autoPlayIfReady);
-            a.addEventListener('canplay', autoPlayIfReady);
-            a.addEventListener('canplaythrough', autoPlayIfReady);
-            a.addEventListener('loadedmetadata', autoPlayIfReady);
-
-            a.addEventListener('ended', () => {
-                const store = window.__FEISHIN_PLAYER_STORE__?.getState?.();
-                const repeat = store?.player?.repeat || 'none';
-                if (repeat === 'one') {
-                    a.currentTime = 0;
-                    a.play().catch(() => {});
-                } else if (!window.__FEISHIN_USER_PAUSED__) {
-                    console.log('[FeishinContinuous] Faixa terminou. Disparando próxima música imediatamente.');
-                    window.FeishinNative.next();
-                }
-            });
-
-            a.addEventListener('error', (e) => {
-                console.warn('[FeishinContinuous] Erro de áudio detectado:', e);
-                if (!window.__FEISHIN_USER_PAUSED__) {
-                    setTimeout(() => {
-                        if (!window.__FEISHIN_USER_PAUSED__) {
-                            console.log('[FeishinContinuous] Avançando faixa após erro de áudio.');
-                            window.FeishinNative.next();
-                        }
-                    }, 300);
-                }
-            });
-
-            a.addEventListener('pause', () => {
-                setTimeout(() => {
-                    if (!window.__FEISHIN_USER_PAUSED__ && a.paused && !a.ended && a.readyState >= 2) {
-                        a.play().catch(() => {});
-                    }
-                }, 70);
-            });
-        }
-
-        document.querySelectorAll('audio').forEach(hookAudio);
-
-        const observer = new MutationObserver(() => {
-            document.querySelectorAll('audio').forEach(hookAudio);
-        });
-        observer.observe(document.body || document.documentElement, { childList: true, subtree: true });
-
-        setInterval(() => {
-            if (window.__FEISHIN_USER_PAUSED__) return;
-            const store = window.__FEISHIN_PLAYER_STORE__?.getState?.();
-            const curSong = (typeof store?.getCurrentSong === 'function' ? store.getCurrentSong() : null) || store?.player?.currentSong;
-            if (!curSong) return;
-
-            const audio = document.querySelector('audio');
-            if (audio && audio.paused && !audio.ended && audio.src && audio.src !== '') {
-                audio.play().catch(() => {});
-            }
-        }, 1200);
-    }
-
     function initUnitaryQueueSystem() {
         const store = window.__FEISHIN_PLAYER_STORE__?.getState?.();
         if (!store || window.__FEISHIN_UNITARY_QUEUE_ENGINE_READY__) return;
@@ -3435,7 +3024,6 @@
             // 2. Playlists estabelecidas: mantém todas as faixas da playlist na fila
             if (isPlaylist || isPlaylistItems) {
                 window.__FEISHIN_HAS_ENQUEUED_ITEMS__ = false;
-                window.__FEISHIN_USER_PAUSED__ = false;
                 return origAddToQueueByType.apply(this, arguments);
             }
 
@@ -3444,10 +3032,8 @@
             if (playType === 'now' || playType === 'shuffle') {
                 const target = (playSongId && items.find((i) => i.id === playSongId)) || items[0];
                 if (target) {
-                    window.__FEISHIN_USER_PAUSED__ = false;
                     const isShuffle = playType === 'shuffle' || store.player?.shuffle === 'track' || store.player?.shuffle === 'album';
                     const targetIdx = items.indexOf(target);
-                    window.__FEISHIN_LAST_KNOWN_COLLECTION__ = items;
                     window.__FEISHIN_ACTIVE_COLLECTION__ = {
                         items: items,
                         currentIndex: targetIdx,
@@ -3456,12 +3042,7 @@
                         shuffledPointer: 0,
                         history: []
                     };
-                    if (window.FeishinTrackPage?.updateInstant) {
-                        window.FeishinTrackPage.updateInstant(target);
-                    }
-                    const res = origAddToQueueByType.call(this, [target], 'now', target.id);
-                    triggerInstantAudioPlay(target);
-                    return res;
+                    return origAddToQueueByType.call(this, [target], 'now', target.id);
                 }
             }
 
@@ -3475,7 +3056,6 @@
                 const idx = typeof index === 'number' ? index : 0;
                 const target = data[idx] || data[0];
                 const isShuffle = store.player?.shuffle === 'track' || store.player?.shuffle === 'album';
-                window.__FEISHIN_LAST_KNOWN_COLLECTION__ = data;
                 window.__FEISHIN_ACTIVE_COLLECTION__ = {
                     items: data,
                     currentIndex: idx,
@@ -3484,32 +3064,21 @@
                     shuffledPointer: 0,
                     history: []
                 };
-                if (window.FeishinTrackPage?.updateInstant) {
-                    window.FeishinTrackPage.updateInstant(target);
-                }
-                const res = origSetQueue.call(this, [target], 0, position);
-                triggerInstantAudioPlay(target);
-                return res;
+                return origSetQueue.call(this, [target], 0, position);
             }
             return origSetQueue.apply(this, arguments);
         };
 
         store.mediaNext = function (toNextAlbum) {
-            window.__FEISHIN_USER_PAUSED__ = false;
             const q = store.getQueue();
             const currentIdx = store.player.index;
             if (q && q.items && q.items.length > currentIdx + 1) {
-                const nextSong = q.items[currentIdx + 1];
-                if (window.FeishinTrackPage?.updateInstant) {
-                    window.FeishinTrackPage.updateInstant(nextSong);
-                }
-                const res = origMediaNext.call(this, toNextAlbum);
-                triggerInstantAudioPlay(nextSong);
-                return res;
+                return origMediaNext.call(this, toNextAlbum);
             }
 
-            const col = getOrBuildActiveCollection(store);
+            const col = window.__FEISHIN_ACTIVE_COLLECTION__;
             if (col && col.items && col.items.length > 0) {
+                const repeat = store.player?.repeat || 'none';
                 const isShuffle = store.player?.shuffle === 'track' || store.player?.shuffle === 'album';
 
                 col.history = col.history || [];
@@ -3537,25 +3106,14 @@
                 col.currentIndex = nextIdx;
                 const nextSong = col.items[nextIdx];
                 if (nextSong) {
-                    if (window.FeishinTrackPage?.updateInstant) {
-                        window.FeishinTrackPage.updateInstant(nextSong);
-                    }
-                    const res = origAddToQueueByType.call(store, [nextSong], 'now', nextSong.id);
-                    triggerInstantAudioPlay(nextSong);
-                    return res;
+                    return origAddToQueueByType.call(store, [nextSong], 'now', nextSong.id);
                 }
             }
 
-            const res = origMediaNext.call(this, toNextAlbum);
-            triggerInstantAudioPlay();
-            return res;
+            return origMediaNext.call(this, toNextAlbum);
         };
 
         store.mediaAutoNext = function () {
-            if (window.__FEISHIN_USER_PAUSED__) {
-                return null;
-            }
-
             const repeat = store.player?.repeat || 'none';
             if (repeat === 'one') {
                 document.querySelectorAll('audio').forEach(a => {
@@ -3567,16 +3125,10 @@
             const q = store.getQueue();
             const currentIdx = store.player.index;
             if (q && q.items && q.items.length > currentIdx + 1) {
-                const nextSong = q.items[currentIdx + 1];
-                if (window.FeishinTrackPage?.updateInstant) {
-                    window.FeishinTrackPage.updateInstant(nextSong);
-                }
-                const res = typeof origMediaAutoNext === 'function' ? origMediaAutoNext.call(this) : null;
-                triggerInstantAudioPlay(nextSong);
-                return res;
+                return typeof origMediaAutoNext === 'function' ? origMediaAutoNext.call(this) : null;
             }
 
-            const col = getOrBuildActiveCollection(store);
+            const col = window.__FEISHIN_ACTIVE_COLLECTION__;
             if (col && col.items && col.items.length > 0) {
                 const isShuffle = store.player?.shuffle === 'track' || store.player?.shuffle === 'album';
 
@@ -3588,6 +3140,9 @@
                     }
                     col.shuffledPointer = (col.shuffledPointer || 0) + 1;
                     if (col.shuffledPointer >= col.shuffledIndices.length) {
+                        if (repeat === 'none') {
+                            return typeof origMediaAutoNext === 'function' ? origMediaAutoNext.call(this) : null;
+                        }
                         col.shuffledIndices = window.FeishinNative.generateShuffledIndices(col.items.length, col.currentIndex);
                         col.shuffledPointer = 0;
                     }
@@ -3595,6 +3150,9 @@
                 } else {
                     nextIdx = col.currentIndex + 1;
                     if (nextIdx >= col.items.length) {
+                        if (repeat === 'none') {
+                            return typeof origMediaAutoNext === 'function' ? origMediaAutoNext.call(this) : null;
+                        }
                         nextIdx = 0;
                     }
                 }
@@ -3608,36 +3166,19 @@
                 col.currentIndex = nextIdx;
                 const nextSong = col.items[nextIdx];
                 if (nextSong) {
-                    if (window.FeishinTrackPage?.updateInstant) {
-                        window.FeishinTrackPage.updateInstant(nextSong);
-                    }
-                    const res = origAddToQueueByType.call(store, [nextSong], 'now', nextSong.id);
-                    triggerInstantAudioPlay(nextSong);
-                    return res;
+                    return origAddToQueueByType.call(store, [nextSong], 'now', nextSong.id);
                 }
             }
 
-            const res = typeof origMediaAutoNext === 'function' ? origMediaAutoNext.call(this) : null;
-            triggerInstantAudioPlay();
-            return res;
+            return typeof origMediaAutoNext === 'function' ? origMediaAutoNext.call(this) : null;
         };
 
         store.mediaPrevious = function (toPrevAlbum) {
-            window.__FEISHIN_USER_PAUSED__ = false;
             const currentIdx = store.player.index;
             if (currentIdx > 0) {
-                const q = store.getQueue();
-                if (q && q.items && q.items[currentIdx - 1]) {
-                    const prevSong = q.items[currentIdx - 1];
-                    if (window.FeishinTrackPage?.updateInstant) {
-                        window.FeishinTrackPage.updateInstant(prevSong);
-                    }
-                }
-                const res = origMediaPrevious.call(this, toPrevAlbum);
-                triggerInstantAudioPlay();
-                return res;
+                return origMediaPrevious.call(this, toPrevAlbum);
             }
-            const col = getOrBuildActiveCollection(store);
+            const col = window.__FEISHIN_ACTIVE_COLLECTION__;
             if (col && col.items && col.items.length > 0) {
                 col.history = col.history || [];
                 let prevIdx;
@@ -3649,20 +3190,26 @@
                 col.currentIndex = prevIdx;
                 const prevSong = col.items[prevIdx];
                 if (prevSong) {
-                    if (window.FeishinTrackPage?.updateInstant) {
-                        window.FeishinTrackPage.updateInstant(prevSong);
-                    }
-                    const res = origAddToQueueByType.call(store, [prevSong], 'now', prevSong.id);
-                    triggerInstantAudioPlay(prevSong);
-                    return res;
+                    return origAddToQueueByType.call(store, [prevSong], 'now', prevSong.id);
                 }
             }
-            const res = origMediaPrevious.call(this, toPrevAlbum);
-            triggerInstantAudioPlay();
-            return res;
+            return origMediaPrevious.call(this, toPrevAlbum);
         };
 
-        attachAudioContinuousWatchdog();
+        function attachAudioLoopListener() {
+            document.querySelectorAll('audio').forEach(a => {
+                if (a.__feishinLoopBound) return;
+                a.__feishinLoopBound = true;
+                a.addEventListener('ended', () => {
+                    const s = window.__FEISHIN_PLAYER_STORE__?.getState?.();
+                    if (s?.player?.repeat === 'one') {
+                        a.currentTime = 0;
+                        a.play().catch(() => {});
+                    }
+                });
+            });
+        }
+        attachAudioLoopListener();
     }
 
     const qInitTimer = setInterval(() => {

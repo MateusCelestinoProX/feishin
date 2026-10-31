@@ -48,11 +48,19 @@
         );
       };
 
+      const isSettingsOpen = () => {
+        return Boolean(
+          document.body.classList.contains('feishin-settings-open') ||
+          document.querySelector('.mantine-Modal-content') ||
+          (document.getElementById('personal-os-shader-modal')?.style?.display === 'flex')
+        );
+      };
+
       // Monitorar rota para montar/desmontar dinamicamente na página de Faixas (/library/songs)
       const checkRoute = () => {
         const hash = window.location.hash || '';
         const isSongsPage = hash.includes('/library/songs');
-        if (isSongsPage && !isFullScreenOpen()) {
+        if (isSongsPage && !isFullScreenOpen() && !isSettingsOpen()) {
           this.mount();
         } else {
           this.unmount();
@@ -60,18 +68,13 @@
       };
 
       window.addEventListener('hashchange', checkRoute);
-      
-      // Checagem periódica resiliente caso ocorra renderização tardia do React
-      setInterval(() => {
-        const hash = window.location.hash || '';
-        if (hash.includes('/library/songs') && !isFullScreenOpen()) {
-          if (!this.container || !document.body.contains(this.container)) {
-            this.mount();
-          }
-        } else if (this.container) {
-          this.unmount();
-        }
-      }, 300);
+      window.addEventListener('popstate', checkRoute);
+
+      // Observer reativo para modais e tela de configurações
+      const stateObserver = new MutationObserver(() => {
+        checkRoute();
+      });
+      stateObserver.observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ['class', 'style'] });
 
       // Execução inicial
       if (document.readyState === 'complete' || document.readyState === 'interactive') {
@@ -242,18 +245,13 @@
     }
 
     mount() {
-      // Localizar o elemento de rolagem da tabela virtualizada
-      const scroller = document.querySelector('.fs-item-table-list-module-height-100');
-      if (!scroller) {
-        setTimeout(() => this.mount(), 400);
-        return;
-      }
-      this.scroller = scroller;
-
       if (this.container && document.body.contains(this.container)) {
+        this.container.style.display = 'flex';
         return;
       }
-
+      const scroller = document.querySelector('.fs-item-table-list-module-height-100');
+      if (!scroller) return;
+      this.scroller = scroller;
       this.createElements();
       this.bindEvents();
       this.loadIndexData();
@@ -261,18 +259,11 @@
 
     unmount() {
       if (this.container) {
-        this.container.remove();
-        this.container = null;
+        this.container.style.display = 'none';
       }
       if (this.hud) {
-        this.hud.remove();
-        this.hud = null;
+        this.hud.style.display = 'none';
       }
-      if (this.scroller && this.scrollListener) {
-        this.scroller.removeEventListener('scroll', this.scrollListener);
-        this.scrollListener = null;
-      }
-      this.scroller = null;
     }
 
     createElements() {
