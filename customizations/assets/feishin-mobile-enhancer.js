@@ -246,39 +246,73 @@
 
     sanitizeSettings();
 
-    // 2. Ponte Nativa Android
+    // 2. Ponte Nativa Android & Playback Engine Contínuo
+    window.__FEISHIN_USER_PAUSED__ = false;
+
+    function triggerInstantAudioPlay(targetSong) {
+        window.__FEISHIN_USER_PAUSED__ = false;
+        const forcePlay = () => {
+            if (window.__FEISHIN_USER_PAUSED__) return;
+            const audios = document.querySelectorAll('audio');
+            audios.forEach(a => {
+                if (a.paused && a.src && !a.src.startsWith('data:audio')) {
+                    const p = a.play();
+                    if (p && typeof p.catch === 'function') {
+                        p.catch(() => {});
+                    }
+                }
+            });
+        };
+        forcePlay();
+        [20, 50, 100, 200, 350, 500, 750, 1000, 1500, 2000].forEach(ms => setTimeout(forcePlay, ms));
+    }
+
     window.FeishinNative = {
         play: function () {
+            window.__FEISHIN_USER_PAUSED__ = false;
             const store = window.__FEISHIN_PLAYER_STORE__?.getState?.();
             if (store && typeof store.mediaPlay === 'function') {
                 const cur = store.player?.currentSong;
                 if (cur?._uniqueId) store.mediaPlay(cur._uniqueId);
                 else store.mediaTogglePlayPause?.();
             }
+            triggerInstantAudioPlay();
         },
         pause: function () {
+            window.__FEISHIN_USER_PAUSED__ = true;
             const store = window.__FEISHIN_PLAYER_STORE__?.getState?.();
             if (store && typeof store.mediaPause === 'function') {
                 store.mediaPause();
             }
+            document.querySelectorAll('audio').forEach(a => {
+                try { a.pause(); } catch (e) {}
+            });
         },
         togglePlay: function () {
             const store = window.__FEISHIN_PLAYER_STORE__?.getState?.();
-            if (store && typeof store.mediaTogglePlayPause === 'function') {
-                store.mediaTogglePlayPause();
+            const status = store?.player?.status;
+            const isPlaying = status === 'playing' || status === 1;
+            if (isPlaying) {
+                this.pause();
+            } else {
+                this.play();
             }
         },
         next: function () {
+            window.__FEISHIN_USER_PAUSED__ = false;
             const store = window.__FEISHIN_PLAYER_STORE__?.getState?.();
             if (store && typeof store.mediaNext === 'function') {
                 store.mediaNext();
             }
+            triggerInstantAudioPlay();
         },
         prev: function () {
+            window.__FEISHIN_USER_PAUSED__ = false;
             const store = window.__FEISHIN_PLAYER_STORE__?.getState?.();
             if (store && typeof store.mediaPrevious === 'function') {
                 store.mediaPrevious();
             }
+            triggerInstantAudioPlay();
         },
         seekTo: function (seconds) {
             const store = window.__FEISHIN_PLAYER_STORE__?.getState?.();
@@ -346,6 +380,7 @@
         },
         closePlayer: function () {
             if (window.AndroidBridge?.hapticFeedback) window.AndroidBridge.hapticFeedback(1);
+            window.__FEISHIN_USER_PAUSED__ = true;
             window.__FEISHIN_HAS_ENQUEUED_ITEMS__ = false;
             window.__FEISHIN_ACTIVE_COLLECTION__ = null;
             const store = window.__FEISHIN_PLAYER_STORE__?.getState?.();
@@ -393,6 +428,9 @@
             }
         },
         openMoreMenu: function () {
+            if (typeof window.closePersonalOSBackgrounds === 'function') {
+                window.closePersonalOSBackgrounds();
+            }
             const moreBox = document.getElementById('feishin-more-glass-box');
             const backdrop = document.getElementById('feishin-more-glass-backdrop');
             if (moreBox && backdrop) {
@@ -443,10 +481,37 @@
         },
         openSettings: function () {
             window.FeishinNative.closeMoreMenu();
+            if (typeof window.closePersonalOSBackgrounds === 'function') {
+                window.closePersonalOSBackgrounds();
+            }
+            const isSettingsOpen = document.body.classList.contains('feishin-settings-open') || Boolean(document.querySelector('.mantine-Modal-content'));
+            if (isSettingsOpen) {
+                window.FeishinNative.closeSettings();
+                return;
+            }
+            // Fechar qualquer modal residual antes de abrir para evitar acúmulo na stack
+            try {
+                const existingCloses = document.querySelectorAll('.mantine-Modal-close, button.mantine-CloseButton-root');
+                existingCloses.forEach(b => b.click());
+            } catch (e) {}
+
+            document.body.classList.add('feishin-settings-open');
             if (typeof window.openFeishinSettings === 'function') {
                 window.openFeishinSettings();
             }
-            window.location.hash = '#/settings';
+            setTimeout(() => {
+                if (typeof window.sanitizeSettingsDOM === 'function') {
+                    window.sanitizeSettingsDOM();
+                }
+            }, 80);
+            if (typeof window.__feishinSyncActiveTabs === 'function') {
+                window.__feishinSyncActiveTabs();
+            }
+        },
+        closeSettings: function () {
+            document.body.classList.remove('feishin-settings-open');
+            const closeBtn = document.querySelector('.mantine-Modal-close, button.mantine-CloseButton-root');
+            if (closeBtn) closeBtn.click();
             if (typeof window.__feishinSyncActiveTabs === 'function') {
                 window.__feishinSyncActiveTabs();
             }
@@ -474,14 +539,20 @@
                 return true;
             }
 
-            // 1. Fechar popup "Mais" se aberto
+            // 1. Fechar painel de Configurações se aberto
+            if (document.body.classList.contains('feishin-settings-open') || document.querySelector('.mantine-Modal-content')) {
+                window.FeishinNative.closeSettings();
+                return true;
+            }
+
+            // 2. Fechar popup "Mais" se aberto
             const moreBox = document.getElementById('feishin-more-glass-box');
             if (moreBox && moreBox.classList.contains('open')) {
                 window.FeishinNative.closeMoreMenu();
                 return true;
             }
 
-            // 2. Fechar modal de backgrounds se aberto
+            // 3. Fechar modal de backgrounds se aberto
             const shaderModal = document.getElementById('personal-os-shader-modal');
             if (shaderModal && (shaderModal.style.display === 'flex' || shaderModal.style.display === 'block')) {
                 const shaderBackdrop = document.getElementById('personal-os-shader-backdrop');
@@ -493,7 +564,20 @@
                 return true;
             }
 
-            // 3. Fechar Fullscreen Player se aberto
+            // 4. Fechar Fullscreen Player / Track Page se aberto
+            if (window.FeishinTrackPage && typeof window.FeishinTrackPage.isOpen === 'function' && window.FeishinTrackPage.isOpen()) {
+                window.FeishinTrackPage.close();
+                return true;
+            }
+            const tpEl = document.getElementById('feishin-track-page');
+            if (tpEl && tpEl.classList.contains('open')) {
+                if (window.FeishinTrackPage && window.FeishinTrackPage.close) {
+                    window.FeishinTrackPage.close();
+                } else {
+                    tpEl.classList.remove('open');
+                }
+                return true;
+            }
             const fsOverlay = document.querySelector('[class*="fullScreenPlayerOverlay"], #full-screen-player');
             if (fsOverlay && fsOverlay.offsetParent !== null) {
                 const closeBtn = fsOverlay.querySelector('button[aria-label*="arrowDown"], button[aria-label*="Close"], button[aria-label*="Fechar"], .fs-action-icon');
@@ -503,14 +587,14 @@
                 }
             }
 
-            // 4. Fechar Drawer da biblioteca se aberto
+            // 5. Fechar Drawer da biblioteca se aberto
             const drawerOverlay = document.querySelector('.mantine-Drawer-overlay');
             if (drawerOverlay && drawerOverlay.offsetParent !== null) {
                 drawerOverlay.click();
                 return true;
             }
 
-            // 5. Voltar rota interna se não estiver na raiz
+            // 6. Voltar rota interna se não estiver na raiz
             if (window.location.hash && window.location.hash !== '#/library/songs' && window.location.hash !== '#/') {
                 window.history.back();
                 return true;
@@ -538,7 +622,15 @@
             <div class="feishin-more-header">
                 <div class="feishin-more-pill-handle"></div>
                 <div class="feishin-more-title-row">
-                    <span class="feishin-more-title">Biblioteca & Opções</span>
+                    <div class="feishin-more-title-group">
+                        <div class="feishin-more-title-icon">
+                            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M4 6H2v14c0 1.1.9 2 2 2h14v-2H4V6zm16-4H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H8V4h12v12z"/></svg>
+                        </div>
+                        <div class="feishin-more-title-texts">
+                            <span class="feishin-more-title">Biblioteca & Opções</span>
+                            <span class="feishin-more-subtitle">Navegação Rápida</span>
+                        </div>
+                    </div>
                     <button class="feishin-more-close-btn" id="feishin-more-close-btn" aria-label="Fechar">✕</button>
                 </div>
             </div>
@@ -679,17 +771,42 @@
                     window.FeishinNative.openSettings();
                 } else if (route) {
                     window.FeishinNative.closeMoreMenu();
+                    if (typeof window.closePersonalOSBackgrounds === 'function') {
+                        window.closePersonalOSBackgrounds();
+                    }
+                    if (typeof window.FeishinNative.closeSettings === 'function') {
+                        window.FeishinNative.closeSettings();
+                    }
                     window.location.hash = route;
                     syncActiveTab();
                 }
             });
         });
 
+        // Sanitização de elementos desktop dentro de modais de configuração
+        function sanitizeSettingsDOM() {
+            try {
+                // 1. Ocultar botões que abrem pastas locais do sistema operacional (Desktop)
+                document.querySelectorAll('.fs-settings-option-module-row button').forEach(btn => {
+                    const txt = (btn.innerText || '').trim();
+                    if (txt === 'Abrir Pasta' || txt === 'Open Folder') {
+                        btn.style.setProperty('display', 'none', 'important');
+                    }
+                });
+                // 2. Ocultar aba de teclas de atalho caso o CSS falhe
+                document.querySelectorAll('button[id*="-tab-hotkeys"], [aria-controls*="-panel-hotkeys"]').forEach(el => {
+                    el.style.setProperty('display', 'none', 'important');
+                });
+            } catch (e) {}
+        }
+        window.sanitizeSettingsDOM = sanitizeSettingsDOM;
+
         // Atualizar aba ativa em tempo real
         function syncActiveTab() {
             const hash = window.location.hash || '';
             const isMoreOpen = document.getElementById('feishin-more-glass-box')?.classList.contains('open');
             const isBgOpen = document.getElementById('personal-os-shader-modal')?.style?.display === 'flex' || document.getElementById('personal-os-shader-modal')?.style?.display === 'block';
+            const isSettingsOpen = document.body.classList.contains('feishin-settings-open') || Boolean(document.querySelector('.mantine-Modal-content'));
 
             const tabSongs = bottomNav.querySelector('[data-route="#/library/songs"]');
             const tabRecent = bottomNav.querySelector('[data-route="#/library/recently-added"]');
@@ -701,7 +818,9 @@
 
             bottomNav.querySelectorAll('.feishin-nav-tab').forEach(t => t.classList.remove('active'));
 
-            if (isBgOpen) {
+            if (isSettingsOpen) {
+                tabConf?.classList.add('active');
+            } else if (isBgOpen) {
                 tabBg?.classList.add('active');
             } else if (isMoreOpen) {
                 tabMore?.classList.add('active');
@@ -717,6 +836,11 @@
                 tabConf?.classList.add('active');
             } else {
                 tabMore?.classList.add('active');
+            }
+
+            const tpBgBtn = document.getElementById('feishin-tp-btn-backgrounds');
+            if (tpBgBtn) {
+                tpBgBtn.classList.toggle('active', Boolean(isBgOpen));
             }
 
             // Sincronizar itens no popup Mais
@@ -736,6 +860,133 @@
         window.__feishinSyncActiveTabs = syncActiveTab;
         window.addEventListener('hashchange', syncActiveTab);
         syncActiveTab();
+
+        // Observer reativo para detectar abertura/fechamento de modais Mantine
+        const modalObserver = new MutationObserver(() => {
+            const hasModal = Boolean(document.querySelector('.mantine-Modal-content'));
+            if (!hasModal && document.body.classList.contains('feishin-settings-open')) {
+                document.body.classList.remove('feishin-settings-open');
+                syncActiveTab();
+            } else if (hasModal && !document.body.classList.contains('feishin-settings-open')) {
+                document.body.classList.add('feishin-settings-open');
+                sanitizeSettingsDOM();
+                syncActiveTab();
+            }
+        });
+        modalObserver.observe(document.body, { childList: true, subtree: true });
+
+        // 3.1. Motor Cinemático de Transição de Interface (Portrait <-> Landscape)
+        let __currentOrientationLandscape = null;
+        let __cinematicTransitionRunning = false;
+        let __orientationTransitionTimeout = null;
+        let __veilHideTimeout = null;
+
+        function ensureCinematicVeil() {
+            let veil = document.getElementById('feishin-cinematic-veil');
+            if (!veil) {
+                veil = document.createElement('div');
+                veil.id = 'feishin-cinematic-veil';
+                document.body.appendChild(veil);
+            }
+            veil.classList.add('active');
+            clearTimeout(__veilHideTimeout);
+            __veilHideTimeout = setTimeout(() => {
+                veil.classList.remove('active');
+            }, 180);
+        }
+
+        function applyOrientationState(isLandscape) {
+            if (isLandscape) {
+                document.body.classList.add('feishin-landscape');
+                document.documentElement.classList.add('feishin-landscape');
+                document.body.classList.remove('feishin-portrait');
+                document.documentElement.classList.remove('feishin-portrait');
+            } else {
+                document.body.classList.remove('feishin-landscape');
+                document.documentElement.classList.remove('feishin-landscape');
+                document.body.classList.add('feishin-portrait');
+                document.documentElement.classList.add('feishin-portrait');
+            }
+            if (typeof syncActiveTab === 'function') {
+                syncActiveTab();
+            }
+        }
+
+        function triggerCinematicOrientationTransition(forcedLandscape) {
+            const isLandscape = typeof forcedLandscape === 'boolean'
+                ? forcedLandscape
+                : (window.matchMedia('(orientation: landscape)').matches || (window.innerWidth > window.innerHeight));
+
+            // Na primeira carga, define estado sem animar
+            if (__currentOrientationLandscape === null) {
+                __currentOrientationLandscape = isLandscape;
+                applyOrientationState(isLandscape);
+                return;
+            }
+
+            // Se já está na mesma orientação, sincroniza abas e encerra
+            if (__currentOrientationLandscape === isLandscape) {
+                applyOrientationState(isLandscape);
+                return;
+            }
+
+            __currentOrientationLandscape = isLandscape;
+            __cinematicTransitionRunning = true;
+
+            // Ativa o véu cinemático líquido imediatamente antes de reflow
+            ensureCinematicVeil();
+
+            document.documentElement.classList.add('feishin-orientation-transitioning');
+            document.body.classList.add('feishin-orientation-transitioning');
+
+            // Imediatamente atualiza o layout atrás do véu protetor
+            applyOrientationState(isLandscape);
+
+            clearTimeout(__orientationTransitionTimeout);
+            __orientationTransitionTimeout = setTimeout(() => {
+                document.documentElement.classList.remove('feishin-orientation-transitioning');
+                document.body.classList.remove('feishin-orientation-transitioning');
+                __cinematicTransitionRunning = false;
+            }, 320);
+        }
+
+        window.__feishinTriggerCinematicOrientationChange = triggerCinematicOrientationTransition;
+        window.__feishinUpdateOrientation = triggerCinematicOrientationTransition;
+
+        let __resizeDebounce = null;
+        window.addEventListener('resize', () => {
+            if (__cinematicTransitionRunning) return;
+            cancelAnimationFrame(__resizeDebounce);
+            __resizeDebounce = requestAnimationFrame(() => triggerCinematicOrientationTransition());
+        }, { passive: true });
+
+        window.addEventListener('orientationchange', function () {
+            triggerCinematicOrientationTransition();
+            setTimeout(() => triggerCinematicOrientationTransition(), 40);
+            setTimeout(() => triggerCinematicOrientationTransition(), 180);
+        }, { passive: true });
+
+        if (screen.orientation && screen.orientation.addEventListener) {
+            screen.orientation.addEventListener('change', () => {
+                triggerCinematicOrientationTransition();
+            }, { passive: true });
+        }
+
+        if (window.matchMedia) {
+            try {
+                window.matchMedia('(orientation: landscape)').addEventListener('change', (e) => {
+                    triggerCinematicOrientationTransition(e.matches);
+                });
+            } catch (e) {
+                try {
+                    window.matchMedia('(orientation: landscape)').addListener((e) => {
+                        triggerCinematicOrientationTransition(e.matches);
+                    });
+                } catch (ignored) {}
+            }
+        }
+
+        triggerCinematicOrientationTransition();
 
         document.body.appendChild(bottomNav);
         console.log('[FeishinMobile] Dock Android 6-itens e Popup Mais inicializados com sucesso.');
@@ -1022,11 +1273,34 @@
         dspNodes: null,
         initialized: false,
 
-        // Curva de saturação analógica C1-contínua sem descontinuidade ou ganho espúrio em baixos sinais
+        getWebAudio: function () {
+            if (window.__feishinWebAudio && window.__feishinWebAudio.context && window.__feishinWebAudio.dsp) {
+                return window.__feishinWebAudio;
+            }
+            try {
+                const wp = document.getElementById("web-player-engine");
+                if (wp) {
+                    const fiberKey = Object.keys(wp).find(k => k.startsWith("__reactFiber"));
+                    if (fiberKey) {
+                        let fiber = wp[fiberKey];
+                        while (fiber) {
+                            if (fiber.memoizedProps?.audioContext?.context && fiber.memoizedProps?.audioContext?.dsp) {
+                                window.__feishinWebAudio = fiber.memoizedProps.audioContext;
+                                return window.__feishinWebAudio;
+                            }
+                            fiber = fiber.return;
+                        }
+                    }
+                }
+            } catch (e) {}
+            return null;
+        },
+
+        // Curva de saturacao analogica C1-continua sem descontinuidade ou ganho espurio em baixos sinais
         getSaturationCurve: function (samples) {
             samples = samples || 8192;
             const curve = new Float32Array(samples);
-            const T = 0.70; // Linear até 70% da escala (-3.1 dBFS)
+            const T = 0.72; // Linear ate 72% da escala (-2.85 dBFS)
             for (let i = 0; i < samples; ++i) {
                 const x = (i * 2) / samples - 1;
                 const ax = Math.abs(x);
@@ -1045,8 +1319,8 @@
             if (this.initialized) return;
             this.initialized = true;
 
-            const saved = localStorage.getItem('feishin_extra_mode');
-            this.active = (saved === 'true');
+            const saved = localStorage.getItem("feishin_extra_mode");
+            this.active = (saved === "true");
 
             this.attachAudioGuard();
 
@@ -1055,25 +1329,27 @@
         },
 
         syncSystemMaxVolume: function () {
-            // No-op: não alterar o volume de mídia do sistema Android
+            // No-op: preserva o volume do sistema Android definido pelo usuario
         },
 
         attachAudioGuard: function () {
             const enforceVolume = () => {
-                document.querySelectorAll('audio').forEach(a => {
+                document.querySelectorAll("audio").forEach(a => {
                     try {
                         if (a.volume < 1.0) a.volume = 1.0;
                         if (a.muted) a.muted = false;
                     } catch (e) {}
                 });
+                if (this.active) {
+                    this.applyDSP();
+                }
             };
-            setInterval(enforceVolume, 1000);
-            document.addEventListener('play', (e) => {
-                if (e.target && e.target.tagName === 'AUDIO') {
+            setInterval(enforceVolume, 2000);
+            document.addEventListener("play", (e) => {
+                if (e.target && e.target.tagName === "AUDIO") {
                     try { e.target.volume = 1.0; } catch (err) {}
-                    if (this.active) {
-                        setTimeout(() => this.applyDSP(), 80);
-                    }
+                    setTimeout(() => this.applyDSP(), 60);
+                    setTimeout(() => this.applyDSP(), 300);
                 }
             }, true);
         },
@@ -1084,35 +1360,24 @@
 
         set: function (enable) {
             this.active = Boolean(enable);
-            localStorage.setItem('feishin_extra_mode', this.active ? 'true' : 'false');
+            localStorage.setItem("feishin_extra_mode", this.active ? "true" : "false");
 
-            if (window.AndroidBridge && typeof window.AndroidBridge.hapticFeedback === 'function') {
+            if (window.AndroidBridge && typeof window.AndroidBridge.hapticFeedback === "function") {
                 window.AndroidBridge.hapticFeedback(1);
-            } else if (window.AndroidBridge && typeof window.AndroidBridge.vibrate === 'function') {
+            } else if (window.AndroidBridge && typeof window.AndroidBridge.vibrate === "function") {
                 window.AndroidBridge.vibrate(25);
             }
 
-            if (this.active) {
-                // Desativa o LoudnessEnhancer nativo da HAL para evitar distorção de intermodulação/double clipping
-                if (window.AndroidBridge && typeof window.AndroidBridge.setNativeLoudnessBoost === 'function') {
-                    window.AndroidBridge.setNativeLoudnessBoost(false, 0);
-                }
-            } else {
-                if (window.AndroidBridge && typeof window.AndroidBridge.setNativeLoudnessBoost === 'function') {
-                    window.AndroidBridge.setNativeLoudnessBoost(false, 0);
-                }
-            }
-
-            document.querySelectorAll('audio').forEach(a => {
+            document.querySelectorAll("audio").forEach(a => {
                 try { a.volume = 1.0; a.muted = false; } catch (e) {}
             });
 
             this.applyDSP();
             this.updateUI();
 
-            if (window.AndroidBridge && typeof window.AndroidBridge.showToast === 'function') {
+            if (window.AndroidBridge && typeof window.AndroidBridge.showToast === "function") {
                 if (this.active) {
-                    window.AndroidBridge.showToast("⚡ EXTRA MODE ATIVADO: Potência Máxima Galaxy Ultra (Studio Limiter Sem Distorção)");
+                    window.AndroidBridge.showToast("⚡ EXTRA MODE ATIVADO: Potencia Maxima +6.6dB (Studio Limiter Sem Distorcao)");
                 } else {
                     window.AndroidBridge.showToast("Extra Mode Desativado: Volume Normal");
                 }
@@ -1120,7 +1385,7 @@
         },
 
         applyDSP: function () {
-            const wa = window.__feishinWebAudio;
+            const wa = this.getWebAudio();
             if (!wa || !wa.context || !wa.dsp) return;
 
             const ctx = wa.context;
@@ -1128,53 +1393,65 @@
             const comp = dsp.compressor;
             const preamp = dsp.preampGain;
 
-            if (ctx.state !== 'running') {
+            if (ctx.state !== "running") {
                 ctx.resume().catch(() => {});
             }
 
-            // O último nó da cadeia de EQ ou o preamp
+            // O ultimo no da cadeia de EQ ou o preamp
             const lastEqNode = (dsp.eqFilters && dsp.eqFilters.length > 0)
                 ? dsp.eqFilters[dsp.eqFilters.length - 1]
                 : preamp;
 
             if (this.active) {
-                // Ganho de entrada otimizado: +4.2 dB (1.62x) - Sem sobrecarregar o teto
-                const targetPreamp = 1.62;
+                // Ganho de entrada otimizado: +6.6 dB (2.15x) - Potencia maxima sem distorcao
+                const targetPreamp = 2.15;
                 try {
-                    preamp.gain.setTargetAtTime(targetPreamp, ctx.currentTime, 0.02);
+                    preamp.gain.setValueAtTime(targetPreamp, ctx.currentTime);
                 } catch (e) {
                     preamp.gain.value = targetPreamp;
                 }
 
                 if (!this.dspNodes || this.dspNodes.ctx !== ctx) {
+                    // 1. Highpass Subsonico (35 Hz, Q=0.707) - Libera headroom e impede distorcao fisica dos alto-falantes
+                    const hpFilter = ctx.createBiquadFilter();
+                    hpFilter.type = "highpass";
+                    hpFilter.frequency.value = 35;
+                    hpFilter.Q.value = 0.707;
+
+                    // 2. Low-End Punch (95 Hz, Q=0.85, +2.6 dB) - Graves encorpados e definidos
                     const bassNode = ctx.createBiquadFilter();
-                    bassNode.type = 'peaking';
-                    bassNode.frequency.value = 120;
+                    bassNode.type = "peaking";
+                    bassNode.frequency.value = 95;
                     bassNode.Q.value = 0.85;
-                    bassNode.gain.value = 2.2;
+                    bassNode.gain.value = 2.6;
 
+                    // 3. Presenca & Articulacao Vocal (3000 Hz, Q=0.80, +2.0 dB) - Vocais e ataque nitidos
                     const clarityNode = ctx.createBiquadFilter();
-                    clarityNode.type = 'peaking';
-                    clarityNode.frequency.value = 3200;
+                    clarityNode.type = "peaking";
+                    clarityNode.frequency.value = 3000;
                     clarityNode.Q.value = 0.80;
-                    clarityNode.gain.value = 1.8;
+                    clarityNode.gain.value = 2.0;
 
+                    // 4. Ar & Brilho Espacial (10000 Hz, +1.6 dB highshelf) - Extensao suave de agudos
                     const airNode = ctx.createBiquadFilter();
-                    airNode.type = 'highshelf';
-                    airNode.frequency.value = 9500;
-                    airNode.gain.value = 1.0;
+                    airNode.type = "highshelf";
+                    airNode.frequency.value = 10000;
+                    airNode.gain.value = 1.6;
 
+                    // 5. Saturacao Analogica C1-continua (Soft-Knee com 4x Oversampling)
                     const shaper = ctx.createWaveShaper();
                     shaper.curve = this.getSaturationCurve(8192);
-                    try { shaper.oversample = '4x'; } catch (e) {
-                        try { shaper.oversample = '2x'; } catch (e2) {}
+                    try { shaper.oversample = "4x"; } catch (e) {
+                        try { shaper.oversample = "2x"; } catch (e2) {}
                     }
 
+                    // 6. True-Peak Output Ceiling (-0.13 dBFS / 0.985 gain) - Zero clipping no HAL Android
                     const ceilingGain = ctx.createGain();
-                    ceilingGain.gain.value = 0.965; // -0.31 dBFS True-Peak Ceiling
+                    ceilingGain.gain.value = 0.985;
 
                     this.dspNodes = {
                         ctx,
+                        hpFilter,
                         bassNode,
                         clarityNode,
                         airNode,
@@ -1183,20 +1460,23 @@
                     };
                 }
 
-                // Configura o Compressor como Brickwall Peak Limiter Musical com Knee suave
+                // 7. Master Studio Peak Limiter Musical (Threshold -1.2 dBFS, Ratio 14:1, Knee 3.5 dB, Attack 2.5ms, Release 75ms)
                 try {
-                    comp.threshold.setValueAtTime(-0.8, ctx.currentTime);
-                    comp.knee.setValueAtTime(2.5, ctx.currentTime);
-                    comp.ratio.setValueAtTime(20.0, ctx.currentTime);
-                    comp.attack.setValueAtTime(0.002, ctx.currentTime);
-                    comp.release.setValueAtTime(0.06, ctx.currentTime);
+                    comp.threshold.setValueAtTime(-1.2, ctx.currentTime);
+                    comp.knee.setValueAtTime(3.5, ctx.currentTime);
+                    comp.ratio.setValueAtTime(14.0, ctx.currentTime);
+                    comp.attack.setValueAtTime(0.0025, ctx.currentTime);
+                    comp.release.setValueAtTime(0.075, ctx.currentTime);
                 } catch (e) {}
 
                 // Roteamento Studio Limiting:
-                // lastEqNode -> bassNode -> clarityNode -> airNode -> shaper -> comp (Limiter) -> ceilingGain -> ctx.destination
+                // lastEqNode -> hpFilter -> bassNode -> clarityNode -> airNode -> shaper -> comp (Limiter) -> ceilingGain -> ctx.destination
                 try {
                     lastEqNode.disconnect();
-                    lastEqNode.connect(this.dspNodes.bassNode);
+                    lastEqNode.connect(this.dspNodes.hpFilter);
+
+                    this.dspNodes.hpFilter.disconnect();
+                    this.dspNodes.hpFilter.connect(this.dspNodes.bassNode);
 
                     this.dspNodes.bassNode.disconnect();
                     this.dspNodes.bassNode.connect(this.dspNodes.clarityNode);
@@ -1216,7 +1496,7 @@
                     this.dspNodes.ceilingGain.disconnect();
                     this.dspNodes.ceilingGain.connect(ctx.destination);
                 } catch (err) {
-                    console.warn('[FeishinMobile] Erro no roteamento Extra Mode:', err);
+                    console.warn("[FeishinMobile] Erro no roteamento Extra Mode:", err);
                     try {
                         lastEqNode.disconnect();
                         lastEqNode.connect(comp);
@@ -1225,9 +1505,9 @@
                     } catch (e) {}
                 }
             } else {
-                // Modo Normal: Preamp 1.0, Limiter transparente, conexão direta
+                // Modo Normal: Preamp 1.0 (0 dB), Limiter transparente, bypass completo
                 try {
-                    preamp.gain.setTargetAtTime(1.0, ctx.currentTime, 0.02);
+                    preamp.gain.setValueAtTime(1.0, ctx.currentTime);
                 } catch (e) {
                     preamp.gain.value = 1.0;
                 }
@@ -1236,7 +1516,7 @@
                     comp.threshold.setValueAtTime(0, ctx.currentTime);
                     comp.knee.setValueAtTime(0, ctx.currentTime);
                     comp.ratio.setValueAtTime(1.0, ctx.currentTime);
-                    comp.attack.setValueAtTime(0.003, ctx.currentTime);
+                    comp.attack.setValueAtTime(0, ctx.currentTime);
                     comp.release.setValueAtTime(0.25, ctx.currentTime);
                 } catch (e) {}
 
@@ -1245,6 +1525,7 @@
                     lastEqNode.connect(comp);
 
                     if (this.dspNodes) {
+                        try { this.dspNodes.hpFilter.disconnect(); } catch (e) {}
                         try { this.dspNodes.bassNode.disconnect(); } catch (e) {}
                         try { this.dspNodes.clarityNode.disconnect(); } catch (e) {}
                         try { this.dspNodes.airNode.disconnect(); } catch (e) {}
@@ -1255,25 +1536,25 @@
                     comp.disconnect();
                     comp.connect(ctx.destination);
                 } catch (err) {
-                    console.warn('[FeishinMobile] Erro no bypass Extra Mode:', err);
+                    console.warn("[FeishinMobile] Erro no bypass Extra Mode:", err);
                     try { comp.connect(ctx.destination); } catch (e) {}
                 }
             }
         },
 
         updateUI: function () {
-            // Remove qualquer botão antigo da barra inferior (mini widget / playerbar)
-            const unwantedBarBtn = document.getElementById('feishin-bar-btn-extra-mode');
+            // Remove qualquer botao antigo da barra inferior (mini widget / playerbar)
+            const unwantedBarBtn = document.getElementById("feishin-bar-btn-extra-mode");
             if (unwantedBarBtn) {
                 unwantedBarBtn.remove();
             }
 
-            // Atualiza exclusivamente o botão da página Fullscreen (Tocando Agora)
-            const tpBtn = document.getElementById('feishin-tp-btn-extra-mode');
+            // Atualiza exclusivamente o botao da pagina Fullscreen (Tocando Agora)
+            const tpBtn = document.getElementById("feishin-tp-btn-extra-mode");
             if (tpBtn) {
                 if (this.active) {
-                    tpBtn.classList.add('feishin-extra-mode-active');
-                    tpBtn.setAttribute('data-active', 'true');
+                    tpBtn.classList.add("feishin-extra-mode-active");
+                    tpBtn.setAttribute("data-active", "true");
                     tpBtn.innerHTML = `
                         <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16">
                             <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
@@ -1281,8 +1562,8 @@
                         <span class="feishin-tp-extra-label">EXTRA ON</span>
                     `;
                 } else {
-                    tpBtn.classList.remove('feishin-extra-mode-active');
-                    tpBtn.setAttribute('data-active', 'false');
+                    tpBtn.classList.remove("feishin-extra-mode-active");
+                    tpBtn.setAttribute("data-active", "false");
                     tpBtn.innerHTML = `
                         <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16">
                             <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
@@ -1292,12 +1573,12 @@
                 }
             }
 
-            // Atualiza status no modal Mais Opções
-            const moreStatus = document.getElementById('feishin-tp-more-extra-mode-status');
+            // Atualiza status no modal Mais Opcoes
+            const moreStatus = document.getElementById("feishin-tp-more-extra-mode-status");
             if (moreStatus) {
-                moreStatus.textContent = this.active ? 'ATIVADO (MAX)' : 'DESATIVADO';
-                moreStatus.style.color = this.active ? '#FACC15' : 'rgba(255, 255, 255, 0.5)';
-                moreStatus.style.background = this.active ? 'rgba(234, 179, 8, 0.25)' : 'rgba(255, 255, 255, 0.1)';
+                moreStatus.textContent = this.active ? "ATIVADO (MAX)" : "DESATIVADO";
+                moreStatus.style.color = this.active ? "#FACC15" : "rgba(255, 255, 255, 0.5)";
+                moreStatus.style.background = this.active ? "rgba(234, 179, 8, 0.25)" : "rgba(255, 255, 255, 0.1)";
             }
         }
     };
@@ -1323,6 +1604,81 @@
             const m = Math.floor(sec / 60);
             const s = sec % 60;
             return m + ':' + (s < 10 ? '0' : '') + s;
+        },
+
+        updateInstant: function (song) {
+            if (!song) return;
+            this._lastInstantSongId = song.id;
+            if (this._instantLockTimer) clearTimeout(this._instantLockTimer);
+            this._instantLockTimer = setTimeout(() => {
+                this._lastInstantSongId = null;
+                this.sync();
+            }, 800);
+            const titleEl = document.getElementById('feishin-tp-title');
+            const artistEl = document.getElementById('feishin-tp-artist');
+            const coverEl = document.getElementById('feishin-tp-cover');
+            const fallbackEl = document.getElementById('feishin-tp-cover-fallback');
+            const auraEl = document.getElementById('feishin-tp-aura');
+            const playIcon = document.getElementById('feishin-tp-play-icon');
+            const pauseIcon = document.getElementById('feishin-tp-pause-icon');
+            const totalEl = document.getElementById('feishin-tp-time-total');
+            const timeCurEl = document.getElementById('feishin-tp-time-cur');
+            const fillEl = document.getElementById('feishin-tp-fill');
+            const thumbEl = document.getElementById('feishin-tp-thumb');
+
+            const title = song.name || song.title || 'Faixa';
+            const artist = song.artistName || (song.artists && song.artists.map(a => a.name).join(', ')) || 'Artista';
+
+            if (titleEl) titleEl.innerText = title;
+            if (artistEl) artistEl.innerText = artist;
+
+            if (fillEl) fillEl.style.setProperty('width', '0%', 'important');
+            if (thumbEl) thumbEl.style.setProperty('left', '0%', 'important');
+            if (timeCurEl) timeCurEl.innerText = '0:00';
+
+            let dur = song.duration || 0;
+            if (dur > 1000) dur = dur / 1000;
+            this.currentDuration = dur;
+            if (totalEl) totalEl.innerText = this.formatTime(dur);
+
+            let coverSrc = song.imageUrl || '';
+            if (!coverSrc) {
+                try {
+                    const auth = JSON.parse(localStorage.getItem('store_authentication') || '{}');
+                    const server = auth?.state?.currentServer;
+                    const imageId = song.imageId || (song.id ? ('mf-' + song.id) : null);
+                    if (imageId && server?.url && server?.credential) {
+                        coverSrc = `${server.url}/rest/getCoverArt.view?id=${imageId}&${server.credential}&v=1.13.0&c=Feishin&size=1000`;
+                    }
+                } catch (e) {}
+            }
+
+            if (coverSrc && !coverSrc.includes('data:image/svg')) {
+                if (coverEl) {
+                    coverEl.src = coverSrc;
+                    coverEl.style.setProperty('display', 'block', 'important');
+                }
+                if (fallbackEl) {
+                    fallbackEl.style.setProperty('display', 'none', 'important');
+                    fallbackEl.classList.add('feishin-hidden');
+                }
+                if (auraEl) auraEl.style.setProperty('background-image', 'url("' + coverSrc + '")', 'important');
+            }
+
+            if (playIcon && pauseIcon) {
+                playIcon.classList.add('feishin-tp-hidden');
+                playIcon.style.display = 'none';
+                pauseIcon.classList.remove('feishin-tp-hidden');
+                pauseIcon.style.display = 'block';
+                auraEl?.classList.remove('paused');
+            }
+
+            try {
+                if (window.AndroidBridge?.updatePlaybackMetadata) {
+                    const durMs = Math.round(dur * 1000);
+                    window.AndroidBridge.updatePlaybackMetadata(title, artist, song.albumName || song.album || '', durMs, true);
+                }
+            } catch (e) {}
         },
 
         isOpen: function () {
@@ -1356,12 +1712,25 @@
             tp.style.transform = 'translateY(0%)';
             tp.style.opacity = '1';
             this.startTicker();
+
+            // PROBLEMA 7: No modo landscape, caso haja fila, exibir a capa da faixa de um lado e a fila do outro lado
+            if (window.innerWidth > window.innerHeight && !this.userClosedQueueInLandscape) {
+                const store = window.__FEISHIN_PLAYER_STORE__?.getState?.();
+                const q = store?.getQueue?.();
+                const queueItems = (q && Array.isArray(q.items)) ? q.items : [];
+                if (isQueueAllowedToDisplayMobile() && queueItems.length > 1) {
+                    setTimeout(() => {
+                        this.openQueue('force');
+                    }, 60);
+                }
+            }
         },
 
         close: function () {
             const tp = document.getElementById('feishin-track-page');
             if (!tp) return;
 
+            this.userClosedQueueInLandscape = false;
             window.__FORCE_SHADER_RUNNING__ = false;
             document.body.classList.remove('feishin-tp-open');
 
@@ -1403,6 +1772,11 @@
                     <span class="feishin-tp-header-subtitle">TOCANDO AGORA</span>
                   </div>
                   <div class="feishin-tp-header-right">
+                    <button class="feishin-tp-icon-btn" id="feishin-tp-btn-backgrounds" aria-label="Backgrounds" title="Backgrounds & Shaders">
+                      <svg viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 2C6.49 2 2 6.49 2 12C2 17.51 6.49 22 12 22C12.55 22 13 21.55 13 21C13 20.75 12.9 20.53 12.75 20.36C12.6 20.19 12.5 19.97 12.5 19.72C12.5 19.17 12.95 18.72 13.5 18.72H15C18.86 18.72 22 15.58 22 11.72C22 6.36 17.52 2 12 2ZM12 4C16.41 4 20 7.46 20 11.72C20 14.48 17.76 16.72 15 16.72H13.5C11.85 16.72 10.5 18.07 10.5 19.72C10.5 20.24 10.7 20.71 11.02 21.07C11.13 21.19 11.2 21.34 11.2 21.5C11.2 21.78 10.98 22 10.7 22H12C6.49 22 2 17.51 2 12C2 6.49 6.49 4 12 4ZM6.5 10C5.67 10 5 10.67 5 11.5C5 12.33 5.67 13 6.5 13C7.33 13 8 12.33 8 11.5C8 10.67 7.33 10 6.5 10ZM9.5 7C8.67 7 8 7.67 8 8.5C8 9.33 8.67 10 9.5 10C10.33 10 11 9.33 11 8.5C11 7.67 10.33 7 9.5 7ZM14.5 7C13.67 7 13 7.67 13 8.5C13 9.33 13.67 10 14.5 10C15.33 10 16 9.33 16 8.5C16 7.67 15.33 7 14.5 7ZM17.5 10C16.67 10 16 10.67 16 11.5C16 12.33 16.67 13 17.5 13C18.33 13 19 12.33 19 11.5C19 10.67 18.33 10 17.5 10Z"/>
+                      </svg>
+                    </button>
                     <button class="feishin-tp-icon-btn" id="feishin-tp-btn-timer" aria-label="Temporizador">
                       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
@@ -1532,7 +1906,10 @@
               <!-- Sheet de Fila (Queue) -->
               <div class="feishin-tp-sheet" id="feishin-tp-queue-sheet">
                 <div class="feishin-tp-sheet-header">
-                  <div class="feishin-tp-sheet-title">Fila de Reprodução</div>
+                  <div class="feishin-tp-sheet-title">
+                    <span>Fila de Reprodução</span>
+                    <span class="feishin-tp-q-count-badge" id="feishin-tp-queue-count-badge" style="display:none;"></span>
+                  </div>
                   <div class="feishin-tp-sheet-actions">
                     <button class="feishin-tp-icon-btn" id="feishin-tp-queue-close" aria-label="Fechar fila">
                       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
@@ -1573,6 +1950,10 @@
                       <svg viewBox="0 0 24 24" fill="currentColor" style="color: #EAB308;"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
                       <span style="font-weight: 600; color: #FFFFFF;">Extra Mode (Amplificador Galaxy Ultra)</span>
                       <span class="feishin-tp-more-badge" id="feishin-tp-more-extra-mode-status" style="margin-left: auto; font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 6px; background: rgba(255,255,255,0.1);">DESATIVADO</span>
+                    </div>
+                    <div class="feishin-tp-more-item" id="feishin-tp-opt-backgrounds">
+                      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.49 2 2 6.49 2 12C2 17.51 6.49 22 12 22C12.55 22 13 21.55 13 21C13 20.75 12.9 20.53 12.75 20.36C12.6 20.19 12.5 19.97 12.5 19.72C12.5 19.17 12.95 18.72 13.5 18.72H15C18.86 18.72 22 15.58 22 11.72C22 6.36 17.52 2 12 2ZM12 4C16.41 4 20 7.46 20 11.72C20 14.48 17.76 16.72 15 16.72H13.5C11.85 16.72 10.5 18.07 10.5 19.72C10.5 20.24 10.7 20.71 11.02 21.07C11.13 21.19 11.2 21.34 11.2 21.5C11.2 21.78 10.98 22 10.7 22H12C6.49 22 2 17.51 2 12C2 6.49 6.49 4 12 4ZM6.5 10C5.67 10 5 10.67 5 11.5C5 12.33 5.67 13 6.5 13C7.33 13 8 12.33 8 11.5C8 10.67 7.33 10 6.5 10ZM9.5 7C8.67 7 8 7.67 8 8.5C8 9.33 8.67 10 9.5 10C10.33 10 11 9.33 11 8.5C11 7.67 10.33 7 9.5 7ZM14.5 7C13.67 7 13 7.67 13 8.5C13 9.33 13.67 10 14.5 10C15.33 10 16 9.33 16 8.5C16 7.67 15.33 7 14.5 7ZM17.5 10C16.67 10 16 10.67 16 11.5C16 12.33 16.67 13 17.5 13C18.33 13 19 12.33 19 11.5C19 10.67 18.33 10 17.5 10Z"/></svg>
+                      <span>Backgrounds & Shaders</span>
                     </div>
                     <div class="feishin-tp-more-item" id="feishin-tp-opt-details">
                       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
@@ -1652,12 +2033,22 @@
             // Controles de Playback
             document.getElementById('feishin-tp-btn-play')?.addEventListener('click', () => {
                 if (window.AndroidBridge?.hapticFeedback) window.AndroidBridge.hapticFeedback(0);
-                window.FeishinNative.togglePlay();
+                const store = window.__FEISHIN_PLAYER_STORE__?.getState?.();
+                const status = store?.player?.status;
+                const isPlaying = status === 'playing' || status === 1;
+
+                if (isPlaying) {
+                    window.__FEISHIN_USER_PAUSED__ = true;
+                    window.FeishinNative.pause();
+                } else {
+                    window.__FEISHIN_USER_PAUSED__ = false;
+                    window.FeishinNative.play();
+                }
+
                 const playIcon = document.getElementById('feishin-tp-play-icon');
                 const pauseIcon = document.getElementById('feishin-tp-pause-icon');
                 if (playIcon && pauseIcon) {
-                    const isVisiblePlay = playIcon.style.display !== 'none' && !playIcon.classList.contains('feishin-tp-hidden');
-                    if (isVisiblePlay) {
+                    if (!isPlaying) {
                         playIcon.classList.add('feishin-tp-hidden');
                         playIcon.style.display = 'none';
                         pauseIcon.classList.remove('feishin-tp-hidden');
@@ -1675,14 +2066,35 @@
 
             document.getElementById('feishin-tp-btn-next')?.addEventListener('click', () => {
                 if (window.AndroidBridge?.hapticFeedback) window.AndroidBridge.hapticFeedback(0);
+                window.__FEISHIN_USER_PAUSED__ = false;
+                const store = window.__FEISHIN_PLAYER_STORE__?.getState?.();
+                const col = (typeof getOrBuildActiveCollection === 'function' && store) ? getOrBuildActiveCollection(store) : window.__FEISHIN_ACTIVE_COLLECTION__;
+                if (col && col.items && col.items.length > 0) {
+                    const isShuffle = store?.player?.shuffle === 'track' || store?.player?.shuffle === 'album';
+                    let peekIdx = isShuffle ? ((col.shuffledPointer || 0) + 1) % col.items.length : ((col.currentIndex || 0) + 1) % col.items.length;
+                    const peekSong = isShuffle && col.shuffledIndices ? col.items[col.shuffledIndices[peekIdx]] : col.items[peekIdx];
+                    if (peekSong) {
+                        this.updateInstant(peekSong);
+                    }
+                }
                 window.FeishinNative.next();
-                setTimeout(() => this.sync(), 200);
+                setTimeout(() => this.sync(), 250);
             });
 
             document.getElementById('feishin-tp-btn-prev')?.addEventListener('click', () => {
                 if (window.AndroidBridge?.hapticFeedback) window.AndroidBridge.hapticFeedback(0);
+                window.__FEISHIN_USER_PAUSED__ = false;
+                const store = window.__FEISHIN_PLAYER_STORE__?.getState?.();
+                const col = (typeof getOrBuildActiveCollection === 'function' && store) ? getOrBuildActiveCollection(store) : window.__FEISHIN_ACTIVE_COLLECTION__;
+                if (col && col.items && col.items.length > 0) {
+                    let peekIdx = ((col.currentIndex || 0) - 1 + col.items.length) % col.items.length;
+                    const peekSong = col.items[peekIdx];
+                    if (peekSong) {
+                        this.updateInstant(peekSong);
+                    }
+                }
                 window.FeishinNative.prev();
-                setTimeout(() => this.sync(), 200);
+                setTimeout(() => this.sync(), 250);
             });
 
             document.getElementById('feishin-tp-btn-shuffle')?.addEventListener('click', () => {
@@ -1755,11 +2167,9 @@
                 document.getElementById('feishin-tp-lyrics-sheet')?.classList.remove('open');
             });
 
-            document.getElementById('feishin-tp-btn-queue')?.addEventListener('click', () => this.openQueue());
             document.getElementById('feishin-tp-queue-close')?.addEventListener('click', () => {
                 if (window.AndroidBridge?.hapticFeedback) window.AndroidBridge.hapticFeedback(0);
-                document.getElementById('feishin-tp-queue-sheet')?.classList.remove('open');
-                document.getElementById('feishin-track-page')?.classList.remove('tp-queue-open');
+                this.closeQueue();
             });
 
             // Favorito Inteligente (Conectado ao Backend Navidrome + Store Feishin)
@@ -1776,6 +2186,22 @@
             });
 
             // Opções do Sheet
+            // Backgrounds na Track Page (Ícone no Topo e Opção no Sheet)
+            document.getElementById('feishin-tp-btn-backgrounds')?.addEventListener('click', (e) => {
+                if (e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                }
+                if (window.AndroidBridge?.hapticFeedback) window.AndroidBridge.hapticFeedback(0);
+                window.FeishinNative.toggleBackgrounds();
+            });
+
+            document.getElementById('feishin-tp-opt-backgrounds')?.addEventListener('click', () => {
+                document.getElementById('feishin-tp-more-sheet')?.classList.remove('open');
+                if (window.AndroidBridge?.hapticFeedback) window.AndroidBridge.hapticFeedback(0);
+                window.FeishinNative.toggleBackgrounds();
+            });
+
             document.getElementById('feishin-tp-opt-details')?.addEventListener('click', () => {
                 document.getElementById('feishin-tp-more-sheet')?.classList.remove('open');
                 this.openDetailsModal();
@@ -1881,6 +2307,10 @@
         sync: function () {
             const store = window.__FEISHIN_PLAYER_STORE__?.getState?.();
             const cur = (typeof store?.getCurrentSong === 'function' ? store.getCurrentSong() : null) || store?.player?.currentSong;
+            if (this._lastInstantSongId && cur && cur.id !== this._lastInstantSongId) {
+                return;
+            }
+            this._lastInstantSongId = null;
             const status = store?.player?.status;
             const isPlaying = status === 'playing' || status === 1;
             if (window.FeishinExtraMode) window.FeishinExtraMode.updateUI();
@@ -2002,6 +2432,20 @@
                 if (queuePill) {
                     queuePill.style.display = 'flex';
                     if (queuePillLabel) queuePillLabel.innerText = `Fila (${queueCount})`;
+                }
+                const badge = document.getElementById('feishin-tp-queue-count-badge');
+                if (badge) {
+                    badge.innerText = `${queueCount} faixas`;
+                    badge.style.display = 'inline-block';
+                }
+                if (document.getElementById('feishin-tp-queue-sheet')?.classList.contains('open')) {
+                    const items = document.querySelectorAll('#feishin-tp-queue-list .feishin-tp-q-item');
+                    const queueList = (q?.items && Array.isArray(q.items)) ? q.items : [];
+                    items.forEach((row, i) => {
+                        const it = queueList[i];
+                        const isCur = cur && it && (cur._uniqueId === it._uniqueId || cur.id === it.id);
+                        row.classList.toggle('active', Boolean(isCur));
+                    });
                 }
             } else {
                 if (queueBtn) queueBtn.style.setProperty('display', 'none', 'important');
@@ -2144,7 +2588,13 @@
         // FILA DE REPRODUÇÃO TOTALMENTE OPERACIONAL (Sem quebra de forEach)
         // Regra: Fila só pode ser exibida quando em playlist ou adicionar a seguir
         // =====================================================================
-        openQueue: function () {
+        closeQueue: function () {
+            this.userClosedQueueInLandscape = true;
+            document.getElementById('feishin-tp-queue-sheet')?.classList.remove('open');
+            document.getElementById('feishin-track-page')?.classList.remove('tp-queue-open');
+        },
+
+        openQueue: function (mode) {
             if (!isQueueAllowedToDisplayMobile()) {
                 if (window.AndroidBridge?.hapticFeedback) window.AndroidBridge.hapticFeedback(1);
                 return;
@@ -2152,6 +2602,14 @@
             const sheet = document.getElementById('feishin-tp-queue-sheet');
             const container = document.getElementById('feishin-tp-queue-list');
             if (!sheet || !container) return;
+
+            // Se for modo landscape e a fila já estiver aberta, clicar novamente alterna para fechar
+            if (sheet.classList.contains('open') && window.innerWidth > window.innerHeight && mode !== 'force') {
+                this.closeQueue();
+                return;
+            }
+
+            this.userClosedQueueInLandscape = false;
             if (window.AndroidBridge?.hapticFeedback) window.AndroidBridge.hapticFeedback(0);
 
             const tp = document.getElementById('feishin-track-page');
@@ -2162,6 +2620,12 @@
             const q = store?.getQueue?.();
             const queue = (q?.items && Array.isArray(q.items)) ? q.items : [];
             const currentSong = (typeof store?.getCurrentSong === 'function' ? store.getCurrentSong() : null) || store?.player?.currentSong;
+
+            const badge = document.getElementById('feishin-tp-queue-count-badge');
+            if (badge) {
+                badge.innerText = `${queue.length} faixas`;
+                badge.style.display = queue.length > 0 ? 'inline-block' : 'none';
+            }
 
             if (queue.length === 0) {
                 container.innerHTML = '<div class="feishin-tp-queue-empty">A fila de reprodução está vazia.</div>';
@@ -2194,7 +2658,7 @@
                     }
                     setTimeout(() => {
                         this.sync();
-                        this.openQueue();
+                        this.openQueue('force');
                     }, 150);
                 });
 
@@ -2540,6 +3004,21 @@
         }
     };
 
+    // Sincronização responsiva de orientação: Landscape com Capa e Fila lado a lado (Problema 7)
+    window.addEventListener('resize', () => {
+        if (window.FeishinTrackPage && typeof window.FeishinTrackPage.isOpen === 'function' && window.FeishinTrackPage.isOpen()) {
+            const isLandscape = window.innerWidth > window.innerHeight;
+            if (isLandscape && !window.FeishinTrackPage.userClosedQueueInLandscape) {
+                const store = window.__FEISHIN_PLAYER_STORE__?.getState?.();
+                const q = store?.getQueue?.();
+                const queueItems = (q && Array.isArray(q.items)) ? q.items : [];
+                if (isQueueAllowedToDisplayMobile() && queueItems.length > 1) {
+                    window.FeishinTrackPage.openQueue('force');
+                }
+            }
+        }
+    });
+
     // 9. Interceptor Universal de Toque no Player Bar para Abrir a Página da Música
     document.addEventListener('click', (e) => {
         const bar = e.target.closest('#player-bar, .fs-playerbar-module-container, .fs-mobile-playerbar-module-container');
@@ -2645,26 +3124,14 @@
                         const playBtn = pageHeader.querySelector('.fs-library-header-bar-module-play-button-container');
                         if (playBtn) playBtn.style.setProperty('display', 'none', 'important');
 
-                        // 2. Extrair contagem de músicas e transferir para o botão 'Mais'
+                        // 2. Ocultar contagem de faixas e garantir que não polua botões de navegação
                         const badge = pageHeader.querySelector('.fs-badge-module-root') || filterBar.querySelector('.fs-badge-module-root');
-                        let countText = '';
                         if (badge) {
-                            countText = (badge.innerText || '').trim();
                             badge.style.setProperty('display', 'none', 'important');
                         }
-
-                        const moreBtn = document.getElementById('feishin-nav-more-btn');
-                        if (moreBtn && countText && countText.length > 0) {
-                            let bubble = moreBtn.querySelector('#feishin-more-bubble');
-                            if (!bubble) {
-                                bubble = document.createElement('span');
-                                bubble.id = 'feishin-more-bubble';
-                                bubble.className = 'feishin-nav-bubble';
-                                moreBtn.appendChild(bubble);
-                            }
-                            if (bubble.innerText !== countText) {
-                                bubble.innerText = countText;
-                            }
+                        const existingBubble = document.getElementById('feishin-more-bubble');
+                        if (existingBubble) {
+                            existingBubble.remove();
                         }
 
                         // 3. Mover lupa de busca para dentro do grupo da direita da barra de filtros
@@ -2687,13 +3154,23 @@
             }
         }
 
-        // Executar imediatamente e monitorar via observer
-        unifyToolbar();
-        const observer = new MutationObserver(() => {
-            unifyToolbar();
-        });
-        observer.observe(document.body, { childList: true, subtree: true });
-        window.addEventListener('hashchange', () => setTimeout(unifyToolbar, 60));
+        // Executar de forma ultra-otimizada sem thrashing no event loop
+        let rAFId = null;
+        function debouncedUnifyToolbar() {
+            if (rAFId) cancelAnimationFrame(rAFId);
+            rAFId = requestAnimationFrame(() => {
+                rAFId = null;
+                unifyToolbar();
+            });
+        }
+        debouncedUnifyToolbar();
+        window.addEventListener('hashchange', debouncedUnifyToolbar);
+        window.addEventListener('popstate', debouncedUnifyToolbar);
+        const rootEl = document.getElementById('root');
+        if (rootEl) {
+            const observer = new MutationObserver(debouncedUnifyToolbar);
+            observer.observe(rootEl, { childList: true, subtree: true });
+        }
     })();
 
     // -------------------------------------------------------------------------
@@ -2771,6 +3248,163 @@
         return Boolean((isPlaylist && queueItems.length > 0) || hasEnqueuedItems);
     }
 
+    function getOrBuildActiveCollection(store) {
+        let col = window.__FEISHIN_ACTIVE_COLLECTION__;
+        if (col && Array.isArray(col.items) && col.items.length > 0) {
+            return col;
+        }
+
+        const q = store?.getQueue?.();
+        if (q && Array.isArray(q.items) && q.items.length > 0) {
+            const curIdx = typeof store.player?.index === 'number' ? store.player.index : 0;
+            const isShuffle = store.player?.shuffle === 'track' || store.player?.shuffle === 'album';
+            col = {
+                items: q.items,
+                currentIndex: curIdx,
+                isShuffle: isShuffle,
+                shuffledIndices: isShuffle ? window.FeishinNative.generateShuffledIndices(q.items.length, curIdx) : null,
+                shuffledPointer: 0,
+                history: []
+            };
+            window.__FEISHIN_ACTIVE_COLLECTION__ = col;
+            return col;
+        }
+
+        if (Array.isArray(window.__FEISHIN_LAST_KNOWN_COLLECTION__) && window.__FEISHIN_LAST_KNOWN_COLLECTION__.length > 0) {
+            const items = window.__FEISHIN_LAST_KNOWN_COLLECTION__;
+            const isShuffle = store?.player?.shuffle === 'track' || store?.player?.shuffle === 'album';
+            col = {
+                items: items,
+                currentIndex: 0,
+                isShuffle: isShuffle,
+                shuffledIndices: isShuffle ? window.FeishinNative.generateShuffledIndices(items.length, 0) : null,
+                shuffledPointer: 0,
+                history: []
+            };
+            window.__FEISHIN_ACTIVE_COLLECTION__ = col;
+            return col;
+        }
+
+        if (!window.__FEISHIN_FETCHING_FALLBACK__) {
+            window.__FEISHIN_FETCHING_FALLBACK__ = true;
+            try {
+                const auth = JSON.parse(localStorage.getItem('store_authentication') || '{}');
+                const server = auth?.state?.currentServer;
+                if (server?.url && server?.credential) {
+                    fetch(`${server.url}/rest/getRandomSongs.view?${server.credential}&v=1.13.0&c=Feishin&f=json&size=50`)
+                        .then(r => r.json())
+                        .then(data => {
+                            const songs = data?.['subsonic-response']?.randomSongs?.song;
+                            if (Array.isArray(songs) && songs.length > 0) {
+                                const formatted = songs.map(s => ({
+                                    id: s.id,
+                                    name: s.title,
+                                    title: s.title,
+                                    artistName: s.artist,
+                                    albumName: s.album,
+                                    albumId: s.albumId,
+                                    duration: s.duration,
+                                    _itemType: 'song',
+                                    _serverId: server.id || 'FsiBb_mTdwLVTb1o_94bm',
+                                    imageUrl: `${server.url}/rest/getCoverArt.view?id=${s.coverArt || s.id}&${server.credential}&v=1.13.0&c=Feishin&size=1000`
+                                }));
+                                window.__FEISHIN_LAST_KNOWN_COLLECTION__ = formatted;
+                                window.__FEISHIN_ACTIVE_COLLECTION__ = {
+                                    items: formatted,
+                                    currentIndex: 0,
+                                    isShuffle: false,
+                                    shuffledIndices: null,
+                                    shuffledPointer: 0,
+                                    history: []
+                                };
+                                if (!window.__FEISHIN_USER_PAUSED__) {
+                                    window.FeishinNative.next();
+                                }
+                            }
+                        })
+                        .catch(() => {})
+                        .finally(() => { window.__FEISHIN_FETCHING_FALLBACK__ = false; });
+                }
+            } catch (e) {
+                window.__FEISHIN_FETCHING_FALLBACK__ = false;
+            }
+        }
+
+        return col;
+    }
+
+    function attachAudioContinuousWatchdog() {
+        window.__FEISHIN_USER_PAUSED__ = window.__FEISHIN_USER_PAUSED__ || false;
+
+        function hookAudio(a) {
+            if (a.__feishinContinuousWatchdogBound) return;
+            a.__feishinContinuousWatchdogBound = true;
+
+            const autoPlayIfReady = () => {
+                if (!window.__FEISHIN_USER_PAUSED__ && a.paused) {
+                    const p = a.play();
+                    if (p && typeof p.catch === 'function') p.catch(() => {});
+                }
+            };
+
+            a.addEventListener('loadeddata', autoPlayIfReady);
+            a.addEventListener('canplay', autoPlayIfReady);
+            a.addEventListener('canplaythrough', autoPlayIfReady);
+            a.addEventListener('loadedmetadata', autoPlayIfReady);
+
+            a.addEventListener('ended', () => {
+                const store = window.__FEISHIN_PLAYER_STORE__?.getState?.();
+                const repeat = store?.player?.repeat || 'none';
+                if (repeat === 'one') {
+                    a.currentTime = 0;
+                    a.play().catch(() => {});
+                } else if (!window.__FEISHIN_USER_PAUSED__) {
+                    console.log('[FeishinContinuous] Faixa terminou. Disparando próxima música imediatamente.');
+                    window.FeishinNative.next();
+                }
+            });
+
+            a.addEventListener('error', (e) => {
+                console.warn('[FeishinContinuous] Erro de áudio detectado:', e);
+                if (!window.__FEISHIN_USER_PAUSED__) {
+                    setTimeout(() => {
+                        if (!window.__FEISHIN_USER_PAUSED__) {
+                            console.log('[FeishinContinuous] Avançando faixa após erro de áudio.');
+                            window.FeishinNative.next();
+                        }
+                    }, 300);
+                }
+            });
+
+            a.addEventListener('pause', () => {
+                setTimeout(() => {
+                    if (!window.__FEISHIN_USER_PAUSED__ && a.paused && !a.ended && a.readyState >= 2) {
+                        a.play().catch(() => {});
+                    }
+                }, 70);
+            });
+        }
+
+        document.querySelectorAll('audio').forEach(hookAudio);
+
+        const observer = new MutationObserver(() => {
+            document.querySelectorAll('audio').forEach(hookAudio);
+        });
+        observer.observe(document.body || document.documentElement, { childList: true, subtree: true });
+
+        setInterval(() => {
+            if (window.__FEISHIN_USER_PAUSED__) return;
+            const store = window.__FEISHIN_PLAYER_STORE__?.getState?.();
+            const curSong = (typeof store?.getCurrentSong === 'function' ? store.getCurrentSong() : null) || store?.player?.currentSong;
+            if (!curSong) return;
+
+            const audio = document.querySelector('audio');
+            if (audio && audio.paused && !audio.ended && audio.src && audio.src !== '') {
+                audio.play().catch(() => {});
+            }
+        }, 1200);
+    }
+
     function initUnitaryQueueSystem() {
         const store = window.__FEISHIN_PLAYER_STORE__?.getState?.();
         if (!store || window.__FEISHIN_UNITARY_QUEUE_ENGINE_READY__) return;
@@ -2801,6 +3435,7 @@
             // 2. Playlists estabelecidas: mantém todas as faixas da playlist na fila
             if (isPlaylist || isPlaylistItems) {
                 window.__FEISHIN_HAS_ENQUEUED_ITEMS__ = false;
+                window.__FEISHIN_USER_PAUSED__ = false;
                 return origAddToQueueByType.apply(this, arguments);
             }
 
@@ -2809,8 +3444,10 @@
             if (playType === 'now' || playType === 'shuffle') {
                 const target = (playSongId && items.find((i) => i.id === playSongId)) || items[0];
                 if (target) {
+                    window.__FEISHIN_USER_PAUSED__ = false;
                     const isShuffle = playType === 'shuffle' || store.player?.shuffle === 'track' || store.player?.shuffle === 'album';
                     const targetIdx = items.indexOf(target);
+                    window.__FEISHIN_LAST_KNOWN_COLLECTION__ = items;
                     window.__FEISHIN_ACTIVE_COLLECTION__ = {
                         items: items,
                         currentIndex: targetIdx,
@@ -2819,7 +3456,12 @@
                         shuffledPointer: 0,
                         history: []
                     };
-                    return origAddToQueueByType.call(this, [target], 'now', target.id);
+                    if (window.FeishinTrackPage?.updateInstant) {
+                        window.FeishinTrackPage.updateInstant(target);
+                    }
+                    const res = origAddToQueueByType.call(this, [target], 'now', target.id);
+                    triggerInstantAudioPlay(target);
+                    return res;
                 }
             }
 
@@ -2833,6 +3475,7 @@
                 const idx = typeof index === 'number' ? index : 0;
                 const target = data[idx] || data[0];
                 const isShuffle = store.player?.shuffle === 'track' || store.player?.shuffle === 'album';
+                window.__FEISHIN_LAST_KNOWN_COLLECTION__ = data;
                 window.__FEISHIN_ACTIVE_COLLECTION__ = {
                     items: data,
                     currentIndex: idx,
@@ -2841,21 +3484,32 @@
                     shuffledPointer: 0,
                     history: []
                 };
-                return origSetQueue.call(this, [target], 0, position);
+                if (window.FeishinTrackPage?.updateInstant) {
+                    window.FeishinTrackPage.updateInstant(target);
+                }
+                const res = origSetQueue.call(this, [target], 0, position);
+                triggerInstantAudioPlay(target);
+                return res;
             }
             return origSetQueue.apply(this, arguments);
         };
 
         store.mediaNext = function (toNextAlbum) {
+            window.__FEISHIN_USER_PAUSED__ = false;
             const q = store.getQueue();
             const currentIdx = store.player.index;
             if (q && q.items && q.items.length > currentIdx + 1) {
-                return origMediaNext.call(this, toNextAlbum);
+                const nextSong = q.items[currentIdx + 1];
+                if (window.FeishinTrackPage?.updateInstant) {
+                    window.FeishinTrackPage.updateInstant(nextSong);
+                }
+                const res = origMediaNext.call(this, toNextAlbum);
+                triggerInstantAudioPlay(nextSong);
+                return res;
             }
 
-            const col = window.__FEISHIN_ACTIVE_COLLECTION__;
+            const col = getOrBuildActiveCollection(store);
             if (col && col.items && col.items.length > 0) {
-                const repeat = store.player?.repeat || 'none';
                 const isShuffle = store.player?.shuffle === 'track' || store.player?.shuffle === 'album';
 
                 col.history = col.history || [];
@@ -2883,14 +3537,25 @@
                 col.currentIndex = nextIdx;
                 const nextSong = col.items[nextIdx];
                 if (nextSong) {
-                    return origAddToQueueByType.call(store, [nextSong], 'now', nextSong.id);
+                    if (window.FeishinTrackPage?.updateInstant) {
+                        window.FeishinTrackPage.updateInstant(nextSong);
+                    }
+                    const res = origAddToQueueByType.call(store, [nextSong], 'now', nextSong.id);
+                    triggerInstantAudioPlay(nextSong);
+                    return res;
                 }
             }
 
-            return origMediaNext.call(this, toNextAlbum);
+            const res = origMediaNext.call(this, toNextAlbum);
+            triggerInstantAudioPlay();
+            return res;
         };
 
         store.mediaAutoNext = function () {
+            if (window.__FEISHIN_USER_PAUSED__) {
+                return null;
+            }
+
             const repeat = store.player?.repeat || 'none';
             if (repeat === 'one') {
                 document.querySelectorAll('audio').forEach(a => {
@@ -2902,10 +3567,16 @@
             const q = store.getQueue();
             const currentIdx = store.player.index;
             if (q && q.items && q.items.length > currentIdx + 1) {
-                return typeof origMediaAutoNext === 'function' ? origMediaAutoNext.call(this) : null;
+                const nextSong = q.items[currentIdx + 1];
+                if (window.FeishinTrackPage?.updateInstant) {
+                    window.FeishinTrackPage.updateInstant(nextSong);
+                }
+                const res = typeof origMediaAutoNext === 'function' ? origMediaAutoNext.call(this) : null;
+                triggerInstantAudioPlay(nextSong);
+                return res;
             }
 
-            const col = window.__FEISHIN_ACTIVE_COLLECTION__;
+            const col = getOrBuildActiveCollection(store);
             if (col && col.items && col.items.length > 0) {
                 const isShuffle = store.player?.shuffle === 'track' || store.player?.shuffle === 'album';
 
@@ -2917,9 +3588,6 @@
                     }
                     col.shuffledPointer = (col.shuffledPointer || 0) + 1;
                     if (col.shuffledPointer >= col.shuffledIndices.length) {
-                        if (repeat === 'none') {
-                            return typeof origMediaAutoNext === 'function' ? origMediaAutoNext.call(this) : null;
-                        }
                         col.shuffledIndices = window.FeishinNative.generateShuffledIndices(col.items.length, col.currentIndex);
                         col.shuffledPointer = 0;
                     }
@@ -2927,9 +3595,6 @@
                 } else {
                     nextIdx = col.currentIndex + 1;
                     if (nextIdx >= col.items.length) {
-                        if (repeat === 'none') {
-                            return typeof origMediaAutoNext === 'function' ? origMediaAutoNext.call(this) : null;
-                        }
                         nextIdx = 0;
                     }
                 }
@@ -2943,19 +3608,36 @@
                 col.currentIndex = nextIdx;
                 const nextSong = col.items[nextIdx];
                 if (nextSong) {
-                    return origAddToQueueByType.call(store, [nextSong], 'now', nextSong.id);
+                    if (window.FeishinTrackPage?.updateInstant) {
+                        window.FeishinTrackPage.updateInstant(nextSong);
+                    }
+                    const res = origAddToQueueByType.call(store, [nextSong], 'now', nextSong.id);
+                    triggerInstantAudioPlay(nextSong);
+                    return res;
                 }
             }
 
-            return typeof origMediaAutoNext === 'function' ? origMediaAutoNext.call(this) : null;
+            const res = typeof origMediaAutoNext === 'function' ? origMediaAutoNext.call(this) : null;
+            triggerInstantAudioPlay();
+            return res;
         };
 
         store.mediaPrevious = function (toPrevAlbum) {
+            window.__FEISHIN_USER_PAUSED__ = false;
             const currentIdx = store.player.index;
             if (currentIdx > 0) {
-                return origMediaPrevious.call(this, toPrevAlbum);
+                const q = store.getQueue();
+                if (q && q.items && q.items[currentIdx - 1]) {
+                    const prevSong = q.items[currentIdx - 1];
+                    if (window.FeishinTrackPage?.updateInstant) {
+                        window.FeishinTrackPage.updateInstant(prevSong);
+                    }
+                }
+                const res = origMediaPrevious.call(this, toPrevAlbum);
+                triggerInstantAudioPlay();
+                return res;
             }
-            const col = window.__FEISHIN_ACTIVE_COLLECTION__;
+            const col = getOrBuildActiveCollection(store);
             if (col && col.items && col.items.length > 0) {
                 col.history = col.history || [];
                 let prevIdx;
@@ -2967,30 +3649,29 @@
                 col.currentIndex = prevIdx;
                 const prevSong = col.items[prevIdx];
                 if (prevSong) {
-                    return origAddToQueueByType.call(store, [prevSong], 'now', prevSong.id);
+                    if (window.FeishinTrackPage?.updateInstant) {
+                        window.FeishinTrackPage.updateInstant(prevSong);
+                    }
+                    const res = origAddToQueueByType.call(store, [prevSong], 'now', prevSong.id);
+                    triggerInstantAudioPlay(prevSong);
+                    return res;
                 }
             }
-            return origMediaPrevious.call(this, toPrevAlbum);
+            const res = origMediaPrevious.call(this, toPrevAlbum);
+            triggerInstantAudioPlay();
+            return res;
         };
 
-        function attachAudioLoopListener() {
-            document.querySelectorAll('audio').forEach(a => {
-                if (a.__feishinLoopBound) return;
-                a.__feishinLoopBound = true;
-                a.addEventListener('ended', () => {
-                    const s = window.__FEISHIN_PLAYER_STORE__?.getState?.();
-                    if (s?.player?.repeat === 'one') {
-                        a.currentTime = 0;
-                        a.play().catch(() => {});
-                    }
-                });
-            });
-        }
-        attachAudioLoopListener();
-        setInterval(attachAudioLoopListener, 1500);
+        attachAudioContinuousWatchdog();
     }
 
-    setInterval(initUnitaryQueueSystem, 400);
+    const qInitTimer = setInterval(() => {
+        if (window.__FEISHIN_UNITARY_QUEUE_ENGINE_READY__) {
+            clearInterval(qInitTimer);
+        } else {
+            initUnitaryQueueSystem();
+        }
+    }, 400);
 
     console.log('[FeishinMobile] Motor Nativo Liquid Glass Pronto e Ativo.');
     // Inicializa o Motor Extra Mode

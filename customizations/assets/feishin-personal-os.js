@@ -8,6 +8,7 @@ import './music-analytics.js';
 import './feishin-recently-added.js';
 import './feishin-alphabet-scrubber.js';
 import './feishin-delete-engine.js';
+import './feishin-track-editor.js';
 
 // ==========================================================================
 // RESILIENCE & CRASH IMMUNITY SAFEGUARDS
