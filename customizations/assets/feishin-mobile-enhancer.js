@@ -1526,6 +1526,17 @@
             window.__FORCE_SHADER_RUNNING__ = true;
             document.body.classList.add('feishin-tp-open');
 
+            // Oculta estritamente a Android Navbar principal ao abrir a tela de reprodução
+            const bottomNav = document.getElementById('feishin-mobile-bottom-nav');
+            if (bottomNav) {
+                bottomNav.style.setProperty('display', 'none', 'important');
+                bottomNav.style.setProperty('visibility', 'hidden', 'important');
+                bottomNav.style.setProperty('pointer-events', 'none', 'important');
+            }
+            if (typeof window.FeishinNative?.closeMoreMenu === 'function') {
+                window.FeishinNative.closeMoreMenu();
+            }
+
             // Garante que o WebGL Shader esteja renderizando no container de fundo
             const bgContainer = document.getElementById('bg-webgl-container');
             const active = localStorage.getItem('feishin_active_shader') || 'plasmawave';
@@ -1563,6 +1574,17 @@
             this.userClosedQueueInLandscape = false;
             window.__FORCE_SHADER_RUNNING__ = false;
             document.body.classList.remove('feishin-tp-open');
+
+            // Restaura a visibilidade da Android Navbar principal ao fechar a tela de reprodução
+            const bottomNav = document.getElementById('feishin-mobile-bottom-nav');
+            if (bottomNav) {
+                bottomNav.style.removeProperty('display');
+                bottomNav.style.removeProperty('visibility');
+                bottomNav.style.removeProperty('pointer-events');
+            }
+            if (typeof window.__feishinSyncActiveTabs === 'function') {
+                window.__feishinSyncActiveTabs();
+            }
 
             document.getElementById('feishin-tp-lyrics-sheet')?.classList.remove('open');
             document.getElementById('feishin-tp-queue-sheet')?.classList.remove('open');

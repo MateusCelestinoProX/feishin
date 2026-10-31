@@ -50,6 +50,27 @@ body.feishin-tp-open #root {
     transition: opacity 0.25s cubic-bezier(0.16, 1, 0.3, 1) !important;
 }
 
+/* Supressão estrita da Android Navbar principal do app na tela de reprodução de músicas */
+body.feishin-tp-open #feishin-mobile-bottom-nav,
+body.feishin-tp-open #feishin-more-glass-backdrop,
+body.feishin-tp-open #feishin-more-glass-box {
+    display: none !important;
+    opacity: 0 !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+    transform: translateY(180%) !important;
+}
+
+body.feishin-landscape.feishin-tp-open #feishin-mobile-bottom-nav,
+body.feishin-landscape.feishin-tp-open #feishin-more-glass-backdrop,
+body.feishin-landscape.feishin-tp-open #feishin-more-glass-box {
+    display: none !important;
+    opacity: 0 !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+    transform: translateX(-180%) !important;
+}
+
 /* 2. Shaders WebGL no Fundo em Fullscreen */
 #bg-webgl-container {
     position: fixed !important;

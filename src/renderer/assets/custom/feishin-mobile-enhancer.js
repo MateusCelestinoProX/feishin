@@ -652,6 +652,14 @@
                     <span class="feishin-more-item-label">Fila</span>
                 </button>
 
+                <button class="feishin-more-item" id="feishin-more-extra-btn" aria-label="Extra Mode Potência Máxima">
+                    <div class="feishin-more-icon-wrap" style="color: #3b82f6;">
+                        <svg viewBox="0 0 24 24" fill="currentColor"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+                    </div>
+                    <span class="feishin-more-item-label">Extra Mode</span>
+                    <span class="feishin-more-badge-pro" id="feishin-more-extra-badge">OFF</span>
+                </button>
+
                 <button class="feishin-more-item" id="feishin-more-drawer-btn" aria-label="Menu Lateral">
                     <div class="feishin-more-icon-wrap">
                         <svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/></svg>
@@ -682,6 +690,10 @@
                         setTimeout(() => {
                             window.FeishinTrackPage.openQueue();
                         }, 200);
+                    }
+                } else if (item.id === 'feishin-more-extra-btn') {
+                    if (window.FeishinExtraMode) {
+                        window.FeishinExtraMode.toggle();
                     }
                 } else if (item.id === 'feishin-more-drawer-btn') {
                     window.FeishinNative.openSidebarDrawer();
@@ -1159,11 +1171,34 @@
         dspNodes: null,
         initialized: false,
 
-        // Curva de saturação analógica C1-contínua sem descontinuidade ou ganho espúrio em baixos sinais
+        getWebAudio: function () {
+            if (window.__feishinWebAudio && window.__feishinWebAudio.context && window.__feishinWebAudio.dsp) {
+                return window.__feishinWebAudio;
+            }
+            try {
+                const wp = document.getElementById("web-player-engine");
+                if (wp) {
+                    const fiberKey = Object.keys(wp).find(k => k.startsWith("__reactFiber"));
+                    if (fiberKey) {
+                        let fiber = wp[fiberKey];
+                        while (fiber) {
+                            if (fiber.memoizedProps?.audioContext?.context && fiber.memoizedProps?.audioContext?.dsp) {
+                                window.__feishinWebAudio = fiber.memoizedProps.audioContext;
+                                return window.__feishinWebAudio;
+                            }
+                            fiber = fiber.return;
+                        }
+                    }
+                }
+            } catch (e) {}
+            return null;
+        },
+
+        // Curva de saturacao analogica C1-continua sem descontinuidade ou ganho espurio em baixos sinais
         getSaturationCurve: function (samples) {
             samples = samples || 8192;
             const curve = new Float32Array(samples);
-            const T = 0.70; // Linear até 70% da escala (-3.1 dBFS)
+            const T = 0.72; // Linear ate 72% da escala (-2.85 dBFS)
             for (let i = 0; i < samples; ++i) {
                 const x = (i * 2) / samples - 1;
                 const ax = Math.abs(x);
@@ -1182,8 +1217,8 @@
             if (this.initialized) return;
             this.initialized = true;
 
-            const saved = localStorage.getItem('feishin_extra_mode');
-            this.active = (saved === 'true');
+            const saved = localStorage.getItem("feishin_extra_mode");
+            this.active = (saved === "true");
 
             this.attachAudioGuard();
 
@@ -1192,27 +1227,36 @@
         },
 
         syncSystemMaxVolume: function () {
-            // No-op: não alterar o volume de mídia do sistema Android
+            // No-op: preserva o volume de midia do sistema Android
         },
 
         attachAudioGuard: function () {
             const enforceVolume = () => {
-                document.querySelectorAll('audio').forEach(a => {
+                document.querySelectorAll("audio").forEach(a => {
                     try {
                         if (a.volume < 1.0) a.volume = 1.0;
                         if (a.muted) a.muted = false;
                     } catch (e) {}
                 });
-            };
-            setInterval(enforceVolume, 1000);
-            document.addEventListener('play', (e) => {
-                if (e.target && e.target.tagName === 'AUDIO') {
-                    try { e.target.volume = 1.0; } catch (err) {}
-                    if (this.active) {
-                        setTimeout(() => this.applyDSP(), 80);
-                    }
+                if (this.active) {
+                    this.applyDSP();
                 }
-            }, true);
+            };
+            setInterval(enforceVolume, 1500);
+
+            const handleAudioEvent = (e) => {
+                if (e.target && e.target.tagName === "AUDIO") {
+                    try { e.target.volume = 1.0; } catch (err) {}
+                    setTimeout(() => this.applyDSP(), 50);
+                    setTimeout(() => this.applyDSP(), 250);
+                    setTimeout(() => this.applyDSP(), 800);
+                }
+            };
+
+            document.addEventListener("play", handleAudioEvent, true);
+            document.addEventListener("playing", handleAudioEvent, true);
+            document.addEventListener("loadedmetadata", handleAudioEvent, true);
+            document.addEventListener("seeked", handleAudioEvent, true);
         },
 
         toggle: function () {
@@ -1221,35 +1265,24 @@
 
         set: function (enable) {
             this.active = Boolean(enable);
-            localStorage.setItem('feishin_extra_mode', this.active ? 'true' : 'false');
+            localStorage.setItem("feishin_extra_mode", this.active ? "true" : "false");
 
-            if (window.AndroidBridge && typeof window.AndroidBridge.hapticFeedback === 'function') {
+            if (window.AndroidBridge && typeof window.AndroidBridge.hapticFeedback === "function") {
                 window.AndroidBridge.hapticFeedback(1);
-            } else if (window.AndroidBridge && typeof window.AndroidBridge.vibrate === 'function') {
+            } else if (window.AndroidBridge && typeof window.AndroidBridge.vibrate === "function") {
                 window.AndroidBridge.vibrate(25);
             }
 
-            if (this.active) {
-                // Desativa o LoudnessEnhancer nativo da HAL para evitar distorção de intermodulação/double clipping
-                if (window.AndroidBridge && typeof window.AndroidBridge.setNativeLoudnessBoost === 'function') {
-                    window.AndroidBridge.setNativeLoudnessBoost(false, 0);
-                }
-            } else {
-                if (window.AndroidBridge && typeof window.AndroidBridge.setNativeLoudnessBoost === 'function') {
-                    window.AndroidBridge.setNativeLoudnessBoost(false, 0);
-                }
-            }
-
-            document.querySelectorAll('audio').forEach(a => {
+            document.querySelectorAll("audio").forEach(a => {
                 try { a.volume = 1.0; a.muted = false; } catch (e) {}
             });
 
             this.applyDSP();
             this.updateUI();
 
-            if (window.AndroidBridge && typeof window.AndroidBridge.showToast === 'function') {
+            if (window.AndroidBridge && typeof window.AndroidBridge.showToast === "function") {
                 if (this.active) {
-                    window.AndroidBridge.showToast("⚡ EXTRA MODE ATIVADO: Potência Máxima Galaxy Ultra (Studio Limiter Sem Distorção)");
+                    window.AndroidBridge.showToast("⚡ EXTRA MODE ATIVADO: Potência Máxima +6.6dB (Studio Limiter Sem Distorção)");
                 } else {
                     window.AndroidBridge.showToast("Extra Mode Desativado: Volume Normal");
                 }
@@ -1257,83 +1290,98 @@
         },
 
         applyDSP: function () {
-            const wa = window.__feishinWebAudio;
+            const wa = this.getWebAudio();
             if (!wa || !wa.context || !wa.dsp) return;
 
             const ctx = wa.context;
             const dsp = wa.dsp;
-            const comp = dsp.compressor;
-            const preamp = dsp.preampGain;
+            const stockComp = dsp.compressor;
+            const stockPreamp = dsp.preampGain;
 
-            if (ctx.state !== 'running') {
+            if (ctx.state !== "running") {
                 ctx.resume().catch(() => {});
             }
 
             // O último nó da cadeia de EQ ou o preamp
             const lastEqNode = (dsp.eqFilters && dsp.eqFilters.length > 0)
                 ? dsp.eqFilters[dsp.eqFilters.length - 1]
-                : preamp;
+                : stockPreamp;
 
             if (this.active) {
-                // Ganho de entrada otimizado: +4.2 dB (1.62x) - Sem sobrecarregar o teto
-                const targetPreamp = 1.62;
-                try {
-                    preamp.gain.setTargetAtTime(targetPreamp, ctx.currentTime, 0.02);
-                } catch (e) {
-                    preamp.gain.value = targetPreamp;
-                }
-
                 if (!this.dspNodes || this.dspNodes.ctx !== ctx) {
+                    // 1. Ganho Dedicado Extra Mode (+6.65 dB / 2.15x linear)
+                    const extraBoostGain = ctx.createGain();
+                    extraBoostGain.gain.value = 2.15;
+
+                    // 2. Highpass Subsônico (35 Hz, Q=0.707) - Libera headroom e protege os alto-falantes
+                    const hpFilter = ctx.createBiquadFilter();
+                    hpFilter.type = "highpass";
+                    hpFilter.frequency.value = 35;
+                    hpFilter.Q.value = 0.707;
+
+                    // 3. Low-End Punch (95 Hz, Q=0.85, +2.6 dB) - Graves encorpados e definidos
                     const bassNode = ctx.createBiquadFilter();
-                    bassNode.type = 'peaking';
-                    bassNode.frequency.value = 120;
+                    bassNode.type = "peaking";
+                    bassNode.frequency.value = 95;
                     bassNode.Q.value = 0.85;
-                    bassNode.gain.value = 2.2;
+                    bassNode.gain.value = 2.6;
 
+                    // 4. Presença Vocal & Ataque (3000 Hz, Q=0.80, +2.0 dB) - Vocais e ataque nítidos
                     const clarityNode = ctx.createBiquadFilter();
-                    clarityNode.type = 'peaking';
-                    clarityNode.frequency.value = 3200;
+                    clarityNode.type = "peaking";
+                    clarityNode.frequency.value = 3000;
                     clarityNode.Q.value = 0.80;
-                    clarityNode.gain.value = 1.8;
+                    clarityNode.gain.value = 2.0;
 
+                    // 5. Ar & Brilho Espacial (10000 Hz, +1.6 dB highshelf) - Extensão suave de agudos
                     const airNode = ctx.createBiquadFilter();
-                    airNode.type = 'highshelf';
-                    airNode.frequency.value = 9500;
-                    airNode.gain.value = 1.0;
+                    airNode.type = "highshelf";
+                    airNode.frequency.value = 10000;
+                    airNode.gain.value = 1.6;
 
+                    // 6. Saturação Analógica C1-contínua (Soft-Knee com 4x Oversampling)
                     const shaper = ctx.createWaveShaper();
                     shaper.curve = this.getSaturationCurve(8192);
-                    try { shaper.oversample = '4x'; } catch (e) {
-                        try { shaper.oversample = '2x'; } catch (e2) {}
+                    try { shaper.oversample = "4x"; } catch (e) {
+                        try { shaper.oversample = "2x"; } catch (e2) {}
                     }
 
+                    // 7. Master Studio Peak Limiter Dedicado (Threshold -1.2 dBFS, Ratio 14:1, Knee 3.5 dB, Attack 2.5ms, Release 75ms)
+                    const extraLimiter = ctx.createDynamicsCompressor();
+                    extraLimiter.threshold.value = -1.2;
+                    extraLimiter.knee.value = 3.5;
+                    extraLimiter.ratio.value = 14.0;
+                    extraLimiter.attack.value = 0.0025;
+                    extraLimiter.release.value = 0.075;
+
+                    // 8. True-Peak Output Ceiling (-0.13 dBFS / 0.985 gain) - Zero clipping no HAL Android
                     const ceilingGain = ctx.createGain();
-                    ceilingGain.gain.value = 0.965; // -0.31 dBFS True-Peak Ceiling
+                    ceilingGain.gain.value = 0.985;
 
                     this.dspNodes = {
                         ctx,
+                        extraBoostGain,
+                        hpFilter,
                         bassNode,
                         clarityNode,
                         airNode,
                         shaper,
+                        extraLimiter,
                         ceilingGain
                     };
                 }
 
-                // Configura o Compressor como Brickwall Peak Limiter Musical com Knee suave
-                try {
-                    comp.threshold.setValueAtTime(-0.8, ctx.currentTime);
-                    comp.knee.setValueAtTime(2.5, ctx.currentTime);
-                    comp.ratio.setValueAtTime(20.0, ctx.currentTime);
-                    comp.attack.setValueAtTime(0.002, ctx.currentTime);
-                    comp.release.setValueAtTime(0.06, ctx.currentTime);
-                } catch (e) {}
-
                 // Roteamento Studio Limiting:
-                // lastEqNode -> bassNode -> clarityNode -> airNode -> shaper -> comp (Limiter) -> ceilingGain -> ctx.destination
+                // lastEqNode -> extraBoostGain -> hpFilter -> bassNode -> clarityNode -> airNode -> shaper -> extraLimiter -> ceilingGain -> ctx.destination
                 try {
                     lastEqNode.disconnect();
-                    lastEqNode.connect(this.dspNodes.bassNode);
+                    lastEqNode.connect(this.dspNodes.extraBoostGain);
+
+                    this.dspNodes.extraBoostGain.disconnect();
+                    this.dspNodes.extraBoostGain.connect(this.dspNodes.hpFilter);
+
+                    this.dspNodes.hpFilter.disconnect();
+                    this.dspNodes.hpFilter.connect(this.dspNodes.bassNode);
 
                     this.dspNodes.bassNode.disconnect();
                     this.dspNodes.bassNode.connect(this.dspNodes.clarityNode);
@@ -1345,72 +1393,61 @@
                     this.dspNodes.airNode.connect(this.dspNodes.shaper);
 
                     this.dspNodes.shaper.disconnect();
-                    this.dspNodes.shaper.connect(comp);
+                    this.dspNodes.shaper.connect(this.dspNodes.extraLimiter);
 
-                    comp.disconnect();
-                    comp.connect(this.dspNodes.ceilingGain);
+                    this.dspNodes.extraLimiter.disconnect();
+                    this.dspNodes.extraLimiter.connect(this.dspNodes.ceilingGain);
 
                     this.dspNodes.ceilingGain.disconnect();
                     this.dspNodes.ceilingGain.connect(ctx.destination);
                 } catch (err) {
-                    console.warn('[FeishinMobile] Erro no roteamento Extra Mode:', err);
+                    console.warn("[FeishinMobile] Erro no roteamento Extra Mode:", err);
                     try {
                         lastEqNode.disconnect();
-                        lastEqNode.connect(comp);
-                        comp.disconnect();
-                        comp.connect(ctx.destination);
+                        lastEqNode.connect(stockComp);
+                        stockComp.disconnect();
+                        stockComp.connect(ctx.destination);
                     } catch (e) {}
                 }
             } else {
-                // Modo Normal: Preamp 1.0, Limiter transparente, conexão direta
-                try {
-                    preamp.gain.setTargetAtTime(1.0, ctx.currentTime, 0.02);
-                } catch (e) {
-                    preamp.gain.value = 1.0;
-                }
-
-                try {
-                    comp.threshold.setValueAtTime(0, ctx.currentTime);
-                    comp.knee.setValueAtTime(0, ctx.currentTime);
-                    comp.ratio.setValueAtTime(1.0, ctx.currentTime);
-                    comp.attack.setValueAtTime(0.003, ctx.currentTime);
-                    comp.release.setValueAtTime(0.25, ctx.currentTime);
-                } catch (e) {}
-
+                // Modo Normal: Preamp 1.0 (0 dB), Limiter transparente, bypass completo
                 try {
                     lastEqNode.disconnect();
-                    lastEqNode.connect(comp);
+                    lastEqNode.connect(stockComp);
 
                     if (this.dspNodes) {
+                        try { this.dspNodes.extraBoostGain.disconnect(); } catch (e) {}
+                        try { this.dspNodes.hpFilter.disconnect(); } catch (e) {}
                         try { this.dspNodes.bassNode.disconnect(); } catch (e) {}
                         try { this.dspNodes.clarityNode.disconnect(); } catch (e) {}
                         try { this.dspNodes.airNode.disconnect(); } catch (e) {}
                         try { this.dspNodes.shaper.disconnect(); } catch (e) {}
+                        try { this.dspNodes.extraLimiter.disconnect(); } catch (e) {}
                         try { this.dspNodes.ceilingGain.disconnect(); } catch (e) {}
                     }
 
-                    comp.disconnect();
-                    comp.connect(ctx.destination);
+                    stockComp.disconnect();
+                    stockComp.connect(ctx.destination);
                 } catch (err) {
-                    console.warn('[FeishinMobile] Erro no bypass Extra Mode:', err);
-                    try { comp.connect(ctx.destination); } catch (e) {}
+                    console.warn("[FeishinMobile] Erro no bypass Extra Mode:", err);
+                    try { stockComp.connect(ctx.destination); } catch (e) {}
                 }
             }
         },
 
         updateUI: function () {
-            // Remove qualquer botão antigo da barra inferior (mini widget / playerbar)
-            const unwantedBarBtn = document.getElementById('feishin-bar-btn-extra-mode');
+            // Remove qualquer botao antigo da barra inferior (mini widget / playerbar)
+            const unwantedBarBtn = document.getElementById("feishin-bar-btn-extra-mode");
             if (unwantedBarBtn) {
                 unwantedBarBtn.remove();
             }
 
-            // Atualiza exclusivamente o botão da página Fullscreen (Tocando Agora)
-            const tpBtn = document.getElementById('feishin-tp-btn-extra-mode');
+            // Atualiza exclusivamente o botao da pagina Fullscreen (Tocando Agora)
+            const tpBtn = document.getElementById("feishin-tp-btn-extra-mode");
             if (tpBtn) {
                 if (this.active) {
-                    tpBtn.classList.add('feishin-extra-mode-active');
-                    tpBtn.setAttribute('data-active', 'true');
+                    tpBtn.classList.add("feishin-extra-mode-active");
+                    tpBtn.setAttribute("data-active", "true");
                     tpBtn.innerHTML = `
                         <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16">
                             <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
@@ -1418,8 +1455,8 @@
                         <span class="feishin-tp-extra-label">EXTRA ON</span>
                     `;
                 } else {
-                    tpBtn.classList.remove('feishin-extra-mode-active');
-                    tpBtn.setAttribute('data-active', 'false');
+                    tpBtn.classList.remove("feishin-extra-mode-active");
+                    tpBtn.setAttribute("data-active", "false");
                     tpBtn.innerHTML = `
                         <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16">
                             <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
@@ -1429,12 +1466,24 @@
                 }
             }
 
-            // Atualiza status no modal Mais Opções
-            const moreStatus = document.getElementById('feishin-tp-more-extra-mode-status');
+            // Atualiza status no modal Mais Opcoes
+            const moreStatus = document.getElementById("feishin-tp-more-extra-mode-status");
             if (moreStatus) {
-                moreStatus.textContent = this.active ? 'ATIVADO (MAX)' : 'DESATIVADO';
-                moreStatus.style.color = this.active ? '#FACC15' : 'rgba(255, 255, 255, 0.5)';
-                moreStatus.style.background = this.active ? 'rgba(234, 179, 8, 0.25)' : 'rgba(255, 255, 255, 0.1)';
+                moreStatus.textContent = this.active ? "ATIVADO (MAX)" : "DESATIVADO";
+                moreStatus.style.color = this.active ? "#FACC15" : "rgba(255, 255, 255, 0.5)";
+                moreStatus.style.background = this.active ? "rgba(234, 179, 8, 0.25)" : "rgba(255, 255, 255, 0.1)";
+            }
+
+            // Atualiza status no menu Mais da barra inferior
+            const moreBadge = document.getElementById("feishin-more-extra-badge");
+            const moreBtn = document.getElementById("feishin-more-extra-btn");
+            if (moreBadge) {
+                moreBadge.innerText = this.active ? "ON" : "OFF";
+                moreBadge.style.background = this.active ? "#3b82f6" : "rgba(255, 255, 255, 0.1)";
+                moreBadge.style.color = "#fff";
+            }
+            if (moreBtn) {
+                moreBtn.classList.toggle("active", this.active);
             }
         }
     };
@@ -1477,6 +1526,17 @@
             window.__FORCE_SHADER_RUNNING__ = true;
             document.body.classList.add('feishin-tp-open');
 
+            // Oculta estritamente a Android Navbar principal ao abrir a tela de reprodução
+            const bottomNav = document.getElementById('feishin-mobile-bottom-nav');
+            if (bottomNav) {
+                bottomNav.style.setProperty('display', 'none', 'important');
+                bottomNav.style.setProperty('visibility', 'hidden', 'important');
+                bottomNav.style.setProperty('pointer-events', 'none', 'important');
+            }
+            if (typeof window.FeishinNative?.closeMoreMenu === 'function') {
+                window.FeishinNative.closeMoreMenu();
+            }
+
             // Garante que o WebGL Shader esteja renderizando no container de fundo
             const bgContainer = document.getElementById('bg-webgl-container');
             const active = localStorage.getItem('feishin_active_shader') || 'plasmawave';
@@ -1514,6 +1574,17 @@
             this.userClosedQueueInLandscape = false;
             window.__FORCE_SHADER_RUNNING__ = false;
             document.body.classList.remove('feishin-tp-open');
+
+            // Restaura a visibilidade da Android Navbar principal ao fechar a tela de reprodução
+            const bottomNav = document.getElementById('feishin-mobile-bottom-nav');
+            if (bottomNav) {
+                bottomNav.style.removeProperty('display');
+                bottomNav.style.removeProperty('visibility');
+                bottomNav.style.removeProperty('pointer-events');
+            }
+            if (typeof window.__feishinSyncActiveTabs === 'function') {
+                window.__feishinSyncActiveTabs();
+            }
 
             document.getElementById('feishin-tp-lyrics-sheet')?.classList.remove('open');
             document.getElementById('feishin-tp-queue-sheet')?.classList.remove('open');
@@ -3221,8 +3292,11 @@
     }, 400);
 
     console.log('[FeishinMobile] Motor Nativo Liquid Glass Pronto e Ativo.');
-    // Inicializa o Motor Extra Mode
+    // Inicializa TrackPage e Motor Extra Mode
     try {
+        if (window.FeishinTrackPage) {
+            window.FeishinTrackPage.init();
+        }
         if (window.FeishinExtraMode) {
             window.FeishinExtraMode.init();
         }
