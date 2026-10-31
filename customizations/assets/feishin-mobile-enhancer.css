@@ -990,6 +990,18 @@ thead {
     box-sizing: border-box !important;
 }
 
+#feishin-alphabet-scrubber.fs-az-scrubber::before,
+.fs-az-scrubber::before {
+    content: '' !important;
+    position: absolute !important;
+    top: -12px !important;
+    bottom: -12px !important;
+    left: -24px !important;
+    right: -10px !important;
+    z-index: 1 !important;
+    pointer-events: auto !important;
+}
+
 #feishin-alphabet-scrubber.fs-az-scrubber:hover,
 #feishin-alphabet-scrubber.fs-az-scrubber.dragging,
 .fs-az-scrubber:hover,
@@ -1126,8 +1138,8 @@ thead {
     flex-direction: column !important;
     overflow: hidden !important;
     background: rgba(10, 6, 20, 0.28) !important;
-    backdrop-filter: blur(20px) saturate(190%) contrast(105%) !important;
-    -webkit-backdrop-filter: blur(20px) saturate(190%) contrast(105%) !important;
+    backdrop-filter: blur(var(--personal-os-glass-blur, 28px)) saturate(190%) contrast(105%) !important;
+    -webkit-backdrop-filter: blur(var(--personal-os-glass-blur, 28px)) saturate(190%) contrast(105%) !important;
     transition: transform 0.38s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.28s ease !important;
     will-change: transform, opacity !important;
     box-sizing: border-box !important;
@@ -1142,7 +1154,7 @@ thead {
     pointer-events: none !important;
 }
 
-/* Aura fluida de luz dinâmica refletindo a capa do álbum */
+/* Aura fluida de luz dinâmica refletindo a capa do álbum com controle de intensidade e blur */
 .feishin-tp-ambient-aura {
     position: absolute !important;
     top: 8% !important;
@@ -1154,16 +1166,16 @@ thead {
     background: radial-gradient(circle, var(--tp-glow-color, rgba(168, 85, 247, 0.55)) 0%, rgba(99, 102, 241, 0.25) 50%, transparent 80%) !important;
     background-size: cover !important;
     background-position: center !important;
-    filter: blur(85px) !important;
-    opacity: 0.65 !important;
+    filter: blur(calc(var(--personal-os-glass-blur, 28px) * 2.5)) !important;
+    opacity: var(--personal-os-aura-opacity, 0.65) !important;
     pointer-events: none !important;
     z-index: 1 !important;
-    transition: background 0.8s ease, transform 0.6s ease, opacity 0.4s ease !important;
+    transition: background 0.8s ease, transform 0.6s ease, opacity 0.4s ease, filter 0.3s ease !important;
 }
 
 .feishin-tp-ambient-aura.paused {
-    opacity: 0.35 !important;
-    filter: blur(95px) !important;
+    opacity: calc(var(--personal-os-aura-opacity, 0.65) * 0.55) !important;
+    filter: blur(calc(var(--personal-os-glass-blur, 28px) * 2.8)) !important;
 }
 
 .feishin-tp-glass-backdrop {
@@ -1303,8 +1315,8 @@ thead {
     align-items: center !important;
     justify-content: center !important;
     background: radial-gradient(circle, rgba(36, 20, 66, 0.5) 0%, rgba(14, 9, 27, 0.6) 100%) !important;
-    backdrop-filter: blur(20px) !important;
-    -webkit-backdrop-filter: blur(20px) !important;
+    backdrop-filter: blur(calc(var(--personal-os-glass-blur, 28px) * 0.7)) !important;
+    -webkit-backdrop-filter: blur(calc(var(--personal-os-glass-blur, 28px) * 0.7)) !important;
     color: rgba(255, 255, 255, 0.5) !important;
 }
 
@@ -1332,8 +1344,8 @@ thead {
     padding: 6px 14px !important;
     border-radius: 9999px !important;
     background: rgba(15, 11, 26, 0.45) !important;
-    backdrop-filter: blur(20px) saturate(200%) !important;
-    -webkit-backdrop-filter: blur(20px) saturate(200%) !important;
+    backdrop-filter: blur(calc(var(--personal-os-glass-blur, 28px) * 0.7)) saturate(200%) !important;
+    -webkit-backdrop-filter: blur(calc(var(--personal-os-glass-blur, 28px) * 0.7)) saturate(200%) !important;
     border: 1px solid rgba(255, 255, 255, 0.28) !important;
     border-top: 1px solid rgba(255, 255, 255, 0.55) !important;
     color: #FFFFFF !important;
@@ -1362,8 +1374,8 @@ thead {
     padding: 6px 14px !important;
     border-radius: 9999px !important;
     background: rgba(168, 85, 247, 0.35) !important;
-    backdrop-filter: blur(20px) saturate(200%) !important;
-    -webkit-backdrop-filter: blur(20px) saturate(200%) !important;
+    backdrop-filter: blur(calc(var(--personal-os-glass-blur, 28px) * 0.7)) saturate(200%) !important;
+    -webkit-backdrop-filter: blur(calc(var(--personal-os-glass-blur, 28px) * 0.7)) saturate(200%) !important;
     border: 1px solid rgba(255, 255, 255, 0.28) !important;
     border-top: 1px solid rgba(255, 255, 255, 0.55) !important;
     color: #FFFFFF !important;
@@ -1788,8 +1800,8 @@ thead {
     width: 100% !important;
     height: 100% !important;
     background: rgba(10, 6, 20, 0.45) !important;
-    backdrop-filter: blur(28px) saturate(190%) contrast(105%) !important;
-    -webkit-backdrop-filter: blur(28px) saturate(190%) contrast(105%) !important;
+    backdrop-filter: blur(var(--personal-os-glass-blur, 28px)) saturate(190%) contrast(105%) !important;
+    -webkit-backdrop-filter: blur(var(--personal-os-glass-blur, 28px)) saturate(190%) contrast(105%) !important;
     z-index: 20 !important;
     display: flex !important;
     flex-direction: column !important;
@@ -1817,8 +1829,8 @@ thead {
     position: relative !important;
     z-index: 25 !important;
     background: rgba(14, 10, 28, 0.55) !important;
-    backdrop-filter: blur(20px) !important;
-    -webkit-backdrop-filter: blur(20px) !important;
+    backdrop-filter: blur(calc(var(--personal-os-glass-blur, 28px) * 0.75)) !important;
+    -webkit-backdrop-filter: blur(calc(var(--personal-os-glass-blur, 28px) * 0.75)) !important;
     margin-left: -18px !important;
     margin-right: -18px !important;
     padding-left: 18px !important;
@@ -2069,8 +2081,8 @@ thead {
     position: fixed !important;
     inset: 0 !important;
     background: rgba(0, 0, 0, 0.65) !important;
-    backdrop-filter: blur(12px) !important;
-    -webkit-backdrop-filter: blur(12px) !important;
+    backdrop-filter: blur(calc(var(--personal-os-glass-blur, 28px) * 0.5)) !important;
+    -webkit-backdrop-filter: blur(calc(var(--personal-os-glass-blur, 28px) * 0.5)) !important;
     z-index: 20 !important;
     display: none !important;
     align-items: center !important;
@@ -2380,8 +2392,8 @@ thead {
         border-left: 1px solid rgba(255, 255, 255, 0.12) !important;
         border-radius: 20px 0 0 20px !important;
         background: rgba(14, 10, 26, 0.72) !important;
-        backdrop-filter: blur(32px) saturate(190%) contrast(105%) !important;
-        -webkit-backdrop-filter: blur(32px) saturate(190%) contrast(105%) !important;
+        backdrop-filter: blur(var(--personal-os-glass-blur, 32px)) saturate(190%) contrast(105%) !important;
+        -webkit-backdrop-filter: blur(var(--personal-os-glass-blur, 32px)) saturate(190%) contrast(105%) !important;
         padding: max(var(--sat, 0px), 8px) max(var(--sar, 0px), 16px) max(var(--sab, 0px), 10px) 16px !important;
         box-shadow: -10px 0 35px rgba(0, 0, 0, 0.5) !important;
         transform: translateX(100%) !important;
@@ -2497,8 +2509,8 @@ thead {
         border-left: 1px solid rgba(255, 255, 255, 0.12) !important;
         border-radius: 20px 0 0 20px !important;
         background: rgba(14, 10, 26, 0.72) !important;
-        backdrop-filter: blur(32px) saturate(190%) contrast(105%) !important;
-        -webkit-backdrop-filter: blur(32px) saturate(190%) contrast(105%) !important;
+        backdrop-filter: blur(var(--personal-os-glass-blur, 32px)) saturate(190%) contrast(105%) !important;
+        -webkit-backdrop-filter: blur(var(--personal-os-glass-blur, 32px)) saturate(190%) contrast(105%) !important;
         padding: max(var(--sat, 0px), 8px) max(var(--sar, 0px), 16px) max(var(--sab, 0px), 10px) 16px !important;
         box-shadow: -10px 0 35px rgba(0, 0, 0, 0.5) !important;
         transform: translateX(100%) !important;
@@ -4418,9 +4430,23 @@ table,
         top: max(32px, env(safe-area-inset-top, 32px)) !important;
         bottom: max(64px, env(safe-area-inset-bottom, 64px)) !important;
         right: max(2px, env(safe-area-inset-right, 2px)) !important;
-        width: 17px !important;
-        padding: 2px 0 !important;
+        width: 20px !important;
+        padding: 3px 0 !important;
         z-index: 170 !important;
+    }
+
+    #feishin-alphabet-scrubber.fs-az-scrubber::before,
+    .fs-az-scrubber::before,
+    body.feishin-landscape #feishin-alphabet-scrubber.fs-az-scrubber::before,
+    body.feishin-landscape .fs-az-scrubber::before {
+        content: '' !important;
+        position: absolute !important;
+        top: -12px !important;
+        bottom: -12px !important;
+        left: -24px !important;
+        right: -10px !important;
+        z-index: 1 !important;
+        pointer-events: auto !important;
     }
 
     #feishin-alphabet-scrubber .fs-az-item,
@@ -4428,8 +4454,9 @@ table,
     body.feishin-landscape #feishin-alphabet-scrubber .fs-az-item,
     body.feishin-landscape .fs-az-item {
         min-height: 8px !important;
-        font-size: 7.5px !important;
+        font-size: 8px !important;
         line-height: 8px !important;
+        width: 16px !important;
     }
 
     /* 6. MODAL DE BACKGROUNDS / SHADERS: CENTRALIZADO COM PERFEIÇÃO */
@@ -4712,5 +4739,18 @@ body:has(.mantine-Modal-content) #feishin-alphabet-hud {
     visibility: hidden !important;
     pointer-events: none !important;
 }
+
+/* 3. Sincronização Universal do Blur do Vidro com Reprodutor Nativo e Fullscreen */
+:root {
+    --personal-os-aura-opacity: 0.65;
+}
+.fs-full-screen-player-module-container,
+.fs-mobile-fullscreen-player-module-container,
+.fs-full-screen-player-background-image-module-image,
+[class*="fullscreen-player"],
+[class*="fullScreenPlayer"] {
+    --image-blur: var(--personal-os-glass-blur, 28px) !important;
+}
+
 
 
