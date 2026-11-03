@@ -7,7 +7,7 @@
 (function() {
   console.log('[Recently Added Engine] Inicializando Adicionadas Recentemente (Samsung Music MediaStore Chronology)...');
 
-  const STORAGE_CACHE_KEY = 'feishin_recently_added_cache_v7_mobile_samsung';
+  const STORAGE_CACHE_KEY = 'feishin_recently_added_cache_v8_samsung_authentic';
 
   let cachedSongs = [];
   let totalRecordCount = 0;
@@ -86,7 +86,11 @@
 
   function cleanKey(str) {
     if (!str) return '';
-    return String(str).toLowerCase().replace(/\ufeff/g, '')
+    return String(str)
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .toLowerCase()
+      .replace(/\ufeff/g, '')
       .replace(/\(.*?\)|\[.*?\]|_|-|"|\ufeff/g, ' ')
       .replace(/feat\..*?|ft\..*?|official.*?|video|audio|lyrics|slowed|reverb|remastered|mp3.*|m4a.*|opus.*/g, ' ')
       .replace(/[^a-z0-9]/g, ' ')
@@ -98,10 +102,18 @@
     if (window.__SAMSUNG_MUSIC_CHRONOLOGY__?.[s.id]) {
       return window.__SAMSUNG_MUSIC_CHRONOLOGY__[s.id];
     }
-    const ck = cleanKey(s.title || s.name);
-    if (ck && window.__SAMSUNG_MUSIC_BY_TITLE__?.[ck]) {
-      return window.__SAMSUNG_MUSIC_BY_TITLE__[ck];
-    }
+    const byTitle = window.__SAMSUNG_MUSIC_BY_TITLE__;
+    if (!byTitle) return null;
+
+    const kTitle = cleanKey(s.title || s.name);
+    if (kTitle && byTitle[kTitle]) return byTitle[kTitle];
+
+    const kFull1 = cleanKey((s.artist || s.artistName || '') + ' ' + (s.title || s.name || ''));
+    if (kFull1 && byTitle[kFull1]) return byTitle[kFull1];
+
+    const kFull2 = cleanKey((s.title || s.name || '') + ' ' + (s.artist || s.artistName || ''));
+    if (kFull2 && byTitle[kFull2]) return byTitle[kFull2];
+
     return null;
   }
 
@@ -111,7 +123,7 @@
     const chrono = getChronoEntry(s);
 
     let rank = 999999;
-    let creationTime = s.created || s.birthTime || s.createdAt || s.updatedAt || new Date().toISOString();
+    let creationTime = s.created || s.birthTime || s.createdAt || s.updatedAt || '1970-01-01T00:00:00Z';
     let formattedDate = null;
     let isSamsungOrder = false;
     let sortTimestamp = 0;
@@ -132,18 +144,10 @@
       isSamsungOrder = true;
       sortTimestamp = (chrono.date_modified ? chrono.date_modified * 1000 : new Date(creationTime).getTime()) || 0;
     } else {
-      const rawTs = new Date(creationTime).getTime() || Date.now();
-      sortTimestamp = rawTs;
-      if (rawTs > SAMSUNG_BASELINE_CUTOFF_MS) {
-        // Nova música adicionada no futuro (chegada ordenada pela data de criação do arquivo)
-        isSamsungOrder = false;
-        formattedDate = formatCreationDate(creationTime, null);
-      } else {
-        // Faixa da baseline não ranqueada diretamente
-        isSamsungOrder = true;
-        rank = 999999;
-        formattedDate = formatCreationDate(creationTime, null);
-      }
+      isSamsungOrder = false;
+      rank = 999999;
+      formattedDate = formatCreationDate(creationTime, null);
+      sortTimestamp = 0;
     }
 
     const coverId = s.coverArt || s.imageId || (s.id ? ('mf-' + s.id) : s.id);
@@ -173,29 +177,15 @@
     };
   }
 
-  // Função unificada de ordenação: preserva baseline Samsung histórico e aloca novos arquivos no topo
+  // Função unificada de ordenação: preserva estritamente o rank ordinal da cronologia Samsung Music (MediaStore)
   function sortChronologically(songs) {
     songs.sort((a, b) => {
-      const aIsSamsung = a.isSamsungOrder && typeof a.rank === 'number' && a.rank < 999999;
-      const bIsSamsung = b.isSamsungOrder && typeof b.rank === 'number' && b.rank < 999999;
+      const aRank = (a.isSamsungOrder && typeof a.rank === 'number') ? a.rank : 999999;
+      const bRank = (b.isSamsungOrder && typeof b.rank === 'number') ? b.rank : 999999;
 
-      // 1. Ambas as faixas estão no baseline Samsung Music: ordena estritamente pelo rank ordinal
-      if (aIsSamsung && bIsSamsung) {
-        if (a.rank !== b.rank) return a.rank - b.rank;
-        return b.sortTimestamp - a.sortTimestamp;
+      if (aRank !== bRank) {
+        return aRank - bRank;
       }
-
-      // 2. Faixa nova (chegada após baseline) vs Faixa histórica do baseline
-      if (!aIsSamsung && bIsSamsung) {
-        if (a.sortTimestamp > SAMSUNG_BASELINE_CUTOFF_MS) return -1;
-        return 1;
-      }
-      if (aIsSamsung && !bIsSamsung) {
-        if (b.sortTimestamp > SAMSUNG_BASELINE_CUTOFF_MS) return 1;
-        return -1;
-      }
-
-      // 3. Faixas residuais sem ranking ou ambas pós-baseline
       return b.sortTimestamp - a.sortTimestamp;
     });
   }
@@ -204,6 +194,19 @@
   async function loadInitialSongs() {
     if (isFetching) return;
     isFetching = true;
+
+    // Purge legacy caches to eliminate corrupted state
+    const LEGACY_CACHE_KEYS = [
+      'feishin_recently_added_cache_v1',
+      'feishin_recently_added_cache_v2',
+      'feishin_recently_added_cache_v3',
+      'feishin_recently_added_cache_v5_samsung',
+      'feishin_recently_added_cache_v6_mobile_samsung',
+      'feishin_recently_added_cache_v7_mobile_samsung'
+    ];
+    LEGACY_CACHE_KEYS.forEach(k => {
+      try { localStorage.removeItem(k); } catch (e) {}
+    });
 
     const { url, cred, serverId, serverType } = getAuthInfo();
 
@@ -219,8 +222,6 @@
             totalRecordCount = cachedSongs.length;
             renderViewContent();
             isFetching = false;
-            // Background sync para capturar novos downloads do celular via VPS sem bloquear a UI
-            syncRecentSongsFromServer(url, serverId, serverType);
             return;
           }
         }
@@ -282,80 +283,7 @@
       renderViewContent();
     }
 
-    // 4. Sincronização em tempo real de novas faixas vindas da VPS / Navidrome
-    await syncRecentSongsFromServer(url, serverId, serverType);
-
     isFetching = false;
-  }
-
-  async function syncRecentSongsFromServer(url, serverId, serverType) {
-    try {
-      const endpoints = [
-        `https://instance-20260907-0637.tail798a9b.ts.net:4533/api/engine/sync/recent-tracks?limit=100`,
-        `http://100.99.207.96:4535/sync/recent-tracks?limit=100`
-      ];
-
-      let rawTracks = null;
-      for (const ep of endpoints) {
-        try {
-          const resp = await fetch(ep, { cache: 'no-store', signal: AbortSignal.timeout(3000) });
-          if (resp.ok) {
-            const data = await resp.json();
-            if (data?.success && Array.isArray(data.tracks) && data.tracks.length > 0) {
-              rawTracks = data.tracks;
-              break;
-            }
-          }
-        } catch (e) {}
-      }
-
-      if (rawTracks && rawTracks.length > 0) {
-        let hasNew = false;
-        const existingIds = new Set(cachedSongs.map(s => s.id));
-        const existingTitles = new Set(cachedSongs.map(s => cleanKey(s.title || s.name)));
-
-        for (const t of rawTracks) {
-          // REGRA ABSOLUTA: Se a faixa pertence ao catálogo histórico Samsung, JAMAIS re-injeta como nova!
-          const chronoEntry = getChronoEntry(t);
-          if (chronoEntry && typeof chronoEntry.rank === 'number' && chronoEntry.rank < 999999) {
-            continue;
-          }
-
-          const cTitle = cleanKey(t.title || t.name);
-          const found = existingIds.has(t.id) || (cTitle && existingTitles.has(cTitle));
-          if (!found) {
-            const cDate = t.created_at || t.createdAt || new Date().toISOString();
-            const ts = new Date(cDate).getTime() || Date.now();
-            
-            // Só adiciona se o timestamp for comprovadamente posterior ao cutoff do baseline Samsung
-            if (ts > SAMSUNG_BASELINE_CUTOFF_MS) {
-              const norm = normalizeSong(t, serverId, serverType);
-              norm.isSamsungOrder = false;
-              norm.rank = 999999;
-              norm.creationTime = cDate;
-              norm.sortTimestamp = ts;
-              norm.formattedDate = formatCreationDate(cDate, null);
-              cachedSongs.unshift(norm);
-              existingIds.add(t.id);
-              if (cTitle) existingTitles.add(cTitle);
-              hasNew = true;
-            }
-          }
-        }
-
-        if (hasNew) {
-          sortChronologically(cachedSongs);
-          totalRecordCount = cachedSongs.length;
-          try {
-            localStorage.setItem(STORAGE_CACHE_KEY, JSON.stringify(cachedSongs.slice(0, 2000)));
-          } catch (e) {}
-          renderViewContent();
-          console.log(`[Recently Added] Biblioteca sincronizada com a VPS: ${cachedSongs.length} faixas.`);
-        }
-      }
-    } catch (err) {
-      console.warn('[Recently Added] Sincronização em background finalizada:', err);
-    }
   }
 
   // 3. Playback Helpers
@@ -487,10 +415,10 @@
       const month = songDate.getMonth();
       const day = songDate.getDate();
 
-      if (isInvalid) {
+      if (isInvalid || !song.isSamsungOrder || song.rank >= 999999) {
         key = 'group-other';
         title = 'Outras Faixas';
-        subtitle = 'Sem data registrada';
+        subtitle = 'Sem data registrada no catálogo histórico';
         icon = '📁';
       } else if (year >= 2026 && (year > 2026 || month >= 9)) {
         // Faixas recentes (Outubro de 2026 em diante e todas as novas adições futuras)
