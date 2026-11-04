@@ -61,3 +61,7 @@ class TypedEventEmitterImpl implements TypedEventEmitter<EventMap> {
 }
 
 export const eventEmitter = new TypedEventEmitterImpl();
+
+if (typeof window !== 'undefined') {
+    (window as any).__FEISHIN_EVENT_EMITTER__ = eventEmitter;
+}

@@ -164,13 +164,16 @@
     }
 
     const coverId = s.coverArt || s.imageId || (s.id ? ('mf-' + s.id) : s.id);
+    const cleanTitle = (s.title || s.name || 'Faixa').replace(/^\uFEFF+/, '').trim();
+    const cleanArtist = (s.artist || s.artistName || (s.artists?.[0]?.name) || '[Unknown Artist]').replace(/^\uFEFF+/, '').trim();
+    const cleanAlbum = (s.album || s.albumName || '').replace(/^\uFEFF+/, '').trim();
 
     return {
       id: s.id,
-      name: s.title || s.name || 'Faixa',
-      title: s.title || s.name || 'Faixa',
-      artistName: s.artist || s.artistName || (s.artists?.[0]?.name) || '[Unknown Artist]',
-      album: s.album || s.albumName || '',
+      name: cleanTitle,
+      title: cleanTitle,
+      artistName: cleanArtist,
+      album: cleanAlbum,
       albumId: s.albumId || s.parent || s.id,
       duration: durMs,
       imageId: coverId,
@@ -1122,15 +1125,60 @@
   // Initial schedule
   scheduleMount();
 
-  // SSE Realtime auto-update from VPS Music Engine
-  try {
-    const sseUrl = `${getAuthInfo().url}/api/engine/events`;
-    const sse = new EventSource(sseUrl);
-    sse.addEventListener('track_uploaded', () => {
-      console.log('[Recently Added] Evento track_uploaded recebido via SSE. Atualizando faixas...');
-      loadInitialSongs(true);
-    });
-  } catch (e) {}
+  // SSE Realtime auto-update from VPS Music Engine com reconexão resiliente
+  let sseInstance = null;
+  let sseReconnectTimer = null;
+  function connectSSE() {
+    if (sseInstance) {
+      try { sseInstance.close(); } catch (e) {}
+      sseInstance = null;
+    }
+    const auth = getAuthInfo();
+    if (!auth || !auth.url) {
+      clearTimeout(sseReconnectTimer);
+      sseReconnectTimer = setTimeout(connectSSE, 2000);
+      return;
+    }
+    const cleanUrl = auth.url.replace(/\/$/, '');
+    const sseUrl = `${cleanUrl}/api/engine/events`;
+    try {
+      sseInstance = new EventSource(sseUrl);
+
+      const onTrackChange = (ev) => {
+        console.log(`[Recently Added] Evento SSE (${ev.type}) recebido. Revalidando faixas...`);
+        loadInitialSongs(true);
+        if (typeof window.feishinRefreshLibrary === 'function') {
+          window.feishinRefreshLibrary(ev.type);
+        }
+        setTimeout(() => loadInitialSongs(true), 1200);
+        setTimeout(() => loadInitialSongs(true), 3200);
+      };
+
+      sseInstance.addEventListener('track_uploaded', onTrackChange);
+      sseInstance.addEventListener('scan_finished', onTrackChange);
+      sseInstance.addEventListener('library_updated', onTrackChange);
+      sseInstance.addEventListener('track_updated', onTrackChange);
+      sseInstance.addEventListener('track_deleted', onTrackChange);
+
+      sseInstance.onerror = () => {
+        if (sseInstance) {
+          try { sseInstance.close(); } catch (e) {}
+          sseInstance = null;
+        }
+        clearTimeout(sseReconnectTimer);
+        sseReconnectTimer = setTimeout(connectSSE, 6000);
+      };
+    } catch (e) {
+      clearTimeout(sseReconnectTimer);
+      sseReconnectTimer = setTimeout(connectSSE, 8000);
+    }
+  }
+  connectSSE();
+
+  // Escuta evento customizado de refresh emitido pelo Personal OS ou core Feishin
+  window.addEventListener('feishin:refresh-library', () => {
+    loadInitialSongs(true);
+  });
 
   // Periodic polling fallback a cada 45 segundos
   setInterval(() => {

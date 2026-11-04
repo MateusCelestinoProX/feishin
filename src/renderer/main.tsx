@@ -50,6 +50,10 @@ function createIDBPersister(idbValidKey: IDBValidKey = 'reactQuery') {
 
 const indexedDbPersister = createIDBPersister('feishin');
 
+if (typeof window !== 'undefined') {
+    (window as any).__FEISHIN_QUERY_CLIENT__ = queryClient;
+}
+
 createRoot(document.getElementById('root')!).render(
     <PersistQueryClientProvider
         client={queryClient}

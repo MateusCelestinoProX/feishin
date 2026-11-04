@@ -2611,3 +2611,137 @@ if (typeof window !== 'undefined') {
     initEngine();
   }
 })();
+
+// ==========================================================================
+// UNIFIED REALTIME LIBRARY REFRESH & QUERY INVALIDATION ENGINE
+// ==========================================================================
+function getReactQueryClient() {
+  if (window.__FEISHIN_QUERY_CLIENT__) return window.__FEISHIN_QUERY_CLIENT__;
+  const root = document.querySelector('#root');
+  if (!root) return null;
+  const key = Object.keys(root).find(k => k.startsWith('__reactFiber$') || k.startsWith('__reactContainer$'));
+  let fiber = root[key];
+  for (let i = 0; i < 30 && fiber; i++) {
+    if (fiber.memoizedProps?.client?.invalidateQueries) {
+      window.__FEISHIN_QUERY_CLIENT__ = fiber.memoizedProps.client;
+      return window.__FEISHIN_QUERY_CLIENT__;
+    }
+    fiber = fiber.child;
+  }
+  return null;
+}
+
+function getEventEmitter() {
+  if (window.__FEISHIN_EVENT_EMITTER__) return window.__FEISHIN_EVENT_EMITTER__;
+  return null;
+}
+
+window.feishinRefreshLibrary = function(reason = 'sync') {
+  console.log(`[PersonalOS Engine] feishinRefreshLibrary acionado (motivo: ${reason})`);
+  
+  // 1. Invalida todas as queries no TanStack React Query
+  const qc = getReactQueryClient();
+  if (qc && typeof qc.invalidateQueries === 'function') {
+    try {
+      qc.invalidateQueries();
+    } catch (e) {
+      console.warn('[PersonalOS Engine] Falha ao invalidar queries:', e);
+    }
+  }
+
+  // 2. Dispara refresh nas tabelas infinitas Feishin
+  const ee = getEventEmitter();
+  if (ee && typeof ee.emit === 'function') {
+    try {
+      ee.emit('ITEM_LIST_REFRESH', { key: 'song' });
+      ee.emit('ITEM_LIST_REFRESH', { key: 'songs' });
+      ee.emit('ITEM_LIST_REFRESH', { key: 'album' });
+      ee.emit('ITEM_LIST_REFRESH', { key: 'albums' });
+      ee.emit('ITEM_LIST_REFRESH', { key: 'artist' });
+      ee.emit('ITEM_LIST_REFRESH', { key: 'artists' });
+    } catch (e) {}
+  }
+
+  // 3. Recarrega a aba Recentes
+  if (window.__FEISHIN_RECENTLY_ADDED__?.reload) {
+    try {
+      window.__FEISHIN_RECENTLY_ADDED__.reload(true);
+    } catch (e) {}
+  }
+
+  // 4. Dispara evento no DOM
+  window.dispatchEvent(new CustomEvent('feishin:refresh-library', { detail: { reason } }));
+};
+
+// SSE Listener em background no Personal OS
+(function initGlobalSSE() {
+  let sse = null;
+  let timer = null;
+
+  function connect() {
+    if (sse) {
+      try { sse.close(); } catch (e) {}
+      sse = null;
+    }
+
+    let serverUrl = '';
+    try {
+      const auth = JSON.parse(localStorage.getItem('store_authentication') || '{}');
+      serverUrl = auth?.state?.currentServer?.url || '';
+    } catch (e) {}
+
+    if (!serverUrl) {
+      timer = setTimeout(connect, 3000);
+      return;
+    }
+
+    const cleanUrl = serverUrl.replace(/\/$/, '');
+    const eventsUrl = `${cleanUrl}/api/engine/events`;
+
+    try {
+      sse = new EventSource(eventsUrl);
+
+      const onSyncEvent = (e) => {
+        console.log(`[PersonalOS SSE] Evento ${e.type} recebido:`, e.data);
+        window.feishinRefreshLibrary(e.type);
+        setTimeout(() => window.feishinRefreshLibrary(e.type), 1500);
+        setTimeout(() => window.feishinRefreshLibrary(e.type), 3500);
+      };
+
+      sse.addEventListener('track_uploaded', onSyncEvent);
+      sse.addEventListener('scan_finished', onSyncEvent);
+      sse.addEventListener('library_updated', onSyncEvent);
+      sse.addEventListener('track_updated', onSyncEvent);
+      sse.addEventListener('track_deleted', onSyncEvent);
+
+      sse.onerror = () => {
+        if (sse) {
+          try { sse.close(); } catch (e) {}
+          sse = null;
+        }
+        clearTimeout(timer);
+        timer = setTimeout(connect, 6000);
+      };
+    } catch (err) {
+      clearTimeout(timer);
+      timer = setTimeout(connect, 10000);
+    }
+  }
+
+  if (typeof window !== 'undefined') {
+    connect();
+
+    // Auto-revalidação ao voltar para a janela após 30 segundos
+    let lastActive = Date.now();
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible') {
+        const now = Date.now();
+        if (now - lastActive > 30000) {
+          window.feishinRefreshLibrary('visibility-focus');
+        }
+        lastActive = now;
+      }
+    });
+  }
+})();
+

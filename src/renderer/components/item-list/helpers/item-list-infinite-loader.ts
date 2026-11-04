@@ -470,20 +470,20 @@ export const useItemListInfiniteLoader = ({
 
     const getItem = useCallback(
         (index: number) => {
-            return (data as any).dataMap?.get(index);
+            return (data as any)?.dataMap?.get(index);
         },
         [data],
     );
 
     const getItemIndex = useCallback(
         (id: string) => {
-            return (data as any).idToIndexMap?.get(id);
+            return (data as any)?.idToIndexMap?.get(id);
         },
         [data],
     );
 
     const loadedItems = useMemo(() => {
-        const map: Map<number, unknown> | undefined = (data as any).dataMap;
+        const map: Map<number, unknown> | undefined = (data as any)?.dataMap;
         if (!map || map.size === 0) return [];
         return Array.from(map.entries())
             .sort(([a], [b]) => a - b)
