@@ -126,7 +126,11 @@
     let creationTime = s.created || s.birthTime || s.createdAt || s.updatedAt || '1970-01-01T00:00:00Z';
     let formattedDate = null;
     let isSamsungOrder = false;
+    let isNewArrival = false;
     let sortTimestamp = 0;
+
+    const rawTime = new Date(creationTime).getTime();
+    const validTime = isNaN(rawTime) ? 0 : rawTime;
 
     if (chrono && typeof chrono.rank === 'number' && chrono.rank < 999999) {
       rank = chrono.rank;
@@ -142,12 +146,21 @@
         formattedDate = `${day}/${mo}/${yr} às ${hr}:${min}`;
       }
       isSamsungOrder = true;
-      sortTimestamp = (chrono.date_modified ? chrono.date_modified * 1000 : new Date(creationTime).getTime()) || 0;
+      isNewArrival = false;
+      sortTimestamp = (chrono.date_modified ? chrono.date_modified * 1000 : validTime) || 0;
+    } else if (validTime >= SAMSUNG_BASELINE_CUTOFF_MS) {
+      // Faixa adicionada após o baseline cronológico do Samsung Music (Nova Adição no Topo)
+      isSamsungOrder = false;
+      isNewArrival = true;
+      rank = -1;
+      formattedDate = formatCreationDate(creationTime, null);
+      sortTimestamp = validTime;
     } else {
       isSamsungOrder = false;
+      isNewArrival = false;
       rank = 999999;
       formattedDate = formatCreationDate(creationTime, null);
-      sortTimestamp = 0;
+      sortTimestamp = validTime;
     }
 
     const coverId = s.coverArt || s.imageId || (s.id ? ('mf-' + s.id) : s.id);
@@ -169,6 +182,7 @@
       rank: rank,
       formattedDate: formattedDate,
       isSamsungOrder: isSamsungOrder,
+      isNewArrival: isNewArrival,
       year: s.year || (s.releaseDate ? new Date(s.releaseDate).getFullYear() : null),
       _serverId: s._serverId || serverId,
       _serverType: s._serverType || serverType || 'subsonic',
@@ -177,9 +191,17 @@
     };
   }
 
-  // Função unificada de ordenação: preserva estritamente o rank ordinal da cronologia Samsung Music (MediaStore)
+  // Função unificada de ordenação: preserva novas adições no topo absoluto e o histórico ordinal Samsung Music (MediaStore)
   function sortChronologically(songs) {
     songs.sort((a, b) => {
+      // 1. Novas faixas adicionadas após o baseline (isNewArrival) têm prioridade absoluta no topo
+      if (a.isNewArrival && b.isNewArrival) {
+        return b.sortTimestamp - a.sortTimestamp;
+      }
+      if (a.isNewArrival && !b.isNewArrival) return -1;
+      if (!a.isNewArrival && b.isNewArrival) return 1;
+
+      // 2. Ordem autêntica da cronologia Samsung Music (MediaStore) por rank ordinal crescente (0, 1, 2...)
       const aRank = (a.isSamsungOrder && typeof a.rank === 'number') ? a.rank : 999999;
       const bRank = (b.isSamsungOrder && typeof b.rank === 'number') ? b.rank : 999999;
 
@@ -191,7 +213,7 @@
   }
 
   // 2. High-Performance Full Library Ingestion Sorted by Samsung Music MediaStore Order
-  async function loadInitialSongs() {
+  async function loadInitialSongs(force = false) {
     if (isFetching) return;
     isFetching = true;
 
@@ -211,7 +233,7 @@
     const { url, cred, serverId, serverType } = getAuthInfo();
 
     // 1. Carregamento imediato via cache local / memória (0ms delay)
-    if (cachedSongs.length === 0) {
+    if (cachedSongs.length === 0 && !force) {
       try {
         const saved = localStorage.getItem(STORAGE_CACHE_KEY);
         if (saved) {
@@ -221,8 +243,7 @@
             sortChronologically(cachedSongs);
             totalRecordCount = cachedSongs.length;
             renderViewContent();
-            isFetching = false;
-            return;
+            // Stale-While-Revalidate: exibe instantâneo e continua para buscar novidades do servidor
           }
         }
       } catch (e) {}
@@ -232,21 +253,28 @@
     try {
       if (url && cred) {
         const r = await fetch(`${url}/rest/search3.view?query=&songCount=5000&songOffset=0&${cred}&v=1.13.0&c=Feishin&f=json`, {
-          signal: AbortSignal.timeout(6000)
+          signal: AbortSignal.timeout(8000)
         });
         const data = await r.json();
         const rawSongs = data?.['subsonic-response']?.searchResult3?.song || [];
 
         if (Array.isArray(rawSongs) && rawSongs.length > 0) {
-          cachedSongs = rawSongs.map(s => normalizeSong(s, serverId, serverType));
-          sortChronologically(cachedSongs);
+          const freshSongs = rawSongs.map(s => normalizeSong(s, serverId, serverType));
+          sortChronologically(freshSongs);
+
+          const isCountDifferent = freshSongs.length !== cachedSongs.length;
+          const isTopDifferent = freshSongs[0]?.id !== cachedSongs[0]?.id;
+
+          cachedSongs = freshSongs;
           totalRecordCount = cachedSongs.length;
 
           try {
             localStorage.setItem(STORAGE_CACHE_KEY, JSON.stringify(cachedSongs.slice(0, 2000)));
           } catch (e) {}
 
-          renderViewContent();
+          if (isCountDifferent || isTopDifferent || force || !document.getElementById('feishin-recently-added-view')) {
+            renderViewContent();
+          }
           isFetching = false;
           return;
         }
@@ -287,7 +315,7 @@
   }
 
   // 3. Playback Helpers
-  function playTrack(song, playlist = null, startIndex = 0) {
+  function playTrack(song, playlist = null, startIndex = -1) {
     const store = window.__FEISHIN_PLAYER_STORE__?.getState?.();
     if (!store) {
       console.warn('[Recently Added] Player Store indisponível');
@@ -296,6 +324,7 @@
 
     const { serverId, serverType } = getAuthInfo();
     const cleanItem = (s) => ({
+      ...s,
       id: s.id,
       name: s.name || s.title || 'Faixa',
       title: s.name || s.title || 'Faixa',
@@ -308,29 +337,35 @@
       _serverId: s._serverId || serverId,
       _serverType: s._serverType || serverType || 'subsonic',
       _itemType: 'song',
-      _uniqueId: 'ra_' + s.id + '_' + Date.now()
+      _uniqueId: 'ra_' + s.id + '_' + Math.random().toString(36).slice(2, 9)
     });
 
+    const targetSongItem = cleanItem(song);
+
     if (playlist && playlist.length > 0) {
+      let targetIndex = (typeof startIndex === 'number' && startIndex >= 0 && playlist[startIndex]?.id === song.id)
+        ? startIndex
+        : playlist.findIndex(s => s.id === song.id);
+
       let targetList = playlist;
-      let targetIndex = startIndex;
-      if (playlist.length > 100) {
-        const start = Math.max(0, startIndex);
-        const end = Math.min(playlist.length, start + 80);
-        targetList = playlist.slice(start, end);
-        targetIndex = Math.min(startIndex, targetList.length - 1);
+      if (targetIndex === -1) {
+        targetList = [song, ...playlist];
+        targetIndex = 0;
       }
+
       const queueItems = targetList.map(cleanItem);
+      // Fix cirúrgico: Assegura correspondência exata do item clicado no índice da fila
+      queueItems[targetIndex] = targetSongItem;
       store.setQueue(queueItems, targetIndex);
     } else {
-      store.addToQueueByType([cleanItem(song)], 'now');
+      store.addToQueueByType([targetSongItem], 'now', targetSongItem.id);
     }
 
     setTimeout(renderActiveTrackIndicator, 150);
   }
 
   function playAll(shuffle = false) {
-    const list = getFilteredSongs();
+    const list = getDisplayedSongs();
     if (list.length === 0) return;
     
     let songsToPlay = [...list];
@@ -415,7 +450,7 @@
       const month = songDate.getMonth();
       const day = songDate.getDate();
 
-      if (isInvalid || !song.isSamsungOrder || song.rank >= 999999) {
+      if (isInvalid || (!song.isSamsungOrder && !song.isNewArrival) || song.rank >= 999999) {
         key = 'group-other';
         title = 'Outras Faixas';
         subtitle = 'Sem data registrada no catálogo histórico';
@@ -474,10 +509,15 @@
     );
   }
 
+  function getDisplayedSongs() {
+    const groups = groupSongsByCreationHierarchy(getFilteredSongs());
+    return groups.flatMap(g => g.songs);
+  }
+
   function getCurrentPlayingSongId() {
     try {
       const store = window.__FEISHIN_PLAYER_STORE__?.getState?.();
-      return store?.getCurrentSong?.()?.id || null;
+      return (store?.getCurrentSong?.() || store?.player?.currentSong)?.id || null;
     } catch (e) {
       return null;
     }
@@ -549,6 +589,13 @@
                 <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
               </svg>
               <span>${window.TagsEngine?.isMultiSelectActive ? 'Cancelar' : 'Selecionar'}</span>
+            </button>
+
+            <button type="button" class="ra-glass-btn" id="ra-btn-refresh-library" title="Atualizar músicas">
+              <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2"/>
+              </svg>
+              <span>Atualizar</span>
             </button>
           </div>
 
@@ -779,6 +826,20 @@
       });
     }
 
+    // Refresh Library Button
+    const refreshBtn = container.querySelector('#ra-btn-refresh-library');
+    if (refreshBtn) {
+      refreshBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (window.AndroidBridge?.vibrate) window.AndroidBridge.vibrate(15);
+        const svg = refreshBtn.querySelector('svg');
+        if (svg) svg.style.animation = 'raDotPulse 0.8s infinite linear';
+        loadInitialSongs(true).finally(() => {
+          if (svg) svg.style.animation = '';
+        });
+      });
+    }
+
     // Play Section Button
     container.querySelectorAll('.ra-section-play-btn').forEach(btn => {
       btn.addEventListener('click', (e) => {
@@ -803,7 +864,7 @@
             return;
           }
           if (window.AndroidBridge?.vibrate) window.AndroidBridge.vibrate(12);
-          playTrack(song, getFilteredSongs(), Number(row.getAttribute('data-index') || 0));
+          playTrack(song, getDisplayedSongs());
         }
       };
 
@@ -894,7 +955,19 @@
 
   let routeObserver = null;
   function ensureRouteObserver() {
-    // Zero-overhead: estilização CSS de rota gerencia visibilidade instantaneamente
+    if (routeObserver) return;
+    try {
+      routeObserver = new MutationObserver(() => {
+        if (window.location.hash.includes('recently-added')) {
+          const mainContainer = getMountContainer();
+          const viewContainer = document.getElementById('feishin-recently-added-view');
+          if (mainContainer && (!viewContainer || viewContainer.parentElement !== mainContainer)) {
+            scheduleMount();
+          }
+        }
+      });
+      routeObserver.observe(document.body, { childList: true, subtree: true });
+    } catch (e) {}
   }
 
   function isOtherCustomPageActive(hash) {
@@ -965,6 +1038,7 @@
     if (isMounting) return;
     isMounting = true;
     try {
+      ensureRouteObserver();
       ensureSidebarRecentlyAddedItem();
 
       const mainContainer = getMountContainer();
@@ -1003,6 +1077,8 @@
           if (!viewContainer.querySelector('.ra-hierarchical-sections-container')) {
             renderViewContent();
           }
+          // Revalidação em background para detectar faixas recém-sincronizadas
+          loadInitialSongs();
         }
       } else {
         document.body.classList.remove('feishin-route-recently-added');
@@ -1052,7 +1128,7 @@
     const sse = new EventSource(sseUrl);
     sse.addEventListener('track_uploaded', () => {
       console.log('[Recently Added] Evento track_uploaded recebido via SSE. Atualizando faixas...');
-      loadInitialSongs();
+      loadInitialSongs(true);
     });
   } catch (e) {}
 
@@ -1062,6 +1138,17 @@
       loadInitialSongs();
     }
   }, 45000);
+
+  // Sincronização em tempo real do indicador de reprodução ativa com a Player Store
+  try {
+    if (window.__FEISHIN_PLAYER_STORE__?.subscribe) {
+      window.__FEISHIN_PLAYER_STORE__.subscribe(() => {
+        if (window.location.hash.includes('recently-added')) {
+          renderActiveTrackIndicator();
+        }
+      });
+    }
+  } catch (e) {}
 
   // Expose API
   window.__FEISHIN_RECENTLY_ADDED__ = {

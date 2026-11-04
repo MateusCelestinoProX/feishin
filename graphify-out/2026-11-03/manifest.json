@@ -7498,5 +7498,11 @@
     "seen": 1793477089.753825,
     "ast_hash": "4d1d475f3257ce967d5c029fc291c9f1",
     "semantic_hash": ""
+  },
+  "docs/MEDIA_SYNC_DUPLICATION_INCIDENT_AND_HARDENING.md": {
+    "mtime": 1793741137.1097941,
+    "seen": 1793741221.090643,
+    "ast_hash": "c407636def9534394c1ff3519c21a250",
+    "semantic_hash": ""
   }
 }
