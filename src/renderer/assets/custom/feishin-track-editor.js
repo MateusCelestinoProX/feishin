@@ -728,8 +728,8 @@
 
                         // Inserir antes de "Deletar Música" ou no topo das ações de detalhe
                         const deleteItem = menu.querySelector('.feishin-delete-menu-item, [data-action="delete-song"]');
-                        if (deleteItem) {
-                            menu.insertBefore(editItem, deleteItem);
+                        if (deleteItem && deleteItem.parentElement) {
+                            deleteItem.parentElement.insertBefore(editItem, deleteItem);
                         } else {
                             const scrollArea = menu.querySelector('.fs-scroll-area-module-scroll-area');
                             if (scrollArea) scrollArea.appendChild(editItem);
@@ -741,111 +741,33 @@
 
             observer.observe(document.body, { childList: true, subtree: true });
 
-            // Suporte Touch Long-Press no Mobile (Android)
-            let touchTimer = null;
-            let touchStartPos = { x: 0, y: 0 };
-
-            document.addEventListener('touchstart', (e) => {
-                if (e.touches.length !== 1) return;
-                const touch = e.touches[0];
-                touchStartPos = { x: touch.clientX, y: touch.clientY };
-
-                const row = e.target.closest('[role="row"], .fs-item-table-list-column-module-data-row, [data-row-index]');
-                if (!row || row.getAttribute('role') === 'columnheader') return;
-
-                this.lastTargetRow = row;
-
-                if (touchTimer) clearTimeout(touchTimer);
-                touchTimer = setTimeout(() => {
-                    if (window.AndroidBridge && typeof window.AndroidBridge.vibrate === 'function') {
-                        window.AndroidBridge.vibrate(25);
-                    } else if (navigator.vibrate) {
-                        navigator.vibrate(25);
-                    }
-
-                    const song = this.extractSongFromElement(row);
-                    if (song) {
-                        this.open(song);
-                    } else {
-                        this.resolveAndOpenTrack();
-                    }
-                }, 520);
-            }, { passive: true });
-
-            document.addEventListener('touchmove', (e) => {
-                if (!touchTimer) return;
-                const touch = e.touches[0];
-                const dx = Math.abs(touch.clientX - touchStartPos.x);
-                const dy = Math.abs(touch.clientY - touchStartPos.y);
-                if (dx > 12 || dy > 12) {
-                    clearTimeout(touchTimer);
-                    touchTimer = null;
-                }
-            }, { passive: true });
-
-            document.addEventListener('touchend', () => {
-                if (touchTimer) {
-                    clearTimeout(touchTimer);
-                    touchTimer = null;
-                }
-            }, { passive: true });
-
             // Hook no FeishinTrackPage (Mais opções da tela da música)
             this.hookTrackPageOptions();
-        }
-
-        extractSongFromElement(el) {
-            if (!el) return null;
-            try {
-                const target = el.closest('[role="row"], [data-row-index], .fs-item-table-list-column-module-data-row') || el;
-                const k = Object.keys(target).find(k => k.startsWith('__reactFiber$')) || 
-                          Object.keys(target.firstElementChild || {}).find(k => k.startsWith('__reactFiber$'));
-                if (k) {
-                    let curr = target[k] || target.firstElementChild[k];
-                    for (let i = 0; i < 20 && curr; i++) {
-                        if (curr.memoizedProps?.getRowItem && typeof curr.memoizedProps.rowIndex === 'number') {
-                            const item = curr.memoizedProps.getRowItem(curr.memoizedProps.rowIndex);
-                            if (item && item.id) return item;
-                        }
-                        if (curr.memoizedProps?.item && curr.memoizedProps.item.id) {
-                            return curr.memoizedProps.item;
-                        }
-                        curr = curr.return;
-                    }
-                }
-            } catch (e) {
-                console.warn('[FeishinTrackEditor] Erro ao extrair item via fiber:', e);
-            }
-            return null;
         }
 
         resolveAndOpenTrack() {
             let songToTarget = null;
 
             if (this.lastTargetRow) {
-                songToTarget = this.extractSongFromElement(this.lastTargetRow);
+                const titleEl = this.lastTargetRow.querySelector('.fs-title-column-module-title, .ra-row-title, [class*="title"], a');
+                const artistEl = this.lastTargetRow.querySelector('.fs-artist-column-module-artist, .ra-row-artist, [class*="artist"]');
+                const albumEl = this.lastTargetRow.querySelector('.fs-album-column-module-album, [class*="album"]');
+                const rowText = this.lastTargetRow.innerText.split('\n').filter(Boolean);
 
-                if (!songToTarget) {
-                    const titleEl = this.lastTargetRow.querySelector('.fs-title-column-module-title, .ra-row-title, [class*="title"], a');
-                    const artistEl = this.lastTargetRow.querySelector('.fs-artist-column-module-artist, .ra-row-artist, [class*="artist"]');
-                    const albumEl = this.lastTargetRow.querySelector('.fs-album-column-module-album, [class*="album"]');
-                    const rowText = this.lastTargetRow.innerText.split('\n').filter(Boolean);
+                const title = titleEl ? titleEl.innerText.trim() : (rowText[1] || rowText[0] || 'Faixa Selecionada');
+                const artist = artistEl ? artistEl.innerText.trim() : (rowText[2] || '');
+                const album = albumEl ? albumEl.innerText.trim() : '';
 
-                    const title = titleEl ? titleEl.innerText.trim() : (rowText[1] || rowText[0] || 'Faixa Selecionada');
-                    const artist = artistEl ? artistEl.innerText.trim() : (rowText[2] || '');
-                    const album = albumEl ? albumEl.innerText.trim() : '';
+                const playerStore = window.__FEISHIN_PLAYER_STORE__?.getState?.();
+                const queue = playerStore?.queue?.items || [];
+                const foundInQueue = queue.find(q => (q.title || q.name || '').toLowerCase().trim() === title.toLowerCase().trim());
 
-                    const playerStore = window.__FEISHIN_PLAYER_STORE__?.getState?.();
-                    const queue = playerStore?.queue?.items || [];
-                    const foundInQueue = queue.find(q => (q.title || q.name || '').toLowerCase().trim() === title.toLowerCase().trim());
-
-                    songToTarget = {
-                        id: foundInQueue ? foundInQueue.id : (this.lastTargetRow.getAttribute('data-song-id') || ''),
-                        title: title,
-                        artist: artist,
-                        album: album
-                    };
-                }
+                songToTarget = {
+                    id: foundInQueue ? foundInQueue.id : (this.lastTargetRow.getAttribute('data-song-id') || this.lastTargetRow.getAttribute('data-id') || ''),
+                    title: title,
+                    artist: artist,
+                    album: album
+                };
             }
 
             // Fallback para faixa atual em reprodução

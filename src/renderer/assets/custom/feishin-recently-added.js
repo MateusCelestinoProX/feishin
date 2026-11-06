@@ -317,16 +317,12 @@
     isFetching = false;
   }
 
-  // 3. Playback Helpers
-  function playTrack(song, playlist = null, startIndex = -1) {
-    const store = window.__FEISHIN_PLAYER_STORE__?.getState?.();
-    if (!store) {
-      console.warn('[Recently Added] Player Store indisponível');
-      return;
-    }
+  // 3. Playback Helpers & Track Context Dialog
+  let lastContextMenuCallTime = 0;
 
+  function cleanItem(s) {
     const { serverId, serverType } = getAuthInfo();
-    const cleanItem = (s) => ({
+    return {
       ...s,
       id: s.id,
       name: s.name || s.title || 'Faixa',
@@ -341,7 +337,258 @@
       _serverType: s._serverType || serverType || 'subsonic',
       _itemType: 'song',
       _uniqueId: 'ra_' + s.id + '_' + Math.random().toString(36).slice(2, 9)
+    };
+  }
+
+  function openTrackContextMenu(song, event, row) {
+    if (!song) return;
+
+    // Guard contra disparos multiplos ou concorrentes em janela curta (< 650ms)
+    const now = Date.now();
+    if (now - lastContextMenuCallTime < 650) {
+      return;
+    }
+    lastContextMenuCallTime = now;
+
+    const targetSong = cleanItem(song);
+
+    // 1. Atualizar lastTargetRow para rastreamento nos motores auxiliares (Delete, TrackEditor, Tags)
+    if (row) {
+      if (window.FeishinDeleteEngine) window.FeishinDeleteEngine.lastTargetRow = row;
+      if (window.FeishinTrackEditor) window.FeishinTrackEditor.lastTargetRow = row;
+      if (window.TagsEngine) window.TagsEngine.lastTargetRow = row;
+    }
+
+    const clientX = (event && typeof event.clientX === 'number') ? event.clientX : (window.innerWidth / 2);
+    const clientY = (event && typeof event.clientY === 'number') ? event.clientY : (window.innerHeight / 2);
+
+    // Limpar preventivamente qualquer menu Radix fantasma ou backdrop anterior
+    document.querySelectorAll('[role="menu"], [data-radix-menu-content], [data-radix-popper-content-wrapper], #feishin-context-backdrop, #ra-glass-context-dialog-backdrop').forEach(el => {
+      try { el.remove(); } catch (e) {}
     });
+
+    // 2. Invocar o Modal Oficial Radix do Feishin (o mesmo exibido na página de Faixas)
+    const contextModal = window.__FEISHIN_CONTEXT_MODAL__;
+    if (contextModal && typeof contextModal.call === 'function') {
+      try {
+        contextModal.call({
+          cmd: {
+            items: [targetSong],
+            type: 'song'
+          },
+          event: {
+            clientX,
+            clientY,
+            preventDefault: () => {
+              if (event?.preventDefault) event.preventDefault();
+            }
+          }
+        });
+        return;
+      } catch (err) {
+        console.warn('[Recently Added] Nota ao acionar ContextModal oficial do Feishin:', err);
+      }
+    }
+
+    // 3. Fallback profissional e nativo com Liquid Glass caso o core do React ainda esteja instanciando
+    showFallbackGlassDialog(targetSong, row);
+  }
+
+  function showFallbackGlassDialog(song, row) {
+    const existing = document.getElementById('ra-glass-context-dialog-backdrop');
+    if (existing) existing.remove();
+
+    const backdrop = document.createElement('div');
+    backdrop.id = 'ra-glass-context-dialog-backdrop';
+    backdrop.style.cssText = `
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.62);
+      backdrop-filter: blur(14px) saturate(180%);
+      -webkit-backdrop-filter: blur(14px) saturate(180%);
+      z-index: 100002;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      opacity: 0;
+      transition: opacity 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+    `;
+
+    const coverUrl = getCoverUrl(song.imageId || song.id);
+    const title = song.name || song.title || 'Faixa';
+    const artist = song.artistName || '[Unknown Artist]';
+    const album = song.album || '—';
+
+    const card = document.createElement('div');
+    card.id = 'ra-glass-context-dialog-card';
+    card.style.cssText = `
+      width: min(22rem, 90vw);
+      max-height: 85vh;
+      background: rgba(18, 14, 28, 0.88);
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      border-radius: 24px;
+      box-shadow: 0 28px 64px rgba(0, 0, 0, 0.85), 0 0 0 1px rgba(167, 139, 250, 0.15);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      transform: scale(0.92);
+      transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+      user-select: none;
+    `;
+
+    card.innerHTML = `
+      <!-- Track Header Preview -->
+      <div style="padding: 18px 18px 14px 18px; display: flex; align-items: center; gap: 14px; border-bottom: 1px solid rgba(255, 255, 255, 0.08); background: rgba(255, 255, 255, 0.03);">
+        <div style="width: 48px; height: 48px; border-radius: 12px; overflow: hidden; flex-shrink: 0; background: rgba(255, 255, 255, 0.06); box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);">
+          ${coverUrl ? `<img src="${coverUrl}" style="width: 100%; height: 100%; object-fit: cover;" alt="" />` : `<div style="display:flex;align-items:center;justify-content:center;height:100%;font-size:20px;">🎵</div>`}
+        </div>
+        <div style="flex: 1; min-width: 0;">
+          <div style="font-size: 15px; font-weight: 700; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; letter-spacing: -0.2px;">${escapeHtml(title)}</div>
+          <div style="font-size: 12.5px; color: rgba(255, 255, 255, 0.65); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 2px;">${escapeHtml(artist)}</div>
+        </div>
+      </div>
+
+      <!-- Action Items List -->
+      <div style="padding: 8px 10px; overflow-y: auto; display: flex; flex-direction: column; gap: 4px;">
+        <button type="button" class="ra-ctx-btn" data-action="play-now" style="display: flex; align-items: center; gap: 12px; width: 100%; padding: 11px 14px; border-radius: 14px; border: none; background: transparent; color: #fff; font-size: 13.5px; font-weight: 500; text-align: left; cursor: pointer; transition: background 0.15s;">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" style="color: #A78BFA; flex-shrink: 0;"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+          <span>Reproduzir Agora</span>
+        </button>
+
+        <button type="button" class="ra-ctx-btn" data-action="play-next" style="display: flex; align-items: center; gap: 12px; width: 100%; padding: 11px 14px; border-radius: 14px; border: none; background: transparent; color: #fff; font-size: 13.5px; font-weight: 500; text-align: left; cursor: pointer; transition: background 0.15s;">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: #A78BFA; flex-shrink: 0;"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+          <span>Reproduzir a Seguir</span>
+        </button>
+
+        <button type="button" class="ra-ctx-btn" data-action="add-queue" style="display: flex; align-items: center; gap: 12px; width: 100%; padding: 11px 14px; border-radius: 14px; border: none; background: transparent; color: #fff; font-size: 13.5px; font-weight: 500; text-align: left; cursor: pointer; transition: background 0.15s;">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: #A78BFA; flex-shrink: 0;"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg>
+          <span>Adicionar ao Fim da Fila</span>
+        </button>
+
+        <div style="height: 1px; background: rgba(255, 255, 255, 0.08); margin: 4px 6px;"></div>
+
+        <button type="button" class="ra-ctx-btn" data-action="tags" style="display: flex; align-items: center; gap: 12px; width: 100%; padding: 11px 14px; border-radius: 14px; border: none; background: transparent; color: #fff; font-size: 13.5px; font-weight: 500; text-align: left; cursor: pointer; transition: background 0.15s;">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#A78BFA" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0;"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path><line x1="7" y1="7" x2="7.01" y2="7"></line></svg>
+          <span>Gerenciar Tags</span>
+        </button>
+
+        <button type="button" class="ra-ctx-btn" data-action="edit" style="display: flex; align-items: center; gap: 12px; width: 100%; padding: 11px 14px; border-radius: 14px; border: none; background: transparent; color: #fff; font-size: 13.5px; font-weight: 500; text-align: left; cursor: pointer; transition: background 0.15s;">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#A78BFA" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0;"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+          <span>Editar Faixa</span>
+        </button>
+
+        <div style="height: 1px; background: rgba(255, 255, 255, 0.08); margin: 4px 6px;"></div>
+
+        <button type="button" class="ra-ctx-btn" data-action="delete" style="display: flex; align-items: center; gap: 12px; width: 100%; padding: 11px 14px; border-radius: 14px; border: none; background: transparent; color: #FF4D4F; font-size: 13.5px; font-weight: 500; text-align: left; cursor: pointer; transition: background 0.15s;">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#FF4D4F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0;"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
+          <span>Excluir Faixa</span>
+        </button>
+      </div>
+
+      <!-- Footer Cancel -->
+      <div style="padding: 10px 14px; border-top: 1px solid rgba(255, 255, 255, 0.08); background: rgba(0, 0, 0, 0.2); text-align: center;">
+        <button type="button" id="ra-ctx-btn-cancel" style="width: 100%; padding: 10px; border-radius: 12px; border: 1px solid rgba(255, 255, 255, 0.1); background: rgba(255, 255, 255, 0.05); color: rgba(255, 255, 255, 0.7); font-size: 13px; font-weight: 600; cursor: pointer;">Cancelar</button>
+      </div>
+    `;
+
+    backdrop.appendChild(card);
+    document.body.appendChild(backdrop);
+
+    requestAnimationFrame(() => {
+      backdrop.style.opacity = '1';
+      card.style.transform = 'scale(1)';
+    });
+
+    const closeDialog = () => {
+      backdrop.style.opacity = '0';
+      card.style.transform = 'scale(0.92)';
+      setTimeout(() => backdrop.remove(), 220);
+    };
+
+    backdrop.addEventListener('click', (e) => {
+      if (e.target === backdrop) closeDialog();
+    });
+
+    card.querySelector('#ra-ctx-btn-cancel')?.addEventListener('click', closeDialog);
+
+    // Hover / active styling
+    card.querySelectorAll('.ra-ctx-btn').forEach(btn => {
+      btn.addEventListener('touchstart', () => { btn.style.background = 'rgba(255, 255, 255, 0.08)'; }, { passive: true });
+      btn.addEventListener('touchend', () => { btn.style.background = 'transparent'; }, { passive: true });
+      btn.addEventListener('mouseenter', () => { btn.style.background = 'rgba(255, 255, 255, 0.08)'; });
+      btn.addEventListener('mouseleave', () => { btn.style.background = 'transparent'; });
+    });
+
+    // Ações
+    card.querySelector('[data-action="play-now"]')?.addEventListener('click', () => {
+      closeDialog();
+      if (window.AndroidBridge?.vibrate) window.AndroidBridge.vibrate(15);
+      playTrack(song, getDisplayedSongs());
+    });
+
+    card.querySelector('[data-action="play-next"]')?.addEventListener('click', () => {
+      closeDialog();
+      if (window.AndroidBridge?.vibrate) window.AndroidBridge.vibrate(15);
+      const store = window.__FEISHIN_PLAYER_STORE__?.getState?.();
+      if (store) store.addToQueueByType([song], 'next');
+    });
+
+    card.querySelector('[data-action="add-queue"]')?.addEventListener('click', () => {
+      closeDialog();
+      if (window.AndroidBridge?.vibrate) window.AndroidBridge.vibrate(15);
+      const store = window.__FEISHIN_PLAYER_STORE__?.getState?.();
+      if (store) store.addToQueueByType([song], 'last');
+    });
+
+    card.querySelector('[data-action="tags"]')?.addEventListener('click', () => {
+      closeDialog();
+      if (window.AndroidBridge?.vibrate) window.AndroidBridge.vibrate(15);
+      if (window.TagsEngine) {
+        window.TagsEngine.lastTargetRow = row;
+        window.TagsEngine.openEditTagsModal(song);
+      }
+    });
+
+    card.querySelector('[data-action="edit"]')?.addEventListener('click', () => {
+      closeDialog();
+      if (window.AndroidBridge?.vibrate) window.AndroidBridge.vibrate(15);
+      if (window.FeishinTrackEditor) {
+        window.FeishinTrackEditor.lastTargetRow = row;
+        window.FeishinTrackEditor.open(song);
+      }
+    });
+
+    card.querySelector('[data-action="delete"]')?.addEventListener('click', () => {
+      closeDialog();
+      if (window.AndroidBridge?.vibrate) window.AndroidBridge.vibrate(15);
+      if (window.FeishinDeleteEngine) {
+        window.FeishinDeleteEngine.lastTargetRow = row;
+        window.FeishinDeleteEngine.openConfirmModal({
+          id: song.id,
+          title: song.name || song.title,
+          artist: song.artistName,
+          path: song.path
+        }, async () => {
+          await window.FeishinDeleteEngine.executeDelete(song);
+        });
+      }
+    });
+  }
+
+  function playTrack(song, playlist = null, startIndex = -1) {
+    if (window.FeishinLocalMode?.active && !window.FeishinLocalMode.isLocal(song.id)) {
+      if (window.AndroidBridge && typeof window.AndroidBridge.showToast === 'function') {
+        window.AndroidBridge.showToast('⚠️ Faixa indisponível localmente nesta máquina (Local Mode ativo)');
+      }
+      return;
+    }
+
+    const store = window.__FEISHIN_PLAYER_STORE__?.getState?.();
+    if (!store) {
+      console.warn('[Recently Added] Player Store indisponível');
+      return;
+    }
 
     const targetSongItem = cleanItem(song);
 
@@ -503,9 +750,13 @@
   }
 
   function getFilteredSongs() {
-    if (!searchQuery || !searchQuery.trim()) return cachedSongs;
+    let songs = cachedSongs;
+    if (window.FeishinLocalMode?.active) {
+      songs = songs.filter(s => window.FeishinLocalMode.isLocal(s.id));
+    }
+    if (!searchQuery || !searchQuery.trim()) return songs;
     const q = searchQuery.toLowerCase().trim();
-    return cachedSongs.filter(s =>
+    return songs.filter(s =>
       (s.name || '').toLowerCase().includes(q) ||
       (s.artistName || '').toLowerCase().includes(q) ||
       (s.album || '').toLowerCase().includes(q)
@@ -538,10 +789,16 @@
 
   // 5. Renderers: Hero Header + Hierarchical Tracklist (Clean, Responsive & Fast)
   function renderHeroHeaderHtml(total, filteredCount) {
+    const isLocal = Boolean(window.FeishinLocalMode?.active);
     const isFiltering = searchQuery && searchQuery.trim().length > 0;
-    const badgeText = isFiltering
+    let badgeText = isFiltering
       ? `${filteredCount} de ${total.toLocaleString('pt-BR')} faixas`
       : `${total.toLocaleString('pt-BR')} faixas`;
+    if (isLocal) {
+      badgeText = isFiltering
+        ? `📱 Local Mode • ${filteredCount} de ${total.toLocaleString('pt-BR')} faixas locais`
+        : `📱 Local Mode • ${filteredCount.toLocaleString('pt-BR')} faixas desta máquina`;
+    }
 
     return `
       <div class="ra-hero-header">
@@ -670,7 +927,7 @@
                       const creationStr = formatCreationDate(song.creationTime, song);
 
                       return `
-                        <div class="ra-tracklist-row ra-mobile-track-row ${isPlaying ? 'is-playing' : ''}" role="row" data-id="${song.id}" data-index="${idx}">
+                        <div class="ra-tracklist-row ra-mobile-track-row fs-item-table-list-column-module-data-row ${isPlaying ? 'is-playing' : ''}" role="row" data-id="${song.id}" data-song-id="${song.id}" data-index="${idx}">
                           <div class="ra-col-idx ra-mobile-col-idx">
                             ${isPlaying ? `
                               <div class="ra-mini-equalizer">
@@ -689,12 +946,13 @@
                           </div>
 
                           <div class="ra-mobile-track-info">
-                            <div class="ra-track-title">
+                            <div class="ra-track-title ra-row-title fs-title-column-module-title">
                               ${escapeHtml(song.name || song.title || 'Faixa')}
+                              ${window.FeishinLocalMode?.isLocal(song.id) ? '<span class="ra-local-tag" title="Local nesta máquina">📱</span>' : ''}
                               ${window.TagsEngine?.renderTagBadgesHtml ? window.TagsEngine.renderTagBadgesHtml(song) : ''}
                             </div>
                             <div class="ra-mobile-meta-line">
-                              <span class="ra-track-artist">${escapeHtml(song.artistName || (song.artists?.[0]?.name) || '[Unknown Artist]')}</span>
+                              <span class="ra-track-artist ra-row-artist fs-artist-column-module-artist">${escapeHtml(song.artistName || (song.artists?.[0]?.name) || '[Unknown Artist]')}</span>
                               <span class="ra-meta-dot">•</span>
                               <span class="ra-track-creation-date">
                                 <svg viewBox="0 0 24 24" width="10" height="10" fill="none" stroke="currentColor" stroke-width="2">
@@ -735,7 +993,7 @@
                         const creationStr = formatCreationDate(song.creationTime, song);
 
                         return `
-                          <tr class="ra-tracklist-row ${isPlaying ? 'is-playing' : ''}" role="row" data-id="${song.id}" data-index="${idx}">
+                          <tr class="ra-tracklist-row fs-item-table-list-column-module-data-row ${isPlaying ? 'is-playing' : ''}" role="row" data-id="${song.id}" data-song-id="${song.id}" data-index="${idx}">
                             <td class="ra-col-idx">
                               ${isPlaying ? `
                                 <div class="ra-mini-equalizer">
@@ -752,11 +1010,12 @@
                               </div>
                             </td>
                             <td class="ra-track-title-cell">
-                              <div class="ra-track-title">
+                              <div class="ra-track-title ra-row-title fs-title-column-module-title">
                                 ${escapeHtml(song.name || song.title || 'Faixa')}
+                                ${window.FeishinLocalMode?.isLocal(song.id) ? '<span class="ra-local-tag" title="Local nesta máquina">📱</span>' : ''}
                                 ${window.TagsEngine?.renderTagBadgesHtml ? window.TagsEngine.renderTagBadgesHtml(song) : ''}
                               </div>
-                              <div class="ra-track-artist">${escapeHtml(song.artistName || (song.artists?.[0]?.name) || '[Unknown Artist]')}</div>
+                              <div class="ra-track-artist ra-row-artist fs-artist-column-module-artist">${escapeHtml(song.artistName || (song.artists?.[0]?.name) || '[Unknown Artist]')}</div>
                             </td>
                             <td>
                               <div class="ra-track-album">${escapeHtml(song.album || song.albumName || '—')}</div>
@@ -853,12 +1112,43 @@
       });
     });
 
-    // Track Rows Single-Tap & Double-Click Playback
+    // Track Rows Single-Tap Playback & Long-Press / ContextMenu Dialog
     container.querySelectorAll('.ra-tracklist-row').forEach(row => {
+      let preventNextClick = false;
+
+      const triggerContextMenu = (clientX, clientY, sourceEvt) => {
+        preventNextClick = true;
+        setTimeout(() => { preventNextClick = false; }, 600);
+
+        if (window.AndroidBridge?.hapticFeedback) {
+          window.AndroidBridge.hapticFeedback(0);
+        } else if (window.AndroidBridge?.vibrate) {
+          window.AndroidBridge.vibrate(35);
+        }
+
+        const id = row.getAttribute('data-id') || row.getAttribute('data-song-id');
+        const song = cachedSongs.find(s => s.id === id);
+        if (song) {
+          openTrackContextMenu(song, { clientX, clientY, preventDefault: () => sourceEvt?.preventDefault?.() }, row);
+        }
+      };
+
+      // Evento de contextmenu — despachado exclusivamente pelo feishin-mobile-enhancer no Android ou clique direito no Desktop
+      row.addEventListener('contextmenu', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        triggerContextMenu(e.clientX || (window.innerWidth / 2), e.clientY || (window.innerHeight / 2), e);
+      });
+
+      // 3. Toque rápido para tocar a faixa
       const handlePlay = (e) => {
-        if (e.target.closest('#ra-search-clear') || e.target.closest('.ra-section-play-btn')) return;
-        if (e.target.closest('.fs-track-tag-badge')) return;
-        if (e.target.closest('.fs-multiselect-indicator')) return;
+        if (preventNextClick) {
+          preventNextClick = false;
+          e.preventDefault();
+          e.stopPropagation();
+          return;
+        }
+        if (e.target.closest('#ra-search-clear, .ra-section-play-btn, .fs-track-tag-badge, .fs-multiselect-indicator')) return;
         const id = row.getAttribute('data-id');
         const song = cachedSongs.find(s => s.id === id);
         if (song) {
@@ -1204,8 +1494,28 @@
     playGroup,
     getSongs: () => cachedSongs,
     getCachedSongs: () => cachedSongs,
-    reload: loadInitialSongs
+    reload: loadInitialSongs,
+    refreshView: () => renderRecentlyAddedView(true),
+    openContextMenu: openTrackContextMenu,
+    removeSong: (songId, songTitle) => {
+      const initialLen = cachedSongs.length;
+      cachedSongs = cachedSongs.filter(s => s.id !== songId && (s.name || s.title) !== songTitle);
+      if (cachedSongs.length !== initialLen) {
+        if (totalRecordCount > 0) totalRecordCount--;
+        const badge = document.getElementById('ra-header-badge');
+        if (badge) {
+          badge.textContent = `${(totalRecordCount || cachedSongs.length).toLocaleString('pt-BR')} faixas`;
+        }
+      }
+    }
   };
   window.FeishinRecentlyAdded = window.__FEISHIN_RECENTLY_ADDED__;
+
+  window.addEventListener('feishin:local-mode-change', () => {
+    const view = document.getElementById('feishin-recently-added-view');
+    if (view) {
+      renderRecentlyAddedView(true);
+    }
+  });
 
 })();

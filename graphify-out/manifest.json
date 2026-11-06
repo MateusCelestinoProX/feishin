@@ -7314,9 +7314,9 @@
     "semantic_hash": ""
   },
   "src/renderer/assets/custom/feishin-recently-added.js": {
-    "mtime": 1793760426.844165,
-    "seen": 1793760837.562728,
-    "ast_hash": "16450ceb02788ea6b3b4448d0e58ec59",
+    "mtime": 1793926604.0449035,
+    "seen": 1793927521.727829,
+    "ast_hash": "d03ab2f1e8fc949398ec15c84ab042b9",
     "semantic_hash": ""
   },
   "customizations/assets/feishin-alphabet-scrubber.js": {
@@ -7452,9 +7452,9 @@
     "semantic_hash": ""
   },
   "src/renderer/assets/custom/feishin-delete-engine.js": {
-    "mtime": 1793223813.8958437,
-    "seen": 1793224332.0181649,
-    "ast_hash": "4edf0f3fb0714c0e9acd4eaa82ee0810",
+    "mtime": 1793927061.073998,
+    "seen": 1793927521.7278259,
+    "ast_hash": "135ea6e1efe0d70036432d931bc3bc72",
     "semantic_hash": ""
   },
   "docs/CHRONOLOGY_ARCHITECTURE.md": {
@@ -7494,9 +7494,9 @@
     "semantic_hash": ""
   },
   "src/renderer/assets/custom/feishin-track-editor.js": {
-    "mtime": 1793418179.4787683,
-    "seen": 1793477089.753825,
-    "ast_hash": "4d1d475f3257ce967d5c029fc291c9f1",
+    "mtime": 1793927236.7717066,
+    "seen": 1793927521.7278311,
+    "ast_hash": "9ca09f3a0c2921a31577fd51d1a09f7d",
     "semantic_hash": ""
   },
   "docs/MEDIA_SYNC_DUPLICATION_INCIDENT_AND_HARDENING.md": {

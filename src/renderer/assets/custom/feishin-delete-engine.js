@@ -264,10 +264,11 @@
     function purgeSongFromUI(songId, songTitle) {
         const titleLower = (songTitle || '').toLowerCase().trim();
 
-        // 1. Remover elementos visíveis da tabela
-        document.querySelectorAll('[data-row-index], .ra-item-row, .fs-item-table-list-column-module-data-row').forEach(row => {
+        // 1. Remover elementos visíveis da tabela e da aba de recentes
+        document.querySelectorAll('[data-row-index], .ra-item-row, .ra-tracklist-row, .fs-item-table-list-column-module-data-row').forEach(row => {
             const text = (row.innerText || '').toLowerCase();
-            const isMatch = (songId && row.getAttribute('data-song-id') === songId) ||
+            const rowSongId = row.getAttribute('data-song-id') || row.getAttribute('data-id');
+            const isMatch = (songId && rowSongId === songId) ||
                             (titleLower.length > 2 && text.includes(titleLower));
             if (isMatch) {
                 row.style.transition = 'all 0.3s ease-out';
@@ -277,6 +278,11 @@
                 setTimeout(() => row.remove(), 320);
             }
         });
+
+        // 1.1 Notificar motor de Recentemente Adicionadas se ativo
+        try {
+            window.__FEISHIN_RECENTLY_ADDED__?.removeSong?.(songId, songTitle);
+        } catch (e) {}
 
         // 2. Parar reprodução se for a faixa atual
         try {
@@ -394,7 +400,8 @@
         for (const menu of activeMenus) {
             const isSubmenu = menu.hasAttribute('aria-labelledby') || menu.dataset.feishinContextMenu === 'sub';
             if (!isSubmenu) {
-                const wrapper = menu.closest('[data-radix-popper-content-wrapper]') || menu.parentElement;
+                const rawWrapper = menu.closest('[data-radix-popper-content-wrapper]') || menu.parentElement;
+                const wrapper = (rawWrapper && rawWrapper !== document.body && rawWrapper !== document.documentElement) ? rawWrapper : null;
                 if (wrapper) {
                     wrapper.setAttribute('data-feishin-menu-wrapper', 'main');
                     wrapper.style.setProperty('position', 'fixed', 'important');
@@ -435,166 +442,167 @@
             }
         }
 
-        const menuContent = document.querySelector('[role="menu"], [data-radix-menu-content], .fs-context-menu-module-content');
-        if (!menuContent || menuContent.dataset.deleteEngineInjected === 'true') return;
-        if (menuContent.querySelector('.feishin-delete-menu-item, [data-action="delete-song"]')) {
-            menuContent.dataset.deleteEngineInjected = 'true';
-            return;
-        }
-
-        // Verificar se é um menu de música (contém itens como "Tocar", "Adicionar à playlist", "Informações")
-        const menuText = menuContent.innerText.toLowerCase();
-        const isSongMenu = menuText.includes('tocar') || menuText.includes('play') ||
-                           menuText.includes('playlist') || menuText.includes('informações') ||
-                           menuText.includes('baixar');
-
-        if (!isSongMenu) return;
-
-        menuContent.dataset.deleteEngineInjected = 'true';
-
-        // Criar divisor nativo
-        const divider = document.createElement('div');
-        divider.className = 'fs-context-menu-module-divider feishin-delete-menu-divider';
-        divider.setAttribute('role', 'separator');
-
-        // Criar item nativo "Deletar Música"
-        const deleteItem = document.createElement('div');
-        deleteItem.className = 'fs-context-menu-module-item fs-context-menu-module-has-left-icon feishin-delete-menu-item';
-        deleteItem.setAttribute('role', 'menuitem');
-        deleteItem.setAttribute('tabindex', '-1');
-        deleteItem.setAttribute('data-orientation', 'vertical');
-        deleteItem.setAttribute('data-radix-collection-item', '');
-        deleteItem.style.cssText = `
-            color: #ff4d4f !important;
-            font-weight: 600;
-            cursor: pointer;
-            transition: background 0.15s ease;
-        `;
-
-        deleteItem.innerHTML = `
-            <svg stroke="#ff4d4f" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" class="fs-context-menu-module-left-icon fs-icon-module-fill fs-icon-module-size-md" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg">
-                <path d="M3 6h18"></path>
-                <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path>
-                <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path>
-                <line x1="10" y1="11" x2="10" y2="17"></line>
-                <line x1="14" y1="11" x2="14" y2="17"></line>
-            </svg>
-            <span>Deletar Música</span>
-        `;
-
-        deleteItem.onmouseenter = () => {
-            deleteItem.style.background = 'rgba(255, 77, 79, 0.16)';
-        };
-        deleteItem.onmouseleave = () => {
-            deleteItem.style.background = 'transparent';
-        };
-
-        deleteItem.onclick = (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-
-            // Fechar menu de contexto e backdrop
-            menuContent.remove();
-            const existingBackdrop = document.getElementById('feishin-context-backdrop');
-            if (existingBackdrop) existingBackdrop.remove();
-
-            // Descobrir qual música foi selecionada
-            let songToTarget = null;
-
-            if (lastTargetRow) {
-                const titleEl = lastTargetRow.querySelector('.fs-title-column-module-title, .ra-row-title, [class*="title"], a');
-                const artistEl = lastTargetRow.querySelector('.fs-artist-column-module-artist, .ra-row-artist, [class*="artist"]');
-                const rowText = lastTargetRow.innerText.split('\n').filter(Boolean);
-                
-                const title = titleEl ? titleEl.innerText.trim() : (rowText[1] || rowText[0] || 'Faixa Selecionada');
-                const artist = artistEl ? artistEl.innerText.trim() : (rowText[2] || '');
-
-                // Tentar obter ID a partir da fila ou store
-                const playerStore = window.__FEISHIN_PLAYER_STORE__?.getState?.();
-                const queue = playerStore?.queue?.items || [];
-                const foundInQueue = queue.find(q => (q.title || q.name || '').toLowerCase().trim() === title.toLowerCase().trim());
-
-                songToTarget = {
-                    id: foundInQueue ? foundInQueue.id : (lastTargetRow.getAttribute('data-song-id') || ''),
-                    title: title,
-                    artist: artist
-                };
-            }
-
-            // Fallback para música em reprodução
-            if (!songToTarget || !songToTarget.title) {
-                const cur = window.__FEISHIN_PLAYER_STORE__?.getState?.()?.getCurrentSong?.();
-                if (cur) {
-                    songToTarget = {
-                        id: cur.id,
-                        title: cur.title || cur.name || 'Faixa Atual',
-                        artist: cur.artistName || cur.artist || '',
-                        path: cur.path
-                    };
-                }
-            }
-
-            if (!songToTarget) {
-                showGlassToast('Erro', 'Não foi possível identificar a música a ser excluída.', true);
+        activeMenus.forEach(menuContent => {
+            if (menuContent.dataset.deleteEngineInjected === 'true') return;
+            if (menuContent.querySelector('.feishin-delete-menu-item, [data-action="delete-song"]')) {
+                menuContent.dataset.deleteEngineInjected = 'true';
                 return;
             }
 
-            // Se ainda não temos o ID exato da música (por exemplo, ao clicar na tabela pura),
-            // buscamos no banco local ou Navidrome pelo título
-            if (!songToTarget.id) {
-                const cur = window.__FEISHIN_PLAYER_STORE__?.getState?.()?.getCurrentSong?.();
-                if (cur && (cur.title || cur.name || '').toLowerCase().trim() === songToTarget.title.toLowerCase().trim()) {
-                    songToTarget.id = cur.id;
-                    songToTarget.path = cur.path;
-                }
-            }
+            // Verificar se é um menu de música (contém itens como "Tocar", "Adicionar à playlist", "Informações")
+            const menuText = menuContent.innerText.toLowerCase();
+            const isSongMenu = menuText.includes('tocar') || menuText.includes('play') ||
+                               menuText.includes('playlist') || menuText.includes('informações') ||
+                               menuText.includes('baixar');
 
-            // Abrir modal de confirmação
-            openConfirmModal(songToTarget, async () => {
-                // Se ainda faltar ID, usar busca no servidor VPS
-                if (!songToTarget.id) {
-                    const serverUrl = window.__FEISHIN_AUTH_STORE__?.getState?.()?.currentServer?.url || window.location.origin;
-                    const searchRes = await fetch(`${serverUrl.replace(/\/$/, '')}/rest/search3.view?query=${encodeURIComponent(songToTarget.title)}&songCount=5&f=json&u=MateusCelestinoPRO&s=1db6bd&t=d8a85b5607aa399b374a131f3b77c1dc&v=1.16.1&c=feishin-engine`);
-                    const searchData = await searchRes.json();
-                    const songs = searchData?.['subsonic-response']?.searchResult3?.song || [];
-                    const exact = songs.find(s => (s.title || '').toLowerCase().trim() === songToTarget.title.toLowerCase().trim()) || songs[0];
-                    if (exact) {
-                        songToTarget.id = exact.id;
-                        songToTarget.path = exact.path;
+            if (!isSongMenu) return;
+
+            menuContent.dataset.deleteEngineInjected = 'true';
+
+            // Criar divisor nativo
+            const divider = document.createElement('div');
+            divider.className = 'fs-context-menu-module-divider feishin-delete-menu-divider';
+            divider.setAttribute('role', 'separator');
+
+            // Criar item nativo "Deletar Música"
+            const deleteItem = document.createElement('div');
+            deleteItem.className = 'fs-context-menu-module-item fs-context-menu-module-has-left-icon feishin-delete-menu-item';
+            deleteItem.setAttribute('role', 'menuitem');
+            deleteItem.setAttribute('tabindex', '-1');
+            deleteItem.setAttribute('data-orientation', 'vertical');
+            deleteItem.setAttribute('data-radix-collection-item', '');
+            deleteItem.style.cssText = `
+                color: #ff4d4f !important;
+                font-weight: 600;
+                cursor: pointer;
+                transition: background 0.15s ease;
+            `;
+
+            deleteItem.innerHTML = `
+                <svg stroke="#ff4d4f" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" class="fs-context-menu-module-left-icon fs-icon-module-fill fs-icon-module-size-md" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M3 6h18"></path>
+                    <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path>
+                    <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path>
+                    <line x1="10" y1="11" x2="10" y2="17"></line>
+                    <line x1="14" y1="11" x2="14" y2="17"></line>
+                </svg>
+                <span>Deletar Música</span>
+            `;
+
+            deleteItem.onmouseenter = () => {
+                deleteItem.style.background = 'rgba(255, 77, 79, 0.16)';
+            };
+            deleteItem.onmouseleave = () => {
+                deleteItem.style.background = 'transparent';
+            };
+
+            deleteItem.onclick = (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+
+                // Fechar menu de contexto e backdrop
+                menuContent.remove();
+                const existingBackdrop = document.getElementById('feishin-context-backdrop');
+                if (existingBackdrop) existingBackdrop.remove();
+
+                // Descobrir qual música foi selecionada
+                let songToTarget = null;
+
+                if (lastTargetRow) {
+                    const titleEl = lastTargetRow.querySelector('.fs-title-column-module-title, .ra-row-title, [class*="title"], a');
+                    const artistEl = lastTargetRow.querySelector('.fs-artist-column-module-artist, .ra-row-artist, [class*="artist"]');
+                    const rowText = lastTargetRow.innerText.split('\n').filter(Boolean);
+                    
+                    const title = titleEl ? titleEl.innerText.trim() : (rowText[1] || rowText[0] || 'Faixa Selecionada');
+                    const artist = artistEl ? artistEl.innerText.trim() : (rowText[2] || '');
+
+                    // Tentar obter ID a partir da fila ou store
+                    const playerStore = window.__FEISHIN_PLAYER_STORE__?.getState?.();
+                    const queue = playerStore?.queue?.items || [];
+                    const foundInQueue = queue.find(q => (q.title || q.name || '').toLowerCase().trim() === title.toLowerCase().trim());
+
+                    songToTarget = {
+                        id: foundInQueue ? foundInQueue.id : (lastTargetRow.getAttribute('data-song-id') || lastTargetRow.getAttribute('data-id') || ''),
+                        title: title,
+                        artist: artist
+                    };
+                }
+
+                // Fallback para música em reprodução
+                if (!songToTarget || !songToTarget.title) {
+                    const cur = window.__FEISHIN_PLAYER_STORE__?.getState?.()?.getCurrentSong?.();
+                    if (cur) {
+                        songToTarget = {
+                            id: cur.id,
+                            title: cur.title || cur.name || 'Faixa Atual',
+                            artist: cur.artistName || cur.artist || '',
+                            path: cur.path
+                        };
                     }
                 }
 
-                if (!songToTarget.id) {
-                    throw new Error('Música não localizada no catálogo do servidor.');
+                if (!songToTarget) {
+                    showGlassToast('Erro', 'Não foi possível identificar a música a ser excluída.', true);
+                    return;
                 }
 
-                await executeDelete(songToTarget);
-            });
-        };
+                // Se ainda não temos o ID exato da música (por exemplo, ao clicar na tabela pura),
+                // buscamos no banco local ou Navidrome pelo título
+                if (!songToTarget.id) {
+                    const cur = window.__FEISHIN_PLAYER_STORE__?.getState?.()?.getCurrentSong?.();
+                    if (cur && (cur.title || cur.name || '').toLowerCase().trim() === songToTarget.title.toLowerCase().trim()) {
+                        songToTarget.id = cur.id;
+                        songToTarget.path = cur.path;
+                    }
+                }
 
-        // Inserir de forma nativa e cirúrgica dentro do scrollArea antes dos scrollbars ou antes do preview footer
-        const scrollArea = menuContent.querySelector('.fs-scroll-area-module-scroll-area');
-        const previewContainer = menuContent.querySelector('.fs-context-menu-preview-module-container');
+                // Abrir modal de confirmação
+                openConfirmModal(songToTarget, async () => {
+                    // Se ainda faltar ID, usar busca no servidor VPS
+                    if (!songToTarget.id) {
+                        const serverUrl = window.__FEISHIN_AUTH_STORE__?.getState?.()?.currentServer?.url || window.location.origin;
+                        const searchRes = await fetch(`${serverUrl.replace(/\/$/, '')}/rest/search3.view?query=${encodeURIComponent(songToTarget.title)}&songCount=5&f=json&u=MateusCelestinoPRO&s=1db6bd&t=d8a85b5607aa399b374a131f3b77c1dc&v=1.16.1&c=feishin-engine`);
+                        const searchData = await searchRes.json();
+                        const songs = searchData?.['subsonic-response']?.searchResult3?.song || [];
+                        const exact = songs.find(s => (s.title || '').toLowerCase().trim() === songToTarget.title.toLowerCase().trim()) || songs[0];
+                        if (exact) {
+                            songToTarget.id = exact.id;
+                            songToTarget.path = exact.path;
+                        }
+                    }
 
-        if (scrollArea) {
-            const scrollbar = scrollArea.querySelector('.os-scrollbar');
-            if (scrollbar) {
-                scrollArea.insertBefore(divider, scrollbar);
-                scrollArea.insertBefore(deleteItem, scrollbar);
+                    if (!songToTarget.id) {
+                        throw new Error('Música não localizada no catálogo do servidor.');
+                    }
+
+                    await executeDelete(songToTarget);
+                });
+            };
+
+            // Inserir de forma nativa e cirúrgica dentro do scrollArea antes dos scrollbars ou antes do preview footer
+            const scrollArea = menuContent.querySelector('.fs-scroll-area-module-scroll-area');
+            const previewContainer = menuContent.querySelector('.fs-context-menu-preview-module-container');
+
+            if (scrollArea) {
+                const scrollbar = scrollArea.querySelector('.os-scrollbar');
+                if (scrollbar) {
+                    scrollArea.insertBefore(divider, scrollbar);
+                    scrollArea.insertBefore(deleteItem, scrollbar);
+                } else {
+                    scrollArea.appendChild(divider);
+                    scrollArea.appendChild(deleteItem);
+                }
+            } else if (previewContainer) {
+                menuContent.insertBefore(divider, previewContainer);
+                menuContent.insertBefore(deleteItem, previewContainer);
             } else {
-                scrollArea.appendChild(divider);
-                scrollArea.appendChild(deleteItem);
+                menuContent.appendChild(divider);
+                menuContent.appendChild(deleteItem);
             }
-        } else if (previewContainer) {
-            menuContent.insertBefore(divider, previewContainer);
-            menuContent.insertBefore(deleteItem, previewContainer);
-        } else {
-            menuContent.appendChild(divider);
-            menuContent.appendChild(deleteItem);
-        }
+        });
     });
 
-    menuObserver.observe(document.body, { childList: true, subtree: true });
+    menuObserver.observe(document.body, { childList: true, subtree: false });
 
     // 6. Integração com FeishinTrackPage (botão Deletar dentro de Mais Opções)
     function attachTrackPageDeleteOption() {
