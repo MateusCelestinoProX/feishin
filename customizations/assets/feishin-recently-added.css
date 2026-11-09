@@ -74,19 +74,33 @@ body.feishin-route-recently-added [class*="animated-page"] {
   align-items: center;
   justify-content: space-between;
   gap: 20px;
-  padding: 20px 26px;
-  background: rgba(20, 16, 35, 0.55);
+  padding: 16px 24px;
+  background: rgba(20, 16, 35, 0.75);
   backdrop-filter: blur(36px) saturate(200%);
   -webkit-backdrop-filter: blur(36px) saturate(200%);
   border: 1px solid rgba(255, 255, 255, 0.14);
-  border-radius: 24px;
+  border-radius: 20px;
   box-shadow: 0 16px 40px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.2);
-  margin-bottom: 24px;
-  position: relative;
+  margin-bottom: 20px;
+  position: sticky;
+  top: 0;
   overflow: hidden;
   flex-shrink: 0;
   width: 100%;
   box-sizing: border-box;
+  z-index: 50;
+  transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.22s ease, box-shadow 0.25s ease;
+  will-change: transform;
+}
+
+.ra-hero-header.ra-header-hidden {
+  transform: translateY(calc(-100% - 20px)) !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
+.ra-hero-header.ra-header-floating {
+  box-shadow: 0 14px 36px rgba(0, 0, 0, 0.65), 0 0 0 1px rgba(255, 255, 255, 0.18) !important;
 }
 
 .ra-hero-header::after {
@@ -245,6 +259,31 @@ body.feishin-route-recently-added [class*="animated-page"] {
 .ra-glass-btn-primary:hover {
   background: linear-gradient(135deg, #3B82F6, #8B5CF6) !important;
   box-shadow: 0 8px 24px rgba(37, 99, 235, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.45) !important;
+}
+
+.ra-glass-btn.ra-glass-btn-icon-only {
+  width: 38px;
+  height: 38px;
+  min-width: 38px;
+  max-width: 38px;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px;
+  flex: 0 0 38px;
+}
+
+.ra-glass-btn.ra-glass-btn-icon-only svg {
+  display: block;
+  margin: auto;
+}
+
+.ra-glass-btn-active {
+  background: rgba(168, 85, 247, 0.32) !important;
+  border-color: rgba(168, 85, 247, 0.65) !important;
+  color: #c084fc !important;
+  box-shadow: 0 0 14px rgba(168, 85, 247, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.35) !important;
 }
 
 /* Search Box in Header */
@@ -654,7 +693,7 @@ body.feishin-route-recently-added [class*="animated-page"] {
 @media (max-width: 768px), (pointer: coarse) {
   #feishin-recently-added-view,
   #mobile-layout #feishin-recently-added-view {
-    padding: 8px 12px calc(140px + var(--sab, 0px)) 12px !important;
+    padding: 6px 10px calc(140px + var(--sab, 0px)) 10px !important;
     width: 100% !important;
     max-width: 100vw !important;
     box-sizing: border-box !important;
@@ -667,12 +706,17 @@ body.feishin-route-recently-added [class*="animated-page"] {
   .ra-hero-header {
     flex-direction: column !important;
     align-items: stretch !important;
-    gap: 12px !important;
-    padding: 14px 14px !important;
-    border-radius: 18px !important;
-    margin-bottom: 14px !important;
+    gap: 8px !important;
+    padding: 10px 12px !important;
+    border-radius: 16px !important;
+    margin-bottom: 10px !important;
     width: 100% !important;
     box-sizing: border-box !important;
+    top: 4px !important;
+  }
+
+  .ra-hero-header.ra-header-floating .ra-header-subtitle {
+    display: none !important;
   }
 
   .ra-header-main-row {
@@ -692,21 +736,21 @@ body.feishin-route-recently-added [class*="animated-page"] {
   }
 
   .ra-header-icon-badge {
-    width: 38px !important;
-    height: 38px !important;
-    min-width: 38px !important;
+    width: 34px !important;
+    height: 34px !important;
+    min-width: 34px !important;
     border-radius: 10px !important;
   }
 
   .ra-header-icon-badge svg {
-    width: 20px !important;
-    height: 20px !important;
+    width: 18px !important;
+    height: 18px !important;
   }
 
   .ra-header-titles {
     display: flex !important;
     flex-direction: column !important;
-    gap: 2px !important;
+    gap: 1px !important;
     min-width: 0 !important;
     flex: 1 1 auto !important;
   }
@@ -719,7 +763,7 @@ body.feishin-route-recently-added [class*="animated-page"] {
   }
 
   .ra-header-title {
-    font-size: 16px !important;
+    font-size: 15px !important;
     font-weight: 700 !important;
     letter-spacing: -0.3px !important;
     white-space: nowrap !important;
@@ -728,46 +772,58 @@ body.feishin-route-recently-added [class*="animated-page"] {
   }
 
   .ra-badge-count {
-    font-size: 10.5px !important;
-    padding: 2px 7px !important;
+    font-size: 10px !important;
+    padding: 2px 6px !important;
     white-space: nowrap !important;
     flex-shrink: 0 !important;
   }
 
   .ra-header-subtitle {
-    font-size: 11px !important;
+    font-size: 10.5px !important;
     white-space: nowrap !important;
     overflow: hidden !important;
     text-overflow: ellipsis !important;
     opacity: 0.8 !important;
+    transition: all 0.2s ease !important;
   }
 
+  /* Single-row streamlined mobile toolbar */
   .ra-header-actions {
     display: flex !important;
-    flex-direction: column !important;
-    gap: 10px !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    gap: 6px !important;
     width: 100% !important;
-    margin-top: 2px !important;
+    margin-top: 0 !important;
   }
 
   .ra-action-buttons-row {
     display: flex !important;
     align-items: center !important;
-    gap: 8px !important;
-    width: 100% !important;
+    gap: 6px !important;
+    width: auto !important;
+    flex-shrink: 0 !important;
   }
 
-  .ra-glass-btn {
-    flex: 1 1 0px !important;
+  .ra-glass-btn.ra-glass-btn-icon-only {
+    width: 36px !important;
     height: 36px !important;
-    font-size: 12.5px !important;
-    justify-content: center !important;
-    padding: 0 10px !important;
-    border-radius: 12px !important;
+    min-width: 36px !important;
+    max-width: 36px !important;
+    padding: 0 !important;
+    border-radius: 10px !important;
+    flex: 0 0 36px !important;
+  }
+
+  .ra-glass-btn.ra-glass-btn-icon-only svg {
+    width: 16px !important;
+    height: 16px !important;
   }
 
   .ra-search-wrap {
-    width: 100% !important;
+    flex: 1 1 auto !important;
+    min-width: 80px !important;
+    width: auto !important;
   }
 
   .ra-search-input {
@@ -775,10 +831,10 @@ body.feishin-route-recently-added [class*="animated-page"] {
     max-width: 100% !important;
     height: 36px !important;
     box-sizing: border-box !important;
-    border-radius: 12px !important;
-    font-size: 12.5px !important;
-    padding-left: 32px !important;
-    padding-right: 28px !important;
+    border-radius: 10px !important;
+    font-size: 12px !important;
+    padding-left: 30px !important;
+    padding-right: 26px !important;
   }
 
   .ra-search-input:focus {

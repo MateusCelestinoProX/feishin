@@ -825,37 +825,33 @@
 
         <div class="ra-header-actions">
           <div class="ra-action-buttons-row">
-            <button type="button" class="ra-glass-btn ra-glass-btn-primary" id="ra-btn-play-all" title="Tocar todas as faixas">
-              <svg viewBox="0 0 24 24" width="15" height="15" fill="currentColor">
-                <polygon points="5 3 19 12 5 21 5 3"/>
+            <button type="button" class="ra-glass-btn ra-glass-btn-primary ra-glass-btn-icon-only" id="ra-btn-play-all" title="Tocar todas as faixas" aria-label="Tocar todas as faixas">
+              <svg viewBox="0 0 24 24" width="17" height="17" fill="currentColor">
+                <polygon points="6 4 20 12 6 20 6 4"/>
               </svg>
-              <span>Tocar Tudo</span>
             </button>
 
-            <button type="button" class="ra-glass-btn" id="ra-btn-shuffle-all" title="Modo aleatório">
-              <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <button type="button" class="ra-glass-btn ra-glass-btn-icon-only" id="ra-btn-shuffle-all" title="Modo aleatório" aria-label="Modo aleatório">
+              <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
                 <polyline points="16 3 21 3 21 8"/>
                 <line x1="4" y1="20" x2="21" y2="3"/>
                 <polyline points="21 16 21 21 16 21"/>
                 <line x1="15" y1="15" x2="21" y2="21"/>
                 <line x1="4" y1="4" x2="9" y2="9"/>
               </svg>
-              <span>Aleatório</span>
             </button>
 
-            <button type="button" class="ra-glass-btn" id="ra-btn-select-mode" title="Selecionar faixas em lote">
-              <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <button type="button" class="ra-glass-btn ra-glass-btn-icon-only ${window.TagsEngine?.isMultiSelectActive ? 'ra-glass-btn-active' : ''}" id="ra-btn-select-mode" title="${window.TagsEngine?.isMultiSelectActive ? 'Cancelar seleção' : 'Selecionar faixas em lote'}" aria-label="Selecionar faixas">
+              <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
                 <polyline points="9 11 12 14 22 4"/>
                 <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
               </svg>
-              <span>${window.TagsEngine?.isMultiSelectActive ? 'Cancelar' : 'Selecionar'}</span>
             </button>
 
-            <button type="button" class="ra-glass-btn" id="ra-btn-refresh-library" title="Atualizar músicas">
-              <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <button type="button" class="ra-glass-btn ra-glass-btn-icon-only" id="ra-btn-refresh-library" title="Atualizar músicas" aria-label="Atualizar músicas">
+              <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2"/>
               </svg>
-              <span>Atualizar</span>
             </button>
           </div>
 
@@ -1081,9 +1077,12 @@
         e.stopPropagation();
         if (window.AndroidBridge?.vibrate) window.AndroidBridge.vibrate(15);
         if (window.TagsEngine) {
-          window.TagsEngine.setMultiSelectActive(!window.TagsEngine.isMultiSelectActive);
+          const isNowActive = !window.TagsEngine.isMultiSelectActive;
+          window.TagsEngine.setMultiSelectActive(isNowActive);
+          selectBtn.classList.toggle('ra-glass-btn-active', isNowActive);
+          selectBtn.title = isNowActive ? 'Cancelar seleção' : 'Selecionar faixas em lote';
           const span = selectBtn.querySelector('span');
-          if (span) span.innerText = window.TagsEngine.isMultiSelectActive ? 'Cancelar' : 'Selecionar';
+          if (span) span.innerText = isNowActive ? 'Cancelar' : 'Selecionar';
         }
       });
     }
@@ -1170,6 +1169,88 @@
         handlePlay(e);
       });
     });
+
+    // Vincular controle dinâmico da barra de ferramentas na rolagem
+    bindScrollHandler(container);
+  }
+
+  // 6b. Scroll Direction Handler (Sticky Toolbar: Slide Up to Hide, Slide Down to Reveal)
+  let lastScrollTop = 0;
+  let isHeaderHidden = false;
+
+  function bindScrollHandler(container) {
+    if (!container || container.dataset.scrollBound === 'true') return;
+    container.dataset.scrollBound = 'true';
+
+    let ticking = false;
+
+    container.addEventListener('scroll', () => {
+      if (ticking) return;
+      ticking = true;
+
+      requestAnimationFrame(() => {
+        const header = container.querySelector('.ra-hero-header');
+        if (!header) {
+          ticking = false;
+          return;
+        }
+
+        const currentScrollTop = container.scrollTop;
+        const delta = currentScrollTop - lastScrollTop;
+        const maxScroll = container.scrollHeight - container.clientHeight;
+
+        // Se estiver no topo (<= 20px), restaura estado normal
+        if (currentScrollTop <= 20) {
+          if (isHeaderHidden) {
+            header.classList.remove('ra-header-hidden');
+            isHeaderHidden = false;
+          }
+          header.classList.remove('ra-header-floating');
+          lastScrollTop = Math.max(0, currentScrollTop);
+          ticking = false;
+          return;
+        }
+
+        header.classList.add('ra-header-floating');
+
+        // Se o campo de busca estiver focado, manter visível
+        const searchInput = header.querySelector('#ra-search-field');
+        if (searchInput && document.activeElement === searchInput) {
+          if (isHeaderHidden) {
+            header.classList.remove('ra-header-hidden');
+            isHeaderHidden = false;
+          }
+          lastScrollTop = currentScrollTop;
+          ticking = false;
+          return;
+        }
+
+        // Evitar triggers falsos por elastic bounce no final da lista
+        if (maxScroll > 0 && currentScrollTop >= maxScroll - 15) {
+          lastScrollTop = currentScrollTop;
+          ticking = false;
+          return;
+        }
+
+        // Rolagem para baixo (descendo a lista): esconde a barra
+        if (delta > 8 && currentScrollTop > 60) {
+          if (!isHeaderHidden) {
+            header.classList.add('ra-header-hidden');
+            isHeaderHidden = true;
+          }
+        }
+        // Rolagem para cima (subindo a lista): revela a barra imediatamente
+        else if (delta < -8) {
+          if (isHeaderHidden) {
+            header.classList.remove('ra-header-hidden');
+            isHeaderHidden = false;
+          }
+        }
+
+        lastScrollTop = currentScrollTop;
+        ticking = false;
+      });
+    }, { passive: true });
   }
 
   function renderViewContentOnly() {
