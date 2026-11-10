@@ -291,57 +291,82 @@ body.feishin-route-recently-added [class*="animated-page"] {
   position: relative;
   display: flex;
   align-items: center;
+  flex: 1 1 auto;
+  min-width: 0;
+  transition: all 0.28s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .ra-search-input {
-  width: 190px;
-  padding: 8px 30px 8px 34px;
-  background: rgba(255, 255, 255, 0.07);
-  border: 1px solid rgba(255, 255, 255, 0.14);
-  border-radius: 9999px;
+  width: 100%;
+  height: 38px;
+  padding: 0 34px 0 36px;
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 12px;
   color: #ffffff;
   font-size: 13px;
+  font-weight: 500;
   outline: none;
-  transition: all 0.25s ease;
+  box-sizing: border-box;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
   font-family: inherit;
 }
 
 .ra-search-input::placeholder {
-  color: rgba(255, 255, 255, 0.4);
+  color: rgba(255, 255, 255, 0.42);
+  font-size: 12.5px;
 }
 
 .ra-search-input:focus {
-  width: 240px;
-  background: rgba(255, 255, 255, 0.12);
-  border-color: rgba(168, 85, 247, 0.6);
-  box-shadow: 0 0 18px rgba(168, 85, 247, 0.3);
+  background: rgba(255, 255, 255, 0.14);
+  border-color: rgba(168, 85, 247, 0.65);
+  box-shadow: 0 0 16px rgba(168, 85, 247, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.25);
 }
 
 .ra-search-icon {
   position: absolute;
   left: 12px;
-  width: 14px;
-  height: 14px;
-  color: rgba(255, 255, 255, 0.45);
+  top: 50%;
+  transform: translateY(-50%);
+  width: 15px;
+  height: 15px;
+  color: rgba(255, 255, 255, 0.5);
   pointer-events: none;
+  z-index: 2;
 }
 
 .ra-search-clear-btn {
   position: absolute;
-  right: 10px;
-  background: none;
+  right: 6px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.14);
   border: none;
-  color: rgba(255, 255, 255, 0.5);
+  color: rgba(255, 255, 255, 0.8);
   font-size: 11px;
   cursor: pointer;
-  padding: 4px;
-  display: flex;
+  padding: 0;
+  display: none;
   align-items: center;
   justify-content: center;
+  transition: all 0.2s ease;
+  z-index: 3;
 }
 
-.ra-search-clear-btn:hover {
+.ra-search-clear-btn.is-visible {
+  display: flex !important;
+}
+
+.ra-search-clear-btn:hover,
+.ra-search-clear-btn:active {
+  background: rgba(168, 85, 247, 0.5);
   color: #ffffff;
+  transform: translateY(-50%) scale(1.08);
 }
 
 /* ==========================================================================
@@ -792,9 +817,10 @@ body.feishin-route-recently-added [class*="animated-page"] {
     display: flex !important;
     flex-direction: row !important;
     align-items: center !important;
-    gap: 6px !important;
+    gap: 8px !important;
     width: 100% !important;
     margin-top: 0 !important;
+    position: relative !important;
   }
 
   .ra-action-buttons-row {
@@ -802,7 +828,10 @@ body.feishin-route-recently-added [class*="animated-page"] {
     align-items: center !important;
     gap: 6px !important;
     width: auto !important;
+    max-width: 180px !important;
     flex-shrink: 0 !important;
+    transition: all 0.28s cubic-bezier(0.16, 1, 0.3, 1) !important;
+    overflow: hidden !important;
   }
 
   .ra-glass-btn.ra-glass-btn-icon-only {
@@ -811,7 +840,7 @@ body.feishin-route-recently-added [class*="animated-page"] {
     min-width: 36px !important;
     max-width: 36px !important;
     padding: 0 !important;
-    border-radius: 10px !important;
+    border-radius: 11px !important;
     flex: 0 0 36px !important;
   }
 
@@ -822,8 +851,9 @@ body.feishin-route-recently-added [class*="animated-page"] {
 
   .ra-search-wrap {
     flex: 1 1 auto !important;
-    min-width: 80px !important;
+    min-width: 0 !important;
     width: auto !important;
+    transition: all 0.28s cubic-bezier(0.16, 1, 0.3, 1) !important;
   }
 
   .ra-search-input {
@@ -831,14 +861,26 @@ body.feishin-route-recently-added [class*="animated-page"] {
     max-width: 100% !important;
     height: 36px !important;
     box-sizing: border-box !important;
-    border-radius: 10px !important;
-    font-size: 12px !important;
-    padding-left: 30px !important;
-    padding-right: 26px !important;
+    border-radius: 11px !important;
+    font-size: 12.5px !important;
+    padding-left: 32px !important;
+    padding-right: 32px !important;
   }
 
-  .ra-search-input:focus {
+  /* Quando o usuário foca na barra de pesquisa para digitar:
+     Os botões recolhem suavemente e a barra de pesquisa ganha 100% da largura útil */
+  .ra-header-actions.is-search-focused .ra-action-buttons-row {
+    max-width: 0 !important;
+    opacity: 0 !important;
+    gap: 0 !important;
+    margin: 0 !important;
+    pointer-events: none !important;
+    transform: scale(0.85) !important;
+  }
+
+  .ra-header-actions.is-search-focused .ra-search-wrap {
     width: 100% !important;
+    flex: 1 1 100% !important;
   }
 
   /* Mobile Section Headers */

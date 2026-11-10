@@ -824,6 +824,20 @@
         </div>
 
         <div class="ra-header-actions">
+          <div class="ra-search-wrap">
+            <svg class="ra-search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+              <circle cx="11" cy="11" r="8"/>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+            </svg>
+            <input type="text" class="ra-search-input" id="ra-search-field" placeholder="Buscar faixas..." value="${escapeHtml(searchQuery)}" autocomplete="off" autocorrect="off" spellcheck="false" />
+            <button type="button" class="ra-search-clear-btn ${isFiltering ? 'is-visible' : ''}" id="ra-search-clear" title="Limpar busca" aria-label="Limpar busca">
+              <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="18" y1="6" x2="6" y2="18"/>
+                <line x1="6" y1="6" x2="18" y2="18"/>
+              </svg>
+            </button>
+          </div>
+
           <div class="ra-action-buttons-row">
             <button type="button" class="ra-glass-btn ra-glass-btn-primary ra-glass-btn-icon-only" id="ra-btn-play-all" title="Tocar todas as faixas" aria-label="Tocar todas as faixas">
               <svg viewBox="0 0 24 24" width="17" height="17" fill="currentColor">
@@ -853,17 +867,6 @@
                 <path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2"/>
               </svg>
             </button>
-          </div>
-
-          <div class="ra-search-wrap">
-            <svg class="ra-search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <circle cx="11" cy="11" r="8"/>
-              <line x1="21" y1="21" x2="16.65" y2="16.65"/>
-            </svg>
-            <input type="text" class="ra-search-input" id="ra-search-field" placeholder="Buscar entre as faixas..." value="${escapeHtml(searchQuery)}" autocomplete="off" autocorrect="off" spellcheck="false" />
-            ${isFiltering ? `
-              <button type="button" class="ra-search-clear-btn" id="ra-search-clear" title="Limpar busca">✕</button>
-            ` : ''}
           </div>
         </div>
       </div>
@@ -1058,17 +1061,45 @@
     });
 
     const searchField = container.querySelector('#ra-search-field');
+    const clearBtn = container.querySelector('#ra-search-clear');
+    const headerActions = container.querySelector('.ra-header-actions');
+
     if (searchField) {
+      searchField.addEventListener('focus', () => {
+        headerActions?.classList.add('is-search-focused');
+      });
+
+      searchField.addEventListener('blur', () => {
+        setTimeout(() => {
+          if (document.activeElement !== searchField) {
+            headerActions?.classList.remove('is-search-focused');
+          }
+        }, 180);
+      });
+
       searchField.addEventListener('input', (e) => {
         searchQuery = e.target.value;
+        if (clearBtn) {
+          clearBtn.classList.toggle('is-visible', searchQuery.trim().length > 0);
+        }
         renderViewContentOnly();
       });
     }
 
-    container.querySelector('#ra-search-clear')?.addEventListener('click', () => {
-      searchQuery = '';
-      renderViewContent();
-    });
+    if (clearBtn) {
+      clearBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        if (window.AndroidBridge?.vibrate) window.AndroidBridge.vibrate(12);
+        searchQuery = '';
+        if (searchField) {
+          searchField.value = '';
+          searchField.focus();
+        }
+        clearBtn.classList.remove('is-visible');
+        renderViewContentOnly();
+      });
+    }
 
     // Select Mode Button
     const selectBtn = container.querySelector('#ra-btn-select-mode');
